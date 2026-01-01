@@ -5,7 +5,6 @@ from threading import Thread
 from fastapi import APIRouter
 from .shared import clients, conversation_history, is_client_active, set_client_inactive
 from .app_logic import (
-    save_conversation_history,
     open_file,
     analyze_mood,
     sanitize_response,
@@ -520,9 +519,7 @@ async def enhanced_conversation_loop():
                 os.makedirs(character_dir, exist_ok=True)
                 
                 save_character_specific_history(local_conversation_history, character_name)
-            else:
-                # Save to global history file for standard characters
-                save_conversation_history(local_conversation_history)
+            # 不再保存全局历史文件（conversation_history.txt 已移除）
                 
         # Main conversation loop
         while enhanced_conversation_active:

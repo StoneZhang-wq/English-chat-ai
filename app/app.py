@@ -917,36 +917,7 @@ def chatgpt_streamed(user_input, system_message, mood_prompt, conversation_histo
     print(f"streaming complete. Response length: {PINK}{len(full_response)}{RESET_COLOR}")
     return full_response
 
-def save_conversation_history(conversation_history):
-    """Save conversation history to a file."""
-    try:
-        # Import with alias to avoid potential shadowing issues
-        from .shared import get_current_character as get_character
-        
-        current_character = get_character()
-        
-        # Check if this is a story or game character
-        is_story_character = current_character.startswith("story_") or current_character.startswith("game_")
-        print(f"Saving history for {current_character} ({is_story_character=})")
-        
-        if is_story_character:
-            # Save to character-specific history file
-            character_dir = os.path.join(characters_folder, current_character)
-            os.makedirs(character_dir, exist_ok=True)
-            history_file = os.path.join(character_dir, "conversation_history.txt")
-        else:
-            # Save to global history file
-            history_file = "conversation_history.txt"
-        
-        with open(history_file, "w", encoding="utf-8") as file:
-            for message in conversation_history:
-                role = message["role"].capitalize()
-                content = message["content"]
-                file.write(f"{role}: {content}\n\n")  # Add extra newline for readability
-    except Exception as e:
-        print(f"Error saving conversation history: {e}")
-        return {"status": "error", "message": str(e)}
-    return {"status": "success"}
+# save_conversation_history 函数已移除（conversation_history.txt 功能已移除）
 
 def transcribe_with_whisper(audio_file):
     """Transcribe audio using local Faster Whisper model"""
@@ -1059,7 +1030,7 @@ async def execute_once(question_prompt):
 async def execute_screenshot_and_analyze():
     # Import the necessary modules at the beginning of the function
     from .shared import get_current_character, conversation_history
-    from .app_logic import save_conversation_history as save_conversation_history_app, save_character_specific_history as save_character_specific_history_app
+    from .app_logic import save_character_specific_history as save_character_specific_history_app
     
     question_prompt = "What do you see in this image? Keep it short but detailed and answer any follow up questions about it"
     print("Taking screenshot and analyzing...")
@@ -1068,14 +1039,13 @@ async def execute_screenshot_and_analyze():
     # Add the AI's response to the conversation history
     conversation_history.append({"role": "assistant", "content": text_response})
     
-    # Save the updated conversation history
+    # Save the updated conversation history (only for story/game characters)
     current_character = get_current_character()
     is_story_character = current_character.startswith("story_") or current_character.startswith("game_")
     
     if is_story_character:
         save_character_specific_history_app(conversation_history, current_character)
-    else:
-        save_conversation_history_app(conversation_history)
+    # 不再保存全局历史文件（conversation_history.txt 已移除）
     
     # Send the response to any connected websocket clients
     await send_message_to_clients(f"{current_character}: {text_response}")
@@ -1418,8 +1388,7 @@ async def user_chatbot_conversation():
                 if len(conversation_history) > 30:
                     conversation_history = conversation_history[-30:]
 
-            # Save conversation history after each message exchange
-            save_conversation_history(conversation_history)
+            # 不再保存全局历史文件（conversation_history.txt 已移除）
 
     except KeyboardInterrupt:
         print("Quitting the conversation...")

@@ -1,0 +1,45 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-01-02T01:33:56.546709",
+  "facts": [
+    {
+      "id": "fact_000001",
+      "date": "2026-01-02",
+      "timestamp": "2026-01-02T01:33:52.927005",
+      "session_id": "2026-01-02_01-33-52",
+      "character": "wizard",
+      "category": "user_info",
+      "content": "用户说：我叫张磊",
+      "extracted_data": {
+        "type": "name",
+        "value": "张磊"
+      }
+    },
+    {
+      "id": "fact_000002",
+      "date": "2026-01-02",
+      "timestamp": "2026-01-02T01:33:52.927005",
+      "session_id": "2026-01-02_01-33-52",
+      "character": "wizard",
+      "category": "interest",
+      "content": "用户说：我喜欢看电影",
+      "extracted_data": {
+        "type": "interest",
+        "value": "看电影"
+      }
+    },
+    {
+      "id": "fact_000003",
+      "date": "2026-01-02",
+      "timestamp": "2026-01-02T01:33:52.927005",
+      "session_id": "2026-01-02_01-33-52",
+      "character": "wizard",
+      "category": "interest",
+      "content": "用户说：我还喜欢打篮球",
+      "extracted_data": {
+        "type": "interest",
+        "value": "打篮球"
+      }
+    }
+  ]
+}

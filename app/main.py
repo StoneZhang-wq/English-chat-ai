@@ -3,6 +3,7 @@ import os
 import signal
 import uvicorn
 import asyncio
+from datetime import datetime
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -10,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, JSONResponse
 from starlette.background import BackgroundTask
 from .shared import clients, set_current_character, conversation_history, add_client, remove_client
-from .app_logic import start_conversation, stop_conversation, set_env_variable, save_conversation_history, characters_folder, set_transcription_model, fetch_ollama_models, load_character_prompt, save_character_specific_history
+from .app_logic import start_conversation, stop_conversation, set_env_variable, characters_folder, set_transcription_model, fetch_ollama_models, load_character_prompt, load_character_specific_history
 from .enhanced_logic import start_enhanced_conversation, stop_enhanced_conversation
 from .app import send_message_to_clients
 import logging
@@ -257,16 +258,9 @@ async def clear_history():
                 print(f"Deleted character-specific history file for {current_character}")
             
             # Write empty history to character-specific file
+            from .app_logic import save_character_specific_history
             save_character_specific_history(conversation_history, current_character)
-        else:
-            # Clear global history file
-            history_file = "conversation_history.txt"
-            if os.path.exists(history_file):
-                os.remove(history_file)
-                print(f"Deleted global history file")
-            
-            # Write empty history to global file
-            save_conversation_history(conversation_history)
+        # 不再处理全局历史文件（conversation_history.txt 已移除）
         
         return {"status": "cleared"}
     except Exception as e:
@@ -325,18 +319,16 @@ async def download_enhanced_history():
                 filename=download_filename
             )
         else:
-            # Get from global history file
-            history_file = "conversation_history.txt"
-            
-            if not os.path.exists(history_file) or os.path.getsize(history_file) == 0:
-                # Create an empty history file if it doesn't exist
-                with open(history_file, "w", encoding="utf-8") as f:
-                    f.write("No conversation history found.\n")
+            # 全局历史文件已移除，返回空文件
+            temp_file = f"temp_download_{uuid.uuid4().hex}.txt"
+            with open(temp_file, "w", encoding="utf-8") as f:
+                f.write("对话历史功能已移除，请使用记忆系统。\n")
             
             return FileResponse(
-                history_file,
+                temp_file,
                 media_type="text/plain",
-                filename="conversation_history.txt"
+                filename="conversation_history.txt",
+                background=BackgroundTask(lambda: os.remove(temp_file) if os.path.exists(temp_file) else None)
             )
     except Exception as e:
         print(f"Error downloading history: {e}")
@@ -693,6 +685,20 @@ async def upload_voice_audio(
         # 设置角色
         set_current_character(character)
         
+        # 首次使用时加载记忆和历史
+        from .shared import conversation_history, get_memory_system
+        if len(conversation_history) == 0:
+            # 加载完整对话历史（最近50条）
+            from .app_logic import load_character_specific_history
+            is_story_character = character.startswith("story_") or character.startswith("game_")
+            if is_story_character:
+                loaded_history = load_character_specific_history(character)
+                if loaded_history:
+                    # 只加载最近50条
+                    conversation_history.extend(loaded_history[-50:])
+                    logger.info(f"Loaded {len(loaded_history[-50:])} messages from character-specific history")
+            # 不再加载全局历史文件（conversation_history.txt 已移除）
+        
         # 发送用户消息到客户端（只发送一次）
         from .app import send_message_to_clients
         await send_message_to_clients(json.dumps({
@@ -701,7 +707,6 @@ async def upload_voice_audio(
         }))
         
         # 将用户输入添加到对话历史
-        from .shared import conversation_history
         conversation_history.append({"role": "user", "content": transcription})
         
         # 处理用户输入并生成回复（在后台任务中执行，避免阻塞）
@@ -739,6 +744,20 @@ async def send_text_message(request: Request):
         # 设置角色
         set_current_character(character)
         
+        # 首次使用时加载记忆和历史
+        from .shared import conversation_history, get_memory_system
+        if len(conversation_history) == 0:
+            # 加载完整对话历史（最近50条）
+            from .app_logic import load_character_specific_history
+            is_story_character = character.startswith("story_") or character.startswith("game_")
+            if is_story_character:
+                loaded_history = load_character_specific_history(character)
+                if loaded_history:
+                    # 只加载最近50条
+                    conversation_history.extend(loaded_history[-50:])
+                    logger.info(f"Loaded {len(loaded_history[-50:])} messages from character-specific history")
+            # 不再加载全局历史文件（conversation_history.txt 已移除）
+        
         # 发送用户消息到客户端
         from .app import send_message_to_clients
         await send_message_to_clients(json.dumps({
@@ -747,7 +766,6 @@ async def send_text_message(request: Request):
         }))
         
         # 将用户输入添加到对话历史
-        from .shared import conversation_history
         conversation_history.append({"role": "user", "content": text})
         
         # 处理用户输入并生成回复（在后台任务中执行，避免阻塞）
@@ -766,6 +784,63 @@ async def send_text_message(request: Request):
         return JSONResponse({
             "status": "error",
             "message": f"处理消息失败: {str(e)}"
+        }, status_code=500)
+
+@app.post("/api/conversation/end")
+async def end_conversation(request: Request):
+    """结束对话并提取事实"""
+    try:
+        from .shared import get_memory_system, get_current_character
+        
+        memory_system = get_memory_system()
+        if not memory_system:
+            return JSONResponse({
+                "status": "error",
+                "message": "记忆系统未初始化"
+            }, status_code=500)
+        
+        # 从临时文件提取事实
+        current_character = get_current_character()
+        facts = await memory_system.extract_facts_from_temp(current_character)
+        
+        if facts:
+            # 添加事实到记忆系统
+            memory_system.add_facts(facts)
+            
+            # 从会话中提取用户信息
+            session_data = memory_system.load_session_temp()
+            if session_data and session_data.get("messages"):
+                conversation_text = "\n".join([
+                    f"{msg['role']}: {msg['content']}" 
+                    for msg in session_data["messages"]
+                ])
+                extracted_info = await memory_system.extract_user_info(conversation_text)
+                # extract_user_info 内部已经调用了 update_user_profile
+            
+            # 清空临时会话文件
+            memory_system.clear_session_temp()
+            
+            return JSONResponse({
+                "status": "success",
+                "message": "对话已结束，记忆已保存",
+                "facts_count": len(facts),
+                "timestamp": datetime.now().isoformat()
+            })
+        else:
+            # 没有临时文件或消息为空，或提取失败
+            memory_system.clear_session_temp()
+            return JSONResponse({
+                "status": "success",
+                "message": "对话已结束，但没有需要保存的记忆"
+            })
+            
+    except Exception as e:
+        logger.error(f"Error ending conversation: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"结束对话失败: {str(e)}"
         }, status_code=500)
 
 # 结束对话功能已移除（记忆系统已移除）

@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "created_at": "2026-01-02T00:54:35.818670",
+  "last_updated": "2026-01-02T01:33:58.744337",
+  "name": "张磊",
+  "age": null,
+  "occupation": null,
+  "interests": [
+    "篮球",
+    "打篮球",
+    "电影",
+    "唱歌",
+    "看电影"
+  ],
+  "preferences": {},
+  "goals": [],
+  "habits": [],
+  "other_info": {}
+}

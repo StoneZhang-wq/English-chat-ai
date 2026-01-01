@@ -21,7 +21,6 @@ from .app import (
     init_set_provider,
     init_kokoro_tts_voice,
     init_voice_speed,
-    save_conversation_history,
     send_message_to_clients,
 )
 import json
@@ -89,9 +88,32 @@ async def send_message_to_all_clients(message):
         except Exception as e:
             print(f"Error sending message to client: {e}")
 
+async def auto_summarize_session(memory_system, character: str):
+    """自动生成会话摘要（在后台执行，不阻塞主流程）"""
+    try:
+        print(f"Auto-summarizing session for {character}...")
+        summary_data = await memory_system.summarize_session_from_temp(character)
+        
+        if summary_data:
+            # 添加摘要到记忆系统
+            memory_system.add_summary(summary_data)
+            
+            # 如果提取了用户信息，更新用户档案
+            if summary_data.get("extracted_user_info"):
+                memory_system.update_user_profile(summary_data["extracted_user_info"])
+            
+            # 不清空临时文件，继续累积消息（直到手动结束或达到更大阈值）
+            print(f"Auto-summary generated and saved for {character}")
+        else:
+            print("No messages to summarize")
+    except Exception as e:
+        print(f"Error in auto_summarize_session: {e}")
+        import traceback
+        traceback.print_exc()
+
 async def process_text(user_input):
     # Import with alias to avoid potential shadowing issues
-    from .shared import get_current_character as get_character, conversation_history
+    from .shared import get_current_character as get_character, conversation_history, get_memory_system
     
     current_character = get_character()
     character_folder = os.path.join('characters', current_character)
@@ -99,6 +121,15 @@ async def process_text(user_input):
     character_audio_file = os.path.join(character_folder, f"{current_character}.wav")
 
     base_system_message = open_file(character_prompt_file)
+    
+    # 加载记忆系统并获取记忆上下文
+    memory_system = get_memory_system()
+    memory_context = ""
+    if memory_system:
+        memory_context = memory_system.get_memory_context()
+        # 将记忆上下文注入系统提示
+        if memory_context:
+            base_system_message = f"{base_system_message}\n\n{memory_context}"
     
     mood = analyze_mood(user_input)
     mood_prompt = adjust_prompt(mood)
@@ -108,6 +139,22 @@ async def process_text(user_input):
     if not conversation_history or conversation_history[-1].get("role") != "user" or conversation_history[-1].get("content") != user_input:
         # 只有在确实不存在时才添加，避免重复
         pass  # 不在这里添加，因为已经在upload或send端点添加了
+    
+    # 保存用户消息到临时会话文件（带时间戳）
+    if memory_system:
+        try:
+            from datetime import datetime
+            user_message = {
+                "role": "user",
+                "content": user_input,
+                "timestamp": datetime.now().isoformat()
+            }
+            memory_system.save_to_session_temp(user_message, current_character)
+            print(f"Saved user message to session temp: {memory_system.session_temp_file}")
+        except Exception as e:
+            print(f"Error saving user message to session temp: {e}")
+            import traceback
+            traceback.print_exc()
 
     chatbot_response = chatgpt_streamed(user_input, base_system_message, mood_prompt, conversation_history)
     sanitized_response = sanitize_response(chatbot_response)
@@ -117,6 +164,22 @@ async def process_text(user_input):
     prompt2 = sanitized_response
 
     conversation_history.append({"role": "assistant", "content": chatbot_response})
+    
+    # 保存AI回复到临时会话文件（带时间戳）
+    if memory_system:
+        try:
+            from datetime import datetime
+            ai_message = {
+                "role": "assistant",
+                "content": chatbot_response,
+                "timestamp": datetime.now().isoformat()
+            }
+            memory_system.save_to_session_temp(ai_message, current_character)
+            # 注意：摘要生成改为手动触发，通过 /api/conversation/end API
+        except Exception as e:
+            print(f"Error saving to session temp: {e}")
+            import traceback
+            traceback.print_exc()
     
     # 先发送AI消息到客户端显示文字（立即执行，无阻塞）
     await send_message_to_clients(json.dumps({
@@ -140,10 +203,7 @@ async def process_text(user_input):
         # Save to character-specific history file
         save_character_specific_history(conversation_history, current_character)
         print(f"Saved character-specific history for {current_character}")
-    else:
-        # Save to global history file
-        save_conversation_history(conversation_history)
-        print(f"Saved global history for {current_character}")
+    # 不再保存全局历史文件（conversation_history.txt 已移除）
         
     return chatbot_response
 
@@ -280,9 +340,7 @@ async def conversation_loop():
         if is_story_character:
             save_character_specific_history(conversation_history, current_character)
             print(f"Saved user input to character-specific history for {current_character}")
-        else:
-            save_conversation_history(conversation_history)
-            # print(f"Saved user input to global history for {current_character}")
+        # 不再保存全局历史文件（conversation_history.txt 已移除）
             
         await send_message_to_clients(f"You: {user_input}")
         print(CYAN + f"You: {user_input}" + RESET_COLOR)
@@ -415,19 +473,7 @@ async def fetch_ollama_models():
         logging.error(f"Error fetching Ollama models: {e}")
         return {"models": ["llama3.2"], "error": f"Error connecting to Ollama: {str(e)}"}
 
-# Function to save conversation history to a file
-def save_conversation_history(conversation_history):
-    history_file = "conversation_history.txt"
-    try:
-        with open(history_file, "w", encoding="utf-8") as file:
-            for message in conversation_history:
-                role = message["role"].capitalize()
-                content = message["content"]
-                file.write(f"{role}: {content}\n")
-    except Exception as e:
-        logging.error(f"Error saving conversation history: {e}")
-        return {"status": "error", "message": str(e)}
-    return {"status": "success"}
+# save_conversation_history 函数已移除（conversation_history.txt 功能已移除）
 
 def is_client_active(client):
     """Check if a client is still active"""
@@ -476,8 +522,8 @@ def save_character_specific_history(history, character_name):
     try:
         # Only process for story/game characters
         if not character_name.startswith("story_") and not character_name.startswith("game_"):
-            print(f"Not a story/game character: {character_name}, using global history instead")
-            return save_conversation_history(history)
+            print(f"Not a story/game character: {character_name}, skipping history save (global history removed)")
+            return {"status": "skipped", "message": "Global history file removed"}
             
         # Create character-specific history file path
         character_dir = os.path.join(characters_folder, character_name)

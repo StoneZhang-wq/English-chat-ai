@@ -62,4 +62,18 @@ def clear_conversation_history():
     global conversation_history
     conversation_history = []
 
-# 记忆系统已移除
+# 记忆系统
+memory_system = None
+
+def get_memory_system():
+    """获取记忆系统实例（单例模式）"""
+    global memory_system
+    if memory_system is None:
+        try:
+            from .memory_system import SummaryMemorySystem
+            memory_system = SummaryMemorySystem()
+            print("Memory system initialized successfully")
+        except Exception as e:
+            print(f"Error initializing memory system: {e}")
+            memory_system = None
+    return memory_system

@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const providerSelect = document.getElementById('provider-select');
     const textInput = document.getElementById('text-input');
     const sendBtn = document.getElementById('send-btn');
+    const endConversationBtn = document.getElementById('end-conversation-btn');
     
     // 检查元素是否存在
     if (!textInput || !sendBtn) {
@@ -526,6 +527,50 @@ document.addEventListener("DOMContentLoaded", function() {
     closeSettings.addEventListener('click', () => {
         settingsPanel.classList.remove('active');
     });
+    
+    // 结束对话并生成摘要
+    if (endConversationBtn) {
+        endConversationBtn.addEventListener('click', async () => {
+            if (isProcessing) {
+                showError('系统正在处理中，请等待完成后再结束对话');
+                return;
+            }
+            
+            if (!confirm('确定要结束对话并保存记忆吗？这将生成对话摘要并保存到记忆系统。')) {
+                return;
+            }
+            
+            try {
+                endConversationBtn.disabled = true;
+                endConversationBtn.textContent = '保存中...';
+                
+                const response = await fetch('/api/conversation/end', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    if (result.summary) {
+                        addAIMessage(`对话已结束，记忆已保存。\n\n摘要：${result.summary}`);
+                    } else {
+                        addAIMessage('对话已结束，但没有需要保存的记忆');
+                    }
+                } else {
+                    showError(result.message || '保存记忆失败');
+                }
+            } catch (error) {
+                console.error('Error ending conversation:', error);
+                showError('结束对话失败：' + error.message);
+            } finally {
+                endConversationBtn.disabled = false;
+                endConversationBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>';
+            }
+        });
+    }
 
     // 加载角色列表
     async function loadCharacters() {
