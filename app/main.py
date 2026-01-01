@@ -3,15 +3,16 @@ import os
 import signal
 import uvicorn
 import asyncio
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, JSONResponse
 from starlette.background import BackgroundTask
 from .shared import clients, set_current_character, conversation_history, add_client, remove_client
 from .app_logic import start_conversation, stop_conversation, set_env_variable, save_conversation_history, characters_folder, set_transcription_model, fetch_ollama_models, load_character_prompt, save_character_specific_history
 from .enhanced_logic import start_enhanced_conversation, stop_enhanced_conversation
+from .app import send_message_to_clients
 import logging
 from threading import Thread
 import uuid
@@ -86,6 +87,15 @@ async def get_index(request: Request):
         "elevenlabs_voice": elevenlabs_voice,
         "kokoro_voice": kokoro_voice,
         "faster_whisper_local": faster_whisper_local,
+    })
+
+@app.get("/voice_chat", response_class=HTMLResponse)
+async def get_voice_chat(request: Request):
+    """Instagram风格的语音消息界面"""
+    character_name = os.getenv("CHARACTER_NAME", "wizard")
+    return templates.TemplateResponse("voice_chat.html", {
+        "request": request,
+        "character_name": character_name,
     })
 
 @app.get("/characters")
@@ -600,6 +610,127 @@ async def get_character_history():
     except Exception as e:
         print(f"Error getting character history: {e}")
         return {"status": "error", "message": str(e)}
+
+@app.post("/api/voice/upload")
+async def upload_voice_audio(
+    audio: UploadFile = File(...),
+    character: str = Form("wizard")
+):
+    """处理上传的语音文件"""
+    try:
+        from .transcription import transcribe_with_openai_api
+        import tempfile
+        import os
+        
+        # 保存临时文件
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as tmp_file:
+            content = await audio.read()
+            tmp_file.write(content)
+            tmp_file_path = tmp_file.name
+        
+        # 转录音频 - 需要将webm转换为wav格式
+        audio_converted = False
+        try:
+            from pydub import AudioSegment
+            # 将webm转换为wav
+            audio_seg = AudioSegment.from_file(tmp_file_path, format="webm")
+            wav_path = tmp_file_path.replace('.webm', '.wav')
+            audio_seg.export(wav_path, format="wav")
+            # 清理原始webm文件
+            os.unlink(tmp_file_path)
+            tmp_file_path = wav_path
+            audio_converted = True
+            logger.info("Audio converted from webm to wav successfully")
+        except ImportError as e:
+            logger.warning(f"pydub not available, trying to use original file: {e}")
+            # pydub未安装，尝试直接使用原文件
+        except Exception as e:
+            logger.error(f"Error converting audio format: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            # 如果转换失败，尝试直接使用原文件
+            if not tmp_file_path.endswith('.wav'):
+                logger.warning("Audio conversion failed, but will try to use original file format")
+        
+        # 转录音频
+        transcription = None
+        try:
+            transcription = await transcribe_with_openai_api(tmp_file_path)
+            if not transcription or transcription.strip() == "":
+                raise ValueError("Transcription returned empty result")
+            logger.info(f"Transcription successful: {transcription[:50]}...")
+        except Exception as e:
+            logger.error(f"Error during transcription: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            # 如果转换失败且文件不是wav格式，尝试重新转换
+            if not audio_converted and not tmp_file_path.endswith('.wav'):
+                logger.info("Retrying with alternative conversion method...")
+                try:
+                    # 尝试使用ffmpeg直接转换（如果可用）
+                    import subprocess
+                    wav_path = tmp_file_path.replace('.webm', '.wav').replace('.mp3', '.wav')
+                    subprocess.run(['ffmpeg', '-i', tmp_file_path, '-y', wav_path], 
+                                 check=True, capture_output=True)
+                    os.unlink(tmp_file_path)
+                    tmp_file_path = wav_path
+                    transcription = await transcribe_with_openai_api(tmp_file_path)
+                    if not transcription or transcription.strip() == "":
+                        raise ValueError("Transcription returned empty result")
+                    logger.info(f"Transcription successful after ffmpeg conversion: {transcription[:50]}...")
+                except Exception as e2:
+                    logger.error(f"Alternative conversion also failed: {e2}")
+                    raise e  # 抛出原始错误
+            else:
+                raise
+        
+        # 清理临时文件
+        try:
+            os.unlink(tmp_file_path)
+        except:
+            pass
+        
+        # 设置角色
+        set_current_character(character)
+        
+        # 发送用户消息到客户端（只发送一次）
+        from .app import send_message_to_clients
+        await send_message_to_clients(json.dumps({
+            "action": "user_message",
+            "text": transcription
+        }))
+        
+        # 将用户输入添加到对话历史
+        from .shared import conversation_history
+        conversation_history.append({"role": "user", "content": transcription})
+        
+        # 处理用户输入并生成回复（在后台任务中执行，避免阻塞）
+        from .app_logic import process_text
+        asyncio.create_task(process_text(transcription))
+        
+        return JSONResponse({
+            "status": "success",
+            "transcription": transcription
+        })
+        
+    except Exception as e:
+        logger.error(f"Error processing voice upload: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"处理语音失败: {str(e)}"
+        }, status_code=500)
+
+@app.post("/api/text/send")
+async def send_text_message(request: Request):
+    """处理文字消息（暂时禁用）"""
+    return JSONResponse({
+        "status": "error",
+        "message": "文字输入功能暂时禁用"
+    }, status_code=503)
+
+# 结束对话功能已移除（记忆系统已移除）
 
 @app.get("/kokoro_voices")
 async def get_kokoro_voices():

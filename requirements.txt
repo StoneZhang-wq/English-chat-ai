@@ -45,6 +45,7 @@ requests==2.32.4
 fastapi==0.115.11
 uvicorn==0.30.1
 websockets==15.0.1
+python-multipart>=0.0.6
 
 # WebRTC (for OpenAI Realtime)
 aiortc>=1.14.0

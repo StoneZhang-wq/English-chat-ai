@@ -23,8 +23,9 @@ RESET_COLOR = '\033[0m'
 # Load environment variables
 load_dotenv()
 
-# Get API keys
+# Get API keys and base URL
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
 
 # Debug flag for audio levels
 DEBUG_AUDIO_LEVELS = os.getenv("DEBUG_AUDIO_LEVELS", "false").lower() == "true"
@@ -80,8 +81,23 @@ async def transcribe_with_openai_api(audio_file, model="gpt-4o-mini-transcribe")
     if not OPENAI_API_KEY:
         raise ValueError("API key missing. Please set OPENAI_API_KEY in your environment.")
     
-    # Make the API call to OpenAI
-    api_url = "https://api.openai.com/v1/audio/transcriptions"
+    # Construct API URL from base URL (support proxy APIs)
+    # If OPENAI_BASE_URL is like "https://api.gptsapi.net/v1", use it directly
+    # If it's like "https://api.openai.com/v1/chat/completions", extract base
+    base_url = OPENAI_BASE_URL
+    if "/chat/completions" in base_url:
+        base_url = base_url.replace("/chat/completions", "")
+    elif "/v1" not in base_url:
+        base_url = base_url.rstrip("/") + "/v1"
+    
+    # Ensure base_url ends with /v1
+    if not base_url.endswith("/v1"):
+        if base_url.endswith("/"):
+            base_url = base_url + "v1"
+        else:
+            base_url = base_url + "/v1"
+    
+    api_url = f"{base_url}/audio/transcriptions"
     
     async with aiohttp.ClientSession() as session:
         with open(audio_file, "rb") as audio_file_data:

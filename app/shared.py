@@ -61,3 +61,5 @@ def clear_conversation_history():
     """Clear the conversation history."""
     global conversation_history
     conversation_history = []
+
+# 记忆系统已移除

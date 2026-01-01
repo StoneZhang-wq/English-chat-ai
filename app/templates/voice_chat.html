@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>语音对话 - Voice Chat AI</title>
+    <link rel="stylesheet" href="/app/static/css/voice_chat.css">
+    <link rel="icon" href="/app/static/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <div class="chat-container">
+        <!-- 头部 -->
+        <header class="chat-header">
+            <div class="header-content">
+                <div class="ai-avatar">
+                    <div class="avatar-circle">AI</div>
+                </div>
+                <div class="header-info">
+                    <h2 id="character-name">Voice Chat AI</h2>
+                    <span class="status-text">在线</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="settings-btn" class="icon-btn" title="设置">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- 消息区域 -->
+        <div class="messages-container" id="messages-container">
+            <div class="messages-list" id="messages-list">
+                <!-- 消息将动态添加到这里 -->
+            </div>
+        </div>
+
+        <!-- 录音状态指示器 -->
+        <div class="recording-indicator" id="recording-indicator">
+            <div class="recording-waveform" id="recording-waveform">
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+            </div>
+            <span class="recording-text">正在录音...</span>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="input-area">
+            <div class="input-container">
+                <!-- 录音按钮 -->
+                <button id="record-btn" class="record-button" title="按住录音">
+                    <svg class="mic-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                </button>
+                <!-- 输入提示 -->
+                <div class="input-hint" id="input-hint">点击麦克风开始对话</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置面板（可选） -->
+    <div class="settings-panel" id="settings-panel">
+        <div class="settings-content">
+            <h3>设置</h3>
+            <div class="setting-group">
+                <label for="character-select">角色:</label>
+                <select id="character-select"></select>
+            </div>
+            <div class="setting-group">
+                <label for="provider-select">模型提供商:</label>
+                <select id="provider-select">
+                    <option value="openai">OpenAI</option>
+                    <option value="ollama">Ollama</option>
+                    <option value="xai">XAI</option>
+                    <option value="anthropic">Anthropic</option>
+                </select>
+            </div>
+            <button id="close-settings" class="close-btn">关闭</button>
+        </div>
+    </div>
+
+    <script src="/app/static/js/voice_chat.js"></script>
+</body>
+</html>
+

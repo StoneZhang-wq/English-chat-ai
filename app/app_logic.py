@@ -24,6 +24,7 @@ from .app import (
     save_conversation_history,
     send_message_to_clients,
 )
+import json
 from .transcription import transcribe_audio
 import json
 import logging
@@ -90,7 +91,7 @@ async def send_message_to_all_clients(message):
 
 async def process_text(user_input):
     # Import with alias to avoid potential shadowing issues
-    from .shared import get_current_character as get_character
+    from .shared import get_current_character as get_character, conversation_history
     
     current_character = get_character()
     character_folder = os.path.join('characters', current_character)
@@ -98,8 +99,15 @@ async def process_text(user_input):
     character_audio_file = os.path.join(character_folder, f"{current_character}.wav")
 
     base_system_message = open_file(character_prompt_file)
+    
     mood = analyze_mood(user_input)
     mood_prompt = adjust_prompt(mood)
+    
+    # 确保用户输入已经在对话历史中（如果不在则添加）
+    # 注意：如果从/api/voice/upload调用，用户输入已经添加了
+    if not conversation_history or conversation_history[-1].get("role") != "user" or conversation_history[-1].get("content") != user_input:
+        # 只有在确实不存在时才添加，避免重复
+        pass  # 不在这里添加，因为已经在upload端点添加了
 
     chatbot_response = chatgpt_streamed(user_input, base_system_message, mood_prompt, conversation_history)
     sanitized_response = sanitize_response(chatbot_response)
@@ -110,6 +118,12 @@ async def process_text(user_input):
     await process_and_play(prompt2, character_audio_file)
 
     conversation_history.append({"role": "assistant", "content": chatbot_response})
+    
+    # 发送AI消息到客户端（支持新界面格式）
+    await send_message_to_clients(json.dumps({
+        "action": "ai_message",
+        "text": chatbot_response
+    }))
     
     # Check if this is a story or game character
     is_story_character = current_character.startswith("story_") or current_character.startswith("game_")
