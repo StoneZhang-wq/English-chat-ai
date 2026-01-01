@@ -471,6 +471,37 @@ body {
     text-align: center;
 }
 
+/* 发送按钮样式 */
+.send-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: #667eea;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.send-button:hover {
+    background: #5568d3;
+    transform: scale(1.05);
+}
+
+.send-button:active {
+    transform: scale(0.95);
+}
+
+.send-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* 结束对话按钮 */
 .end-conversation-btn {
     display: flex;

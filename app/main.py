@@ -724,11 +724,49 @@ async def upload_voice_audio(
 
 @app.post("/api/text/send")
 async def send_text_message(request: Request):
-    """处理文字消息（暂时禁用）"""
-    return JSONResponse({
-        "status": "error",
-        "message": "文字输入功能暂时禁用"
-    }, status_code=503)
+    """处理文字消息"""
+    try:
+        data = await request.json()
+        text = data.get("text", "").strip()
+        character = data.get("character", "wizard")
+        
+        if not text:
+            return JSONResponse({
+                "status": "error",
+                "message": "消息内容不能为空"
+            }, status_code=400)
+        
+        # 设置角色
+        set_current_character(character)
+        
+        # 发送用户消息到客户端
+        from .app import send_message_to_clients
+        await send_message_to_clients(json.dumps({
+            "action": "user_message",
+            "text": text
+        }))
+        
+        # 将用户输入添加到对话历史
+        from .shared import conversation_history
+        conversation_history.append({"role": "user", "content": text})
+        
+        # 处理用户输入并生成回复（在后台任务中执行，避免阻塞）
+        from .app_logic import process_text
+        asyncio.create_task(process_text(text))
+        
+        return JSONResponse({
+            "status": "success",
+            "message": "消息已发送"
+        })
+        
+    except Exception as e:
+        logger.error(f"Error processing text message: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"处理消息失败: {str(e)}"
+        }, status_code=500)
 
 # 结束对话功能已移除（记忆系统已移除）
 

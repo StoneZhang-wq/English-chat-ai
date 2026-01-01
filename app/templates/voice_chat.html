@@ -52,6 +52,19 @@
         <!-- 输入区域 -->
         <div class="input-area">
             <div class="input-container">
+                <!-- 文字输入框 -->
+                <input type="text" 
+                       id="text-input" 
+                       class="text-input" 
+                       placeholder="输入消息..." 
+                       autocomplete="off">
+                <!-- 发送按钮 -->
+                <button id="send-btn" class="send-button" title="发送">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
                 <!-- 录音按钮 -->
                 <button id="record-btn" class="record-button" title="按住录音">
                     <svg class="mic-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -61,8 +74,6 @@
                         <line x1="8" y1="23" x2="16" y2="23"></line>
                     </svg>
                 </button>
-                <!-- 输入提示 -->
-                <div class="input-hint" id="input-hint">点击麦克风开始对话</div>
             </div>
         </div>
     </div>

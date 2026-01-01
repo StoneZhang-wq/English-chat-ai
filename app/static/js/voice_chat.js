@@ -5,13 +5,20 @@ document.addEventListener("DOMContentLoaded", function() {
     const messagesList = document.getElementById('messages-list');
     const recordBtn = document.getElementById('record-btn');
     const recordingIndicator = document.getElementById('recording-indicator');
-    const inputHint = document.getElementById('input-hint');
     const characterName = document.getElementById('character-name');
     const settingsBtn = document.getElementById('settings-btn');
     const settingsPanel = document.getElementById('settings-panel');
     const closeSettings = document.getElementById('close-settings');
     const characterSelect = document.getElementById('character-select');
     const providerSelect = document.getElementById('provider-select');
+    const textInput = document.getElementById('text-input');
+    const sendBtn = document.getElementById('send-btn');
+    
+    // 检查元素是否存在
+    if (!textInput || !sendBtn) {
+        console.error('Text input or send button not found');
+    }
+    
     // 状态管理
     let isRecording = false;
     let mediaRecorder = null;
@@ -23,6 +30,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let dataArray = null;
     let lastUserMessage = ''; // 用于防止重复显示
     let isProcessingAudio = false; // 标记是否正在处理音频
+    let isProcessing = false; // 标记系统是否正在处理消息（包括生成回复和播放语音）
 
     // 初始化WebSocket连接
     function initWebSocket() {
@@ -31,7 +39,6 @@ document.addEventListener("DOMContentLoaded", function() {
         
         websocket.onopen = () => {
             console.log('WebSocket connected');
-            updateInputHint('点击麦克风开始对话');
         };
         
         websocket.onmessage = (event) => {
@@ -46,16 +53,15 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         };
         
-        websocket.onerror = (error) => {
-            console.error('WebSocket error:', error);
-            updateInputHint('连接错误，请刷新页面');
-        };
+               websocket.onerror = (error) => {
+                   console.error('WebSocket error:', error);
+                   showError('连接错误，请刷新页面');
+               };
         
-        websocket.onclose = () => {
-            console.log('WebSocket closed');
-            updateInputHint('连接已断开，正在重连...');
-            setTimeout(initWebSocket, 3000);
-        };
+               websocket.onclose = () => {
+                   console.log('WebSocket closed');
+                   setTimeout(initWebSocket, 3000);
+               };
     }
 
     // 处理WebSocket消息
@@ -65,9 +71,15 @@ document.addEventListener("DOMContentLoaded", function() {
         } else if (data.action === 'recording_stopped') {
             hideRecordingIndicator();
         } else if (data.action === 'ai_start_speaking') {
-            // AI开始说话
+            // AI开始说话，保持禁用状态
+            isProcessing = true;
+            setInputEnabled(false);
+            console.log('AI started speaking, input disabled');
         } else if (data.action === 'ai_stop_speaking') {
-            // AI停止说话
+            // AI停止说话，重新启用输入
+            isProcessing = false;
+            setInputEnabled(true);
+            console.log('AI stopped speaking, input enabled');
         } else if (data.action === 'ai_message') {
             addAIMessage(data.text);
         } else if (data.action === 'user_message') {
@@ -76,6 +88,9 @@ document.addEventListener("DOMContentLoaded", function() {
             addAIMessage(data.message);
         } else if (data.action === 'error') {
             showError(data.message || '发生错误');
+            // 发生错误时也重新启用输入
+            isProcessing = false;
+            setInputEnabled(true);
         }
     }
 
@@ -89,8 +104,119 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    // 启用/禁用输入功能
+    function setInputEnabled(enabled) {
+        if (textInput) {
+            textInput.disabled = !enabled;
+        }
+        if (sendBtn) {
+            sendBtn.disabled = !enabled;
+        }
+        if (recordBtn) {
+            recordBtn.disabled = !enabled;
+            if (!enabled) {
+                recordBtn.style.opacity = '0.5';
+                recordBtn.style.cursor = 'not-allowed';
+            } else {
+                recordBtn.style.opacity = '1';
+                recordBtn.style.cursor = 'pointer';
+            }
+        }
+    }
+
+    // 文字输入功能
+    async function sendTextMessage() {
+        console.log('sendTextMessage called');
+        
+        if (!textInput || !sendBtn) {
+            console.error('Text input or send button not found', { textInput, sendBtn });
+            showError('界面元素未找到，请刷新页面');
+            return;
+        }
+        
+        // 检查是否正在处理
+        if (isProcessing) {
+            console.log('System is processing, please wait...');
+            showError('系统正在处理中，请等待回复完成后再发送');
+            return;
+        }
+        
+        const text = textInput.value.trim();
+        console.log('Text to send:', text);
+        
+        if (!text) {
+            console.log('Text is empty, returning');
+            return;
+        }
+        
+        // 设置处理状态并禁用输入
+        isProcessing = true;
+        setInputEnabled(false);
+        
+        try {
+            console.log('Sending request to /api/text/send', { text, character: currentCharacter });
+            
+            const response = await fetch('/api/text/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: text,
+                    character: currentCharacter
+                })
+            });
+            
+            console.log('Response status:', response.status);
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ message: '未知错误' }));
+                console.error('Error response:', errorData);
+                throw new Error(errorData.message || '发送失败');
+            }
+            
+            const result = await response.json();
+            console.log('Success response:', result);
+            
+            // 清空输入框
+            textInput.value = '';
+            
+            // 注意：不在这里重新启用输入，等待 ai_stop_speaking 事件
+            
+        } catch (error) {
+            console.error('Error sending text message:', error);
+            showError('发送消息失败：' + error.message);
+            // 发生错误时重新启用输入
+            isProcessing = false;
+            setInputEnabled(true);
+        }
+        // 注意：正常情况下不在这里重新启用输入，等待 ai_stop_speaking 事件
+    }
+    
+    // 发送按钮点击事件
+    if (sendBtn) {
+        sendBtn.addEventListener('click', sendTextMessage);
+    }
+    
+    // Enter键发送消息
+    if (textInput) {
+        textInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendTextMessage();
+            }
+        });
+    }
+    
     // 录音功能
     recordBtn.addEventListener('click', async () => {
+        // 检查是否正在处理（但允许停止正在进行的录音）
+        if (isProcessing && !isRecording) {
+            console.log('System is processing, cannot start recording...');
+            showError('系统正在处理中，请等待回复完成后再录音');
+            return;
+        }
+        
         if (!isRecording) {
             await startRecording();
         } else {
@@ -143,11 +269,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             };
             
-            mediaRecorder.start();
-            isRecording = true;
-            recordBtn.classList.add('recording');
-            showRecordingIndicator();
-            updateInputHint('正在录音，再次点击停止');
+                   mediaRecorder.start();
+                   isRecording = true;
+                   recordBtn.classList.add('recording');
+                   showRecordingIndicator();
             
             // 开始波形动画
             animateWaveform();
@@ -167,10 +292,9 @@ document.addEventListener("DOMContentLoaded", function() {
     function stopRecording() {
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
-            isRecording = false;
-            recordBtn.classList.remove('recording');
-            hideRecordingIndicator();
-            updateInputHint('处理中...');
+                   isRecording = false;
+                   recordBtn.classList.remove('recording');
+                   hideRecordingIndicator();
             
             // 通知服务器停止录音
             if (websocket && websocket.readyState === WebSocket.OPEN) {
@@ -201,12 +325,22 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 发送音频到服务器
     async function sendAudioToServer(audioBlob) {
+        // 检查是否正在处理
+        if (isProcessing) {
+            console.log('System is processing, please wait...');
+            showError('系统正在处理中，请等待回复完成后再发送');
+            return;
+        }
+        
         if (isProcessingAudio) {
             console.log('Already processing audio, skipping...');
             return;
         }
         
         isProcessingAudio = true;
+        // 设置处理状态并禁用输入
+        isProcessing = true;
+        setInputEnabled(false);
         try {
             const formData = new FormData();
             formData.append('audio', audioBlob, 'recording.webm');
@@ -235,7 +369,11 @@ document.addEventListener("DOMContentLoaded", function() {
             console.error('Error sending audio:', error);
             showError('发送音频失败');
             isProcessingAudio = false;
+            // 发生错误时重新启用输入
+            isProcessing = false;
+            setInputEnabled(true);
         }
+        // 注意：正常情况下不在这里重新启用输入，等待 ai_stop_speaking 事件
     }
 
     // 添加用户消息
@@ -350,11 +488,6 @@ document.addEventListener("DOMContentLoaded", function() {
         recordingIndicator.classList.remove('active');
     }
 
-    // 更新输入提示
-    function updateInputHint(text) {
-        inputHint.textContent = text;
-    }
-
     // 滚动到底部
     function scrollToBottom() {
         const container = document.querySelector('.messages-container');
@@ -437,13 +570,22 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
+    // 初始化检查
+    console.log('Initializing voice chat interface...');
+    console.log('Elements check:', {
+        textInput: !!textInput,
+        sendBtn: !!sendBtn,
+        recordBtn: !!recordBtn,
+        messagesList: !!messagesList
+    });
+    
     // 初始化
     initWebSocket();
     loadCharacters();
     
     // 添加欢迎消息
     setTimeout(() => {
-        addAIMessage('你好！我是你的AI助手，点击麦克风开始对话吧！');
+        addAIMessage('你好！我是你的AI助手，可以输入文字或点击麦克风开始对话！');
     }, 1000);
 });
 

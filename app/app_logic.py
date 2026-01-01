@@ -104,10 +104,10 @@ async def process_text(user_input):
     mood_prompt = adjust_prompt(mood)
     
     # 确保用户输入已经在对话历史中（如果不在则添加）
-    # 注意：如果从/api/voice/upload调用，用户输入已经添加了
+    # 注意：如果从/api/voice/upload或/api/text/send调用，用户输入已经添加了
     if not conversation_history or conversation_history[-1].get("role") != "user" or conversation_history[-1].get("content") != user_input:
         # 只有在确实不存在时才添加，避免重复
-        pass  # 不在这里添加，因为已经在upload端点添加了
+        pass  # 不在这里添加，因为已经在upload或send端点添加了
 
     chatbot_response = chatgpt_streamed(user_input, base_system_message, mood_prompt, conversation_history)
     sanitized_response = sanitize_response(chatbot_response)
@@ -115,16 +115,24 @@ async def process_text(user_input):
     if len(sanitized_response) > MAX_CHAR_LENGTH:
         sanitized_response = sanitized_response[:MAX_CHAR_LENGTH] + "..."
     prompt2 = sanitized_response
-    await process_and_play(prompt2, character_audio_file)
 
     conversation_history.append({"role": "assistant", "content": chatbot_response})
     
-    # 发送AI消息到客户端（支持新界面格式）
+    # 先发送AI消息到客户端显示文字（立即执行，无阻塞）
     await send_message_to_clients(json.dumps({
         "action": "ai_message",
         "text": chatbot_response
     }))
     
+    # 让出控制权，确保WebSocket消息已经真正发送到网络
+    # 这确保消息发送完成后再创建音频任务
+    await asyncio.sleep(0)  # 让出控制权，确保消息发送完成
+    
+    # 再异步执行 process_and_play（语音处理/播放）
+    # 不阻塞主流程，文字已经显示，音频在后台处理
+    asyncio.create_task(process_and_play(prompt2, character_audio_file))
+    
+    # 继续执行保存历史等操作（不等待音频播放完成）
     # Check if this is a story or game character
     is_story_character = current_character.startswith("story_") or current_character.startswith("game_")
     

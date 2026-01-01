@@ -284,6 +284,7 @@ print(f"{NEON_GREEN}Text-to-Speech provider: {TTS_PROVIDER}{RESET_COLOR}")
 print(f"To stop chatting say Quit or Exit. One moment please loading...")
 
 async def process_and_play(prompt, audio_file_pth):
+    # 移除延迟，因为文字消息已经在 process_text 中发送完成
     # Always get the current character name to ensure we have the right audio file
     current_character = get_current_character()
     
