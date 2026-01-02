@@ -823,17 +823,19 @@ async def end_conversation(request: Request):
         # 清空临时会话文件
         memory_system.clear_session_temp()
         
-        # 如果处于中文沟通阶段，返回标志提示可以生成英文对话
+        # 总是允许生成英文对话（即使没有今天的摘要，也可以基于历史记忆生成）
         response_data = {
             "status": "success",
             "message": "对话已结束，记忆已保存",
             "summary": today_summary,
-            "timestamp": entry.get("timestamp", "") if entry else ""
+            "timestamp": entry.get("timestamp", "") if entry else "",
+            "should_generate_english": True  # 总是允许生成英文对话
         }
         
-        if learning_stage == "chinese_chat" and today_summary:
-            response_data["should_generate_english"] = True
+        if today_summary:
             response_data["message"] = "对话已结束，记忆已保存。可以生成英文学习对话了"
+        else:
+            response_data["message"] = "可以生成英文学习对话了（将基于历史记忆生成）"
         
         return JSONResponse(response_data)
             

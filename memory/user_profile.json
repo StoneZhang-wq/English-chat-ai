@@ -1,17 +1,21 @@
 {
   "version": "1.0",
   "created_at": "2026-01-02T00:54:35.818670",
-  "last_updated": "2026-01-02T14:26:55.315084",
+  "last_updated": "2026-01-03T02:05:38.909569",
   "name": "张磊",
   "age": null,
   "occupation": "国际部GTM",
   "interests": [
-    "唱歌",
-    "电影",
+    "小说",
+    "泡澡",
+    "跳舞",
+    "打篮球",
+    "做饭",
+    "篮球",
     "游戏",
     "看电影",
-    "打篮球",
-    "篮球"
+    "唱歌",
+    "电影"
   ],
   "preferences": {
     "language": "中文"
@@ -20,5 +24,10 @@
     "变得很成功"
   ],
   "habits": [],
-  "other_info": {}
+  "other_info": {
+    "mood": "不开心",
+    "feeling": "工作做不完"
+  },
+  "english_level": "beginner",
+  "english_level_description": ""
 }

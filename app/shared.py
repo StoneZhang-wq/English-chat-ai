@@ -71,8 +71,8 @@ def get_memory_system():
     global memory_system
     if memory_system is None:
         try:
-            from .memory_system import SummaryMemorySystem
-            memory_system = SummaryMemorySystem()
+            from .memory_system import DiaryMemorySystem
+            memory_system = DiaryMemorySystem()
             print("Memory system initialized successfully")
         except Exception as e:
             print(f"Error initializing memory system: {e}")

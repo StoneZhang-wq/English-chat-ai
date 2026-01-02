@@ -652,46 +652,41 @@ document.addEventListener("DOMContentLoaded", function() {
                         addAIMessage('记忆已保存');
                     }
                     
-                    // 第二步：询问是否生成英文对话
-                    if (result.should_generate_english) {
-                        const length = await showDialogueLengthDialog();
-                        if (length) {
-                            // 生成英文对话
-                            try {
-                                addAIMessage('正在生成英文学习对话...');
-                                
-                                const englishResponse = await fetch('/api/english/generate', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({ dialogue_length: length })
-                                });
-                                
-                                const englishResult = await englishResponse.json();
-                                
-                                if (englishResult.status === 'success' && englishResult.dialogue) {
-                                    // 使用卡片式展示英文对话
-                                    displayEnglishDialogue(englishResult.dialogue);
-                                    addAIMessage('已切换到英文学习模式！现在我会用英文和你交流。');
-                                    showSuccess('英文对话已生成，已切换到英文学习模式！');
-                                } else {
-                                    // 即使生成失败，也切换到英文学习阶段
-                                    await switchToEnglishLearning();
-                                    showError(englishResult.message || '生成英文对话失败，但已切换到英文学习模式');
-                                }
-                            } catch (error) {
-                                console.error('Error generating english dialogue:', error);
+                    // 总是显示对话长度选择对话框（即使没有今天的摘要，也可以基于历史记忆生成）
+                    const length = await showDialogueLengthDialog();
+                    if (length) {
+                        // 生成英文对话
+                        try {
+                            addAIMessage('正在生成英文学习对话...');
+                            
+                            const englishResponse = await fetch('/api/english/generate', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ dialogue_length: length })
+                            });
+                            
+                            const englishResult = await englishResponse.json();
+                            
+                            if (englishResult.status === 'success' && englishResult.dialogue) {
+                                // 使用卡片式展示英文对话
+                                displayEnglishDialogue(englishResult.dialogue);
+                                addAIMessage('已切换到英文学习模式！现在我会用英文和你交流。');
+                                showSuccess('英文对话已生成，已切换到英文学习模式！');
+                            } else {
                                 // 即使生成失败，也切换到英文学习阶段
                                 await switchToEnglishLearning();
-                                showError('生成英文对话失败，但已切换到英文学习模式：' + error.message);
+                                showError(englishResult.message || '生成英文对话失败，但已切换到英文学习模式');
                             }
-                        } else {
-                            // 用户取消了长度选择，但还是要切换到英文学习阶段
+                        } catch (error) {
+                            console.error('Error generating english dialogue:', error);
+                            // 即使生成失败，也切换到英文学习阶段
                             await switchToEnglishLearning();
+                            showError('生成英文对话失败，但已切换到英文学习模式：' + error.message);
                         }
                     } else {
-                        // 不需要生成英文对话，直接切换到英文学习阶段
+                        // 用户取消了长度选择，但还是要切换到英文学习阶段
                         await switchToEnglishLearning();
                     }
                 } else {
@@ -763,11 +758,11 @@ document.addEventListener("DOMContentLoaded", function() {
             } else if (trimmedLine.startsWith('B:')) {
                 const content = trimmedLine.replace(/^B:\s*/, '').trim();
                 return `<div class="dialogue-item speaker-b-item">
+                    <div class="speaker-label speaker-b-label">B</div>
                     <div class="dialogue-bubble speaker-b-bubble">
                         <div class="bubble-content">${content}</div>
                         <div class="bubble-tail bubble-tail-right"></div>
                     </div>
-                    <div class="speaker-label speaker-b-label">B</div>
                 </div>`;
             } else if (trimmedLine) {
                 return `<div class="dialogue-item"><div class="dialogue-bubble neutral-bubble"><div class="bubble-content">${trimmedLine}</div></div></div>`;

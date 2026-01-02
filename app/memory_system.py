@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-class SummaryMemorySystem:
+class DiaryMemorySystem:
     """简化版日记式记忆系统，使用文本摘要存储对话内容"""
     
     def __init__(self, 
@@ -634,6 +634,8 @@ class SummaryMemorySystem:
         target_sentences = DIALOGUE_LENGTH_MAP.get(dialogue_length, DIALOGUE_LENGTH_MAP["medium"]).get(english_level, 15)
         
         # 构建提示词
+        topic_instruction = "对话内容要与用户今天聊的话题相关" if today_chinese_summary else "对话内容要基于用户的兴趣、职业和历史对话记录"
+        
         prompt = f"""基于以下信息，生成一段适合用户的英文教学对话内容。
 
 用户信息：
@@ -643,12 +645,12 @@ class SummaryMemorySystem:
 {memory_context if memory_context else "暂无历史记忆"}
 
 今天的中文对话摘要：
-{today_chinese_summary if today_chinese_summary else "无"}
+{today_chinese_summary if today_chinese_summary else "无（将基于历史记忆生成）"}
 
 用户英文水平：{level_description}
 
 要求：
-1. 生成一段自然的英文对话（约{target_sentences}句），对话内容要与用户今天聊的话题相关
+1. 生成一段自然的英文对话（约{target_sentences}句），{topic_instruction}
 2. 根据用户的英文水平（{level_description}）调整词汇和语法难度
 3. 对话要实用、贴近生活，符合用户的兴趣和职业
 4. 只返回英文对话内容，不要中文解释
