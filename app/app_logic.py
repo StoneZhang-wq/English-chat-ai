@@ -131,6 +131,18 @@ async def process_text(user_input):
         if memory_context:
             base_system_message = f"{base_system_message}\n\n{memory_context}"
     
+    # 添加强制简洁要求（优先级最高，覆盖所有其他风格要求）
+    base_system_message += """
+
+【重要：回复风格要求】
+- 回复要像正常朋友聊天一样，简洁自然
+- 每次回复控制在30-80字左右（2-3句话）
+- 不要使用过多的比喻、修饰词或诗意语言
+- 直接回答问题，不要绕弯子
+- 除非用户明确要求详细解释，否则保持简短
+- 这个要求优先于所有其他风格要求
+"""
+    
     mood = analyze_mood(user_input)
     mood_prompt = adjust_prompt(mood)
     

@@ -788,7 +788,7 @@ async def send_text_message(request: Request):
 
 @app.post("/api/conversation/end")
 async def end_conversation(request: Request):
-    """结束对话并提取事实"""
+    """结束对话并生成摘要"""
     try:
         from .shared import get_memory_system, get_current_character
         
@@ -799,13 +799,13 @@ async def end_conversation(request: Request):
                 "message": "记忆系统未初始化"
             }, status_code=500)
         
-        # 从临时文件提取事实
+        # 从临时文件生成摘要
         current_character = get_current_character()
-        facts = await memory_system.extract_facts_from_temp(current_character)
+        entry = await memory_system.generate_diary_summary_from_temp(current_character)
         
-        if facts:
-            # 添加事实到记忆系统
-            memory_system.add_facts(facts)
+        if entry:
+            # 添加摘要到记忆系统
+            memory_system.add_diary_entry(entry)
             
             # 从会话中提取用户信息
             session_data = memory_system.load_session_temp()
@@ -823,11 +823,11 @@ async def end_conversation(request: Request):
             return JSONResponse({
                 "status": "success",
                 "message": "对话已结束，记忆已保存",
-                "facts_count": len(facts),
-                "timestamp": datetime.now().isoformat()
+                "summary": entry.get("summary", ""),
+                "timestamp": entry.get("timestamp", "")
             })
         else:
-            # 没有临时文件或消息为空，或提取失败
+            # 没有临时文件或消息为空，或生成失败
             memory_system.clear_session_temp()
             return JSONResponse({
                 "status": "success",

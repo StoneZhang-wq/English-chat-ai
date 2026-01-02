@@ -8,11 +8,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class SummaryMemorySystem:
-    """基于结构化事实的记忆系统，只存储真实对话内容，不虚构信息"""
+    """简化版日记式记忆系统，使用文本摘要存储对话内容"""
     
     def __init__(self, 
                  memory_file=None,
-                 max_facts=None):
+                 max_entries=None):
         # 获取项目根目录（app 的父目录）
         current_file_dir = os.path.dirname(os.path.abspath(__file__))
         project_dir = os.path.dirname(current_file_dir)
@@ -20,71 +20,71 @@ class SummaryMemorySystem:
         # 从环境变量读取配置，如果没有则使用默认值（相对于项目根目录）
         if memory_file:
             # 如果提供了路径，使用提供的路径
-            self.facts_file = Path(memory_file)
+            self.diary_file = Path(memory_file)
         else:
             # 从环境变量读取，或使用默认路径
             env_memory_file = os.getenv("MEMORY_FILE")
             if env_memory_file:
                 # 如果是绝对路径，直接使用；如果是相对路径，相对于项目根目录
                 if os.path.isabs(env_memory_file):
-                    self.facts_file = Path(env_memory_file)
+                    self.diary_file = Path(env_memory_file)
                 else:
-                    self.facts_file = Path(project_dir) / env_memory_file
+                    self.diary_file = Path(project_dir) / env_memory_file
             else:
-                # 默认路径：项目根目录下的 memory/facts.json
-                self.facts_file = Path(project_dir) / "memory" / "facts.json"
+                # 默认路径：项目根目录下的 memory/diary.json
+                self.diary_file = Path(project_dir) / "memory" / "diary.json"
         
-        self.max_facts = max_facts or int(os.getenv("MEMORY_MAX_FACTS", "200"))
+        self.max_entries = max_entries or int(os.getenv("MEMORY_MAX_ENTRIES", "50"))
         
         # 确保目录存在
-        self.facts_file.parent.mkdir(parents=True, exist_ok=True)
-        self.session_temp_file = self.facts_file.parent / "session_temp.json"
-        self.user_profile_file = self.facts_file.parent / "user_profile.json"
-        self.facts_data = self.load_facts()
+        self.diary_file.parent.mkdir(parents=True, exist_ok=True)
+        self.session_temp_file = self.diary_file.parent / "session_temp.json"
+        self.user_profile_file = self.diary_file.parent / "user_profile.json"
+        self.diary_data = self.load_diary()
         self.user_profile = self.load_user_profile()
         
         # 打印调试信息
         print(f"Memory system initialized:")
-        print(f"  Facts file: {self.facts_file}")
+        print(f"  Diary file: {self.diary_file}")
         print(f"  Session temp: {self.session_temp_file}")
         print(f"  User profile: {self.user_profile_file}")
         
-    def load_facts(self) -> Dict:
-        """加载事实文件"""
-        if not self.facts_file.exists():
+    def load_diary(self) -> Dict:
+        """加载日记文件"""
+        if not self.diary_file.exists():
             return {
                 "version": "1.0",
                 "last_updated": None,
-                "facts": []
+                "entries": []
             }
         
         try:
-            with open(self.facts_file, "r", encoding="utf-8") as f:
+            with open(self.diary_file, "r", encoding="utf-8") as f:
                 return json.load(f)
         except Exception as e:
-            print(f"Error loading facts: {e}")
+            print(f"Error loading diary: {e}")
             return {
                 "version": "1.0",
                 "last_updated": None,
-                "facts": []
+                "entries": []
             }
     
-    def save_facts(self):
-        """保存事实到文件"""
-        self.facts_data["last_updated"] = datetime.now().isoformat()
+    def save_diary(self):
+        """保存日记到文件"""
+        self.diary_data["last_updated"] = datetime.now().isoformat()
         
         try:
             # 确保目录存在
-            self.facts_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.facts_file, "w", encoding="utf-8") as f:
-                json.dump(self.facts_data, f, ensure_ascii=False, indent=2)
+            self.diary_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.diary_file, "w", encoding="utf-8") as f:
+                json.dump(self.diary_data, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            print(f"Error saving facts: {e}")
+            print(f"Error saving diary: {e}")
             import traceback
             traceback.print_exc()
     
     def get_memory_context(self) -> str:
-        """获取记忆上下文，基于真实事实和用户档案"""
+        """获取记忆上下文，基于日记摘要和用户档案"""
         # 获取当前日期
         today = datetime.now()
         today_str = today.strftime("%Y年%m月%d日")
@@ -94,8 +94,8 @@ class SummaryMemorySystem:
         # 获取用户档案
         user_profile = self.get_user_profile_context()
         
-        # 获取最近的事实记录（最近30条）
-        recent_facts = self.facts_data.get("facts", [])[-30:]
+        # 获取最近的日记条目（最近10条）
+        recent_entries = self.diary_data.get("entries", [])[-10:]
         
         # 构建上下文
         context_parts = [f"[当前时间信息]\n今天是{today_str}（{weekday}），日期：{today_iso}"]
@@ -103,27 +103,29 @@ class SummaryMemorySystem:
         if user_profile:
             context_parts.append(f"[用户档案信息]\n{user_profile}")
         
-        if recent_facts:
-            # 按日期分组事实
-            facts_by_date = {}
-            for fact in recent_facts:
-                date_str = fact.get("date", "")
+        if recent_entries:
+            # 按日期分组条目
+            entries_by_date = {}
+            for entry in recent_entries:
+                date_str = entry.get("date", "")
                 if date_str:
-                    if date_str not in facts_by_date:
-                        facts_by_date[date_str] = []
-                    facts_by_date[date_str].append(fact)
+                    if date_str not in entries_by_date:
+                        entries_by_date[date_str] = []
+                    entries_by_date[date_str].append(entry)
             
-            # 生成事实列表（带相对时间标签）
-            fact_entries = []
-            for date_str in sorted(facts_by_date.keys())[-10:]:  # 最近10天的记录
+            # 生成摘要列表（带相对时间标签）
+            summary_entries = []
+            for date_str in sorted(entries_by_date.keys())[-7:]:  # 最近7天的记录
                 time_label = self.get_relative_time_label(date_str)
-                date_facts = facts_by_date[date_str]
-                fact_texts = [f.get("content", "") for f in date_facts if f.get("content")]
-                if fact_texts:
-                    fact_entries.append(f"{time_label}（{date_str}）：{'；'.join(fact_texts[:3])}")  # 每天最多3条
+                date_entries = entries_by_date[date_str]
+                summaries = [e.get("summary", "") for e in date_entries if e.get("summary")]
+                if summaries:
+                    # 合并同一天的多个摘要
+                    combined_summary = " ".join(summaries)
+                    summary_entries.append(f"{time_label}（{date_str}）：{combined_summary}")
             
-            if fact_entries:
-                context_parts.append(f"[最近的事实记录]\n" + "\n".join(fact_entries))
+            if summary_entries:
+                context_parts.append(f"[最近的对话记录]\n" + "\n".join(summary_entries))
         
         if len(context_parts) == 1:  # 只有时间信息
             return ""
@@ -134,12 +136,14 @@ class SummaryMemorySystem:
 请根据以上记忆与用户对话：
 1. 明确知道今天是{today_str}
 2. 如果用户提到"昨天"、"今天"、"明天"，要能准确理解
-3. 可以主动提及之前的事实记录，如"你昨天说..."、"你前天提到..."
+3. 可以主动提及之前的对话内容，如"你昨天提到..."、"你之前说过..."
 4. 可以追问后续进展，如"你之前提到的...现在怎么样了？"
 5. 保持对话的连贯性和时间感
 6. 使用相对时间概念（昨天、前天、上周等）让对话更自然
 7. 如果知道用户的姓名、兴趣等信息，要自然地使用这些信息
-8. 重要：只能基于以上真实记录的事实进行对话，不要虚构或添加不存在的信息
+8. 重要：只能基于以上真实记录的对话内容进行对话，不要虚构或添加不存在的信息
+9. 重要：不要说"在日记中提到"，只说"提到"或"说过"即可
+10. 重要：回复要简洁自然，像正常朋友聊天一样。每次回复尽量控制在50-100字左右，除非用户明确要求详细解释。保持对话的轻松和自然，不要长篇大论。
 """
         return context
     
@@ -240,8 +244,8 @@ class SummaryMemorySystem:
         response_lower = response.lower()
         return any(indicator.lower() in response_lower for indicator in error_indicators)
     
-    async def extract_facts_from_session(self, session_messages: List[Dict], character: str):
-        """从会话中提取结构化事实（只提取对话中明确提到的内容）"""
+    async def generate_diary_summary(self, session_messages: List[Dict], character: str):
+        """从会话生成文本摘要（不设字数限制，实事求是）"""
         import asyncio
         from .app import chatgpt_streamed
         
@@ -255,54 +259,28 @@ class SummaryMemorySystem:
         timestamp = today.isoformat()
         session_id = f"{date_str}_{today.strftime('%H-%M-%S')}"
         
-        # 严格的事实提取提示词
-        extract_prompt = f"""请从以下对话中提取用户明确提到的真实事实，以JSON格式返回。
+        # 简化的摘要生成提示词
+        summary_prompt = f"""请将以下对话整理成一段简单的文本摘要，描述用户在这次对话中做了什么、说了什么、表达了什么。
 
-重要要求：
-1. 只提取对话中明确提到的内容，不要添加任何细节或推断
-2. 不要虚构或补充不存在的信息
-3. 如果用户说"我喜欢篮球"，提取为事实；如果用户说"可能喜欢"，不要提取
-4. 每个事实必须是对话中直接表达的
+要求：
+1. 实事求是，有多少信息就写多少，不设字数限制
+2. 如果用户只是简单打招呼，就写"用户简单打招呼"
+3. 如果用户说了很多信息，就详细记录
+4. 只记录对话中明确提到的内容，不要虚构或添加细节
+5. 用自然的中文描述，像在写日记一样
 
 对话内容：
 {conversation_text}
 
-请提取以下类型的事实（如果对话中明确提到）：
-- user_info: 用户的基本信息（姓名、年龄、职业等）
-- interest: 用户的兴趣、爱好
-- goal: 用户的目标、计划
-- event: 用户提到的事件、活动
-- preference: 用户的偏好、习惯
-
-返回格式（JSON数组）：
-[
-  {{
-    "category": "user_info|interest|goal|event|preference",
-    "content": "用户说：我喜欢打篮球",
-    "extracted_data": {{
-      "type": "interest",
-      "value": "篮球"
-    }}
-  }},
-  {{
-    "category": "user_info",
-    "content": "用户说：我叫张磊",
-    "extracted_data": {{
-      "type": "name",
-      "value": "张磊"
-    }}
-  }}
-]
-
-只返回JSON数组，不要其他说明。如果对话中没有明确的事实，返回空数组 []。"""
+只返回摘要文本，不要其他说明。"""
         
         # 将同步函数包装成异步调用
         loop = asyncio.get_event_loop()
         response = await loop.run_in_executor(
             None,
             lambda: chatgpt_streamed(
-                extract_prompt,
-                "你是一个专业的事实提取助手，只提取对话中明确提到的真实内容，不添加任何细节。",
+                summary_prompt,
+                "你是一个专业的对话摘要助手，实事求是地总结对话内容，不添加任何细节。",
                 "neutral",
                 []
             )
@@ -310,85 +288,55 @@ class SummaryMemorySystem:
         
         # 检查是否为错误响应
         if self.is_error_response(response):
-            print(f"Error in fact extraction: {response}")
-            return []
+            print(f"Error in diary summary generation: {response}")
+            return None
         
-        # 尝试解析JSON
-        facts = []
-        try:
-            # 提取JSON部分
-            json_start = response.find('[')
-            json_end = response.rfind(']') + 1
-            if json_start >= 0 and json_end > json_start:
-                json_str = response[json_start:json_end]
-                extracted_facts = json.loads(json_str)
-                
-                # 验证并格式化事实
-                for fact in extracted_facts:
-                    if isinstance(fact, dict) and fact.get("content"):
-                        facts.append({
-                            "id": f"fact_{len(self.facts_data.get('facts', [])) + len(facts) + 1:06d}",
-                            "date": date_str,
-                            "timestamp": timestamp,
-                            "session_id": session_id,
-                            "character": character,
-                            "category": fact.get("category", "other"),
-                            "content": fact.get("content", ""),
-                            "extracted_data": fact.get("extracted_data", {})
-                        })
-        except Exception as e:
-            print(f"Error parsing extracted facts: {e}")
-            print(f"Response: {response[:500]}")
+        # 清理响应（去除可能的格式标记）
+        summary = response.strip()
+        if not summary:
+            return None
         
-        return facts
+        return {
+            "date": date_str,
+            "timestamp": timestamp,
+            "session_id": session_id,
+            "character": character,
+            "summary": summary
+        }
     
-    async def extract_facts_from_temp(self, character: str = ""):
-        """从临时文件提取事实"""
+    async def generate_diary_summary_from_temp(self, character: str = ""):
+        """从临时文件生成摘要"""
         session_data = self.load_session_temp()
         if not session_data or not session_data.get("messages"):
-            return []
+            return None
         
-        # 使用临时文件中的消息进行提取
+        # 使用临时文件中的消息进行生成
         messages = session_data.get("messages", [])
         if not messages:
-            return []
+            return None
         
         # 使用临时文件中的角色，如果没有则使用传入的角色
         session_character = session_data.get("character") or character
         
-        facts = await self.extract_facts_from_session(messages, session_character)
-        return facts
+        entry = await self.generate_diary_summary(messages, session_character)
+        return entry
     
-    def add_fact(self, fact: Dict):
-        """添加事实到事实文件"""
-        if "facts" not in self.facts_data:
-            self.facts_data["facts"] = []
-        
-        self.facts_data["facts"].append(fact)
-        
-        # 限制事实数量（保留最近N条）
-        if len(self.facts_data["facts"]) > self.max_facts:
-            self.facts_data["facts"] = self.facts_data["facts"][-self.max_facts:]
-        
-        # 保存到文件
-        self.save_facts()
-    
-    def add_facts(self, facts: List[Dict]):
-        """批量添加事实"""
-        if not facts:
+    def add_diary_entry(self, entry: Dict):
+        """添加日记条目到日记文件"""
+        if not entry:
             return
         
-        if "facts" not in self.facts_data:
-            self.facts_data["facts"] = []
+        if "entries" not in self.diary_data:
+            self.diary_data["entries"] = []
         
-        self.facts_data["facts"].extend(facts)
+        self.diary_data["entries"].append(entry)
         
-        # 限制事实数量（保留最近N条）
-        if len(self.facts_data["facts"]) > self.max_facts:
-            self.facts_data["facts"] = self.facts_data["facts"][-self.max_facts:]
+        # 限制条目数量（保留最近N条）
+        if len(self.diary_data["entries"]) > self.max_entries:
+            self.diary_data["entries"] = self.diary_data["entries"][-self.max_entries:]
         
         # 保存到文件
-        self.save_facts()
+        self.save_diary()
     
     def load_user_profile(self) -> Dict:
         """加载用户档案"""
