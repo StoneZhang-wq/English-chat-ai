@@ -788,9 +788,9 @@ async def send_text_message(request: Request):
 
 @app.post("/api/conversation/end")
 async def end_conversation(request: Request):
-    """结束对话并生成摘要"""
+    """结束对话并生成摘要，如果处于中文沟通阶段则提示可以生成英文对话"""
     try:
-        from .shared import get_memory_system, get_current_character
+        from .shared import get_memory_system, get_current_character, get_learning_stage
         
         memory_system = get_memory_system()
         if not memory_system:
@@ -799,13 +799,16 @@ async def end_conversation(request: Request):
                 "message": "记忆系统未初始化"
             }, status_code=500)
         
-        # 从临时文件生成摘要
         current_character = get_current_character()
+        learning_stage = get_learning_stage()
+        
+        # 从临时文件生成摘要
         entry = await memory_system.generate_diary_summary_from_temp(current_character)
         
+        today_summary = ""
         if entry:
-            # 添加摘要到记忆系统
             memory_system.add_diary_entry(entry)
+            today_summary = entry.get("summary", "")
             
             # 从会话中提取用户信息
             session_data = memory_system.load_session_temp()
@@ -816,23 +819,23 @@ async def end_conversation(request: Request):
                 ])
                 extracted_info = await memory_system.extract_user_info(conversation_text)
                 # extract_user_info 内部已经调用了 update_user_profile
-            
-            # 清空临时会话文件
-            memory_system.clear_session_temp()
-            
-            return JSONResponse({
-                "status": "success",
-                "message": "对话已结束，记忆已保存",
-                "summary": entry.get("summary", ""),
-                "timestamp": entry.get("timestamp", "")
-            })
-        else:
-            # 没有临时文件或消息为空，或生成失败
-            memory_system.clear_session_temp()
-            return JSONResponse({
-                "status": "success",
-                "message": "对话已结束，但没有需要保存的记忆"
-            })
+        
+        # 清空临时会话文件
+        memory_system.clear_session_temp()
+        
+        # 如果处于中文沟通阶段，返回标志提示可以生成英文对话
+        response_data = {
+            "status": "success",
+            "message": "对话已结束，记忆已保存",
+            "summary": today_summary,
+            "timestamp": entry.get("timestamp", "") if entry else ""
+        }
+        
+        if learning_stage == "chinese_chat" and today_summary:
+            response_data["should_generate_english"] = True
+            response_data["message"] = "对话已结束，记忆已保存。可以生成英文学习对话了"
+        
+        return JSONResponse(response_data)
             
     except Exception as e:
         logger.error(f"Error ending conversation: {e}")
@@ -840,8 +843,123 @@ async def end_conversation(request: Request):
         logger.error(traceback.format_exc())
         return JSONResponse({
             "status": "error",
-            "message": f"结束对话失败: {str(e)}"
+            "message": f"结束对话时出错: {str(e)}"
         }, status_code=500)
+
+@app.post("/api/english/generate")
+async def generate_english_dialogue(request: Request):
+    """生成英文教学对话"""
+    try:
+        from .shared import get_memory_system, get_current_character, get_learning_stage, set_learning_stage
+        
+        data = await request.json()
+        dialogue_length = data.get("dialogue_length", "auto")  # short/medium/long/auto
+        
+        memory_system = get_memory_system()
+        if not memory_system:
+            return JSONResponse({
+                "status": "error",
+                "message": "记忆系统未初始化"
+            }, status_code=500)
+        
+        # 获取今天的中文对话摘要（从日记条目中获取）
+        current_character = get_current_character()
+        today_summary = ""
+        
+        diary_entries = memory_system.diary_data.get("entries", [])
+        if diary_entries:
+            today = datetime.now().strftime("%Y-%m-%d")
+            today_entries = [e for e in diary_entries if e.get("date") == today]
+            if today_entries:
+                # 获取今天最新的摘要
+                today_summary = today_entries[-1].get("summary", "")
+        
+        # 生成英文对话
+        english_dialogue = await memory_system.generate_english_dialogue(today_summary, dialogue_length)
+        
+        if english_dialogue:
+            # 切换到英文学习阶段
+            set_learning_stage("english_learning")
+            
+            return JSONResponse({
+                "status": "success",
+                "message": "英文对话已生成",
+                "dialogue": english_dialogue
+            })
+        else:
+            return JSONResponse({
+                "status": "error",
+                "message": "生成英文对话失败"
+            }, status_code=500)
+            
+    except Exception as e:
+        logger.error(f"Error generating english dialogue: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"生成英文对话时出错: {str(e)}"
+        }, status_code=500)
+
+@app.post("/api/learning/start_english")
+async def start_english_learning(request: Request):
+    """手动切换到英文学习阶段"""
+    try:
+        from .shared import set_learning_stage, get_learning_stage
+        
+        current_stage = get_learning_stage()
+        if current_stage == "english_learning":
+            return JSONResponse({
+                "status": "info",
+                "message": "已经处于英文学习阶段"
+            })
+        
+        set_learning_stage("english_learning")
+        
+        return JSONResponse({
+            "status": "success",
+            "message": "已切换到英文学习阶段，现在AI会用英文回复你"
+        })
+    except Exception as e:
+        logger.error(f"Error starting english learning: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"切换失败: {str(e)}"
+        }, status_code=500)
+
+@app.post("/api/user/update_english_level")
+async def update_english_level(request: Request):
+    """更新用户英文水平"""
+    try:
+        from .shared import get_memory_system
+        
+        data = await request.json()
+        level = data.get("level", "beginner")
+        description = data.get("description", "")
+        
+        memory_system = get_memory_system()
+        if not memory_system:
+            return JSONResponse({
+                "status": "error",
+                "message": "记忆系统未初始化"
+            }, status_code=500)
+        
+        memory_system.update_english_level(level, description)
+        
+        return JSONResponse({
+            "status": "success",
+            "message": "英文水平已更新",
+            "level": level
+        })
+    except Exception as e:
+        logger.error(f"Error updating english level: {e}")
+        return JSONResponse({
+            "status": "error",
+            "message": f"更新英文水平时出错: {str(e)}"
+        }, status_code=500)
+
 
 # 结束对话功能已移除（记忆系统已移除）
 

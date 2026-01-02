@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const providerSelect = document.getElementById('provider-select');
     const textInput = document.getElementById('text-input');
     const sendBtn = document.getElementById('send-btn');
-    const endConversationBtn = document.getElementById('end-conversation-btn');
+    const startEnglishBtn = document.getElementById('start-english-btn');
     
     // 检查元素是否存在
     if (!textInput || !sendBtn) {
@@ -519,6 +519,30 @@ document.addEventListener("DOMContentLoaded", function() {
         }, 3000);
     }
 
+    // 显示成功消息
+    function showSuccess(message) {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-message';
+        successDiv.textContent = message;
+        successDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4caf50;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        `;
+        document.body.appendChild(successDiv);
+        
+        setTimeout(() => {
+            successDiv.remove();
+        }, 3000);
+    }
+
     // 设置面板
     settingsBtn.addEventListener('click', () => {
         settingsPanel.classList.add('active');
@@ -528,22 +552,89 @@ document.addEventListener("DOMContentLoaded", function() {
         settingsPanel.classList.remove('active');
     });
     
-    // 结束对话并生成摘要
-    if (endConversationBtn) {
-        endConversationBtn.addEventListener('click', async () => {
+    // 显示对话长度选择对话框
+    function showDialogueLengthDialog() {
+        return new Promise((resolve) => {
+            const dialog = document.createElement('div');
+            dialog.className = 'dialogue-length-dialog';
+            dialog.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 24px;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                z-index: 10000;
+                min-width: 300px;
+            `;
+            
+            dialog.innerHTML = `
+                <h3 style="margin: 0 0 16px 0; font-size: 18px;">选择英文对话长度</h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="length-btn" data-length="short" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; text-align: left;">
+                        <strong>短对话</strong> (8-12句)
+                    </button>
+                    <button class="length-btn" data-length="medium" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; text-align: left;">
+                        <strong>中等对话</strong> (12-18句) - 推荐
+                    </button>
+                    <button class="length-btn" data-length="long" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; text-align: left;">
+                        <strong>长对话</strong> (18-25句)
+                    </button>
+                    <button class="length-btn" data-length="auto" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; text-align: left;">
+                        <strong>自动</strong> (根据英文水平)
+                    </button>
+                </div>
+                <button id="cancel-dialog" style="margin-top: 16px; padding: 8px 16px; border: none; background: #f0f0f0; border-radius: 6px; cursor: pointer; width: 100%;">取消</button>
+            `;
+            
+            document.body.appendChild(dialog);
+            
+            // 添加按钮事件
+            dialog.querySelectorAll('.length-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const length = btn.dataset.length;
+                    document.body.removeChild(dialog);
+                    resolve(length);
+                });
+                
+                btn.addEventListener('mouseenter', () => {
+                    btn.style.borderColor = '#007bff';
+                    btn.style.background = '#f0f7ff';
+                });
+                
+                btn.addEventListener('mouseleave', () => {
+                    btn.style.borderColor = '#e0e0e0';
+                    btn.style.background = 'white';
+                });
+            });
+            
+            dialog.querySelector('#cancel-dialog').addEventListener('click', () => {
+                document.body.removeChild(dialog);
+                resolve(null);
+            });
+        });
+    }
+    
+    // 开始英语学习（保存记忆并切换到英文学习阶段）
+    if (startEnglishBtn) {
+        startEnglishBtn.addEventListener('click', async () => {
             if (isProcessing) {
-                showError('系统正在处理中，请等待完成后再结束对话');
+                showError('系统正在处理中，请等待完成后再切换');
                 return;
             }
             
-            if (!confirm('确定要结束对话并保存记忆吗？这将生成对话摘要并保存到记忆系统。')) {
+            if (!confirm('确定要开始英语学习吗？\n\n注意：当前对话的记忆将被保存，然后切换到英文学习模式。')) {
                 return;
             }
             
             try {
-                endConversationBtn.disabled = true;
-                endConversationBtn.textContent = '保存中...';
+                startEnglishBtn.disabled = true;
+                const originalHTML = startEnglishBtn.innerHTML;
+                startEnglishBtn.innerHTML = '<span style="font-size: 12px;">保存中...</span>';
                 
+                // 第一步：保存当前对话记忆
                 const response = await fetch('/api/conversation/end', {
                     method: 'POST',
                     headers: {
@@ -554,22 +645,257 @@ document.addEventListener("DOMContentLoaded", function() {
                 const result = await response.json();
                 
                 if (result.status === 'success') {
+                    // 显示记忆保存成功
                     if (result.summary) {
-                        addAIMessage(`对话已结束，记忆已保存。\n\n摘要：${result.summary}`);
+                        addAIMessage(`记忆已保存。\n\n摘要：${result.summary}`);
                     } else {
-                        addAIMessage('对话已结束，但没有需要保存的记忆');
+                        addAIMessage('记忆已保存');
+                    }
+                    
+                    // 第二步：询问是否生成英文对话
+                    if (result.should_generate_english) {
+                        const length = await showDialogueLengthDialog();
+                        if (length) {
+                            // 生成英文对话
+                            try {
+                                addAIMessage('正在生成英文学习对话...');
+                                
+                                const englishResponse = await fetch('/api/english/generate', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ dialogue_length: length })
+                                });
+                                
+                                const englishResult = await englishResponse.json();
+                                
+                                if (englishResult.status === 'success' && englishResult.dialogue) {
+                                    // 使用卡片式展示英文对话
+                                    displayEnglishDialogue(englishResult.dialogue);
+                                    addAIMessage('已切换到英文学习模式！现在我会用英文和你交流。');
+                                    showSuccess('英文对话已生成，已切换到英文学习模式！');
+                                } else {
+                                    // 即使生成失败，也切换到英文学习阶段
+                                    await switchToEnglishLearning();
+                                    showError(englishResult.message || '生成英文对话失败，但已切换到英文学习模式');
+                                }
+                            } catch (error) {
+                                console.error('Error generating english dialogue:', error);
+                                // 即使生成失败，也切换到英文学习阶段
+                                await switchToEnglishLearning();
+                                showError('生成英文对话失败，但已切换到英文学习模式：' + error.message);
+                            }
+                        } else {
+                            // 用户取消了长度选择，但还是要切换到英文学习阶段
+                            await switchToEnglishLearning();
+                        }
+                    } else {
+                        // 不需要生成英文对话，直接切换到英文学习阶段
+                        await switchToEnglishLearning();
                     }
                 } else {
                     showError(result.message || '保存记忆失败');
                 }
             } catch (error) {
-                console.error('Error ending conversation:', error);
-                showError('结束对话失败：' + error.message);
+                console.error('Error starting english learning:', error);
+                showError('开始英语学习失败：' + error.message);
             } finally {
-                endConversationBtn.disabled = false;
-                endConversationBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>';
+                startEnglishBtn.disabled = false;
+                startEnglishBtn.innerHTML = originalHTML || '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"></path><path d="M12 3v18"></path></svg><span style="margin-left: 4px; font-size: 12px;">EN</span>';
             }
         });
+    }
+    
+    // 切换到英文学习阶段的辅助函数
+    async function switchToEnglishLearning() {
+        try {
+            const response = await fetch('/api/learning/start_english', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                addAIMessage('已切换到英文学习模式！现在我会用英文和你交流。');
+                showSuccess('已切换到英文学习模式');
+            } else if (result.status === 'info') {
+                // 已经处于英文学习阶段
+                showSuccess('已经处于英文学习模式');
+            } else {
+                showError(result.message || '切换失败');
+            }
+        } catch (error) {
+            console.error('Error switching to english learning:', error);
+            showError('切换失败：' + error.message);
+        }
+    }
+    
+    // 提取纯对话内容（用于朗读，去掉A:和B:标签）
+    function extractDialogueText(dialogue) {
+        const lines = dialogue.split('\n').filter(line => line.trim());
+        return lines.map(line => {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('A:') || trimmedLine.startsWith('B:')) {
+                return trimmedLine.replace(/^[AB]:\s*/, '').trim();
+            }
+            return trimmedLine;
+        }).filter(line => line).join('. '); // 用句号连接，更自然
+    }
+    
+    // 格式化对话，标签和内容分开
+    function formatDialogue(dialogue) {
+        const lines = dialogue.split('\n').filter(line => line.trim());
+        return lines.map(line => {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('A:')) {
+                const content = trimmedLine.replace(/^A:\s*/, '').trim();
+                return `<div class="dialogue-item speaker-a-item">
+                    <div class="speaker-label speaker-a-label">A</div>
+                    <div class="dialogue-bubble speaker-a-bubble">
+                        <div class="bubble-content">${content}</div>
+                        <div class="bubble-tail bubble-tail-left"></div>
+                    </div>
+                </div>`;
+            } else if (trimmedLine.startsWith('B:')) {
+                const content = trimmedLine.replace(/^B:\s*/, '').trim();
+                return `<div class="dialogue-item speaker-b-item">
+                    <div class="dialogue-bubble speaker-b-bubble">
+                        <div class="bubble-content">${content}</div>
+                        <div class="bubble-tail bubble-tail-right"></div>
+                    </div>
+                    <div class="speaker-label speaker-b-label">B</div>
+                </div>`;
+            } else if (trimmedLine) {
+                return `<div class="dialogue-item"><div class="dialogue-bubble neutral-bubble"><div class="bubble-content">${trimmedLine}</div></div></div>`;
+            }
+            return '';
+        }).join('');
+    }
+    
+    // 创建英文学习卡片
+    function displayEnglishDialogue(dialogue) {
+        const card = document.createElement('div');
+        card.className = 'english-dialogue-card';
+        
+        let isCollapsed = false;
+        
+        card.innerHTML = `
+            <div class="dialogue-header">
+                <div class="dialogue-title">
+                    <span class="dialogue-icon">📚</span>
+                    <h3>英文学习对话</h3>
+                </div>
+                <button class="collapse-btn" title="展开/折叠">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+            </div>
+            <div class="dialogue-content">
+                ${formatDialogue(dialogue)}
+            </div>
+            <div class="dialogue-actions">
+                <button class="action-btn copy-btn" title="复制对话">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span>复制</span>
+                </button>
+                <button class="action-btn read-btn" title="朗读对话">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                    <span>朗读</span>
+                </button>
+            </div>
+        `;
+        
+        // 展开/折叠功能
+        const collapseBtn = card.querySelector('.collapse-btn');
+        const content = card.querySelector('.dialogue-content');
+        
+        collapseBtn.addEventListener('click', () => {
+            isCollapsed = !isCollapsed;
+            if (isCollapsed) {
+                content.style.display = 'none';
+                collapseBtn.querySelector('svg').style.transform = 'rotate(-90deg)';
+            } else {
+                content.style.display = 'block';
+                collapseBtn.querySelector('svg').style.transform = 'rotate(0deg)';
+            }
+        });
+        
+        // 复制功能
+        const copyBtn = card.querySelector('.copy-btn');
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(dialogue);
+                copyBtn.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>已复制</span>
+                `;
+                setTimeout(() => {
+                    copyBtn.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span>复制</span>
+                    `;
+                }, 2000);
+            } catch (error) {
+                console.error('Failed to copy:', error);
+                showError('复制失败');
+            }
+        });
+        
+        // 朗读功能
+        const readBtn = card.querySelector('.read-btn');
+        readBtn.addEventListener('click', () => {
+            if ('speechSynthesis' in window) {
+                // 使用提取的纯内容，不包含A:和B:标签
+                const cleanText = extractDialogueText(dialogue);
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                
+                readBtn.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+                        <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+                    </svg>
+                    <span>朗读中...</span>
+                `;
+                readBtn.disabled = true;
+                
+                utterance.onend = () => {
+                    readBtn.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        </svg>
+                        <span>朗读</span>
+                    `;
+                    readBtn.disabled = false;
+                };
+                
+                speechSynthesis.speak(utterance);
+            } else {
+                showError('您的浏览器不支持语音朗读功能');
+            }
+        });
+        
+        messagesList.appendChild(card);
+        scrollToBottom();
     }
 
     // 加载角色列表

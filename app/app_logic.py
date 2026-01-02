@@ -113,9 +113,10 @@ async def auto_summarize_session(memory_system, character: str):
 
 async def process_text(user_input):
     # Import with alias to avoid potential shadowing issues
-    from .shared import get_current_character as get_character, conversation_history, get_memory_system
+    from .shared import get_current_character as get_character, conversation_history, get_memory_system, get_learning_stage, set_learning_stage
     
     current_character = get_character()
+    learning_stage = get_learning_stage()
     character_folder = os.path.join('characters', current_character)
     character_prompt_file = os.path.join(character_folder, f"{current_character}.txt")
     character_audio_file = os.path.join(character_folder, f"{current_character}.wav")
@@ -130,6 +131,71 @@ async def process_text(user_input):
         # 将记忆上下文注入系统提示
         if memory_context:
             base_system_message = f"{base_system_message}\n\n{memory_context}"
+    
+    # 根据学习阶段调整系统提示
+    if learning_stage == "chinese_chat":
+        # 判断是否是第一次沟通
+        is_first = memory_system.is_first_conversation() if memory_system else True
+        
+        if is_first:
+            # 第一次沟通：深入了解用户基本信息
+            base_system_message += """
+
+【重要：中文沟通阶段 - 首次沟通】
+- 你是一位专业的英文老师，正在用中文和用户沟通
+- 目的是深入了解用户的兴趣爱好、职业背景、学习目标和内心想法，以便为后续的英文教学做准备
+- 主动探查：姓名、职业、兴趣、目标、英文水平、学习动机等
+- 回复要简洁自然，控制在30-80字左右（2-3句话）
+- 如果用户说"开始学英语"、"开始英文学习"等，表示要进入英文学习阶段
+"""
+        else:
+            # 后续沟通：了解生活动态和教学主题
+            base_system_message += """
+
+【重要：中文沟通阶段 - 后续沟通】
+- 你是一位专业的英文老师，正在用中文和用户沟通
+- 用户的基本信息你已经了解，现在你的重点是：
+  1. 了解用户最近的生活动态
+  2. 探索用户希望学习的英文主题和方向
+  3. 了解用户感兴趣的话题，以便为后续生成个性化的英文教学对话做准备
+- 不要重复询问已经知道的基本信息（姓名、职业等）
+- 回复要简洁自然，控制在30-80字左右（2-3句话）
+- 如果用户说"开始学英语"、"开始英文学习"等，表示要进入英文学习阶段
+"""
+        
+        # 检测触发词，切换到英文学习阶段
+        trigger_phrases = ["开始学英语", "开始英文学习", "开始英语学习", "start english", "开始学英文"]
+        if any(phrase in user_input for phrase in trigger_phrases):
+            set_learning_stage("english_learning")
+            # 发送提示消息
+            await send_message_to_clients({
+                "action": "ai_message",
+                "text": "好的，让我为你生成一段个性化的英文对话！"
+            })
+    
+    elif learning_stage == "english_learning":
+        # 英文学习阶段
+        english_level = "beginner"
+        if memory_system:
+            english_level = memory_system.user_profile.get("english_level", "beginner")
+        
+        level_map = {
+            "beginner": "初级（A1-A2）",
+            "elementary": "基础（A2-B1）",
+            "intermediate": "中级（B1-B2）",
+            "advanced": "高级（B2-C1）"
+        }
+        level_display = level_map.get(english_level, "初级")
+        
+        base_system_message += f"""
+
+【重要：英文学习阶段】
+- 你必须用英文回复用户
+- 根据用户的英文水平（{level_display}）调整回复难度
+- 基于用户的兴趣、职业和今天的对话内容进行教学
+- 回复要简洁，控制在50-100字
+- 可以纠正用户的语法错误，但要友好
+"""
     
     # 添加强制简洁要求（优先级最高，覆盖所有其他风格要求）
     base_system_message += """

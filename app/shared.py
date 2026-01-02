@@ -16,6 +16,7 @@ current_character = os.getenv("CHARACTER_NAME")  # Get from .env
 conversation_active = False
 conversation_history = []
 continue_conversation = False  # Added missing variable
+learning_stage = "chinese_chat"  # "chinese_chat" 或 "english_learning"
 
 # Functions to get and set shared state
 def get_current_character():
@@ -75,5 +76,22 @@ def get_memory_system():
             print("Memory system initialized successfully")
         except Exception as e:
             print(f"Error initializing memory system: {e}")
+            import traceback
+            traceback.print_exc()
             memory_system = None
     return memory_system
+
+# 学习阶段管理
+def get_learning_stage():
+    """获取当前学习阶段"""
+    global learning_stage # noqa: F824
+    return learning_stage
+
+def set_learning_stage(stage):
+    """设置学习阶段"""
+    global learning_stage # noqa: F824
+    if stage in ["chinese_chat", "english_learning"]:
+        learning_stage = stage
+        print(f"Learning stage set to: {stage}")
+    else:
+        print(f"Invalid learning stage: {stage}, must be 'chinese_chat' or 'english_learning'")

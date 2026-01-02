@@ -352,6 +352,8 @@ class SummaryMemorySystem:
                 "preferences": {},
                 "goals": [],
                 "habits": [],
+                "english_level": "beginner",  # 新增：beginner/elementary/intermediate/advanced
+                "english_level_description": "",  # 新增：英文水平描述
                 "other_info": {}
             }
         
@@ -363,6 +365,11 @@ class SummaryMemorySystem:
                     profile["version"] = "1.0"
                 if "created_at" not in profile:
                     profile["created_at"] = datetime.now().isoformat()
+                # 确保英文水平字段存在
+                if "english_level" not in profile:
+                    profile["english_level"] = "beginner"
+                if "english_level_description" not in profile:
+                    profile["english_level_description"] = ""
                 return profile
         except Exception as e:
             print(f"Error loading user profile: {e}")
@@ -377,6 +384,8 @@ class SummaryMemorySystem:
                 "preferences": {},
                 "goals": [],
                 "habits": [],
+                "english_level": "beginner",
+                "english_level_description": "",
                 "other_info": {}
             }
     
@@ -426,9 +435,49 @@ class SummaryMemorySystem:
             habits = ", ".join(self.user_profile["habits"])
             context_parts.append(f"习惯：{habits}")
         
+        # 添加英文水平信息
+        if self.user_profile.get("english_level"):
+            level_map = {
+                "beginner": "初级（A1-A2）",
+                "elementary": "基础（A2-B1）",
+                "intermediate": "中级（B1-B2）",
+                "advanced": "高级（B2-C1）"
+            }
+            level_display = level_map.get(self.user_profile["english_level"], self.user_profile["english_level"])
+            context_parts.append(f"英文水平：{level_display}")
+            if self.user_profile.get("english_level_description"):
+                context_parts.append(f"英文水平描述：{self.user_profile['english_level_description']}")
+        
         if context_parts:
             return "\n".join(context_parts)
         return ""
+    
+    def is_first_conversation(self) -> bool:
+        """判断是否是第一次沟通（检查用户档案是否已有基本信息）"""
+        if not self.user_profile:
+            return True
+        
+        # 检查是否有基本信息：姓名、职业、兴趣中的至少一个
+        has_basic_info = (
+            self.user_profile.get("name") or
+            self.user_profile.get("occupation") or
+            (self.user_profile.get("interests") and len(self.user_profile["interests"]) > 0)
+        )
+        
+        return not has_basic_info
+    
+    def update_english_level(self, level: str, description: str = ""):
+        """更新用户英文水平"""
+        valid_levels = ["beginner", "elementary", "intermediate", "advanced"]
+        if level not in valid_levels:
+            print(f"Invalid english level: {level}, must be one of {valid_levels}")
+            return
+        
+        self.user_profile["english_level"] = level
+        if description:
+            self.user_profile["english_level_description"] = description
+        self.save_user_profile()
+        print(f"English level updated to: {level}")
     
     async def extract_user_info(self, conversation_text: str):
         """从对话中提取用户关键信息（严格模式：只提取明确提到的内容）"""
@@ -551,3 +600,83 @@ class SummaryMemorySystem:
         
         # 保存
         self.save_user_profile()
+    
+    async def generate_english_dialogue(self, today_chinese_summary: str = "", dialogue_length: str = "auto"):
+        """基于今天的中文对话和历史记忆生成英文教学对话"""
+        import asyncio
+        from .app import chatgpt_streamed
+        
+        # 对话长度映射
+        DIALOGUE_LENGTH_MAP = {
+            "short": {"beginner": 8, "elementary": 10, "intermediate": 12, "advanced": 15},
+            "medium": {"beginner": 12, "elementary": 15, "intermediate": 18, "advanced": 20},
+            "long": {"beginner": 15, "elementary": 18, "intermediate": 22, "advanced": 25}
+        }
+        
+        # 获取用户档案和记忆上下文
+        user_profile = self.get_user_profile_context()
+        memory_context = self.get_memory_context()
+        
+        # 获取英文水平
+        english_level = self.user_profile.get("english_level", "beginner")
+        english_level_map = {
+            "beginner": "初级（A1-A2）",
+            "elementary": "基础（A2-B1）",
+            "intermediate": "中级（B1-B2）",
+            "advanced": "高级（B2-C1）"
+        }
+        level_description = english_level_map.get(english_level, "初级")
+        
+        # 确定对话句数
+        if dialogue_length == "auto":
+            dialogue_length = "medium"  # 默认使用medium
+        
+        target_sentences = DIALOGUE_LENGTH_MAP.get(dialogue_length, DIALOGUE_LENGTH_MAP["medium"]).get(english_level, 15)
+        
+        # 构建提示词
+        prompt = f"""基于以下信息，生成一段适合用户的英文教学对话内容。
+
+用户信息：
+{user_profile if user_profile else "暂无用户信息"}
+
+历史记忆：
+{memory_context if memory_context else "暂无历史记忆"}
+
+今天的中文对话摘要：
+{today_chinese_summary if today_chinese_summary else "无"}
+
+用户英文水平：{level_description}
+
+要求：
+1. 生成一段自然的英文对话（约{target_sentences}句），对话内容要与用户今天聊的话题相关
+2. 根据用户的英文水平（{level_description}）调整词汇和语法难度
+3. 对话要实用、贴近生活，符合用户的兴趣和职业
+4. 只返回英文对话内容，不要中文解释
+5. 格式：每句话一行，用 "A: " 和 "B: " 表示对话双方
+6. 对话要自然流畅，像真实的口语交流
+
+示例格式：
+A: Hi, how are you today?
+B: I'm doing great, thanks for asking!
+A: That's wonderful to hear.
+...
+
+现在生成对话："""
+        
+        # 调用AI生成
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: chatgpt_streamed(
+                prompt,
+                "你是一个专业的英语教学助手，能够根据用户的水平和兴趣生成个性化的英文对话。",
+                "neutral",
+                []
+            )
+        )
+        
+        if self.is_error_response(response):
+            print(f"Error generating english dialogue: {response}")
+            return None
+        
+        return response.strip()

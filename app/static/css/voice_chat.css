@@ -679,3 +679,291 @@ body {
     }
 }
 
+/* 英文学习对话卡片样式 */
+.english-dialogue-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 16px 0;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    color: white;
+    animation: cardSlideIn 0.4s ease-out;
+}
+
+@keyframes cardSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.dialogue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dialogue-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dialogue-icon {
+    font-size: 20px;
+}
+
+.dialogue-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+}
+
+.collapse-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.collapse-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.collapse-btn svg {
+    transition: transform 0.3s;
+}
+
+.dialogue-content {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 16px;
+    max-height: 500px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+}
+
+.dialogue-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dialogue-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.dialogue-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.dialogue-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* 对话项容器 */
+.dialogue-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 16px 0;
+    width: 100%; /* 确保占满宽度，让B可以靠右显示 */
+}
+
+/* A说话者：标签在左，气泡在右 */
+.speaker-a-item {
+    justify-content: flex-start;
+}
+
+.speaker-a-label {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(79, 172, 254, 0.4);
+}
+
+/* A说话者的气泡：圆角矩形，左侧带尖角 */
+.speaker-a-bubble {
+    position: relative;
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.25) 0%, rgba(0, 242, 254, 0.25) 100%);
+    border: 2px solid rgba(79, 172, 254, 0.6);
+    padding: 14px 18px;
+    border-radius: 20px 20px 20px 6px; /* 左上、右上、右下圆角，左下小圆角 */
+    max-width: 75%;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(79, 172, 254, 0.2);
+}
+
+/* A气泡的左侧尖角 */
+.bubble-tail-left {
+    position: absolute;
+    left: -8px;
+    top: 16px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid rgba(79, 172, 254, 0.6);
+}
+
+.bubble-tail-left::after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: -6px;
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-right: 6px solid rgba(79, 172, 254, 0.25);
+}
+
+/* B说话者：气泡在左，标签在右 */
+.speaker-b-item {
+    justify-content: flex-end;
+    flex-direction: row-reverse;
+}
+
+.speaker-b-label {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(250, 112, 154, 0.4);
+}
+
+/* B说话者的气泡：圆角矩形，右侧带尖角，形状更圆润 */
+.speaker-b-bubble {
+    position: relative;
+    background: linear-gradient(135deg, rgba(250, 112, 154, 0.25) 0%, rgba(254, 225, 64, 0.25) 100%);
+    border: 2px solid rgba(250, 112, 154, 0.6);
+    padding: 14px 18px;
+    border-radius: 20px 6px 20px 20px; /* 右上小圆角，其他大圆角 */
+    max-width: 75%;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(250, 112, 154, 0.2);
+}
+
+/* B气泡的右侧尖角 */
+.bubble-tail-right {
+    position: absolute;
+    right: -8px;
+    top: 16px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 8px solid rgba(250, 112, 154, 0.6);
+}
+
+.bubble-tail-right::after {
+    content: '';
+    position: absolute;
+    right: 2px;
+    top: -6px;
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 6px solid rgba(250, 112, 154, 0.25);
+}
+
+/* 气泡内容 */
+.bubble-content {
+    color: white;
+    line-height: 1.7;
+    font-size: 15px;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+/* 悬停效果 */
+.dialogue-bubble {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dialogue-bubble:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 中性气泡（没有标签的行） */
+.neutral-bubble {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 12px 16px;
+    border-radius: 16px;
+    max-width: 85%;
+    margin: 0 auto;
+}
+
+.dialogue-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.action-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+.action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.action-btn svg {
+    flex-shrink: 0;
+}
