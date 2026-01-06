@@ -82,9 +82,19 @@ document.addEventListener("DOMContentLoaded", function() {
             setInputEnabled(true);
             console.log('AI stopped speaking, input enabled');
         } else if (data.action === 'ai_message') {
-            addAIMessage(data.text);
+            // 在练习模式下，不显示AI的正常回复（因为AI应该按卡片内容回复）
+            if (!practiceState || !practiceState.isActive) {
+                addAIMessage(data.text);
+            } else {
+                console.log('Practice mode: ignoring AI message from normal flow');
+            }
         } else if (data.action === 'user_message') {
-            addUserMessage(data.text);
+            // 在练习模式下，用户消息已经在handlePracticeInput中显示
+            if (!practiceState || !practiceState.isActive) {
+                addUserMessage(data.text);
+            } else {
+                console.log('Practice mode: ignoring user message from normal flow');
+            }
         } else if (data.message) {
             addAIMessage(data.message);
         } else if (data.action === 'error') {
@@ -148,6 +158,16 @@ document.addEventListener("DOMContentLoaded", function() {
         if (!text) {
             console.log('Text is empty, returning');
             return;
+        }
+        
+        // 检查是否在练习模式
+        if (typeof handlePracticeInput === 'function' && practiceState && practiceState.isActive) {
+            console.log('Practice mode active, intercepting input');
+            const handled = await handlePracticeInput(text);
+            if (handled) {
+                textInput.value = '';
+                return; // 已在练习模式中处理，不继续正常流程
+            }
         }
         
         // 设置处理状态并禁用输入
@@ -326,6 +346,57 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 发送音频到服务器
     async function sendAudioToServer(audioBlob) {
+        // 检查是否在练习模式
+        if (practiceState && practiceState.isActive) {
+            console.log('Practice mode active: using practice transcribe API');
+            // 在练习模式下，只转录音频，不生成AI回复
+            try {
+                isProcessingAudio = true;
+                setInputEnabled(false);
+                
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.webm');
+                
+                const response = await fetch('/api/practice/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('转录失败');
+                }
+                
+                const result = await response.json();
+                console.log('Practice transcribe result:', result);
+                
+                if (result.status === 'success' && result.transcription) {
+                    console.log('Practice mode: transcription received, handling input');
+                    
+                    // 如果返回了音频URL，显示为音频气泡
+                    if (result.audio_url) {
+                        createAudioBubble(result.transcription, result.audio_url, 'user');
+                    }
+                    
+                    // 使用练习API处理转录结果
+                    await handlePracticeInput(result.transcription);
+                } else {
+                    const errorMsg = result.message || '转录失败：未知错误';
+                    console.error('Transcription failed:', result);
+                    showError(errorMsg);
+                }
+                
+                isProcessingAudio = false;
+                setInputEnabled(true);
+                return; // 已处理，不继续正常流程
+            } catch (error) {
+                console.error('Error in practice mode transcription:', error);
+                showError('转录音频失败：' + error.message);
+                isProcessingAudio = false;
+                setInputEnabled(true);
+                return;
+            }
+        }
+        
         // 检查是否正在处理
         if (isProcessing) {
             console.log('System is processing, please wait...');
@@ -357,6 +428,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             
             const result = await response.json();
+            
             // 不在这里显示消息，等待WebSocket消息来显示
             // 这样可以避免重复显示
             if (result.transcription) {
@@ -552,11 +624,11 @@ document.addEventListener("DOMContentLoaded", function() {
         settingsPanel.classList.remove('active');
     });
     
-    // 显示对话长度选择对话框
-    function showDialogueLengthDialog() {
+    // 显示对话选项选择对话框（长度和难度）
+    function showDialogueOptionsDialog() {
         return new Promise((resolve) => {
             const dialog = document.createElement('div');
-            dialog.className = 'dialogue-length-dialog';
+            dialog.className = 'dialogue-options-dialog';
             dialog.style.cssText = `
                 position: fixed;
                 top: 50%;
@@ -567,53 +639,101 @@ document.addEventListener("DOMContentLoaded", function() {
                 border-radius: 12px;
                 box-shadow: 0 4px 20px rgba(0,0,0,0.15);
                 z-index: 10000;
-                min-width: 300px;
+                min-width: 500px;
+                max-width: 90%;
+                max-height: 90vh;
+                overflow-y: auto;
             `;
             
             dialog.innerHTML = `
-                <h3 style="margin: 0 0 16px 0; font-size: 18px;">选择英文对话长度</h3>
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <button class="length-btn" data-length="short" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; text-align: left;">
-                        <strong>短对话</strong> (8-12句)
-                    </button>
-                    <button class="length-btn" data-length="medium" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; text-align: left;">
-                        <strong>中等对话</strong> (12-18句) - 推荐
-                    </button>
-                    <button class="length-btn" data-length="long" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; text-align: left;">
-                        <strong>长对话</strong> (18-25句)
-                    </button>
-                    <button class="length-btn" data-length="auto" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; text-align: left;">
-                        <strong>自动</strong> (根据英文水平)
-                    </button>
+                <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #333;">选择对话选项</h3>
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">对话长度：</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="option-btn" data-type="length" data-value="short" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">短（8-12句）</button>
+                        <button class="option-btn" data-type="length" data-value="medium" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">中（12-18句）</button>
+                        <button class="option-btn" data-type="length" data-value="long" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">长（18-25句）</button>
+                        <button class="option-btn" data-type="length" data-value="auto" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">自动</button>
+                    </div>
                 </div>
-                <button id="cancel-dialog" style="margin-top: 16px; padding: 8px 16px; border: none; background: #f0f0f0; border-radius: 6px; cursor: pointer; width: 100%;">取消</button>
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">难度水平：</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="option-btn" data-type="difficulty" data-value="beginner" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">初级（A1）</button>
+                        <button class="option-btn" data-type="difficulty" data-value="elementary" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">基础（A2）</button>
+                        <button class="option-btn" data-type="difficulty" data-value="pre_intermediate" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">准中级（A2-B1）</button>
+                        <button class="option-btn" data-type="difficulty" data-value="intermediate" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">中级（B1-B2）</button>
+                        <button class="option-btn" data-type="difficulty" data-value="upper_intermediate" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">中高级（B2）</button>
+                        <button class="option-btn" data-type="difficulty" data-value="advanced" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">高级（B2-C1）</button>
+                        <button class="option-btn" data-type="difficulty" data-value="auto" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">使用我的水平</button>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button id="confirm-dialog" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">确认</button>
+                    <button id="cancel-dialog" style="padding: 10px 20px; background: #f0f0f0; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">取消</button>
+                </div>
             `;
             
-            document.body.appendChild(dialog);
+            let selectedLength = "auto";
+            let selectedDifficulty = "auto";
             
-            // 添加按钮事件
-            dialog.querySelectorAll('.length-btn').forEach(btn => {
+            // 选项按钮点击事件
+            dialog.querySelectorAll('.option-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const length = btn.dataset.length;
-                    document.body.removeChild(dialog);
-                    resolve(length);
+                    const type = btn.dataset.type;
+                    const value = btn.dataset.value;
+                    
+                    // 移除同类型其他按钮的选中状态
+                    dialog.querySelectorAll(`.option-btn[data-type="${type}"]`).forEach(b => {
+                        b.style.background = 'white';
+                        b.style.borderColor = '#e0e0e0';
+                        b.style.color = '#333';
+                    });
+                    
+                    // 设置当前按钮为选中状态
+                    btn.style.background = '#007bff';
+                    btn.style.color = 'white';
+                    btn.style.borderColor = '#007bff';
+                    
+                    if (type === 'length') {
+                        selectedLength = value;
+                    } else if (type === 'difficulty') {
+                        selectedDifficulty = value;
+                    }
                 });
                 
+                // 鼠标悬停效果
                 btn.addEventListener('mouseenter', () => {
-                    btn.style.borderColor = '#007bff';
-                    btn.style.background = '#f0f7ff';
+                    if (btn.style.background !== 'rgb(0, 123, 255)') {
+                        btn.style.borderColor = '#007bff';
+                        btn.style.background = '#f0f7ff';
+                    }
                 });
                 
                 btn.addEventListener('mouseleave', () => {
-                    btn.style.borderColor = '#e0e0e0';
-                    btn.style.background = 'white';
+                    if (btn.style.background !== 'rgb(0, 123, 255)') {
+                        btn.style.borderColor = '#e0e0e0';
+                        btn.style.background = 'white';
+                    }
                 });
             });
             
+            // 确认按钮
+            dialog.querySelector('#confirm-dialog').addEventListener('click', () => {
+                document.body.removeChild(dialog);
+                resolve({
+                    length: selectedLength,
+                    difficulty: selectedDifficulty === "auto" ? null : selectedDifficulty
+                });
+            });
+            
+            // 取消按钮
             dialog.querySelector('#cancel-dialog').addEventListener('click', () => {
                 document.body.removeChild(dialog);
                 resolve(null);
             });
+            
+            document.body.appendChild(dialog);
         });
     }
     
@@ -629,9 +749,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 return;
             }
             
+            let originalHTML = null;
             try {
                 startEnglishBtn.disabled = true;
-                const originalHTML = startEnglishBtn.innerHTML;
+                originalHTML = startEnglishBtn.innerHTML;
                 startEnglishBtn.innerHTML = '<span style="font-size: 12px;">保存中...</span>';
                 
                 // 第一步：保存当前对话记忆
@@ -652,9 +773,9 @@ document.addEventListener("DOMContentLoaded", function() {
                         addAIMessage('记忆已保存');
                     }
                     
-                    // 总是显示对话长度选择对话框（即使没有今天的摘要，也可以基于历史记忆生成）
-                    const length = await showDialogueLengthDialog();
-                    if (length) {
+                    // 总是显示对话选项选择对话框（即使没有今天的摘要，也可以基于历史记忆生成）
+                    const options = await showDialogueOptionsDialog();
+                    if (options) {
                         // 生成英文对话
                         try {
                             addAIMessage('正在生成英文学习对话...');
@@ -664,14 +785,21 @@ document.addEventListener("DOMContentLoaded", function() {
                                 headers: {
                                     'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({ dialogue_length: length })
+                                body: JSON.stringify({ 
+                                    dialogue_length: options.length,
+                                    difficulty_level: options.difficulty
+                                })
                             });
                             
                             const englishResult = await englishResponse.json();
                             
                             if (englishResult.status === 'success' && englishResult.dialogue) {
                                 // 使用卡片式展示英文对话
-                                displayEnglishDialogue(englishResult.dialogue);
+                                displayEnglishDialogue(
+                                    englishResult.dialogue, 
+                                    englishResult.dialogue_lines || [],
+                                    englishResult.dialogue_id || ''
+                                );
                                 addAIMessage('已切换到英文学习模式！现在我会用英文和你交流。');
                                 showSuccess('英文对话已生成，已切换到英文学习模式！');
                             } else {
@@ -696,8 +824,12 @@ document.addEventListener("DOMContentLoaded", function() {
                 console.error('Error starting english learning:', error);
                 showError('开始英语学习失败：' + error.message);
             } finally {
-                startEnglishBtn.disabled = false;
-                startEnglishBtn.innerHTML = originalHTML || '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"></path><path d="M12 3v18"></path></svg><span style="margin-left: 4px; font-size: 12px;">EN</span>';
+                if (startEnglishBtn) {
+                    startEnglishBtn.disabled = false;
+                    // 恢复按钮内容
+                    const defaultHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"></path><path d="M12 3v18"></path></svg><span style="margin-left: 4px; font-size: 12px;">EN</span>';
+                    startEnglishBtn.innerHTML = defaultHTML;
+                }
             }
         });
     }
@@ -741,26 +873,46 @@ document.addEventListener("DOMContentLoaded", function() {
         }).filter(line => line).join('. '); // 用句号连接，更自然
     }
     
-    // 格式化对话，标签和内容分开
-    function formatDialogue(dialogue) {
+    // 格式化对话，标签和内容分开，支持逐句播放
+    function formatDialogue(dialogue, dialogueLines = []) {
         const lines = dialogue.split('\n').filter(line => line.trim());
-        return lines.map(line => {
+        let lineIndex = 0;
+        
+        return lines.map((line, idx) => {
             const trimmedLine = line.trim();
             if (trimmedLine.startsWith('A:')) {
                 const content = trimmedLine.replace(/^A:\s*/, '').trim();
+                // 查找对应的音频URL
+                const audioLine = dialogueLines.find(l => l.speaker === 'A' && l.text === content);
+                const audioUrl = audioLine ? audioLine.audio_url : null;
+                const lineId = `dialogue-line-${idx}`;
+                
                 return `<div class="dialogue-item speaker-a-item">
                     <div class="speaker-label speaker-a-label">A</div>
-                    <div class="dialogue-bubble speaker-a-bubble">
+                    <div class="dialogue-bubble speaker-a-bubble ${audioUrl ? 'dialogue-line-clickable' : ''}" 
+                         data-audio-url="${audioUrl || ''}" 
+                         data-line-id="${lineId}"
+                         ${audioUrl ? 'style="cursor: pointer;"' : ''}>
                         <div class="bubble-content">${content}</div>
+                        ${audioUrl ? '<div class="play-icon" style="display: none;">▶</div>' : ''}
                         <div class="bubble-tail bubble-tail-left"></div>
                     </div>
                 </div>`;
             } else if (trimmedLine.startsWith('B:')) {
                 const content = trimmedLine.replace(/^B:\s*/, '').trim();
+                // 查找对应的音频URL
+                const audioLine = dialogueLines.find(l => l.speaker === 'B' && l.text === content);
+                const audioUrl = audioLine ? audioLine.audio_url : null;
+                const lineId = `dialogue-line-${idx}`;
+                
                 return `<div class="dialogue-item speaker-b-item">
                     <div class="speaker-label speaker-b-label">B</div>
-                    <div class="dialogue-bubble speaker-b-bubble">
+                    <div class="dialogue-bubble speaker-b-bubble ${audioUrl ? 'dialogue-line-clickable' : ''}" 
+                         data-audio-url="${audioUrl || ''}" 
+                         data-line-id="${lineId}"
+                         ${audioUrl ? 'style="cursor: pointer;"' : ''}>
                         <div class="bubble-content">${content}</div>
+                        ${audioUrl ? '<div class="play-icon" style="display: none;">▶</div>' : ''}
                         <div class="bubble-tail bubble-tail-right"></div>
                     </div>
                 </div>`;
@@ -772,11 +924,15 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     // 创建英文学习卡片
-    function displayEnglishDialogue(dialogue) {
+    function displayEnglishDialogue(dialogue, dialogueLines = [], dialogueId = '') {
         const card = document.createElement('div');
         card.className = 'english-dialogue-card';
+        card.dataset.dialogueId = dialogueId;
+        card.dataset.dialogueLines = JSON.stringify(dialogueLines);
         
         let isCollapsed = false;
+        let currentPlayingAudio = null;
+        let currentPlayingElement = null;
         
         card.innerHTML = `
             <div class="dialogue-header">
@@ -791,7 +947,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 </button>
             </div>
             <div class="dialogue-content">
-                ${formatDialogue(dialogue)}
+                ${formatDialogue(dialogue, dialogueLines)}
             </div>
             <div class="dialogue-actions">
                 <button class="action-btn copy-btn" title="复制对话">
@@ -807,6 +963,12 @@ document.addEventListener("DOMContentLoaded", function() {
                         <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                     </svg>
                     <span>朗读</span>
+                </button>
+                <button class="action-btn practice-btn" title="开始练习" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <span>开始练习</span>
                 </button>
             </div>
         `;
@@ -824,6 +986,83 @@ document.addEventListener("DOMContentLoaded", function() {
                 content.style.display = 'block';
                 collapseBtn.querySelector('svg').style.transform = 'rotate(0deg)';
             }
+        });
+        
+        // 逐句播放功能
+        const clickableBubbles = card.querySelectorAll('.dialogue-line-clickable');
+        clickableBubbles.forEach(bubble => {
+            const audioUrl = bubble.dataset.audioUrl;
+            if (!audioUrl) return;
+            
+            const playIcon = bubble.querySelector('.play-icon');
+            
+            // 鼠标悬停显示播放图标
+            bubble.addEventListener('mouseenter', () => {
+                if (playIcon && currentPlayingElement !== bubble) {
+                    playIcon.style.display = 'block';
+                }
+            });
+            
+            bubble.addEventListener('mouseleave', () => {
+                if (playIcon && currentPlayingElement !== bubble) {
+                    playIcon.style.display = 'none';
+                }
+            });
+            
+            // 点击播放
+            bubble.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                // 如果正在播放其他音频，先停止
+                if (currentPlayingAudio) {
+                    currentPlayingAudio.pause();
+                    currentPlayingAudio.currentTime = 0;
+                    if (currentPlayingElement) {
+                        currentPlayingElement.classList.remove('dialogue-line-playing');
+                        const prevIcon = currentPlayingElement.querySelector('.play-icon');
+                        if (prevIcon) prevIcon.style.display = 'none';
+                    }
+                }
+                
+                // 如果点击的是同一个气泡，停止播放
+                if (currentPlayingElement === bubble && currentPlayingAudio) {
+                    currentPlayingAudio = null;
+                    currentPlayingElement = null;
+                    return;
+                }
+                
+                // 播放新音频
+                const audio = new Audio(audioUrl);
+                currentPlayingAudio = audio;
+                currentPlayingElement = bubble;
+                
+                bubble.classList.add('dialogue-line-playing');
+                if (playIcon) {
+                    playIcon.textContent = '⏸';
+                    playIcon.style.display = 'block';
+                }
+                
+                audio.play().catch(err => {
+                    console.error('Error playing audio:', err);
+                    showError('播放音频失败');
+                    bubble.classList.remove('dialogue-line-playing');
+                    if (playIcon) playIcon.style.display = 'none';
+                });
+                
+                audio.onended = () => {
+                    bubble.classList.remove('dialogue-line-playing');
+                    if (playIcon) {
+                        playIcon.textContent = '▶';
+                        playIcon.style.display = 'none';
+                    }
+                    currentPlayingAudio = null;
+                    currentPlayingElement = null;
+                };
+                
+                audio.onpause = () => {
+                    if (playIcon) playIcon.textContent = '▶';
+                };
+            });
         });
         
         // 复制功能
@@ -889,8 +1128,480 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
         
+        // 开始练习功能
+        const practiceBtn = card.querySelector('.practice-btn');
+        if (practiceBtn) {
+            practiceBtn.addEventListener('click', () => {
+                startPracticeMode(dialogue, card);
+            });
+        }
+        
+        // 存储对话内容到卡片数据属性
+        card.dataset.dialogue = dialogue;
+        
         messagesList.appendChild(card);
         scrollToBottom();
+    }
+    
+    // 练习模式状态
+    let practiceState = {
+        dialogueId: null,
+        dialogueLines: [],
+        currentTurn: 0,
+        isActive: false,
+        currentHints: null,
+        totalTurns: 0
+    };
+    
+    // 开始练习模式
+    async function startPracticeMode(dialogue, cardElement) {
+        try {
+            console.log('Starting practice mode, dialogue:', dialogue);
+            
+            // 检查对话内容
+            if (!dialogue || !dialogue.trim()) {
+                showError('对话内容为空，无法开始练习');
+                return;
+            }
+            
+            // 显示加载状态
+            const practiceBtn = cardElement.querySelector('.practice-btn');
+            const originalHTML = practiceBtn.innerHTML;
+            practiceBtn.disabled = true;
+            practiceBtn.innerHTML = '<span>准备中...</span>';
+            
+            // 获取对话行数据（包含音频URL）
+            const dialogueLines = JSON.parse(cardElement.dataset.dialogueLines || '[]');
+            const dialogueId = cardElement.dataset.dialogueId || '';
+            
+            // 调用API开始练习
+            const response = await fetch('/api/practice/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    dialogue: dialogue,
+                    dialogue_lines: dialogueLines,
+                    dialogue_id: dialogueId
+                })
+            });
+            
+            // 检查响应状态
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API error response:', errorText);
+                let errorMessage = `服务器错误 (${response.status})`;
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    errorMessage = errorJson.message || errorMessage;
+                } catch (e) {
+                    errorMessage = errorText || errorMessage;
+                }
+                throw new Error(errorMessage);
+            }
+            
+            const result = await response.json();
+            console.log('Practice start result:', result);
+            
+            if (result.status === 'success') {
+                // 初始化练习状态
+                practiceState = {
+                    dialogueId: result.dialogue_id,
+                    dialogueLines: result.dialogue_lines,
+                    currentTurn: 0,
+                    isActive: true,
+                    currentHints: result.b_hints,
+                    totalTurns: result.total_turns
+                };
+                
+                // 折叠并禁用英语卡片
+                const collapseBtn = cardElement.querySelector('.collapse-btn');
+                const content = cardElement.querySelector('.dialogue-content');
+                const practiceBtn = cardElement.querySelector('.practice-btn');
+                
+                if (content) {
+                    content.style.display = 'none';
+                }
+                if (collapseBtn) {
+                    collapseBtn.disabled = true;
+                    collapseBtn.style.opacity = '0.5';
+                    collapseBtn.style.cursor = 'not-allowed';
+                }
+                if (practiceBtn) {
+                    practiceBtn.style.display = 'none';
+                }
+                
+                // 创建练习模式UI
+                createPracticeUI(result.a_text, result.a_audio_url, result.b_hints, result.total_turns);
+                
+                // 显示AI的第一句话（使用音频气泡）
+                if (result.a_audio_url) {
+                    createAudioBubble(result.a_text, result.a_audio_url, 'ai');
+                } else {
+                    addAIMessage(`A: ${result.a_text}`);
+                }
+                
+                showSuccess('练习模式已开始！你是角色B，请回复A的话。');
+            } else {
+                showError(result.message || '开始练习失败');
+                practiceBtn.disabled = false;
+                practiceBtn.innerHTML = originalHTML;
+            }
+        } catch (error) {
+            console.error('Error starting practice:', error);
+            showError('开始练习失败：' + error.message);
+            const practiceBtn = cardElement.querySelector('.practice-btn');
+            if (practiceBtn) {
+                practiceBtn.disabled = false;
+            }
+        }
+    }
+    
+    // 创建练习模式UI
+    function createPracticeUI(aText, aAudioUrl, hints, totalTurns) {
+        // 移除旧的练习UI（如果存在）
+        const oldPracticeUI = document.getElementById('practice-mode-ui');
+        if (oldPracticeUI) {
+            oldPracticeUI.remove();
+        }
+        
+        const practiceUI = document.createElement('div');
+        practiceUI.id = 'practice-mode-ui';
+        practiceUI.className = 'practice-mode-container';
+        practiceUI.innerHTML = `
+            <div class="practice-header">
+                <h3>🎯 练习模式</h3>
+                <div class="practice-progress">
+                    <span>进度：<span id="practice-current-turn">1</span>/<span id="practice-total-turns">${totalTurns}</span></span>
+                </div>
+            </div>
+            <div class="practice-hints-panel" id="practice-hints-panel" style="display: none;">
+                <div class="hints-header">
+                    <h4>💡 提示</h4>
+                </div>
+                <div class="hints-content" id="hints-content">
+                    <!-- 提示内容将动态填充 -->
+                </div>
+            </div>
+            <div class="practice-dialogue-area" id="practice-dialogue-area">
+                <!-- 对话历史将显示在这里 -->
+            </div>
+            <div class="practice-input-area">
+                <button id="toggle-hints-btn" class="hint-toggle-btn">显示提示</button>
+            </div>
+        `;
+        
+        // 插入到消息列表
+        const messagesList = document.getElementById('messages-list');
+        if (!messagesList) {
+            console.error('Messages list element not found');
+            showError('无法找到消息列表，请刷新页面重试');
+            return;
+        }
+        messagesList.appendChild(practiceUI);
+        
+        // 更新进度
+        updatePracticeProgress(1, totalTurns);
+        
+        // 如果有提示，填充提示内容
+        if (hints) {
+            fillHintsContent(hints);
+        }
+        
+        // 绑定事件 - 统一的切换按钮
+        const toggleHintsBtn = document.getElementById('toggle-hints-btn');
+        const hintsPanel = document.getElementById('practice-hints-panel');
+        
+        function updateToggleButton() {
+            if (toggleHintsBtn && hintsPanel) {
+                const isVisible = hintsPanel.style.display !== 'none';
+                toggleHintsBtn.textContent = isVisible ? '隐藏提示' : '显示提示';
+            }
+        }
+        
+        function toggleHintsPanel() {
+            if (hintsPanel) {
+                const isVisible = hintsPanel.style.display !== 'none';
+                hintsPanel.style.display = isVisible ? 'none' : 'block';
+                updateToggleButton();
+            }
+        }
+        
+        if (toggleHintsBtn) {
+            toggleHintsBtn.addEventListener('click', toggleHintsPanel);
+        }
+        
+        // 初始化按钮状态
+        updateToggleButton();
+        
+        scrollToBottom();
+    }
+    
+    // 填充提示内容（只显示重点词组）
+    function fillHintsContent(hints) {
+        const hintsContent = document.getElementById('hints-content');
+        if (!hintsContent) return;
+        
+        let html = '';
+        
+        // 只显示重点词组
+        if (hints.phrases && hints.phrases.length > 0) {
+            html += `<div class="hint-phrases-container">${hints.phrases.map(p => `<span class="hint-phrase-box">${p}</span>`).join('')}</div>`;
+        } else {
+            html = '<div class="hint-phrases-container"><span class="hint-phrase-box-empty">暂无提示</span></div>';
+        }
+        
+        hintsContent.innerHTML = html;
+    }
+    
+    // 更新练习进度
+    function updatePracticeProgress(current, total) {
+        const currentTurnEl = document.getElementById('practice-current-turn');
+        const totalTurnsEl = document.getElementById('practice-total-turns');
+        if (currentTurnEl) currentTurnEl.textContent = current;
+        if (totalTurnsEl) totalTurnsEl.textContent = total;
+    }
+    
+    // 创建音频气泡（Instagram风格）
+    function createAudioBubble(text, audioUrl, type = 'ai') {
+        const messagesList = document.getElementById('messages-list');
+        if (!messagesList) return;
+        
+        // 创建消息容器
+        const message = document.createElement('div');
+        message.className = `message ${type === 'user' ? 'user' : 'ai'}`;
+        
+        const audioId = `audio-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const audio = new Audio(audioUrl);
+        let isPlaying = false;
+        let duration = 0;
+        let textExpanded = false;
+        
+        // 获取音频时长
+        audio.addEventListener('loadedmetadata', () => {
+            duration = audio.duration;
+            const durationEl = message.querySelector('.audio-duration');
+            if (durationEl) {
+                durationEl.textContent = formatDuration(duration);
+            }
+        });
+        
+        // Instagram风格的消息结构
+        message.innerHTML = `
+            <div class="message-avatar">${type === 'user' ? '你' : 'AI'}</div>
+            <div class="message-content-wrapper">
+                <div class="message-content audio-message" data-audio-id="${audioId}">
+                    <div class="audio-controls">
+                        <button class="audio-play-btn" data-audio-id="${audioId}">
+                            <svg class="audio-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="8 5 8 19 19 12 8 5"></polygon>
+                            </svg>
+                            <svg class="audio-pause-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+                                <rect x="6" y="4" width="4" height="16"></rect>
+                                <rect x="14" y="4" width="4" height="16"></rect>
+                            </svg>
+                        </button>
+                        <div class="audio-waveform">
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                        </div>
+                        <span class="audio-duration">--:--</span>
+                    </div>
+                    <div class="audio-text-content" style="display: none;">
+                        ${text}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const audioMessage = message.querySelector('.audio-message');
+        const playBtn = message.querySelector('.audio-play-btn');
+        const playIcon = message.querySelector('.audio-play-icon');
+        const pauseIcon = message.querySelector('.audio-pause-icon');
+        const waveform = message.querySelector('.audio-waveform');
+        const textContent = message.querySelector('.audio-text-content');
+        
+        // 播放/暂停控制（点击播放按钮）
+        playBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // 阻止冒泡到消息容器
+            
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+                waveform.classList.remove('playing');
+            } else {
+                audio.play();
+                isPlaying = true;
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+                waveform.classList.add('playing');
+            }
+        });
+        
+        audio.addEventListener('ended', () => {
+            isPlaying = false;
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+            waveform.classList.remove('playing');
+        });
+        
+        // 点击整个消息气泡展开/折叠文字（Instagram风格）
+        audioMessage.addEventListener('click', (e) => {
+            // 如果点击的是播放按钮，不处理
+            if (e.target.closest('.audio-play-btn')) {
+                return;
+            }
+            
+            textExpanded = !textExpanded;
+            if (textExpanded) {
+                textContent.style.display = 'block';
+                audioMessage.classList.add('text-expanded');
+            } else {
+                textContent.style.display = 'none';
+                audioMessage.classList.remove('text-expanded');
+            }
+        });
+        
+        messagesList.appendChild(message);
+        scrollToBottom();
+        
+        // 存储audio对象到message
+        message.dataset.audioId = audioId;
+        window[audioId] = audio;
+    }
+    
+    // 格式化时长（秒转为MM:SS或SS，Instagram风格）
+    function formatDuration(seconds) {
+        if (isNaN(seconds) || seconds === 0) return '--:--';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        // 如果小于1分钟，只显示秒数（Instagram风格）
+        if (mins === 0) {
+            return `${secs}"`;
+        }
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    // 结束练习模式
+    function endPracticeMode() {
+        // 恢复英语卡片
+        const cards = document.querySelectorAll('.english-dialogue-card');
+        cards.forEach(card => {
+            const collapseBtn = card.querySelector('.collapse-btn');
+            const practiceBtn = card.querySelector('.practice-btn');
+            
+            if (collapseBtn) {
+                collapseBtn.disabled = false;
+                collapseBtn.style.opacity = '1';
+                collapseBtn.style.cursor = 'pointer';
+            }
+            if (practiceBtn) {
+                practiceBtn.style.display = 'inline-flex';
+            }
+        });
+        
+        // 清理练习状态
+        practiceState = {
+            dialogueId: null,
+            dialogueLines: [],
+            currentTurn: 0,
+            isActive: false,
+            currentHints: null,
+            totalTurns: 0
+        };
+    }
+    
+    // 处理练习模式的用户输入
+    async function handlePracticeInput(userInput) {
+        console.log('handlePracticeInput called, isActive:', practiceState.isActive);
+        if (!practiceState.isActive) {
+            console.log('Not in practice mode, returning false');
+            return false; // 不在练习模式，正常处理
+        }
+        
+        console.log('In practice mode, processing input...');
+        
+        try {
+            // 显示用户输入
+            addUserMessage(userInput);
+            
+            // 调用API验证
+            const response = await fetch('/api/practice/respond', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_input: userInput,
+                    dialogue_lines: practiceState.dialogueLines,
+                    current_turn: practiceState.currentTurn
+                })
+            });
+            
+            const result = await response.json();
+            console.log('Practice respond result:', result);
+            
+            if (result.status === 'success') {
+                if (result.is_consistent) {
+                    // 意思一致，继续下一轮
+                    practiceState.currentTurn = result.next_turn;
+                    practiceState.currentHints = result.next_b_hints;
+                    
+                    if (result.is_completed) {
+                        // 练习完成
+                        practiceState.isActive = false;
+                        showSuccess('🎉 恭喜！练习完成！');
+                        addAIMessage('练习已完成，你做得很好！');
+                        
+                        // 隐藏练习UI
+                        const practiceUI = document.getElementById('practice-mode-ui');
+                        if (practiceUI) {
+                            practiceUI.style.opacity = '0.7';
+                        }
+                        
+                        // 恢复英语卡片
+                        endPracticeMode();
+                    } else {
+                        // 显示下一句A的台词（使用音频气泡）
+                        if (result.next_a_text) {
+                            if (result.next_a_audio_url) {
+                                createAudioBubble(result.next_a_text, result.next_a_audio_url, 'ai');
+                            } else {
+                                addAIMessage(`A: ${result.next_a_text}`);
+                            }
+                            
+                            // 更新提示
+                            if (result.next_b_hints) {
+                                fillHintsContent(result.next_b_hints);
+                                practiceState.currentHints = result.next_b_hints;
+                            }
+                            
+                            // 更新进度
+                            updatePracticeProgress(practiceState.currentTurn + 1, practiceState.totalTurns);
+                            
+                            showSuccess('很好！继续下一句。');
+                        }
+                    }
+                } else {
+                    // 意思不一致
+                    showError('意思不太一致，请再试试。你可以点击"显示提示"查看提示。');
+                }
+            } else {
+                showError(result.message || '验证失败');
+            }
+            
+            return true; // 已处理，不继续正常流程
+        } catch (error) {
+            console.error('Error handling practice input:', error);
+            showError('处理失败：' + error.message);
+            return true;
+        }
     }
 
     // 加载角色列表

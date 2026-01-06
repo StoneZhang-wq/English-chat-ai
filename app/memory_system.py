@@ -7,6 +7,88 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# 英语水平配置
+ENGLISH_LEVELS = {
+    "beginner": {
+        "name": "初级（A1）",
+        "description": "入门级，基础词汇和简单句型",
+        "difficulty": {
+            "vocabulary": "基础词汇（1000词以内）",
+            "grammar": "现在时、简单过去时、基本疑问句",
+            "tenses": ["present simple", "past simple"],
+            "idioms": False,
+            "slang": False,
+            "sentence_length": "5-8词",
+            "complexity": "简单句，主谓宾结构"
+        }
+    },
+    "elementary": {
+        "name": "基础（A2）",
+        "description": "基础级，日常交流词汇",
+        "difficulty": {
+            "vocabulary": "日常词汇（2000词以内）",
+            "grammar": "现在时、过去时、将来时、现在进行时",
+            "tenses": ["present simple", "past simple", "future simple", "present continuous"],
+            "idioms": "少量常见习语（如 'how are you', 'nice to meet you'）",
+            "slang": False,
+            "sentence_length": "8-12词",
+            "complexity": "简单句和并列句"
+        }
+    },
+    "pre_intermediate": {
+        "name": "准中级（A2-B1）",
+        "description": "准中级，开始使用复合句",
+        "difficulty": {
+            "vocabulary": "扩展词汇（3000词以内）",
+            "grammar": "所有基本时态、条件句、被动语态",
+            "tenses": ["all basic tenses", "present perfect", "past continuous", "conditional"],
+            "idioms": "常见习语和短语动词",
+            "slang": "少量日常俚语",
+            "sentence_length": "10-15词",
+            "complexity": "复合句，从句"
+        }
+    },
+    "intermediate": {
+        "name": "中级（B1-B2）",
+        "description": "中级，流利日常交流",
+        "difficulty": {
+            "vocabulary": "丰富词汇（5000词以内）",
+            "grammar": "所有时态、虚拟语气、复杂语法结构",
+            "tenses": ["all tenses", "present perfect continuous", "past perfect", "subjunctive"],
+            "idioms": "常用习语和表达",
+            "slang": "日常俚语和口语表达",
+            "sentence_length": "12-18词",
+            "complexity": "复杂复合句，多种从句"
+        }
+    },
+    "upper_intermediate": {
+        "name": "中高级（B2）",
+        "description": "中高级，复杂话题讨论",
+        "difficulty": {
+            "vocabulary": "高级词汇（8000词以内）",
+            "grammar": "所有语法结构，包括倒装、强调句",
+            "tenses": ["all tenses including perfect continuous forms"],
+            "idioms": "丰富习语和地道表达",
+            "slang": "常见俚语和流行语",
+            "sentence_length": "15-22词",
+            "complexity": "复杂句式，多种语法结构混合"
+        }
+    },
+    "advanced": {
+        "name": "高级（B2-C1）",
+        "description": "高级，接近母语水平",
+        "difficulty": {
+            "vocabulary": "高级词汇和学术词汇（10000+词）",
+            "grammar": "所有高级语法，包括修辞手法",
+            "tenses": ["all tenses with nuanced usage"],
+            "idioms": "大量习语、谚语和地道表达",
+            "slang": "丰富俚语、网络用语和流行语",
+            "sentence_length": "18-25词",
+            "complexity": "复杂句式，多种修辞手法"
+        }
+    }
+}
+
 class DiaryMemorySystem:
     """简化版日记式记忆系统，使用文本摘要存储对话内容"""
     
@@ -437,13 +519,12 @@ class DiaryMemorySystem:
         
         # 添加英文水平信息
         if self.user_profile.get("english_level"):
-            level_map = {
-                "beginner": "初级（A1-A2）",
-                "elementary": "基础（A2-B1）",
-                "intermediate": "中级（B1-B2）",
-                "advanced": "高级（B2-C1）"
-            }
-            level_display = level_map.get(self.user_profile["english_level"], self.user_profile["english_level"])
+            level_key = self.user_profile["english_level"]
+            level_config = ENGLISH_LEVELS.get(level_key)
+            if level_config:
+                level_display = f"{level_config['name']} - {level_config['description']}"
+            else:
+                level_display = level_key
             context_parts.append(f"英文水平：{level_display}")
             if self.user_profile.get("english_level_description"):
                 context_parts.append(f"英文水平描述：{self.user_profile['english_level_description']}")
@@ -468,7 +549,7 @@ class DiaryMemorySystem:
     
     def update_english_level(self, level: str, description: str = ""):
         """更新用户英文水平"""
-        valid_levels = ["beginner", "elementary", "intermediate", "advanced"]
+        valid_levels = list(ENGLISH_LEVELS.keys())
         if level not in valid_levels:
             print(f"Invalid english level: {level}, must be one of {valid_levels}")
             return
@@ -477,7 +558,8 @@ class DiaryMemorySystem:
         if description:
             self.user_profile["english_level_description"] = description
         self.save_user_profile()
-        print(f"English level updated to: {level}")
+        level_name = ENGLISH_LEVELS.get(level, {}).get("name", level)
+        print(f"English level updated to: {level_name}")
     
     async def extract_user_info(self, conversation_text: str):
         """从对话中提取用户关键信息（严格模式：只提取明确提到的内容）"""
@@ -601,37 +683,82 @@ class DiaryMemorySystem:
         # 保存
         self.save_user_profile()
     
-    async def generate_english_dialogue(self, today_chinese_summary: str = "", dialogue_length: str = "auto"):
-        """基于今天的中文对话和历史记忆生成英文教学对话"""
+    def get_difficulty_instructions(self, level_config):
+        """根据水平配置生成难度要求"""
+        diff = level_config["difficulty"]
+        instructions = []
+        
+        instructions.append(f"【词汇难度】{diff['vocabulary']}")
+        instructions.append(f"【语法结构】{diff['grammar']}")
+        instructions.append(f"【时态使用】必须自然使用以下时态：{', '.join(diff['tenses'])}")
+        instructions.append(f"【句子长度】{diff['sentence_length']}")
+        instructions.append(f"【句式复杂度】{diff['complexity']}")
+        
+        if diff.get('idioms'):
+            if diff['idioms'] is True:
+                instructions.append("【习语使用】必须包含常用习语和短语动词")
+            else:
+                instructions.append(f"【习语使用】{diff['idioms']}")
+        
+        if diff.get('slang'):
+            if diff['slang'] is True:
+                instructions.append("【俚语使用】必须包含日常俚语和口语表达")
+            elif diff['slang']:
+                instructions.append(f"【俚语使用】{diff['slang']}")
+        
+        return "\n".join(instructions)
+    
+    async def generate_english_dialogue(self, today_chinese_summary: str = "", 
+                                        dialogue_length: str = "auto",
+                                        difficulty_level: str = None):
+        """基于今天的中文对话和历史记忆生成英文教学对话
+        
+        Args:
+            today_chinese_summary: 今天的中文对话摘要
+            dialogue_length: 对话长度 (short/medium/long/auto)
+            difficulty_level: 难度水平 (beginner/elementary/pre_intermediate/intermediate/upper_intermediate/advanced)
+                            如果为None，使用用户当前水平
+        """
         import asyncio
         from .app import chatgpt_streamed
         
-        # 对话长度映射
+        # 对话长度映射（扩展到所有水平）
         DIALOGUE_LENGTH_MAP = {
-            "short": {"beginner": 8, "elementary": 10, "intermediate": 12, "advanced": 15},
-            "medium": {"beginner": 12, "elementary": 15, "intermediate": 18, "advanced": 20},
-            "long": {"beginner": 15, "elementary": 18, "intermediate": 22, "advanced": 25}
+            "short": {
+                "beginner": 8, "elementary": 10, "pre_intermediate": 10, 
+                "intermediate": 12, "upper_intermediate": 12, "advanced": 15
+            },
+            "medium": {
+                "beginner": 12, "elementary": 15, "pre_intermediate": 15,
+                "intermediate": 18, "upper_intermediate": 18, "advanced": 20
+            },
+            "long": {
+                "beginner": 15, "elementary": 18, "pre_intermediate": 18,
+                "intermediate": 22, "upper_intermediate": 22, "advanced": 25
+            }
         }
         
         # 获取用户档案和记忆上下文
         user_profile = self.get_user_profile_context()
         memory_context = self.get_memory_context()
         
-        # 获取英文水平
-        english_level = self.user_profile.get("english_level", "beginner")
-        english_level_map = {
-            "beginner": "初级（A1-A2）",
-            "elementary": "基础（A2-B1）",
-            "intermediate": "中级（B1-B2）",
-            "advanced": "高级（B2-C1）"
-        }
-        level_description = english_level_map.get(english_level, "初级")
+        # 获取用户当前水平
+        user_level = self.user_profile.get("english_level", "beginner")
+        
+        # 确定使用的难度水平
+        target_level = difficulty_level if difficulty_level else user_level
+        
+        # 获取该水平的配置
+        level_config = ENGLISH_LEVELS.get(target_level, ENGLISH_LEVELS["beginner"])
+        
+        # 生成难度要求说明
+        difficulty_instructions = self.get_difficulty_instructions(level_config)
         
         # 确定对话句数
         if dialogue_length == "auto":
             dialogue_length = "medium"  # 默认使用medium
         
-        target_sentences = DIALOGUE_LENGTH_MAP.get(dialogue_length, DIALOGUE_LENGTH_MAP["medium"]).get(english_level, 15)
+        target_sentences = DIALOGUE_LENGTH_MAP.get(dialogue_length, DIALOGUE_LENGTH_MAP["medium"]).get(target_level, 15)
         
         # 构建提示词
         topic_instruction = "对话内容要与用户今天聊的话题相关" if today_chinese_summary else "对话内容要基于用户的兴趣、职业和历史对话记录"
@@ -647,15 +774,24 @@ class DiaryMemorySystem:
 今天的中文对话摘要：
 {today_chinese_summary if today_chinese_summary else "无（将基于历史记忆生成）"}
 
-用户英文水平：{level_description}
+目标难度水平：{level_config['name']} - {level_config['description']}
 
-要求：
-1. 生成一段自然的英文对话（约{target_sentences}句），{topic_instruction}
-2. 根据用户的英文水平（{level_description}）调整词汇和语法难度
-3. 对话要实用、贴近生活，符合用户的兴趣和职业
-4. 只返回英文对话内容，不要中文解释
-5. 格式：每句话一行，用 "A: " 和 "B: " 表示对话双方
-6. 对话要自然流畅，像真实的口语交流
+【难度要求】（必须严格遵守）：
+{difficulty_instructions}
+
+【内容要求】：
+1. 对话必须贴近日常生活，涉及日常沟通场景（如：工作、学习、娱乐、社交、购物、旅行等）
+2. 必须自然使用指定的时态，不要刻意堆砌，要让时态使用符合真实对话场景
+3. 对话要实用，能帮助用户在实际场景中应用
+4. 根据难度水平包含适量的习语、俚语或地道表达（不要过度使用）
+5. 对话要自然流畅，像真实的口语交流，不要像教科书
+6. 可以基于用户的历史记忆和兴趣来设计对话主题
+7. 生成约{target_sentences}句对话，{topic_instruction}
+
+【格式要求】：
+- 每句话一行，用 "A: " 和 "B: " 表示对话双方
+- 只返回英文对话内容，不要中文解释
+- 确保对话连贯，有逻辑性，有真实感
 
 示例格式：
 A: Hi, how are you today?
@@ -666,19 +802,104 @@ A: That's wonderful to hear.
 现在生成对话："""
         
         # 调用AI生成
-        loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None,
-            lambda: chatgpt_streamed(
-                prompt,
-                "你是一个专业的英语教学助手，能够根据用户的水平和兴趣生成个性化的英文对话。",
-                "neutral",
-                []
+        try:
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(
+                None,
+                lambda: chatgpt_streamed(
+                    prompt,
+                    "你是一个专业的英语教学助手，能够根据用户的水平和兴趣生成个性化的英文对话。",
+                    "neutral",
+                    []
+                )
             )
-        )
+        except Exception as e:
+            print(f"Error calling chatgpt_streamed: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
         
         if self.is_error_response(response):
             print(f"Error generating english dialogue: {response}")
             return None
         
-        return response.strip()
+        if not response or not response.strip():
+            print("Error: Empty response from chatgpt_streamed")
+            return None
+        
+        dialogue_text = response.strip()
+        
+        # 解析对话文本，提取每句对话
+        dialogue_lines = []
+        lines = dialogue_text.split('\n')
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith('A: '):
+                text = line[3:].strip()
+                if text:
+                    dialogue_lines.append({"speaker": "A", "text": text})
+            elif line.startswith('B: '):
+                text = line[3:].strip()
+                if text:
+                    dialogue_lines.append({"speaker": "B", "text": text})
+        
+        # 如果没有解析到对话，返回原始文本（兼容旧格式）
+        if not dialogue_lines:
+            print("Warning: No dialogue lines parsed, returning raw text")
+            return dialogue_text
+        
+        # 生成每句对话的音频
+        import uuid
+        from .app import openai_text_to_speech
+        
+        # 创建音频存储目录
+        dialogue_id = str(uuid.uuid4())[:8]
+        current_file_dir = os.path.dirname(os.path.abspath(__file__))
+        project_dir = os.path.dirname(current_file_dir)
+        audio_dir = os.path.join(project_dir, "outputs", "english_dialogue", dialogue_id)
+        
+        try:
+            os.makedirs(audio_dir, exist_ok=True)
+        except Exception as e:
+            print(f"Error creating audio directory: {e}")
+            import traceback
+            traceback.print_exc()
+            # 即使目录创建失败，也继续尝试生成音频
+        
+        # 为每句对话生成音频
+        audio_success_count = 0
+        for i, line in enumerate(dialogue_lines):
+            try:
+                audio_filename = f"{line['speaker']}_{i}.wav"
+                audio_path = os.path.join(audio_dir, audio_filename)
+                
+                # 生成TTS音频
+                await openai_text_to_speech(line['text'], audio_path)
+                
+                # 检查文件是否成功创建
+                if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+                    # 生成音频URL（相对路径，前端可以通过静态文件服务访问）
+                    audio_url = f"/audio/english_dialogue/{dialogue_id}/{audio_filename}"
+                    line['audio_url'] = audio_url
+                    line['audio_path'] = audio_path  # 保存完整路径供后端使用
+                    audio_success_count += 1
+                    print(f"Generated audio for {line['speaker']} line {i}: {audio_url}")
+                else:
+                    print(f"Warning: Audio file not created or empty for line {i}")
+                    line['audio_url'] = None
+            except Exception as e:
+                print(f"Error generating audio for line {i}: {e}")
+                import traceback
+                traceback.print_exc()
+                line['audio_url'] = None  # 如果生成失败，设置为None
+        
+        print(f"Audio generation complete: {audio_success_count}/{len(dialogue_lines)} successful")
+        
+        # 返回包含音频URL的对话数据（即使部分音频生成失败，也返回对话文本）
+        return {
+            "dialogue_text": dialogue_text,
+            "dialogue_lines": dialogue_lines,
+            "dialogue_id": dialogue_id
+        }

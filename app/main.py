@@ -4,6 +4,7 @@ import signal
 import uvicorn
 import asyncio
 from datetime import datetime
+from typing import Dict
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -54,6 +55,31 @@ app = FastAPI()
 # Mount static files and templates
 app.mount("/app/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
+
+# 添加音频文件服务
+@app.get("/audio/{file_path:path}")
+async def serve_audio(file_path: str):
+    """提供音频文件服务"""
+    import os
+    from pathlib import Path
+    
+    # 构建音频文件路径
+    current_file_dir = os.path.dirname(os.path.abspath(__file__))
+    project_dir = os.path.dirname(current_file_dir)
+    audio_path = os.path.join(project_dir, "outputs", file_path)
+    
+    # 检查文件是否存在
+    if os.path.exists(audio_path) and os.path.isfile(audio_path):
+        return FileResponse(
+            audio_path,
+            media_type="audio/wav",
+            headers={"Content-Disposition": f"inline; filename={os.path.basename(audio_path)}"}
+        )
+    else:
+        return JSONResponse(
+            {"status": "error", "message": "Audio file not found"},
+            status_code=404
+        )
 
 app.add_middleware(
     CORSMiddleware,
@@ -856,6 +882,7 @@ async def generate_english_dialogue(request: Request):
         
         data = await request.json()
         dialogue_length = data.get("dialogue_length", "auto")  # short/medium/long/auto
+        difficulty_level = data.get("difficulty_level", None)  # 新增：难度水平，如果为None则使用用户当前水平
         
         memory_system = get_memory_system()
         if not memory_system:
@@ -876,22 +903,38 @@ async def generate_english_dialogue(request: Request):
                 # 获取今天最新的摘要
                 today_summary = today_entries[-1].get("summary", "")
         
-        # 生成英文对话
-        english_dialogue = await memory_system.generate_english_dialogue(today_summary, dialogue_length)
+        # 生成英文对话，传入难度参数
+        english_dialogue_result = await memory_system.generate_english_dialogue(
+            today_summary, 
+            dialogue_length,
+            difficulty_level  # 新增参数
+        )
         
-        if english_dialogue:
+        if english_dialogue_result:
             # 切换到英文学习阶段
             set_learning_stage("english_learning")
             
-            return JSONResponse({
-                "status": "success",
-                "message": "英文对话已生成",
-                "dialogue": english_dialogue
-            })
+            # 处理返回格式：可能是字典（新格式）或字符串（旧格式兼容）
+            if isinstance(english_dialogue_result, dict):
+                return JSONResponse({
+                    "status": "success",
+                    "message": "英文对话已生成",
+                    "dialogue": english_dialogue_result.get("dialogue_text", ""),
+                    "dialogue_lines": english_dialogue_result.get("dialogue_lines", []),
+                    "dialogue_id": english_dialogue_result.get("dialogue_id", "")
+                })
+            else:
+                # 兼容旧格式（纯文本）
+                return JSONResponse({
+                    "status": "success",
+                    "message": "英文对话已生成",
+                    "dialogue": english_dialogue_result
+                })
         else:
+            logger.error("generate_english_dialogue returned None or empty result")
             return JSONResponse({
                 "status": "error",
-                "message": "生成英文对话失败"
+                "message": "生成英文对话失败：AI生成对话时出错，请检查控制台日志获取详细信息"
             }, status_code=500)
             
     except Exception as e:
@@ -961,6 +1004,424 @@ async def update_english_level(request: Request):
             "status": "error",
             "message": f"更新英文水平时出错: {str(e)}"
         }, status_code=500)
+
+# 练习模式相关API
+@app.post("/api/practice/start")
+async def start_practice(request: Request):
+    """开始练习阶段，解析对话卡片并初始化状态"""
+    try:
+        from .shared import get_memory_system
+        from .app import chatgpt_streamed
+        import asyncio
+        
+        data = await request.json()
+        dialogue = data.get("dialogue", "").strip()
+        dialogue_lines_from_card = data.get("dialogue_lines", [])  # 从英语卡片获取的对话行（包含音频URL）
+        dialogue_id_from_card = data.get("dialogue_id", "")  # 从英语卡片获取的对话ID
+        
+        if not dialogue:
+            return JSONResponse({
+                "status": "error",
+                "message": "对话内容不能为空"
+            }, status_code=400)
+        
+        # 如果从卡片获取了对话行数据，直接使用（包含音频URL）
+        # 否则解析对话文本（兼容旧格式）
+        dialogue_lines = []
+        if dialogue_lines_from_card and len(dialogue_lines_from_card) > 0:
+            # 使用卡片提供的对话行数据（包含音频URL）
+            dialogue_lines = dialogue_lines_from_card
+        else:
+            # 解析对话文本（兼容旧格式，没有音频URL）
+            lines = dialogue.split('\n')
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                if line.startswith('A:'):
+                    content = line[2:].strip()
+                    if content:
+                        dialogue_lines.append({"speaker": "A", "text": content, "audio_url": None})
+                elif line.startswith('B:'):
+                    content = line[2:].strip()
+                    if content:
+                        dialogue_lines.append({"speaker": "B", "text": content, "audio_url": None})
+        
+        if not dialogue_lines:
+            return JSONResponse({
+                "status": "error",
+                "message": "无法解析对话内容"
+            }, status_code=400)
+        
+        # 确保对话以A开始
+        if dialogue_lines[0]["speaker"] != "A":
+            return JSONResponse({
+                "status": "error",
+                "message": "对话必须以A（AI）开始"
+            }, status_code=400)
+        
+        # 使用卡片提供的对话ID，或生成新的
+        dialogue_id = dialogue_id_from_card if dialogue_id_from_card else f"practice_{int(datetime.now().timestamp() * 1000)}"
+        
+        # 获取第一句A的台词和对应的B的提示
+        first_a_text = dialogue_lines[0]["text"]
+        first_a_audio_url = dialogue_lines[0].get("audio_url")  # 获取音频URL
+        first_b_text = None
+        if len(dialogue_lines) > 1 and dialogue_lines[1]["speaker"] == "B":
+            first_b_text = dialogue_lines[1]["text"]
+        
+        # 如果有B的台词，提取提示
+        hints = None
+        if first_b_text:
+            try:
+                hints = await extract_hints(first_b_text)
+            except Exception as e:
+                logger.error(f"Error extracting hints: {e}")
+                # 如果提取提示失败，使用空提示，不影响练习开始
+                hints = {
+                    "phrases": [],
+                    "pattern": "",
+                    "words": [],
+                    "grammar": ""
+                }
+        
+        return JSONResponse({
+            "status": "success",
+            "dialogue_id": dialogue_id,
+            "dialogue_lines": dialogue_lines,
+            "current_turn": 0,
+            "a_text": first_a_text,
+            "a_audio_url": first_a_audio_url,  # 返回第一句A的音频URL
+            "b_hints": hints,
+            "total_turns": len([l for l in dialogue_lines if l["speaker"] == "B"])
+        })
+        
+    except Exception as e:
+        logger.error(f"Error starting practice: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"开始练习时出错: {str(e)}"
+        }, status_code=500)
+
+@app.post("/api/practice/respond")
+async def practice_respond(request: Request):
+    """用户回复，验证意思一致性"""
+    try:
+        from .shared import get_memory_system
+        from .app import chatgpt_streamed
+        import asyncio
+        
+        data = await request.json()
+        user_input = data.get("user_input", "").strip()
+        dialogue_lines = data.get("dialogue_lines", [])
+        current_turn = data.get("current_turn", 0)
+        
+        if not user_input:
+            return JSONResponse({
+                "status": "error",
+                "message": "用户输入不能为空"
+            }, status_code=400)
+        
+        # 找到当前轮次对应的B的参考台词
+        b_turn_index = 0
+        for i, line in enumerate(dialogue_lines):
+            if line["speaker"] == "B":
+                if b_turn_index == current_turn:
+                    reference_text = line["text"]
+                    break
+                b_turn_index += 1
+        else:
+            return JSONResponse({
+                "status": "error",
+                "message": "找不到对应的参考台词"
+            }, status_code=400)
+        
+        # 验证意思一致性
+        validation_result = await check_meaning_consistency(user_input, reference_text)
+        
+        # 如果意思一致，获取下一句A的台词
+        next_a_text = None
+        next_a_audio_url = None
+        next_b_hints = None
+        next_turn = current_turn + 1
+        
+        if validation_result.get("result") in ["consistent", "consistent_with_errors"]:
+            # 找到当前B之后的下一个A的台词
+            b_count = 0
+            found_current_b = False
+            
+            for i, line in enumerate(dialogue_lines):
+                if line["speaker"] == "B":
+                    if b_count == current_turn:
+                        found_current_b = True
+                        # 找到当前B，往后找下一个A
+                        for j in range(i + 1, len(dialogue_lines)):
+                            if dialogue_lines[j]["speaker"] == "A":
+                                next_a_text = dialogue_lines[j]["text"]
+                                next_a_audio_url = dialogue_lines[j].get("audio_url")  # 获取下一句A的音频URL
+                                # 如果A后面还有B，提取B的提示
+                                if j + 1 < len(dialogue_lines) and dialogue_lines[j + 1]["speaker"] == "B":
+                                    next_b_hints = await extract_hints(dialogue_lines[j + 1]["text"])
+                                break
+                        break
+                    b_count += 1
+            
+            # 如果找不到下一个A，说明对话已完成
+            is_completed = next_a_text is None
+        else:
+            is_completed = False
+        
+        return JSONResponse({
+            "status": "success",
+            "is_consistent": validation_result.get("result") in ["consistent", "consistent_with_errors"],
+            "validation_result": validation_result,
+            "next_a_text": next_a_text,
+            "next_a_audio_url": next_a_audio_url,  # 返回下一句A的音频URL
+            "next_b_hints": next_b_hints,
+            "next_turn": next_turn if next_a_text else current_turn,
+            "is_completed": is_completed
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in practice respond: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"处理回复时出错: {str(e)}"
+        }, status_code=500)
+
+@app.post("/api/practice/hints")
+async def get_practice_hints(request: Request):
+    """获取提示信息（按需）"""
+    try:
+        from .shared import get_memory_system
+        
+        data = await request.json()
+        reference_text = data.get("reference_text", "").strip()
+        
+        if not reference_text:
+            return JSONResponse({
+                "status": "error",
+                "message": "参考文本不能为空"
+            }, status_code=400)
+        
+        hints = await extract_hints(reference_text)
+        
+        return JSONResponse({
+            "status": "success",
+            "hints": hints
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting hints: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"获取提示时出错: {str(e)}"
+        }, status_code=500)
+
+@app.post("/api/practice/transcribe")
+async def practice_transcribe_audio(
+    audio: UploadFile = File(...)
+):
+    """练习模式下只转录音频，不生成AI回复（避免token浪费）"""
+    try:
+        from .transcription import transcribe_with_openai_api
+        import tempfile
+        import os
+        
+        # 保存临时文件
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as tmp_file:
+            content = await audio.read()
+            tmp_file.write(content)
+            tmp_file_path = tmp_file.name
+        
+        # 转录音频 - 需要将webm转换为wav格式
+        audio_converted = False
+        try:
+            from pydub import AudioSegment
+            # 将webm转换为wav
+            audio_seg = AudioSegment.from_file(tmp_file_path, format="webm")
+            wav_path = tmp_file_path.replace('.webm', '.wav')
+            audio_seg.export(wav_path, format="wav")
+            tmp_file_path = wav_path
+            audio_converted = True
+        except Exception as e:
+            logger.warning(f"Could not convert audio format: {e}")
+            # 如果转换失败，尝试直接使用原文件
+        
+        # 转录音频
+        transcription = None
+        try:
+            transcription = await transcribe_with_openai_api(tmp_file_path, "gpt-4o-mini-transcribe")
+            if not transcription or transcription.strip() == "":
+                raise ValueError("Transcription returned empty result")
+            logger.info(f"Practice transcription successful: {transcription[:50]}...")
+        except Exception as e:
+            logger.error(f"Error during practice transcription: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            # 清理临时文件
+            try:
+                os.unlink(tmp_file_path)
+                if audio_converted and os.path.exists(tmp_file_path.replace('.wav', '.webm')):
+                    os.unlink(tmp_file_path.replace('.wav', '.webm'))
+            except:
+                pass
+            return JSONResponse({
+                "status": "error",
+                "message": f"转录音频失败: {str(e)}"
+            }, status_code=500)
+        
+        # 保存用户音频文件（用于音频气泡显示）
+        audio_url = None
+        try:
+            import uuid
+            current_file_dir = os.path.dirname(os.path.abspath(__file__))
+            project_dir = os.path.dirname(current_file_dir)
+            practice_audio_dir = os.path.join(project_dir, "outputs", "practice")
+            os.makedirs(practice_audio_dir, exist_ok=True)
+            
+            # 生成唯一的音频文件名
+            audio_filename = f"user_{uuid.uuid4().hex[:8]}_{int(datetime.now().timestamp() * 1000)}.wav"
+            saved_audio_path = os.path.join(practice_audio_dir, audio_filename)
+            
+            # 复制音频文件到保存目录
+            shutil.copy2(tmp_file_path, saved_audio_path)
+            
+            # 生成音频URL
+            audio_url = f"/audio/practice/{audio_filename}"
+            logger.info(f"User audio saved: {audio_url}")
+        except Exception as e:
+            logger.error(f"Error saving user audio: {e}")
+            # 即使保存失败，也继续返回转录结果
+        
+        # 清理临时文件
+        try:
+            os.unlink(tmp_file_path)
+            if audio_converted and os.path.exists(tmp_file_path.replace('.wav', '.webm')):
+                os.unlink(tmp_file_path.replace('.wav', '.webm'))
+        except:
+            pass
+        
+        return JSONResponse({
+            "status": "success",
+            "transcription": transcription,
+            "audio_url": audio_url  # 返回音频URL
+        })
+        
+    except Exception as e:
+        logger.error(f"Error transcribing audio for practice: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"转录音频失败: {str(e)}"
+        }, status_code=500)
+
+# 辅助函数
+async def check_meaning_consistency(user_input: str, reference_text: str) -> Dict:
+    """检查用户输入是否与参考文本意思一致（部分一致即可）"""
+    from .app import chatgpt_streamed
+    import asyncio
+    import json
+    
+    prompt = f"""判断以下两个英文句子的意思是否一致。
+
+参考句子：{reference_text}
+用户输入：{user_input}
+
+要求：
+1. 如果意思一致或部分一致（即使表达不同），返回 "consistent"
+2. 如果用户输入明显偏离主题或完全无关（瞎说），返回 "inconsistent"
+3. 如果用户输入为空或几乎没有内容（不说），返回 "inconsistent"
+4. 如果用户输入有明显语法错误但不影响理解，返回 "consistent_with_errors"
+
+注意：只要意思相关，即使表达方式不同，也应该返回 "consistent"。
+
+只返回JSON格式，不要其他说明：
+{{"result": "consistent/inconsistent/consistent_with_errors", "reason": "简要说明原因"}}"""
+    
+    loop = asyncio.get_event_loop()
+    response = await loop.run_in_executor(
+        None,
+        lambda: chatgpt_streamed(
+            prompt,
+            "你是一个专业的英语教学助手，能够判断句子意思的一致性。",
+            "neutral",
+            []
+        )
+    )
+    
+    # 尝试解析JSON
+    try:
+        json_start = response.find('{')
+        json_end = response.rfind('}') + 1
+        if json_start >= 0 and json_end > json_start:
+            json_str = response[json_start:json_end]
+            return json.loads(json_str)
+    except Exception as e:
+        logger.error(f"Error parsing validation result: {e}")
+    
+    # 默认返回一致（如果解析失败，给用户机会）
+    return {"result": "consistent", "reason": "无法判断，默认通过"}
+
+async def extract_hints(reference_text: str) -> Dict:
+    """从参考文本中提取提示信息"""
+    from .app import chatgpt_streamed
+    import asyncio
+    import json
+    
+    prompt = f"""从以下英文句子中提取学习提示：
+
+句子：{reference_text}
+
+要求提取：
+1. 关键词组（key phrases）：2-3个重要词组或短语
+2. 句型结构（sentence pattern）：句子的主要语法结构
+3. 重点词汇（key words）：2-3个重点单词
+4. 语法点（grammar points）：涉及的语法知识（简要说明）
+
+返回JSON格式，不要其他说明：
+{{
+    "phrases": ["词组1", "词组2"],
+    "pattern": "句型结构说明",
+    "words": ["单词1", "单词2"],
+    "grammar": "语法点说明"
+}}"""
+    
+    loop = asyncio.get_event_loop()
+    response = await loop.run_in_executor(
+        None,
+        lambda: chatgpt_streamed(
+            prompt,
+            "你是一个专业的英语教学助手，能够提取句子中的学习要点。",
+            "neutral",
+            []
+        )
+    )
+    
+    # 尝试解析JSON
+    try:
+        json_start = response.find('{')
+        json_end = response.rfind('}') + 1
+        if json_start >= 0 and json_end > json_start:
+            json_str = response[json_start:json_end]
+            return json.loads(json_str)
+    except Exception as e:
+        logger.error(f"Error parsing hints: {e}")
+    
+    # 默认返回空提示
+    return {
+        "phrases": [],
+        "pattern": "",
+        "words": [],
+        "grammar": ""
+    }
 
 
 # 结束对话功能已移除（记忆系统已移除）
