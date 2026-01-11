@@ -1356,8 +1356,312 @@ body {
     display: flex;
     justify-content: center;
     gap: 10px;
+    align-items: center;
+}
+
+.end-practice-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.end-practice-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.end-practice-btn:active {
+    transform: translateY(0);
 }
 
 .action-btn svg {
     flex-shrink: 0;
+}
+
+/* 复习笔记卡片样式 */
+.review-notes-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 248, 255, 0.95) 100%);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 16px 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.review-card-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+.review-card-header h3 {
+    margin: 0;
+    color: #667eea;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.review-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.review-section {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    padding: 16px;
+    border-left: 4px solid #667eea;
+}
+
+.review-section h4 {
+    margin: 0 0 12px 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.vocab-category {
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.grammar-item {
+    margin: 12px 0;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.grammar-item strong {
+    color: #667eea;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.error-usage {
+    color: #e74c3c;
+    margin: 6px 0;
+    padding: 6px 10px;
+    background: rgba(231, 76, 60, 0.1);
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.correct-usage {
+    color: #27ae60;
+    margin: 6px 0;
+    padding: 6px 10px;
+    background: rgba(39, 174, 96, 0.1);
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.explanation {
+    color: #555;
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 6px;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.correction-item {
+    margin: 12px 0;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.error-text {
+    color: #e74c3c;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.correct-text {
+    color: #27ae60;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.correction-explanation {
+    color: #555;
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 6px;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.suggestions-list {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.suggestions-list li {
+    margin: 8px 0;
+    color: #555;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* 场景拓展卡片样式 */
+.expansion-materials-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 240, 245, 0.95) 100%);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 16px 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(250, 112, 154, 0.2);
+}
+
+.expansion-card-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(250, 112, 154, 0.3);
+}
+
+.expansion-card-header h3 {
+    margin: 0;
+    color: #fa709a;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.expansion-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.expansion-section {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    padding: 16px;
+    border-left: 4px solid #fa709a;
+}
+
+.expansion-section h4 {
+    margin: 0 0 12px 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.dialogue-example {
+    margin: 16px 0;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    border: 1px solid rgba(250, 112, 154, 0.2);
+}
+
+.dialogue-scene {
+    font-weight: 600;
+    color: #fa709a;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.dialogue-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dialogue-line {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.dialogue-line.speaker-a {
+    background: rgba(102, 126, 234, 0.1);
+    align-self: flex-start;
+    max-width: 80%;
+}
+
+.dialogue-line.speaker-b {
+    background: rgba(250, 112, 154, 0.1);
+    align-self: flex-end;
+    max-width: 80%;
+}
+
+.speaker-label {
+    font-weight: 600;
+    margin-right: 8px;
+    color: #667eea;
+}
+
+.dialogue-line.speaker-b .speaker-label {
+    color: #fa709a;
+}
+
+.expressions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.expression-item {
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    border: 1px solid rgba(250, 112, 154, 0.2);
+}
+
+.expression-phrase {
+    color: #fa709a;
+    font-size: 15px;
+    margin-bottom: 6px;
+}
+
+.expression-meaning {
+    color: #555;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.expression-example {
+    color: #777;
+    font-size: 13px;
+    font-style: italic;
+    margin-top: 6px;
+    padding: 6px 10px;
+    background: rgba(250, 112, 154, 0.05);
+    border-radius: 6px;
+}
+
+/* 生成按钮样式 */
+.practice-complete-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.generate-review-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.generate-review-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }

@@ -1005,6 +1005,9 @@ async def update_english_level(request: Request):
             "message": f"更新英文水平时出错: {str(e)}"
         }, status_code=500)
 
+# 练习模式会话存储（临时存储，练习完成后保存到文件）
+practice_sessions = {}  # {session_id: {user_inputs: [], dialogue_lines: [], dialogue_topic: ""}}
+
 # 练习模式相关API
 @app.post("/api/practice/start")
 async def start_practice(request: Request):
@@ -1013,6 +1016,7 @@ async def start_practice(request: Request):
         from .shared import get_memory_system
         from .app import chatgpt_streamed
         import asyncio
+        import uuid
         
         data = await request.json()
         dialogue = data.get("dialogue", "").strip()
@@ -1063,6 +1067,47 @@ async def start_practice(request: Request):
         # 使用卡片提供的对话ID，或生成新的
         dialogue_id = dialogue_id_from_card if dialogue_id_from_card else f"practice_{int(datetime.now().timestamp() * 1000)}"
         
+        # 生成会话ID用于跟踪练习会话
+        session_id = str(uuid.uuid4())
+        
+        # 从对话内容中智能提取主题（使用AI分析）
+        all_dialogue_text = " ".join([line.get("text", "") for line in dialogue_lines])
+        dialogue_topic = "日常对话"  # 默认主题
+        
+        try:
+            topic_prompt = f"""分析以下英文对话，提取出主要讨论的主题（1-2个中文关键词，如：电影、篮球、学习、工作等）：
+
+{all_dialogue_text}
+
+只返回主题关键词，用中文，用逗号分隔，例如：电影,篮球 或 学习,工作。不要其他说明。"""
+            
+            loop = asyncio.get_event_loop()
+            topic_response = await loop.run_in_executor(
+                None,
+                lambda: chatgpt_streamed(
+                    topic_prompt,
+                    "你是一个专业的英语教学助手，能够准确分析对话主题。只返回主题关键词，不要其他说明。",
+                    "neutral",
+                    []
+                )
+            )
+            # 提取主题关键词
+            if topic_response:
+                topics = [t.strip() for t in topic_response.strip().split(",") if t.strip()]
+                dialogue_topic = ", ".join(topics[:2]) if topics else "日常对话"
+        except Exception as e:
+            logger.error(f"Error extracting dialogue topic: {e}")
+            dialogue_topic = "日常对话"  # 失败时使用默认值
+        
+        # 初始化练习会话记录
+        practice_sessions[session_id] = {
+            "dialogue_id": dialogue_id,
+            "dialogue_lines": dialogue_lines,
+            "user_inputs": [],  # 存储对话上下文（ai_said, user_said）
+            "dialogue_topic": dialogue_topic,
+            "start_time": datetime.now().isoformat()
+        }
+        
         # 获取第一句A的台词和对应的B的提示
         first_a_text = dialogue_lines[0]["text"]
         first_a_audio_url = dialogue_lines[0].get("audio_url")  # 获取音频URL
@@ -1087,6 +1132,7 @@ async def start_practice(request: Request):
         
         return JSONResponse({
             "status": "success",
+            "session_id": session_id,  # 返回会话ID，前端需要保存
             "dialogue_id": dialogue_id,
             "dialogue_lines": dialogue_lines,
             "current_turn": 0,
@@ -1117,6 +1163,7 @@ async def practice_respond(request: Request):
         user_input = data.get("user_input", "").strip()
         dialogue_lines = data.get("dialogue_lines", [])
         current_turn = data.get("current_turn", 0)
+        session_id = data.get("session_id", "")  # 获取会话ID
         
         if not user_input:
             return JSONResponse({
@@ -1126,6 +1173,7 @@ async def practice_respond(request: Request):
         
         # 找到当前轮次对应的B的参考台词
         b_turn_index = 0
+        reference_text = None
         for i, line in enumerate(dialogue_lines):
             if line["speaker"] == "B":
                 if b_turn_index == current_turn:
@@ -1138,6 +1186,33 @@ async def practice_respond(request: Request):
                 "message": "找不到对应的参考台词"
             }, status_code=400)
         
+        # 记录对话上下文（AI说的和用户说的）到会话数据中
+        if session_id and session_id in practice_sessions:
+            # 找到当前轮次对应的A的台词（AI说的，作为上下文）
+            ai_said = None
+            for i, line in enumerate(dialogue_lines):
+                if line["speaker"] == "A":
+                    # 检查这个A后面是否有对应的B（当前轮次）
+                    b_count = 0
+                    for j in range(i + 1, len(dialogue_lines)):
+                        if dialogue_lines[j]["speaker"] == "B":
+                            if b_count == current_turn:
+                                ai_said = line["text"]
+                                break
+                            b_count += 1
+                        elif dialogue_lines[j]["speaker"] == "A":
+                            # 如果遇到下一个A，说明当前A不是我们要找的
+                            break
+                    if ai_said:
+                        break
+            
+            practice_sessions[session_id]["user_inputs"].append({
+                "turn": current_turn,
+                "ai_said": ai_said or "",  # AI说的话（上下文）
+                "user_said": user_input,    # 用户说的话
+                "timestamp": datetime.now().isoformat()
+            })
+        
         # 验证意思一致性
         validation_result = await check_meaning_consistency(user_input, reference_text)
         
@@ -1146,6 +1221,7 @@ async def practice_respond(request: Request):
         next_a_audio_url = None
         next_b_hints = None
         next_turn = current_turn + 1
+        is_completed = False  # 初始化 is_completed
         
         if validation_result.get("result") in ["consistent", "consistent_with_errors"]:
             # 找到当前B之后的下一个A的台词
@@ -1164,12 +1240,17 @@ async def practice_respond(request: Request):
                                 # 如果A后面还有B，提取B的提示
                                 if j + 1 < len(dialogue_lines) and dialogue_lines[j + 1]["speaker"] == "B":
                                     next_b_hints = await extract_hints(dialogue_lines[j + 1]["text"])
+                                    is_completed = False  # 还有下一轮，未完成
+                                else:
+                                    # A后面没有B了，说明这是最后一个A，练习应该完成
+                                    is_completed = True
                                 break
                         break
                     b_count += 1
             
             # 如果找不到下一个A，说明对话已完成
-            is_completed = next_a_text is None
+            if next_a_text is None:
+                is_completed = True
         else:
             is_completed = False
         
@@ -1181,7 +1262,8 @@ async def practice_respond(request: Request):
             "next_a_audio_url": next_a_audio_url,  # 返回下一句A的音频URL
             "next_b_hints": next_b_hints,
             "next_turn": next_turn if next_a_text else current_turn,
-            "is_completed": is_completed
+            "is_completed": is_completed,
+            "session_id": session_id  # 返回会话ID，前端需要保存
         })
         
     except Exception as e:
@@ -1191,6 +1273,91 @@ async def practice_respond(request: Request):
         return JSONResponse({
             "status": "error",
             "message": f"处理回复时出错: {str(e)}"
+        }, status_code=500)
+
+@app.post("/api/practice/end")
+async def end_practice(request: Request):
+    """结束练习，返回完整的练习会话数据"""
+    try:
+        
+        data = await request.json()
+        session_id = data.get("session_id", "")
+        
+        if not session_id:
+            return JSONResponse({
+                "status": "error",
+                "message": "会话ID不能为空"
+            }, status_code=400)
+        
+        if session_id not in practice_sessions:
+            return JSONResponse({
+                "status": "error",
+                "message": "找不到对应的练习会话"
+            }, status_code=404)
+        
+        # 获取会话数据
+        session_data = practice_sessions[session_id].copy()
+        session_data["end_time"] = datetime.now().isoformat()
+        
+        # 从对话内容和用户实际练习内容中智能提取主题
+        dialogue_topic = session_data.get("dialogue_topic", "日常对话")
+        
+        # 如果之前没有提取主题，或者需要重新确认，从实际对话内容中提取
+        all_text = " ".join([line.get("text", "") for line in session_data.get("dialogue_lines", [])])
+        user_practice_text = " ".join([
+            item.get("ai_said", "") + " " + item.get("user_said", "") 
+            for item in session_data.get("user_inputs", [])
+        ])
+        
+        # 结合对话内容和用户实际练习内容来提取主题
+        combined_text = f"{all_text} {user_practice_text}".strip()
+        
+        if combined_text:
+            try:
+                from .app import chatgpt_streamed
+                topic_prompt = f"""分析以下英文对话和用户练习内容，提取出主要讨论的主题（1-2个中文关键词）：
+
+对话内容：
+{all_text}
+
+用户实际练习内容：
+{user_practice_text}
+
+只返回主题关键词，用中文，用逗号分隔，例如：电影,篮球。不要其他说明。"""
+                
+                loop = asyncio.get_event_loop()
+                topic_response = await loop.run_in_executor(
+                    None,
+                    lambda: chatgpt_streamed(
+                        topic_prompt,
+                        "你是一个专业的英语教学助手，能够准确分析对话主题。只返回主题关键词，不要其他说明。",
+                        "neutral",
+                        []
+                    )
+                )
+                if topic_response:
+                    topics = [t.strip() for t in topic_response.strip().split(",") if t.strip()]
+                    dialogue_topic = ", ".join(topics[:2]) if topics else dialogue_topic
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Error extracting dialogue topic in end_practice: {e}")
+                # 如果AI提取失败，保持原有主题
+        
+        session_data["dialogue_topic"] = dialogue_topic
+        
+        return JSONResponse({
+            "status": "success",
+            "session_data": session_data
+        })
+        
+    except Exception as e:
+        logger.error(f"Error ending practice: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"结束练习时出错: {str(e)}"
         }, status_code=500)
 
 @app.post("/api/practice/hints")
@@ -1222,6 +1389,320 @@ async def get_practice_hints(request: Request):
         return JSONResponse({
             "status": "error",
             "message": f"获取提示时出错: {str(e)}"
+        }, status_code=500)
+
+@app.post("/api/practice/generate-review")
+async def generate_review_notes(request: Request):
+    """生成复习笔记"""
+    try:
+        from .shared import get_memory_system
+        from .app import chatgpt_streamed
+        import asyncio
+        import json
+        
+        data = await request.json()
+        user_inputs = data.get("user_inputs", [])  # [{turn, ai_said, user_said}, ...]
+        dialogue_topic = data.get("dialogue_topic", "日常对话")
+        
+        if not user_inputs:
+            return JSONResponse({
+                "status": "error",
+                "message": "用户输入数据不能为空"
+            }, status_code=400)
+        
+        # 构建对话上下文的文本（AI说的和用户说的）
+        user_inputs_text = "\n".join([
+            f"轮次 {item['turn']}:\n  AI说: {item.get('ai_said', '')}\n  用户说: {item.get('user_said', '')}"
+            for item in user_inputs
+        ])
+        
+        # 构建生成复习笔记的prompt
+        prompt = f"""基于以下练习会话数据，生成个性化的复习笔记。
+
+对话主题：{dialogue_topic}
+
+用户输入和参考台词：
+{user_inputs_text}
+
+请生成包含以下内容的复习笔记（JSON格式）：
+{{
+  "vocabulary": {{
+    "key_words": ["重点词汇1", "重点词汇2", ...],
+    "new_words": ["新词汇1", "新词汇2", ...],
+    "difficult_words": ["易错词汇1", "易错词汇2", ...]
+  }},
+  "grammar": [
+    {{
+      "point": "语法点名称",
+      "user_usage": "用户使用的语法（如果有错误）",
+      "correct_usage": "正确用法",
+      "explanation": "解释说明"
+    }},
+    ...
+  ],
+  "corrections": [
+    {{
+      "user_said": "用户说的内容",
+      "correct": "正确表达",
+      "explanation": "错误原因和纠正说明"
+    }},
+    ...
+  ],
+  "suggestions": [
+    "针对性的学习建议1",
+    "针对性的学习建议2",
+    ...
+  ]
+}}
+
+要求：
+1. 词汇部分要包含用户在练习中使用的重要词汇、新出现的词汇、容易出错的词汇
+2. 语法点要分析用户使用的语法，指出错误（如果有）并提供正确用法
+3. 错误纠正要对比用户说的内容和参考台词，指出差异和正确表达
+4. 改进建议要针对用户的具体表现给出学习建议
+5. 只返回JSON格式，不要其他文字说明
+"""
+        
+        # 调用AI生成
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: chatgpt_streamed(
+                prompt,
+                "你是一个专业的英语教学助手，能够分析学生的练习表现并生成个性化的复习笔记。",
+                "neutral",
+                []
+            )
+        )
+        
+        if not response or not response.strip():
+            return JSONResponse({
+                "status": "error",
+                "message": "AI生成失败，返回空响应"
+            }, status_code=500)
+        
+        # 尝试解析JSON响应
+        try:
+            # 提取JSON部分
+            response_text = response.strip()
+            json_start = response_text.find('{')
+            json_end = response_text.rfind('}') + 1
+            
+            if json_start >= 0 and json_end > json_start:
+                json_str = response_text[json_start:json_end]
+                review_notes = json.loads(json_str)
+            else:
+                # 如果没有找到JSON，返回错误
+                logger.error(f"Failed to parse review notes JSON: {response_text[:200]}")
+                return JSONResponse({
+                    "status": "error",
+                    "message": "无法解析AI返回的复习笔记格式"
+                }, status_code=500)
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decode error: {e}, response: {response_text[:200]}")
+            return JSONResponse({
+                "status": "error",
+                "message": f"解析复习笔记JSON失败: {str(e)}"
+            }, status_code=500)
+        
+        return JSONResponse({
+            "status": "success",
+            "review_notes": review_notes
+        })
+        
+    except Exception as e:
+        logger.error(f"Error generating review notes: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"生成复习笔记时出错: {str(e)}"
+        }, status_code=500)
+
+@app.post("/api/practice/generate-expansion")
+async def generate_expansion_materials(request: Request):
+    """生成场景拓展资料"""
+    try:
+        from .shared import get_memory_system
+        from .app import chatgpt_streamed
+        import asyncio
+        import json
+        
+        data = await request.json()
+        dialogue_topic = data.get("dialogue_topic", "日常对话")
+        user_inputs = data.get("user_inputs", [])  # 获取用户实际练习内容
+        user_level = data.get("user_level", "beginner")  # 可选：用户水平
+        
+        # 基于用户实际练习内容提取主题
+        actual_practice_topics = []
+        if user_inputs:
+            # 从用户输入中提取实际练习的主题
+            user_text = " ".join([
+                item.get("ai_said", "") + " " + item.get("user_said", "") 
+                for item in user_inputs
+            ])
+            
+            if user_text.strip():
+                try:
+                    topic_prompt = f"""分析以下英语练习对话，提取出主要讨论的主题（1-3个中文关键词）：
+
+{user_text}
+
+只返回主题关键词，用中文，用逗号分隔，例如：电影,篮球,娱乐。不要其他说明。"""
+                    
+                    loop = asyncio.get_event_loop()
+                    topic_response = await loop.run_in_executor(
+                        None,
+                        lambda: chatgpt_streamed(
+                            topic_prompt,
+                            "你是一个专业的英语教学助手，能够分析对话主题。只返回主题关键词，不要其他说明。",
+                            "neutral",
+                            []
+                        )
+                    )
+                    if topic_response:
+                        actual_practice_topics = [t.strip() for t in topic_response.strip().split(",") if t.strip()]
+                except Exception as e:
+                    logger.error(f"Error extracting practice topics: {e}")
+        
+        # 使用实际练习主题，如果没有则使用dialogue_topic
+        actual_topic = ", ".join(actual_practice_topics) if actual_practice_topics else dialogue_topic
+        
+        # 构建生成场景拓展资料的prompt
+        prompt = f"""基于以下实际练习内容，生成场景拓展资料。
+
+实际练习主题：{actual_topic}
+原始对话主题：{dialogue_topic}
+
+用户实际练习内容：
+{chr(10).join([f"- AI: {item.get('ai_said', '')}{chr(10)}  用户: {item.get('user_said', '')}" for item in user_inputs[:5]]) if user_inputs else "无"}
+
+用户水平：{user_level}
+
+请生成场景拓展资料（JSON格式）：
+{{
+  "dialogues": [
+    {{
+      "scene": "场景名称",
+      "dialogue": [
+        {{"speaker": "A", "text": "..."}},
+        {{"speaker": "B", "text": "..."}},
+        ...
+      ]
+    }},
+    ...
+  ],
+  "expressions": [
+    {{
+      "phrase": "常用短语或句型",
+      "meaning": "中文意思",
+      "example": "使用示例"
+    }},
+    ...
+  ]
+}}
+
+要求：
+1. 场景拓展必须与用户实际练习的主题相关（{actual_topic}），而不是原始对话主题
+2. 对话示例：生成3-5个与用户实际练习主题相关的不同场景对话（每个对话包含A和B的对话，约4-6句）
+3. 常用表达：提供该场景下的常用短语、句型，每个表达要有中文意思和使用示例
+4. 对话要自然流畅，符合真实场景
+5. 表达要实用，能帮助用户在实际场景中应用
+6. 只返回JSON格式，不要其他文字说明
+"""
+        
+        # 调用AI生成
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: chatgpt_streamed(
+                prompt,
+                "你是一个专业的英语教学助手，能够生成场景相关的对话示例和常用表达。",
+                "neutral",
+                []
+            )
+        )
+        
+        if not response or not response.strip():
+            return JSONResponse({
+                "status": "error",
+                "message": "AI生成失败，返回空响应"
+            }, status_code=500)
+        
+        # 尝试解析JSON响应
+        try:
+            # 提取JSON部分
+            response_text = response.strip()
+            json_start = response_text.find('{')
+            json_end = response_text.rfind('}') + 1
+            
+            if json_start >= 0 and json_end > json_start:
+                json_str = response_text[json_start:json_end]
+                expansion_materials = json.loads(json_str)
+            else:
+                # 如果没有找到JSON，返回错误
+                logger.error(f"Failed to parse expansion materials JSON: {response_text[:200]}")
+                return JSONResponse({
+                    "status": "error",
+                    "message": "无法解析AI返回的场景拓展资料格式"
+                }, status_code=500)
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decode error: {e}, response: {response_text[:200]}")
+            return JSONResponse({
+                "status": "error",
+                "message": f"解析场景拓展资料JSON失败: {str(e)}"
+            }, status_code=500)
+        
+        return JSONResponse({
+            "status": "success",
+            "expansion_materials": expansion_materials
+        })
+        
+    except Exception as e:
+        logger.error(f"Error generating expansion materials: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"生成场景拓展资料时出错: {str(e)}"
+        }, status_code=500)
+
+@app.post("/api/practice/save-memory")
+async def save_practice_memory(request: Request):
+    """保存练习记忆到文件"""
+    try:
+        from .shared import get_memory_system
+        
+        data = await request.json()
+        memory_system = get_memory_system()
+        
+        if not memory_system:
+            return JSONResponse({
+                "status": "error",
+                "message": "记忆系统未初始化"
+            }, status_code=500)
+        
+        # 保存练习记忆
+        success = memory_system.save_practice_memory(data)
+        
+        if success:
+            return JSONResponse({
+                "status": "success",
+                "message": "练习记忆已保存"
+            })
+        else:
+            return JSONResponse({
+                "status": "error",
+                "message": "保存练习记忆失败"
+            }, status_code=500)
+            
+    except Exception as e:
+        logger.error(f"Error saving practice memory: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"保存练习记忆时出错: {str(e)}"
         }, status_code=500)
 
 @app.post("/api/practice/transcribe")

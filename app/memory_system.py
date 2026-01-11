@@ -9,6 +9,19 @@ load_dotenv()
 
 # 英语水平配置
 ENGLISH_LEVELS = {
+    "minimal": {
+        "name": "极简",
+        "description": "极简级，最简单的日常用语，适合2句话对话",
+        "difficulty": {
+            "vocabulary": "最基础词汇（500词以内），如 hello, thank you, yes, no, how are you",
+            "grammar": "仅现在时，最简单的陈述句和疑问句",
+            "tenses": ["present simple"],
+            "idioms": False,
+            "slang": False,
+            "sentence_length": "3-6词",
+            "complexity": "最简单的短句，主谓结构"
+        }
+    },
     "beginner": {
         "name": "初级（A1）",
         "description": "入门级，基础词汇和简单句型",
@@ -549,7 +562,7 @@ class DiaryMemorySystem:
     
     def update_english_level(self, level: str, description: str = ""):
         """更新用户英文水平"""
-        valid_levels = list(ENGLISH_LEVELS.keys())
+        valid_levels = ["minimal", "beginner", "elementary", "pre_intermediate", "intermediate", "upper_intermediate", "advanced"]
         if level not in valid_levels:
             print(f"Invalid english level: {level}, must be one of {valid_levels}")
             return
@@ -724,16 +737,20 @@ class DiaryMemorySystem:
         
         # 对话长度映射（扩展到所有水平）
         DIALOGUE_LENGTH_MAP = {
+            "mini": {
+                "minimal": 2, "beginner": 2, "elementary": 2, "pre_intermediate": 2,
+                "intermediate": 2, "upper_intermediate": 2, "advanced": 2
+            },
             "short": {
-                "beginner": 8, "elementary": 10, "pre_intermediate": 10, 
+                "minimal": 4, "beginner": 8, "elementary": 10, "pre_intermediate": 10, 
                 "intermediate": 12, "upper_intermediate": 12, "advanced": 15
             },
             "medium": {
-                "beginner": 12, "elementary": 15, "pre_intermediate": 15,
+                "minimal": 6, "beginner": 12, "elementary": 15, "pre_intermediate": 15,
                 "intermediate": 18, "upper_intermediate": 18, "advanced": 20
             },
             "long": {
-                "beginner": 15, "elementary": 18, "pre_intermediate": 18,
+                "minimal": 8, "beginner": 15, "elementary": 18, "pre_intermediate": 18,
                 "intermediate": 22, "upper_intermediate": 22, "advanced": 25
             }
         }
@@ -742,13 +759,62 @@ class DiaryMemorySystem:
         user_profile = self.get_user_profile_context()
         memory_context = self.get_memory_context()
         
+        # 获取练习记忆（最近的10条），只使用有复习笔记的记录
+        practice_memories = self.get_practice_memories(limit=10)
+        # 过滤掉没有复习笔记的记录
+        practice_memories_with_review = [m for m in practice_memories if m.get("review_notes")]
+        practice_memories_context = ""
+        if practice_memories_with_review:
+            practice_memories_context = "\n\n【历史练习记忆】（用于参考，生成更个性化的对话）：\n"
+            for memory in practice_memories_with_review:
+                topic = memory.get("dialogue_topic", "未知主题")
+                date = memory.get("date", "")
+                review_notes = memory.get("review_notes", {})
+                
+                # 提取词汇信息
+                vocabulary = review_notes.get("vocabulary", {})
+                difficult_words = vocabulary.get("difficult_words", [])
+                key_words = vocabulary.get("key_words", [])
+                
+                # 提取语法点
+                grammar_points = review_notes.get("grammar", [])
+                grammar_summary = []
+                for g in grammar_points[:3]:  # 只取前3个语法点
+                    grammar_summary.append(g.get("point", ""))
+                
+                # 提取错误纠正
+                corrections = review_notes.get("corrections", [])
+                corrections_summary = []
+                for c in corrections[:2]:  # 只取前2个错误
+                    corrections_summary.append(c.get("user_said", ""))
+                
+                # 提取学习建议
+                suggestions = review_notes.get("suggestions", [])
+                
+                # 构建详细信息
+                memory_info = f"- {date} {topic}主题练习\n"
+                if difficult_words:
+                    memory_info += f"  易错词汇：{', '.join(difficult_words[:5])}\n"
+                if key_words:
+                    memory_info += f"  重点词汇：{', '.join(key_words[:5])}\n"
+                if grammar_summary:
+                    memory_info += f"  语法要点：{', '.join(grammar_summary)}\n"
+                if corrections_summary:
+                    memory_info += f"  常见错误：{', '.join(corrections_summary)}\n"
+                if suggestions:
+                    memory_info += f"  学习建议：{suggestions[0] if suggestions else ''}\n"
+                
+                practice_memories_context += memory_info
+        
         # 获取用户当前水平
         user_level = self.user_profile.get("english_level", "beginner")
         
         # 确定使用的难度水平
         target_level = difficulty_level if difficulty_level else user_level
         
-        # 获取该水平的配置
+        # 获取该水平的配置（如果不存在，默认使用beginner）
+        if target_level not in ENGLISH_LEVELS:
+            target_level = "beginner"
         level_config = ENGLISH_LEVELS.get(target_level, ENGLISH_LEVELS["beginner"])
         
         # 生成难度要求说明
@@ -773,6 +839,7 @@ class DiaryMemorySystem:
 
 今天的中文对话摘要：
 {today_chinese_summary if today_chinese_summary else "无（将基于历史记忆生成）"}
+{practice_memories_context}
 
 目标难度水平：{level_config['name']} - {level_config['description']}
 
@@ -786,7 +853,7 @@ class DiaryMemorySystem:
 4. 根据难度水平包含适量的习语、俚语或地道表达（不要过度使用）
 5. 对话要自然流畅，像真实的口语交流，不要像教科书
 6. 可以基于用户的历史记忆和兴趣来设计对话主题
-7. 生成约{target_sentences}句对话，{topic_instruction}
+7. {"生成严格2句对话（A和B各一句），" if target_sentences == 2 else f"生成严格{target_sentences}句对话（严格限制，不要超过这个数量），"}{topic_instruction}
 
 【格式要求】：
 - 每句话一行，用 "A: " 和 "B: " 表示对话双方
@@ -903,3 +970,85 @@ A: That's wonderful to hear.
             "dialogue_lines": dialogue_lines,
             "dialogue_id": dialogue_id
         }
+    
+    def save_practice_memory(self, practice_data: Dict) -> bool:
+        """保存练习记忆到文件（创建新记录）
+        
+        Args:
+            practice_data: 练习数据字典，包含：
+                - id: 练习ID（必需）
+                - date: 日期
+                - timestamp: 时间戳
+                - dialogue_topic: 对话主题
+                - review_notes: 复习笔记
+                - expansion_materials: 场景拓展资料
+        
+        Returns:
+            bool: 是否保存成功
+        """
+        try:
+            practice_memories_file = os.path.join(str(self.diary_file.parent), "practice_memories.json")
+            practice_id = practice_data.get("id")
+            
+            if not practice_id:
+                print("Error: practice_id is required")
+                return False
+            
+            # 读取现有数据
+            if os.path.exists(practice_memories_file):
+                with open(practice_memories_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+            else:
+                data = {"practices": []}
+            
+            practices = data.get("practices", [])
+            
+            # 添加新的练习记忆
+            practices.append(practice_data)
+            print(f"Practice memory created: {practice_id}")
+            
+            data["practices"] = practices
+            
+            # 保存到文件
+            with open(practice_memories_file, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            
+            return True
+            
+        except Exception as e:
+            print(f"Error saving practice memory: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+    
+    def get_practice_memories(self, limit: int = 10) -> List[Dict]:
+        """获取最近的练习记忆
+        
+        Args:
+            limit: 返回的记录数量限制
+        
+        Returns:
+            List[Dict]: 练习记忆列表，按时间倒序
+        """
+        try:
+            practice_memories_file = os.path.join(str(self.diary_file.parent), "practice_memories.json")
+            
+            if not os.path.exists(practice_memories_file):
+                return []
+            
+            with open(practice_memories_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            practices = data.get("practices", [])
+            
+            # 按时间戳排序（最新的在前）
+            practices.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+            
+            # 返回最近的limit条记录
+            return practices[:limit]
+            
+        except Exception as e:
+            print(f"Error loading practice memories: {e}")
+            import traceback
+            traceback.print_exc()
+            return []

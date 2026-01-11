@@ -650,6 +650,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 <div style="margin-bottom: 24px;">
                     <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">对话长度：</label>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="option-btn" data-type="length" data-value="mini" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">极短（2句）</button>
                         <button class="option-btn" data-type="length" data-value="short" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">短（8-12句）</button>
                         <button class="option-btn" data-type="length" data-value="medium" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">中（12-18句）</button>
                         <button class="option-btn" data-type="length" data-value="long" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">长（18-25句）</button>
@@ -659,6 +660,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 <div style="margin-bottom: 24px;">
                     <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">难度水平：</label>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="option-btn" data-type="difficulty" data-value="minimal" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">极简（适合2句）</button>
                         <button class="option-btn" data-type="difficulty" data-value="beginner" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">初级（A1）</button>
                         <button class="option-btn" data-type="difficulty" data-value="elementary" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">基础（A2）</button>
                         <button class="option-btn" data-type="difficulty" data-value="pre_intermediate" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">准中级（A2-B1）</button>
@@ -1145,12 +1147,14 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // 练习模式状态
     let practiceState = {
+        sessionId: null,  // 会话ID
         dialogueId: null,
         dialogueLines: [],
         currentTurn: 0,
         isActive: false,
         currentHints: null,
-        totalTurns: 0
+        totalTurns: 0,
+        userInputs: []  // 收集用户输入：[{turn, user_said, reference, timestamp}, ...]
     };
     
     // 开始练习模式
@@ -1207,12 +1211,15 @@ document.addEventListener("DOMContentLoaded", function() {
             if (result.status === 'success') {
                 // 初始化练习状态
                 practiceState = {
+                    sessionId: result.session_id,  // 保存会话ID
                     dialogueId: result.dialogue_id,
                     dialogueLines: result.dialogue_lines,
                     currentTurn: 0,
                     isActive: true,
                     currentHints: result.b_hints,
-                    totalTurns: result.total_turns
+                    totalTurns: result.total_turns,
+                    userInputs: [],  // 初始化用户输入列表
+                    sessionData: null  // 完整的会话数据
                 };
                 
                 // 折叠并禁用英语卡片
@@ -1289,6 +1296,18 @@ document.addEventListener("DOMContentLoaded", function() {
             </div>
             <div class="practice-input-area">
                 <button id="toggle-hints-btn" class="hint-toggle-btn">显示提示</button>
+                <button id="end-practice-btn" class="end-practice-btn" style="
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    margin-left: 10px;
+                    transition: all 0.3s ease;
+                ">结束练习</button>
             </div>
         `;
         
@@ -1307,6 +1326,14 @@ document.addEventListener("DOMContentLoaded", function() {
         // 如果有提示，填充提示内容
         if (hints) {
             fillHintsContent(hints);
+        }
+        
+        // 绑定结束练习按钮事件
+        const endPracticeBtn = practiceUI.querySelector('#end-practice-btn');
+        if (endPracticeBtn) {
+            endPracticeBtn.addEventListener('click', async () => {
+                await endPracticeManually();
+            });
         }
         
         // 绑定事件 - 统一的切换按钮
@@ -1488,6 +1515,381 @@ document.addEventListener("DOMContentLoaded", function() {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
     
+    // 手动结束练习
+    async function endPracticeManually() {
+        if (!practiceState.sessionId) {
+            showError('练习会话不可用');
+            return;
+        }
+        
+        // 检查用户是否至少说了一句话
+        if (!practiceState.userInputs || practiceState.userInputs.length === 0) {
+            showError('你还没有说任何话，无法生成复习资料。请至少完成一轮对话后再结束练习。');
+            return;
+        }
+        
+        // 确认对话框
+        const confirmed = confirm('确定要结束练习并生成复习资料吗？');
+        if (!confirmed) {
+            return;
+        }
+        
+        // 结束练习会话
+        await endPracticeSession();
+    }
+    
+    // 结束练习会话，获取完整数据
+    async function endPracticeSession() {
+        if (!practiceState.sessionId) {
+            console.error('No session ID available');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/practice/end', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    session_id: practiceState.sessionId
+                })
+            });
+            
+            const result = await response.json();
+            if (result.status === 'success') {
+                // 保存会话数据到practiceState
+                practiceState.sessionData = result.session_data;
+                
+                // 标记练习已结束
+                practiceState.isActive = false;
+                
+                // 显示完成消息
+                showSuccess('练习已结束！');
+                addAIMessage('练习已结束，你可以生成复习资料了。');
+                
+                // 隐藏练习UI
+                const practiceUI = document.getElementById('practice-mode-ui');
+                if (practiceUI) {
+                    practiceUI.style.opacity = '0.7';
+                }
+                
+                // 恢复英语卡片
+                endPracticeMode();
+                
+                // 显示生成复习笔记按钮
+                showGenerateReviewButton();
+            } else {
+                console.error('Failed to end practice session:', result.message);
+                showError('结束练习失败：' + (result.message || '未知错误'));
+            }
+        } catch (error) {
+            console.error('Error ending practice session:', error);
+            showError('结束练习失败：' + error.message);
+        }
+    }
+    
+    // 显示生成复习笔记按钮
+    function showGenerateReviewButton() {
+        const practiceUI = document.getElementById('practice-mode-ui');
+        if (!practiceUI) return;
+        
+        // 检查是否已经添加了按钮
+        if (practiceUI.querySelector('.generate-review-btn')) {
+            return;
+        }
+        
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'practice-complete-actions';
+        buttonContainer.innerHTML = `
+            <button class="generate-review-btn" style="
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                margin-top: 16px;
+                transition: all 0.3s ease;
+            ">
+                📝 生成复习笔记和场景拓展
+            </button>
+        `;
+        
+        const practiceInputArea = practiceUI.querySelector('.practice-input-area');
+        if (practiceInputArea) {
+            practiceInputArea.appendChild(buttonContainer);
+        } else {
+            practiceUI.appendChild(buttonContainer);
+        }
+        
+        // 绑定点击事件
+        const generateBtn = buttonContainer.querySelector('.generate-review-btn');
+        generateBtn.addEventListener('click', () => {
+            generateReviewNotes();
+        });
+    }
+    
+    // 生成复习笔记和场景拓展
+    async function generateReviewNotes() {
+        if (!practiceState.sessionData) {
+            showError('练习会话数据不可用');
+            return;
+        }
+        
+        const generateBtn = document.querySelector('.generate-review-btn');
+        if (generateBtn) {
+            generateBtn.disabled = true;
+            generateBtn.textContent = '正在生成...';
+        }
+        
+        try {
+            const sessionData = practiceState.sessionData;
+            
+            // 1. 生成复习笔记
+            const reviewResponse = await fetch('/api/practice/generate-review', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_inputs: sessionData.user_inputs,
+                    dialogue_topic: sessionData.dialogue_topic
+                })
+            });
+            
+            const reviewResult = await reviewResponse.json();
+            
+            // 2. 生成场景拓展资料
+            const expansionResponse = await fetch('/api/practice/generate-expansion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    dialogue_topic: sessionData.dialogue_topic,
+                    user_inputs: sessionData.user_inputs,  // 传递用户实际练习内容
+                    user_level: 'beginner'  // 可以从用户配置获取
+                })
+            });
+            
+            const expansionResult = await expansionResponse.json();
+            
+            if (reviewResult.status === 'success' && expansionResult.status === 'success') {
+                // 3. 保存练习记忆
+                await savePracticeMemory(reviewResult.review_notes, expansionResult.expansion_materials);
+                
+                // 4. 显示复习笔记和场景拓展
+                displayReviewNotes(reviewResult.review_notes);
+                displayExpansionMaterials(expansionResult.expansion_materials);
+                
+                showSuccess('复习笔记和场景拓展已生成！');
+            } else {
+                showError('生成失败：' + (reviewResult.message || expansionResult.message || '未知错误'));
+            }
+        } catch (error) {
+            console.error('Error generating review notes:', error);
+            showError('生成失败：' + error.message);
+        } finally {
+            if (generateBtn) {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '📝 生成复习笔记和场景拓展';
+            }
+        }
+    }
+    
+    // 保存练习记忆（创建新记录）
+    async function savePracticeMemory(reviewNotes, expansionMaterials) {
+        if (!practiceState.sessionData) return;
+        
+        try {
+            const sessionData = practiceState.sessionData;
+            
+            // 生成新的ID
+            const practiceId = `practice_${Date.now()}`;
+            
+            const practiceMemory = {
+                id: practiceId,
+                date: sessionData.date || new Date().toISOString().split('T')[0],
+                timestamp: sessionData.timestamp || new Date().toISOString(),
+                dialogue_topic: sessionData.dialogue_topic,
+                // 移除 user_inputs，只保存复习资料
+                review_notes: reviewNotes,
+                expansion_materials: expansionMaterials
+            };
+            
+            const response = await fetch('/api/practice/save-memory', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(practiceMemory)
+            });
+            
+            const result = await response.json();
+            if (result.status === 'success') {
+                console.log('Practice memory saved successfully:', practiceId);
+            } else {
+                console.error('Failed to save practice memory:', result.message);
+            }
+        } catch (error) {
+            console.error('Error saving practice memory:', error);
+        }
+    }
+    
+    // 显示复习笔记
+    function displayReviewNotes(reviewNotes) {
+        const messagesList = document.getElementById('messages-list');
+        if (!messagesList) return;
+        
+        const card = document.createElement('div');
+        card.className = 'review-notes-card';
+        card.innerHTML = `
+            <div class="review-card-header">
+                <h3>📝 复习笔记</h3>
+            </div>
+            <div class="review-card-content">
+                ${generateReviewNotesHTML(reviewNotes)}
+            </div>
+        `;
+        
+        messagesList.appendChild(card);
+        scrollToBottom();
+    }
+    
+    // 生成复习笔记HTML
+    function generateReviewNotesHTML(reviewNotes) {
+        let html = '';
+        
+        // 词汇部分
+        if (reviewNotes.vocabulary) {
+            html += `
+                <div class="review-section">
+                    <h4>📚 词汇</h4>
+                    ${reviewNotes.vocabulary.key_words ? `<div class="vocab-category"><strong>重点词汇：</strong>${reviewNotes.vocabulary.key_words.join(', ')}</div>` : ''}
+                    ${reviewNotes.vocabulary.new_words ? `<div class="vocab-category"><strong>新词汇：</strong>${reviewNotes.vocabulary.new_words.join(', ')}</div>` : ''}
+                    ${reviewNotes.vocabulary.difficult_words ? `<div class="vocab-category"><strong>易错词汇：</strong>${reviewNotes.vocabulary.difficult_words.join(', ')}</div>` : ''}
+                </div>
+            `;
+        }
+        
+        // 语法部分
+        if (reviewNotes.grammar && reviewNotes.grammar.length > 0) {
+            html += `
+                <div class="review-section">
+                    <h4>📖 语法点</h4>
+                    ${reviewNotes.grammar.map(g => `
+                        <div class="grammar-item">
+                            <strong>${g.point}</strong>
+                            ${g.user_usage ? `<div class="error-usage">❌ 你的用法：${g.user_usage}</div>` : ''}
+                            <div class="correct-usage">✅ 正确用法：${g.correct_usage}</div>
+                            ${g.explanation ? `<div class="explanation">💡 ${g.explanation}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        // 错误纠正
+        if (reviewNotes.corrections && reviewNotes.corrections.length > 0) {
+            html += `
+                <div class="review-section">
+                    <h4>🔧 错误纠正</h4>
+                    ${reviewNotes.corrections.map(c => `
+                        <div class="correction-item">
+                            <div class="error-text">❌ ${c.user_said}</div>
+                            <div class="correct-text">✅ ${c.correct}</div>
+                            ${c.explanation ? `<div class="correction-explanation">💡 ${c.explanation}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        // 改进建议
+        if (reviewNotes.suggestions && reviewNotes.suggestions.length > 0) {
+            html += `
+                <div class="review-section">
+                    <h4>💡 改进建议</h4>
+                    <ul class="suggestions-list">
+                        ${reviewNotes.suggestions.map(s => `<li>${s}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        return html;
+    }
+    
+    // 显示场景拓展资料
+    function displayExpansionMaterials(expansionMaterials) {
+        const messagesList = document.getElementById('messages-list');
+        if (!messagesList) return;
+        
+        const card = document.createElement('div');
+        card.className = 'expansion-materials-card';
+        card.innerHTML = `
+            <div class="expansion-card-header">
+                <h3>🌟 场景拓展资料</h3>
+            </div>
+            <div class="expansion-card-content">
+                ${generateExpansionMaterialsHTML(expansionMaterials)}
+            </div>
+        `;
+        
+        messagesList.appendChild(card);
+        scrollToBottom();
+    }
+    
+    // 生成场景拓展资料HTML
+    function generateExpansionMaterialsHTML(expansionMaterials) {
+        let html = '';
+        
+        // 对话示例
+        if (expansionMaterials.dialogues && expansionMaterials.dialogues.length > 0) {
+            html += `
+                <div class="expansion-section">
+                    <h4>💬 对话示例</h4>
+                    ${expansionMaterials.dialogues.map((dialogue, idx) => `
+                        <div class="dialogue-example">
+                            <div class="dialogue-scene">场景 ${idx + 1}: ${dialogue.scene}</div>
+                            <div class="dialogue-content">
+                                ${dialogue.dialogue.map(line => `
+                                    <div class="dialogue-line ${line.speaker === 'A' ? 'speaker-a' : 'speaker-b'}">
+                                        <span class="speaker-label">${line.speaker}:</span>
+                                        <span class="dialogue-text">${line.text}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        // 常用表达
+        if (expansionMaterials.expressions && expansionMaterials.expressions.length > 0) {
+            html += `
+                <div class="expansion-section">
+                    <h4>📝 常用表达</h4>
+                    <div class="expressions-list">
+                        ${expansionMaterials.expressions.map(expr => `
+                            <div class="expression-item">
+                                <div class="expression-phrase"><strong>${expr.phrase}</strong></div>
+                                <div class="expression-meaning">${expr.meaning}</div>
+                                ${expr.example ? `<div class="expression-example">💬 示例：${expr.example}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        return html;
+    }
+    
     // 结束练习模式
     function endPracticeMode() {
         // 恢复英语卡片
@@ -1506,15 +1908,10 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
         
-        // 清理练习状态
-        practiceState = {
-            dialogueId: null,
-            dialogueLines: [],
-            currentTurn: 0,
-            isActive: false,
-            currentHints: null,
-            totalTurns: 0
-        };
+        // 清理练习状态（但保留sessionData用于生成复习笔记）
+        practiceState.isActive = false;
+        practiceState.currentTurn = 0;
+        practiceState.currentHints = null;
     }
     
     // 处理练习模式的用户输入
@@ -1531,6 +1928,19 @@ document.addEventListener("DOMContentLoaded", function() {
             // 显示用户输入
             addUserMessage(userInput);
             
+            // 找到当前轮次对应的参考台词
+            let referenceText = "";
+            let b_turn_index = 0;
+            for (let i = 0; i < practiceState.dialogueLines.length; i++) {
+                if (practiceState.dialogueLines[i].speaker === "B") {
+                    if (b_turn_index === practiceState.currentTurn) {
+                        referenceText = practiceState.dialogueLines[i].text;
+                        break;
+                    }
+                    b_turn_index++;
+                }
+            }
+            
             // 调用API验证
             const response = await fetch('/api/practice/respond', {
                 method: 'POST',
@@ -1540,12 +1950,23 @@ document.addEventListener("DOMContentLoaded", function() {
                 body: JSON.stringify({
                     user_input: userInput,
                     dialogue_lines: practiceState.dialogueLines,
-                    current_turn: practiceState.currentTurn
+                    current_turn: practiceState.currentTurn,
+                    session_id: practiceState.sessionId  // 传递会话ID
                 })
             });
             
             const result = await response.json();
             console.log('Practice respond result:', result);
+            
+            // 记录用户输入到practiceState（无论是否一致）
+            if (referenceText) {
+                practiceState.userInputs.push({
+                    turn: practiceState.currentTurn,
+                    user_said: userInput,
+                    reference: referenceText,
+                    timestamp: new Date().toISOString()
+                });
+            }
             
             if (result.status === 'success') {
                 if (result.is_consistent) {
@@ -1558,6 +1979,9 @@ document.addEventListener("DOMContentLoaded", function() {
                         practiceState.isActive = false;
                         showSuccess('🎉 恭喜！练习完成！');
                         addAIMessage('练习已完成，你做得很好！');
+                        
+                        // 调用结束API获取完整会话数据
+                        await endPracticeSession();
                         
                         // 隐藏练习UI
                         const practiceUI = document.getElementById('practice-mode-ui');
