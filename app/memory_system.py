@@ -14,12 +14,18 @@ ENGLISH_LEVELS = {
         "description": "极简级，最简单的日常用语，适合2句话对话",
         "difficulty": {
             "vocabulary": "最基础词汇（500词以内），如 hello, thank you, yes, no, how are you",
+            "vocab_scope": "只使用超高频生活用词，避免抽象或学术词",
+            "vocab_avoid": "避免多音节或罕见词（如 sophisticated, comprehensive）",
             "grammar": "仅现在时，最简单的陈述句和疑问句",
+            "grammar_structures": "只用主谓或主谓宾；不使用从句",
             "tenses": ["present simple"],
             "idioms": False,
+            "idiom_ratio": "0%",
             "slang": False,
             "sentence_length": "3-6词",
-            "complexity": "最简单的短句，主谓结构"
+            "sentence_length_range": "3-6词",
+            "complexity": "最简单的短句，主谓结构",
+            "info_density": "每句只表达1个信息点"
         }
     },
     "beginner": {
@@ -27,12 +33,18 @@ ENGLISH_LEVELS = {
         "description": "入门级，基础词汇和简单句型",
         "difficulty": {
             "vocabulary": "基础词汇（1000词以内）",
+            "vocab_scope": "高频日常用词，避免抽象名词和复杂动词",
+            "vocab_avoid": "避免高阶词（如 elaborate, nuanced）",
             "grammar": "现在时、简单过去时、基本疑问句",
+            "grammar_structures": "主谓宾为主，允许简单并列句",
             "tenses": ["present simple", "past simple"],
             "idioms": False,
+            "idiom_ratio": "0-5%",
             "slang": False,
             "sentence_length": "5-8词",
-            "complexity": "简单句，主谓宾结构"
+            "sentence_length_range": "5-8词",
+            "complexity": "简单句，主谓宾结构",
+            "info_density": "每句1个信息点，避免多层信息"
         }
     },
     "elementary": {
@@ -40,12 +52,18 @@ ENGLISH_LEVELS = {
         "description": "基础级，日常交流词汇",
         "difficulty": {
             "vocabulary": "日常词汇（2000词以内）",
+            "vocab_scope": "日常场景词汇为主，可少量加入生活短语",
+            "vocab_avoid": "避免学术词或专业术语",
             "grammar": "现在时、过去时、将来时、现在进行时",
+            "grammar_structures": "简单并列句，允许because/and连接",
             "tenses": ["present simple", "past simple", "future simple", "present continuous"],
             "idioms": "少量常见习语（如 'how are you', 'nice to meet you'）",
+            "idiom_ratio": "5-10%",
             "slang": False,
             "sentence_length": "8-12词",
-            "complexity": "简单句和并列句"
+            "sentence_length_range": "8-12词",
+            "complexity": "简单句和并列句",
+            "info_density": "每句1-2个信息点"
         }
     },
     "pre_intermediate": {
@@ -53,12 +71,18 @@ ENGLISH_LEVELS = {
         "description": "准中级，开始使用复合句",
         "difficulty": {
             "vocabulary": "扩展词汇（3000词以内）",
+            "vocab_scope": "生活与学习场景常用词，允许适度抽象词",
+            "vocab_avoid": "避免罕见学术词或文学词",
             "grammar": "所有基本时态、条件句、被动语态",
+            "grammar_structures": "允许1个从句（because/when/if）",
             "tenses": ["all basic tenses", "present perfect", "past continuous", "conditional"],
             "idioms": "常见习语和短语动词",
+            "idiom_ratio": "10-15%",
             "slang": "少量日常俚语",
             "sentence_length": "10-15词",
-            "complexity": "复合句，从句"
+            "sentence_length_range": "10-15词",
+            "complexity": "复合句，从句",
+            "info_density": "每句1-2个信息点，允许补充细节"
         }
     },
     "intermediate": {
@@ -66,12 +90,18 @@ ENGLISH_LEVELS = {
         "description": "中级，流利日常交流",
         "difficulty": {
             "vocabulary": "丰富词汇（5000词以内）",
+            "vocab_scope": "常用进阶词+语境化表达",
+            "vocab_avoid": "避免过度书面或极少见词汇",
             "grammar": "所有时态、虚拟语气、复杂语法结构",
+            "grammar_structures": "允许2个从句或非限定性从句",
             "tenses": ["all tenses", "present perfect continuous", "past perfect", "subjunctive"],
             "idioms": "常用习语和表达",
+            "idiom_ratio": "15-20%",
             "slang": "日常俚语和口语表达",
             "sentence_length": "12-18词",
-            "complexity": "复杂复合句，多种从句"
+            "sentence_length_range": "12-18词",
+            "complexity": "复杂复合句，多种从句",
+            "info_density": "每句2个信息点，允许对比或解释"
         }
     },
     "upper_intermediate": {
@@ -79,12 +109,18 @@ ENGLISH_LEVELS = {
         "description": "中高级，复杂话题讨论",
         "difficulty": {
             "vocabulary": "高级词汇（8000词以内）",
+            "vocab_scope": "进阶与抽象表达，含部分领域词汇",
+            "vocab_avoid": "避免生僻学术词堆砌",
             "grammar": "所有语法结构，包括倒装、强调句",
+            "grammar_structures": "允许多重从句与强调结构",
             "tenses": ["all tenses including perfect continuous forms"],
             "idioms": "丰富习语和地道表达",
+            "idiom_ratio": "20-25%",
             "slang": "常见俚语和流行语",
             "sentence_length": "15-22词",
-            "complexity": "复杂句式，多种语法结构混合"
+            "sentence_length_range": "15-22词",
+            "complexity": "复杂句式，多种语法结构混合",
+            "info_density": "每句2-3个信息点"
         }
     },
     "advanced": {
@@ -92,12 +128,18 @@ ENGLISH_LEVELS = {
         "description": "高级，接近母语水平",
         "difficulty": {
             "vocabulary": "高级词汇和学术词汇（10000+词）",
+            "vocab_scope": "高级抽象表达+部分学术用语",
+            "vocab_avoid": "避免极端冷僻或专业术语堆叠",
             "grammar": "所有高级语法，包括修辞手法",
+            "grammar_structures": "允许复杂从句、倒装、强调与修辞",
             "tenses": ["all tenses with nuanced usage"],
             "idioms": "大量习语、谚语和地道表达",
+            "idiom_ratio": "25-30%",
             "slang": "丰富俚语、网络用语和流行语",
             "sentence_length": "18-25词",
-            "complexity": "复杂句式，多种修辞手法"
+            "sentence_length_range": "18-25词",
+            "complexity": "复杂句式，多种修辞手法",
+            "info_density": "每句2-3个信息点，允许抽象表达"
         }
     }
 }
@@ -107,7 +149,8 @@ class DiaryMemorySystem:
     
     def __init__(self, 
                  memory_file=None,
-                 max_entries=None):
+                 max_entries=None,
+                 cefr_vocab_file=None):
         # 获取项目根目录（app 的父目录）
         current_file_dir = os.path.dirname(os.path.abspath(__file__))
         project_dir = os.path.dirname(current_file_dir)
@@ -135,14 +178,23 @@ class DiaryMemorySystem:
         self.diary_file.parent.mkdir(parents=True, exist_ok=True)
         self.session_temp_file = self.diary_file.parent / "session_temp.json"
         self.user_profile_file = self.diary_file.parent / "user_profile.json"
+        
+        # CEFR词汇表文件路径
+        if cefr_vocab_file:
+            self.cefr_vocab_file = Path(cefr_vocab_file)
+        else:
+            self.cefr_vocab_file = self.diary_file.parent / "cefr_vocabulary.json"
+        
         self.diary_data = self.load_diary()
         self.user_profile = self.load_user_profile()
+        self.cefr_vocab_data = self.load_cefr_vocabulary()
         
         # 打印调试信息
         print(f"Memory system initialized:")
         print(f"  Diary file: {self.diary_file}")
         print(f"  Session temp: {self.session_temp_file}")
         print(f"  User profile: {self.user_profile_file}")
+        print(f"  CEFR vocabulary: {self.cefr_vocab_file}")
         
     def load_diary(self) -> Dict:
         """加载日记文件"""
@@ -546,6 +598,80 @@ class DiaryMemorySystem:
             return "\n".join(context_parts)
         return ""
     
+    def load_cefr_vocabulary(self) -> Dict:
+        """加载CEFR分级词汇表"""
+        try:
+            if self.cefr_vocab_file.exists():
+                with open(self.cefr_vocab_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    vocab_levels = len(data.get('vocabulary', {}))
+                    print(f"CEFR vocabulary loaded: {vocab_levels} levels")
+                    return data
+            else:
+                print(f"CEFR vocabulary file not found: {self.cefr_vocab_file}")
+                return {}
+        except Exception as e:
+            print(f"Error loading CEFR vocabulary: {e}")
+            import traceback
+            traceback.print_exc()
+            return {}
+    
+    def get_cefr_vocab_for_level(self, level: str) -> Dict:
+        """根据难度级别获取对应的CEFR词汇、短语和句型
+        
+        Args:
+            level: 难度级别 (minimal/beginner/elementary/pre_intermediate/intermediate/upper_intermediate/advanced)
+        
+        Returns:
+            包含vocabulary, phrases, grammar_patterns的字典
+        """
+        if not self.cefr_vocab_data:
+            return {}
+        
+        # 映射难度级别到CEFR级别
+        level_mapping = {
+            "minimal": "A1",
+            "beginner": "A1",
+            "elementary": "A2",
+            "pre_intermediate": "B1",
+            "intermediate": "B1",
+            "upper_intermediate": "B2",
+            "advanced": "C1"
+        }
+        
+        cefr_level = level_mapping.get(level, "A1")
+        vocab_data = self.cefr_vocab_data.get("vocabulary", {})
+        phrases_data = self.cefr_vocab_data.get("phrases", {})
+        patterns_data = self.cefr_vocab_data.get("grammar_patterns", {})
+        
+        # 获取当前级别及以下级别的词汇（允许使用更简单的词汇）
+        result = {
+            "vocabulary": [],
+            "phrases": [],
+            "grammar_patterns": []
+        }
+        
+        # CEFR级别顺序
+        cefr_order = ["A1", "A2", "B1", "B2", "C1"]
+        target_index = cefr_order.index(cefr_level) if cefr_level in cefr_order else 0
+        
+        # 收集当前级别及以下级别的词汇（最多包含当前级别和上一级别）
+        for i in range(max(0, target_index - 1), target_index + 1):
+            level_key = cefr_order[i]
+            if level_key in vocab_data:
+                result["vocabulary"].extend(vocab_data[level_key])
+            if level_key in phrases_data:
+                result["phrases"].extend(phrases_data[level_key])
+            if level_key in patterns_data:
+                result["grammar_patterns"].extend(patterns_data[level_key])
+        
+        # 限制数量，避免prompt过长
+        result["vocabulary"] = result["vocabulary"][:50]  # 最多50个词汇
+        result["phrases"] = result["phrases"][:20]  # 最多20个短语
+        result["grammar_patterns"] = result["grammar_patterns"][:15]  # 最多15个句型
+        
+        return result
+    
     def is_first_conversation(self) -> bool:
         """判断是否是第一次沟通（检查用户档案是否已有基本信息）"""
         if not self.user_profile:
@@ -702,16 +828,26 @@ class DiaryMemorySystem:
         instructions = []
         
         instructions.append(f"【词汇难度】{diff['vocabulary']}")
+        if diff.get("vocab_scope"):
+            instructions.append(f"【词汇范围】{diff['vocab_scope']}")
+        if diff.get("vocab_avoid"):
+            instructions.append(f"【用词限制】{diff['vocab_avoid']}")
         instructions.append(f"【语法结构】{diff['grammar']}")
+        if diff.get("grammar_structures"):
+            instructions.append(f"【句型限制】{diff['grammar_structures']}")
         instructions.append(f"【时态使用】必须自然使用以下时态：{', '.join(diff['tenses'])}")
-        instructions.append(f"【句子长度】{diff['sentence_length']}")
+        # 移除句子长度描述（这是每句话的长度，不是总句数，避免与总句数要求混淆）
         instructions.append(f"【句式复杂度】{diff['complexity']}")
+        if diff.get("info_density"):
+            instructions.append(f"【信息密度】{diff['info_density']}")
         
         if diff.get('idioms'):
             if diff['idioms'] is True:
                 instructions.append("【习语使用】必须包含常用习语和短语动词")
             else:
                 instructions.append(f"【习语使用】{diff['idioms']}")
+        if diff.get("idiom_ratio"):
+            instructions.append(f"【习语比例】约{diff['idiom_ratio']}的句子包含习语或短语动词")
         
         if diff.get('slang'):
             if diff['slang'] is True:
@@ -719,40 +855,31 @@ class DiaryMemorySystem:
             elif diff['slang']:
                 instructions.append(f"【俚语使用】{diff['slang']}")
         
+        instructions.append("【硬性要求】不要写超出当前难度的词汇或语法；宁可更简单也不要更复杂")
+        
         return "\n".join(instructions)
     
     async def generate_english_dialogue(self, today_chinese_summary: str = "", 
                                         dialogue_length: str = "auto",
-                                        difficulty_level: str = None):
+                                        difficulty_level: str = None,
+                                        custom_sentence_count: int = None):
         """基于今天的中文对话和历史记忆生成英文教学对话
         
         Args:
             today_chinese_summary: 今天的中文对话摘要
-            dialogue_length: 对话长度 (short/medium/long/auto)
+            dialogue_length: 对话长度 (short/medium/long/custom/auto)
             difficulty_level: 难度水平 (beginner/elementary/pre_intermediate/intermediate/upper_intermediate/advanced)
                             如果为None，使用用户当前水平
+            custom_sentence_count: 自定义句数（2-30）
         """
         import asyncio
         from .app import chatgpt_streamed
         
-        # 对话长度映射（扩展到所有水平）
+        # 对话长度映射（长度优先，不受难度影响）
         DIALOGUE_LENGTH_MAP = {
-            "mini": {
-                "minimal": 2, "beginner": 2, "elementary": 2, "pre_intermediate": 2,
-                "intermediate": 2, "upper_intermediate": 2, "advanced": 2
-            },
-            "short": {
-                "minimal": 4, "beginner": 8, "elementary": 10, "pre_intermediate": 10, 
-                "intermediate": 12, "upper_intermediate": 12, "advanced": 15
-            },
-            "medium": {
-                "minimal": 6, "beginner": 12, "elementary": 15, "pre_intermediate": 15,
-                "intermediate": 18, "upper_intermediate": 18, "advanced": 20
-            },
-            "long": {
-                "minimal": 8, "beginner": 15, "elementary": 18, "pre_intermediate": 18,
-                "intermediate": 22, "upper_intermediate": 22, "advanced": 25
-            }
+            "short": 8,
+            "medium": 14,
+            "long": 20
         }
         
         # 获取用户档案和记忆上下文
@@ -820,16 +947,57 @@ class DiaryMemorySystem:
         # 生成难度要求说明
         difficulty_instructions = self.get_difficulty_instructions(level_config)
         
-        # 确定对话句数
+        # 确定对话句数（长度优先）
         if dialogue_length == "auto":
-            dialogue_length = "medium"  # 默认使用medium
+            dialogue_length = "medium"
         
-        target_sentences = DIALOGUE_LENGTH_MAP.get(dialogue_length, DIALOGUE_LENGTH_MAP["medium"]).get(target_level, 15)
+        if dialogue_length == "custom":
+            try:
+                custom_count = int(custom_sentence_count) if custom_sentence_count is not None else None
+            except (TypeError, ValueError):
+                custom_count = None
+            if custom_count is None or custom_count < 2 or custom_count > 30:
+                custom_count = 14
+            target_sentences = custom_count
+        else:
+            target_sentences = DIALOGUE_LENGTH_MAP.get(dialogue_length, DIALOGUE_LENGTH_MAP["medium"])
+        
+        # 加载CEFR词汇表并生成资料库上下文
+        resource_context = ""
+        cefr_vocab = self.get_cefr_vocab_for_level(target_level)
+        
+        if cefr_vocab and (cefr_vocab.get("vocabulary") or cefr_vocab.get("phrases") or cefr_vocab.get("grammar_patterns")):
+            vocab_list = cefr_vocab.get("vocabulary", [])
+            phrases_list = cefr_vocab.get("phrases", [])
+            patterns_list = cefr_vocab.get("grammar_patterns", [])
+            
+            resource_parts = []
+            if vocab_list:
+                # 只显示前30个词汇，避免prompt过长
+                vocab_display = ", ".join(vocab_list[:30])
+                resource_parts.append(f"【推荐词汇】{vocab_display}")
+            if phrases_list:
+                phrases_display = ", ".join(phrases_list[:15])
+                resource_parts.append(f"【常用短语】{phrases_display}")
+            if patterns_list:
+                patterns_display = ", ".join(patterns_list[:10])
+                resource_parts.append(f"【推荐句型】{patterns_display}")
+            
+            if resource_parts:
+                resource_context = "\n".join(resource_parts)
+        
+        resource_context_block = f"\n\n【CEFR资料库参考】\n{resource_context}" if resource_context else "\n\n【CEFR资料库参考】无（将使用通用词汇）"
         
         # 构建提示词
         topic_instruction = "对话内容要与用户今天聊的话题相关" if today_chinese_summary else "对话内容要基于用户的兴趣、职业和历史对话记录"
         
         prompt = f"""基于以下信息，生成一段适合用户的英文教学对话内容。
+
+【⚠️ 最高优先级：句数限制（不可违反）】
+必须生成严格{target_sentences}句对话，这是硬性要求。
+- 对话必须正好是{target_sentences}句，不能多也不能少
+- 无论难度如何，句数限制优先于所有其他要求
+- 如果无法在{target_sentences}句内完成，宁可简化内容也要保证句数
 
 用户信息：
 {user_profile if user_profile else "暂无用户信息"}
@@ -840,10 +1008,11 @@ class DiaryMemorySystem:
 今天的中文对话摘要：
 {today_chinese_summary if today_chinese_summary else "无（将基于历史记忆生成）"}
 {practice_memories_context}
+{resource_context_block}
 
 目标难度水平：{level_config['name']} - {level_config['description']}
 
-【难度要求】（必须严格遵守）：
+【难度要求】（用于控制每句话的用词和句型，不影响总句数）：
 {difficulty_instructions}
 
 【内容要求】：
@@ -853,7 +1022,7 @@ class DiaryMemorySystem:
 4. 根据难度水平包含适量的习语、俚语或地道表达（不要过度使用）
 5. 对话要自然流畅，像真实的口语交流，不要像教科书
 6. 可以基于用户的历史记忆和兴趣来设计对话主题
-7. {"生成严格2句对话（A和B各一句），" if target_sentences == 2 else f"生成严格{target_sentences}句对话（严格限制，不要超过这个数量），"}{topic_instruction}
+7. {topic_instruction}
 
 【格式要求】：
 - 每句话一行，用 "A: " 和 "B: " 表示对话双方

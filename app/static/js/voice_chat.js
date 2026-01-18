@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const settingsBtn = document.getElementById('settings-btn');
     const settingsPanel = document.getElementById('settings-panel');
     const closeSettings = document.getElementById('close-settings');
+    const customLengthInput = document.getElementById('custom-length-input');
     const characterSelect = document.getElementById('character-select');
     const providerSelect = document.getElementById('provider-select');
     const textInput = document.getElementById('text-input');
@@ -25,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let mediaRecorder = null;
     let audioChunks = [];
     let websocket = null;
-    let currentCharacter = 'wizard';
+    let currentCharacter = 'english_tutor';
     let audioContext = null;
     let analyser = null;
     let dataArray = null;
@@ -623,6 +624,30 @@ document.addEventListener("DOMContentLoaded", function() {
     closeSettings.addEventListener('click', () => {
         settingsPanel.classList.remove('active');
     });
+
+    // 自定义对话句数（2-30）
+    const CUSTOM_LENGTH_KEY = 'custom_sentence_count';
+    function getCustomSentenceCount() {
+        const stored = parseInt(localStorage.getItem(CUSTOM_LENGTH_KEY), 10);
+        if (!Number.isNaN(stored) && stored >= 2 && stored <= 30) {
+            return stored;
+        }
+        return 8;
+    }
+
+    if (customLengthInput) {
+        const initialCount = getCustomSentenceCount();
+        customLengthInput.value = initialCount;
+        customLengthInput.addEventListener('change', () => {
+            let value = parseInt(customLengthInput.value, 10);
+            if (Number.isNaN(value)) {
+                value = 8;
+            }
+            value = Math.min(30, Math.max(2, value));
+            customLengthInput.value = value;
+            localStorage.setItem(CUSTOM_LENGTH_KEY, String(value));
+        });
+    }
     
     // 显示对话选项选择对话框（长度和难度）
     function showDialogueOptionsDialog() {
@@ -645,38 +670,75 @@ document.addEventListener("DOMContentLoaded", function() {
                 overflow-y: auto;
             `;
             
+            const customCount = getCustomSentenceCount();
             dialog.innerHTML = `
-                <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #333;">选择对话选项</h3>
-                <div style="margin-bottom: 24px;">
-                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">对话长度：</label>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="option-btn" data-type="length" data-value="mini" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">极短（2句）</button>
-                        <button class="option-btn" data-type="length" data-value="short" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">短（8-12句）</button>
-                        <button class="option-btn" data-type="length" data-value="medium" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">中（12-18句）</button>
-                        <button class="option-btn" data-type="length" data-value="long" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">长（18-25句）</button>
-                        <button class="option-btn" data-type="length" data-value="auto" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">自动</button>
+                <h3 style="margin: 0 0 24px 0; font-size: 20px; color: #333; text-align: center;">生成英语对话卡片</h3>
+                
+                <!-- 对话长度选择（必选，放在最前面） -->
+                <div style="margin-bottom: 28px; padding: 16px; background: #f8f9fa; border-radius: 10px; border: 2px solid #e9ecef;">
+                    <label style="display: block; margin-bottom: 12px; font-weight: 700; color: #333; font-size: 15px;">
+                        📏 对话长度 <span style="color: #dc3545; font-size: 12px;">（必选）</span>
+                    </label>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
+                        <button class="option-btn" data-type="length" data-value="short" style="padding: 14px 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s;">
+                            <div style="font-size: 16px; font-weight: 600; color: #333;">短</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">8句</div>
+                        </button>
+                        <button class="option-btn" data-type="length" data-value="medium" style="padding: 14px 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s;">
+                            <div style="font-size: 16px; font-weight: 600; color: #333;">中</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">14句</div>
+                        </button>
+                        <button class="option-btn" data-type="length" data-value="long" style="padding: 14px 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s;">
+                            <div style="font-size: 16px; font-weight: 600; color: #333;">长</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">20句</div>
+                        </button>
+                    </div>
+                    <div style="margin-top: 12px; padding: 12px; background: white; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <button class="option-btn" data-type="length" data-value="custom" style="width: 100%; padding: 10px; border: 2px dashed #007bff; border-radius: 6px; background: #f0f7ff; cursor: pointer; font-size: 14px; color: #007bff; font-weight: 500;">
+                            ✏️ 自定义句数
+                        </button>
+                    </div>
+                    <div id="custom-length-input-container" style="display: none; margin-top: 12px; padding: 14px; background: white; border-radius: 8px; border: 2px solid #007bff;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 13px;">请输入句数（2-30句）：</label>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="number" id="dialog-custom-length-input" min="2" max="30" step="1" value="${customCount}" 
+                                   style="flex: 1; padding: 10px 12px; border: 2px solid #007bff; border-radius: 6px; font-size: 15px; outline: none; font-weight: 500;" />
+                            <span style="color: #666; font-size: 14px; font-weight: 500;">句</span>
+                        </div>
                     </div>
                 </div>
-                <div style="margin-bottom: 24px;">
-                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">难度水平：</label>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="option-btn" data-type="difficulty" data-value="minimal" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">极简（适合2句）</button>
-                        <button class="option-btn" data-type="difficulty" data-value="beginner" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">初级（A1）</button>
-                        <button class="option-btn" data-type="difficulty" data-value="elementary" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">基础（A2）</button>
-                        <button class="option-btn" data-type="difficulty" data-value="pre_intermediate" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">准中级（A2-B1）</button>
-                        <button class="option-btn" data-type="difficulty" data-value="intermediate" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">中级（B1-B2）</button>
-                        <button class="option-btn" data-type="difficulty" data-value="upper_intermediate" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">中高级（B2）</button>
-                        <button class="option-btn" data-type="difficulty" data-value="advanced" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">高级（B2-C1）</button>
-                        <button class="option-btn" data-type="difficulty" data-value="auto" style="padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px;">使用我的水平</button>
+                
+                <!-- 难度水平选择（可选，分组显示） -->
+                <div style="margin-bottom: 24px; padding: 16px; background: #fff; border-radius: 10px; border: 2px solid #e9ecef;">
+                    <label style="display: block; margin-bottom: 12px; font-weight: 700; color: #333; font-size: 15px;">
+                        🎯 难度水平 <span style="color: #6c757d; font-size: 12px; font-weight: 400;">（可选，默认使用你的水平）</span>
+                    </label>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                        <button class="option-btn" data-type="difficulty" data-value="beginner" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; transition: all 0.2s;">
+                            <div style="font-weight: 600; color: #333;">基础级</div>
+                            <div style="font-size: 11px; color: #666; margin-top: 2px;">A1-A2</div>
+                        </button>
+                        <button class="option-btn" data-type="difficulty" data-value="intermediate" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; transition: all 0.2s;">
+                            <div style="font-weight: 600; color: #333;">中级</div>
+                            <div style="font-size: 11px; color: #666; margin-top: 2px;">B1-B2</div>
+                        </button>
+                        <button class="option-btn" data-type="difficulty" data-value="advanced" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; transition: all 0.2s;">
+                            <div style="font-weight: 600; color: #333;">高级</div>
+                            <div style="font-size: 11px; color: #666; margin-top: 2px;">B2-C1</div>
+                        </button>
+                        <button class="option-btn" data-type="difficulty" data-value="auto" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; transition: all 0.2s;">
+                            <div style="font-weight: 600; color: #333;">使用我的水平</div>
+                            <div style="font-size: 11px; color: #666; margin-top: 2px;">自动匹配</div>
+                        </button>
                     </div>
                 </div>
-                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                    <button id="confirm-dialog" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">确认</button>
-                    <button id="cancel-dialog" style="padding: 10px 20px; background: #f0f0f0; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">取消</button>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+                    <button id="cancel-dialog" style="padding: 12px 24px; background: #f0f0f0; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; color: #333;">取消</button>
+                    <button id="confirm-dialog" style="padding: 12px 24px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,123,255,0.3);">确认生成</button>
                 </div>
             `;
             
-            let selectedLength = "auto";
+            let selectedLength = null;  // 改为null，强制用户选择
             let selectedDifficulty = "auto";
             
             // 选项按钮点击事件
@@ -699,6 +761,13 @@ document.addEventListener("DOMContentLoaded", function() {
                     
                     if (type === 'length') {
                         selectedLength = value;
+                        // 如果选择自定义，显示输入框
+                        const customContainer = dialog.querySelector('#custom-length-input-container');
+                        if (value === 'custom') {
+                            customContainer.style.display = 'block';
+                        } else {
+                            customContainer.style.display = 'none';
+                        }
                     } else if (type === 'difficulty') {
                         selectedDifficulty = value;
                     }
@@ -722,10 +791,33 @@ document.addEventListener("DOMContentLoaded", function() {
             
             // 确认按钮
             dialog.querySelector('#confirm-dialog').addEventListener('click', () => {
+                // 验证长度是否已选择
+                if (!selectedLength) {
+                    showError('请先选择对话长度');
+                    return;
+                }
+                
+                let customSentenceCount = null;
+                if (selectedLength === 'custom') {
+                    const dialogInput = dialog.querySelector('#dialog-custom-length-input');
+                    const rawValue = dialogInput ? parseInt(dialogInput.value, 10) : getCustomSentenceCount();
+                    if (Number.isNaN(rawValue) || rawValue < 2 || rawValue > 30) {
+                        showError('自定义句数必须在 2-30 之间');
+                        return;
+                    }
+                    customSentenceCount = rawValue;
+                    localStorage.setItem(CUSTOM_LENGTH_KEY, String(rawValue));
+                    // 同步更新设置面板中的输入框（如果存在）
+                    if (customLengthInput) {
+                        customLengthInput.value = rawValue;
+                    }
+                }
+                
                 document.body.removeChild(dialog);
                 resolve({
                     length: selectedLength,
-                    difficulty: selectedDifficulty === "auto" ? null : selectedDifficulty
+                    difficulty: selectedDifficulty === "auto" ? null : selectedDifficulty,
+                    custom_sentence_count: customSentenceCount
                 });
             });
             
@@ -789,7 +881,8 @@ document.addEventListener("DOMContentLoaded", function() {
                                 },
                                 body: JSON.stringify({ 
                                     dialogue_length: options.length,
-                                    difficulty_level: options.difficulty
+                                    difficulty_level: options.difficulty,
+                                    custom_sentence_count: options.custom_sentence_count
                                 })
                             });
                             

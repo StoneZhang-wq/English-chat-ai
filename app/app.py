@@ -40,7 +40,7 @@ except ImportError as e:
 load_dotenv()
 
 MODEL_PROVIDER = os.getenv('MODEL_PROVIDER', 'openai')
-CHARACTER_NAME = os.getenv('CHARACTER_NAME', 'wizard')
+CHARACTER_NAME = os.getenv('CHARACTER_NAME', 'english_tutor')
 TTS_PROVIDER = os.getenv('TTS_PROVIDER', 'openai')
 OPENAI_TTS_URL = os.getenv('OPENAI_TTS_URL', 'https://api.openai.com/v1/audio/speech')
 OPENAI_TTS_VOICE = os.getenv('OPENAI_TTS_VOICE', 'alloy')
@@ -1265,7 +1265,7 @@ async def user_chatbot_conversation():
     previous_character = os.getenv("PREVIOUS_CHARACTER_NAME", "")
     
     # Get current character
-    current_character = os.getenv("CHARACTER_NAME", "wizard")
+    current_character = os.getenv("CHARACTER_NAME", "english_tutor")
     
     # Check if we're switching characters
     is_character_switch = previous_character != "" and previous_character != current_character

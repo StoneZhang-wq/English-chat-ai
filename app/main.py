@@ -92,7 +92,7 @@ app.add_middleware(
 @app.get("/", response_class=HTMLResponse)
 async def get_index(request: Request):
     model_provider = os.getenv("MODEL_PROVIDER")
-    character_name = os.getenv("CHARACTER_NAME", "wizard") 
+    character_name = os.getenv("CHARACTER_NAME", "english_tutor") 
     tts_provider = os.getenv("TTS_PROVIDER")
     openai_tts_voice = os.getenv("OPENAI_TTS_VOICE")
     openai_model = os.getenv("OPENAI_MODEL")
@@ -119,7 +119,7 @@ async def get_index(request: Request):
 @app.get("/voice_chat", response_class=HTMLResponse)
 async def get_voice_chat(request: Request):
     """Instagram风格的语音消息界面"""
-    character_name = os.getenv("CHARACTER_NAME", "wizard")
+    character_name = os.getenv("CHARACTER_NAME", "english_tutor")
     return templates.TemplateResponse("voice_chat.html", {
         "request": request,
         "character_name": character_name,
@@ -632,7 +632,7 @@ async def get_character_history():
 @app.post("/api/voice/upload")
 async def upload_voice_audio(
     audio: UploadFile = File(...),
-    character: str = Form("wizard")
+    character: str = Form("english_tutor")
 ):
     """处理上传的语音文件"""
     try:
@@ -759,7 +759,7 @@ async def send_text_message(request: Request):
     try:
         data = await request.json()
         text = data.get("text", "").strip()
-        character = data.get("character", "wizard")
+        character = data.get("character", "english_tutor")
         
         if not text:
             return JSONResponse({
@@ -881,8 +881,9 @@ async def generate_english_dialogue(request: Request):
         from .shared import get_memory_system, get_current_character, get_learning_stage, set_learning_stage
         
         data = await request.json()
-        dialogue_length = data.get("dialogue_length", "auto")  # short/medium/long/auto
+        dialogue_length = data.get("dialogue_length", "auto")  # short/medium/long/custom/auto
         difficulty_level = data.get("difficulty_level", None)  # 新增：难度水平，如果为None则使用用户当前水平
+        custom_sentence_count = data.get("custom_sentence_count", None)
         
         memory_system = get_memory_system()
         if not memory_system:
@@ -907,7 +908,8 @@ async def generate_english_dialogue(request: Request):
         english_dialogue_result = await memory_system.generate_english_dialogue(
             today_summary, 
             dialogue_length,
-            difficulty_level  # 新增参数
+            difficulty_level,
+            custom_sentence_count
         )
         
         if english_dialogue_result:
