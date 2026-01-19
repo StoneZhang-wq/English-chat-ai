@@ -1,0 +1,185 @@
+{
+  "practices": [
+    {
+      "id": "practice_1768842331698",
+      "date": "2026-01-19",
+      "timestamp": "2026-01-19T17:05:31.698Z",
+      "dialogue_topic": "学习进度, 专业术语",
+      "review_notes": {
+        "vocabulary": {
+          "key_words": [
+            "progress",
+            "recognize",
+            "words"
+          ],
+          "new_words": [],
+          "difficult_words": [
+            "slowly"
+          ]
+        },
+        "grammar": [
+          {
+            "point": "Adverb placement",
+            "user_usage": "is going slow",
+            "correct_usage": "is going slowly",
+            "explanation": "The adjective 'slow' should be replaced by the adverb 'slowly' to modify the verb 'going', indicating the manner of progress."
+          },
+          {
+            "point": "Verb form",
+            "user_usage": "I try starting to recognize the term.",
+            "correct_usage": "I am trying to start recognizing the words.",
+            "explanation": "Present continuous 'am trying' is used to indicate an ongoing action. The infinitive 'to start' is used prior to another verb. The noun 'term' should be replaced with 'words' to match the context."
+          }
+        ],
+        "corrections": [
+          {
+            "user_said": "Hey, is going slow about I try starting to recognize the term.",
+            "correct": "Hey, it's going slowly, but I try starting to recognize the words that I learned.",
+            "explanation": "The user's sentence lacked grammatical accuracy in verb forms and adverb usage. The correct sentence uses 'it's going slowly', 'I try', and 'the words' for clarity and correctness."
+          }
+        ],
+        "suggestions": [
+          "Review adverb forms and practice using 'slowly' in different sentences.",
+          "Practice the use of present continuous verbs to describe ongoing actions.",
+          "Expand vocabulary by practicing the difference between 'term' and 'words' based on context."
+        ]
+      },
+      "expansion_materials": {
+        "dialogues": [
+          {
+            "scene": "学习进展—英语课堂",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hi Li Hua, how are you finding the new vocabulary in our English class?"
+              },
+              {
+                "speaker": "B",
+                "text": "Hello! It's challenging, but I'm slowly getting used to them."
+              },
+              {
+                "speaker": "A",
+                "text": "That's great. Do you have any tips for remembering them?"
+              },
+              {
+                "speaker": "B",
+                "text": "I use flashcards and try to read them in context."
+              }
+            ]
+          },
+          {
+            "scene": "识别单词—自学环境",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hey Xiao Ming, how's your self-study going with the technical words?"
+              },
+              {
+                "speaker": "B",
+                "text": "Hi! I've been able to recognize a few more words each day."
+              },
+              {
+                "speaker": "A",
+                "text": "That's progress! Do you use any apps for that?"
+              },
+              {
+                "speaker": "B",
+                "text": "Yes, I find dictionary apps quite helpful."
+              }
+            ]
+          },
+          {
+            "scene": "专业术语—工作场所",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hi Mei, how are your preparations for the upcoming project presentation?"
+              },
+              {
+                "speaker": "B",
+                "text": "Hello! I'm focusing on understanding the key terms we'll be using."
+              },
+              {
+                "speaker": "A",
+                "text": "Do you feel confident about it?"
+              },
+              {
+                "speaker": "B",
+                "text": "I'm getting there, slowly but surely."
+              }
+            ]
+          },
+          {
+            "scene": "学习进展—语言交换",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hi Kevin, how's your progress with the Mandarin vocabulary we discussed?"
+              },
+              {
+                "speaker": "B",
+                "text": "Hey! It’s slow, but I’m making an effort to practice every day."
+              },
+              {
+                "speaker": "A",
+                "text": "Consistent practice is key. Do you communicate with native speakers?"
+              },
+              {
+                "speaker": "B",
+                "text": "Yes, I’m part of a language exchange group online."
+              }
+            ]
+          },
+          {
+            "scene": "识别单词—图书馆学习",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hi Yan, what are you reading?"
+              },
+              {
+                "speaker": "B",
+                "text": "I'm going through some medical journals to pick up new terminology."
+              },
+              {
+                "speaker": "A",
+                "text": "That sounds intense! How do you manage to remember everything?"
+              },
+              {
+                "speaker": "B",
+                "text": "I summarize key points and review them regularly."
+              }
+            ]
+          }
+        ],
+        "expressions": [
+          {
+            "phrase": "getting used to",
+            "meaning": "逐渐习惯",
+            "example": "I'm getting used to speaking English every day."
+          },
+          {
+            "phrase": "slowly but surely",
+            "meaning": "缓慢但稳定地",
+            "example": "I’m learning to play the piano slowly but surely."
+          },
+          {
+            "phrase": "in context",
+            "meaning": "在上下文中",
+            "example": "It’s easier to understand vocabulary when seen in context."
+          },
+          {
+            "phrase": "key terms",
+            "meaning": "关键术语",
+            "example": "Before the exam, make sure you understand all the key terms."
+          },
+          {
+            "phrase": "consistent practice",
+            "meaning": "持续练习",
+            "example": "Consistent practice leads to improvement."
+          }
+        ]
+      }
+    }
+  ]
+}

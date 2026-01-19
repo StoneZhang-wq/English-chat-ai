@@ -150,10 +150,14 @@ class DiaryMemorySystem:
     def __init__(self, 
                  memory_file=None,
                  max_entries=None,
-                 cefr_vocab_file=None):
+                 cefr_vocab_file=None,
+                 account_name=None):
         # 获取项目根目录（app 的父目录）
         current_file_dir = os.path.dirname(os.path.abspath(__file__))
         project_dir = os.path.dirname(current_file_dir)
+        
+        # 账号名称（用于创建独立的记忆文件夹）
+        self.account_name = account_name
         
         # 从环境变量读取配置，如果没有则使用默认值（相对于项目根目录）
         if memory_file:
@@ -169,8 +173,18 @@ class DiaryMemorySystem:
                 else:
                     self.diary_file = Path(project_dir) / env_memory_file
             else:
-                # 默认路径：项目根目录下的 memory/diary.json
-                self.diary_file = Path(project_dir) / "memory" / "diary.json"
+                # 如果有账号名称，使用账号专属文件夹；否则使用默认路径
+                if self.account_name:
+                    # 清理账号名称，移除不安全字符
+                    safe_account_name = "".join(c for c in self.account_name if c.isalnum() or c in (' ', '-', '_')).strip()
+                    safe_account_name = safe_account_name.replace(' ', '_')
+                    if not safe_account_name:
+                        safe_account_name = "default"
+                    # 账号专属路径：memory/accounts/{account_name}/diary.json
+                    self.diary_file = Path(project_dir) / "memory" / "accounts" / safe_account_name / "diary.json"
+                else:
+                    # 默认路径：项目根目录下的 memory/diary.json
+                    self.diary_file = Path(project_dir) / "memory" / "diary.json"
         
         self.max_entries = max_entries or int(os.getenv("MEMORY_MAX_ENTRIES", "50"))
         

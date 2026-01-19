@@ -8,7 +8,39 @@
     <link rel="icon" href="/app/static/favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <div class="chat-container">
+    <!-- 账号登录界面 -->
+    <div class="login-overlay" id="login-overlay">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>🎯 欢迎使用英语学习助手</h1>
+                <p>请输入您的名字开始使用</p>
+            </div>
+            <div class="login-form">
+                <div class="input-group">
+                    <label for="username-input">您的名字</label>
+                    <input 
+                        type="text" 
+                        id="username-input" 
+                        class="username-input" 
+                        placeholder="请输入您的名字（如：张三）"
+                        maxlength="20"
+                        autocomplete="off">
+                </div>
+                <button id="login-btn" class="login-btn">
+                    <span>开始使用</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+                <div class="login-hint">
+                    <p>💡 提示：每个账号都有独立的记忆和学习记录</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-container" id="chat-container" style="display: none;">
         <!-- 头部 -->
         <header class="chat-header">
             <div class="header-content">
@@ -17,10 +49,21 @@
                 </div>
                 <div class="header-info">
                     <h2 id="character-name">Voice Chat AI</h2>
-                    <span class="status-text">在线</span>
+                    <span class="status-text" id="user-status">在线</span>
                 </div>
             </div>
             <div class="header-actions">
+                <div class="user-info" id="user-info" title="当前账号">
+                    <span id="current-username">未登录</span>
+                </div>
+                <button id="switch-account-btn" class="icon-btn" title="切换账号">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                </button>
                 <button id="start-english-btn" class="icon-btn" title="开始英语学习（将保存当前对话记忆）">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 12h18M3 6h18M3 18h18"></path>
@@ -54,6 +97,39 @@
                 <div class="wave-bar"></div>
             </div>
             <span class="recording-text">正在录音...</span>
+        </div>
+
+        <!-- 英语学习入口卡片 - 显眼且直观 -->
+        <div class="english-learning-card" id="english-learning-card">
+            <div class="english-card-badge">🎯 英语学习</div>
+            <div class="english-card-content">
+                <div class="english-card-left">
+                    <div class="english-card-icon-wrapper">
+                        <svg class="english-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                            <path d="M2 17l10 5 10-5"></path>
+                            <path d="M2 12l10 5 10-5"></path>
+                        </svg>
+                    </div>
+                    <div class="english-card-text">
+                        <h3>📚 开始英语学习</h3>
+                        <p class="english-card-desc">生成个性化英语对话卡片，开始口语练习</p>
+                        <div class="english-card-features">
+                            <span class="feature-tag">✨ 个性化</span>
+                            <span class="feature-tag">🎯 按你的水平</span>
+                            <span class="feature-tag">💬 真实对话</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="start-english-card-btn" class="english-card-btn">
+                    <span class="btn-icon">🚀</span>
+                    <span class="btn-text">开始学习</span>
+                    <svg class="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </div>
         </div>
 
         <!-- 输入区域 -->

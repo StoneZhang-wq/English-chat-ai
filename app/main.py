@@ -11,7 +11,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, JSONResponse
 from starlette.background import BackgroundTask
-from .shared import clients, set_current_character, conversation_history, add_client, remove_client
+from .shared import clients, set_current_character, conversation_history, add_client, remove_client, get_memory_system, set_current_account, get_current_account
 from .app_logic import start_conversation, stop_conversation, set_env_variable, characters_folder, set_transcription_model, fetch_ollama_models, load_character_prompt, load_character_specific_history
 from .enhanced_logic import start_enhanced_conversation, stop_enhanced_conversation
 from .app import send_message_to_clients
@@ -124,6 +124,96 @@ async def get_voice_chat(request: Request):
         "request": request,
         "character_name": character_name,
     })
+
+@app.post("/api/account/login")
+async def login_account(request: Request):
+    """账号登录/创建"""
+    try:
+        data = await request.json()
+        account_name = data.get("account_name", "").strip()
+        
+        if not account_name:
+            return JSONResponse({
+                "status": "error",
+                "message": "账号名称不能为空"
+            }, status_code=400)
+        
+        # 验证账号名称（只允许字母、数字、中文、下划线、连字符和空格）
+        import re
+        if not re.match(r'^[\w\s\u4e00-\u9fa5-]+$', account_name):
+            return JSONResponse({
+                "status": "error",
+                "message": "账号名称只能包含字母、数字、中文、下划线和连字符"
+            }, status_code=400)
+        
+        if len(account_name) > 20:
+            return JSONResponse({
+                "status": "error",
+                "message": "账号名称不能超过20个字符"
+            }, status_code=400)
+        
+        # 设置当前账号并初始化记忆系统
+        set_current_account(account_name)
+        memory_system = get_memory_system(account_name)
+        
+        if memory_system:
+            return JSONResponse({
+                "status": "success",
+                "message": "登录成功",
+                "account_name": account_name
+            })
+        else:
+            return JSONResponse({
+                "status": "error",
+                "message": "初始化记忆系统失败"
+            }, status_code=500)
+            
+    except Exception as e:
+        logger.error(f"Error logging in account: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"登录失败: {str(e)}"
+        }, status_code=500)
+
+@app.get("/api/account/current")
+async def get_current_account_info():
+    """获取当前账号信息"""
+    try:
+        account_name = get_current_account()
+        if account_name:
+            return JSONResponse({
+                "status": "success",
+                "account_name": account_name
+            })
+        else:
+            return JSONResponse({
+                "status": "error",
+                "message": "未登录"
+            }, status_code=401)
+    except Exception as e:
+        logger.error(f"Error getting current account: {e}")
+        return JSONResponse({
+            "status": "error",
+            "message": f"获取账号信息失败: {str(e)}"
+        }, status_code=500)
+
+@app.post("/api/account/logout")
+async def logout_account():
+    """退出当前账号"""
+    try:
+        set_current_account(None)
+        return JSONResponse({
+            "status": "success",
+            "message": "已退出账号"
+        })
+    except Exception as e:
+        logger.error(f"Error logging out account: {e}")
+        return JSONResponse({
+            "status": "error",
+            "message": f"退出失败: {str(e)}"
+        }, status_code=500)
 
 @app.get("/characters")
 async def get_characters():

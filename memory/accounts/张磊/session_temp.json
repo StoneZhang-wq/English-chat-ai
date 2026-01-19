@@ -1,0 +1,16 @@
+{
+  "session_start": "2026-01-18T23:55:50.824027",
+  "character": "english_tutor",
+  "messages": [
+    {
+      "role": "user",
+      "content": "你知道我是谁吗",
+      "timestamp": "2026-01-18T23:55:50.824027"
+    },
+    {
+      "role": "assistant",
+      "content": "我知道你是张磊，喜欢篮球、电影等活动，想通过英语学习助力自己的计划。最近生活怎么样？",
+      "timestamp": "2026-01-18T23:55:53.110634"
+    }
+  ]
+}

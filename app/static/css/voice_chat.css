@@ -13,6 +13,166 @@ body {
     overflow: hidden;
 }
 
+/* ========== 账号登录界面 ========== */
+.login-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.login-overlay.hidden {
+    display: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.login-container {
+    background: white;
+    border-radius: 24px;
+    padding: 40px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.login-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #262626;
+    margin: 0 0 8px 0;
+}
+
+.login-header p {
+    font-size: 15px;
+    color: #8e8e8e;
+    margin: 0;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #262626;
+}
+
+.username-input {
+    padding: 14px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.username-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.login-btn:active {
+    transform: translateY(0);
+}
+
+.login-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.login-hint {
+    text-align: center;
+    margin-top: 8px;
+}
+
+.login-hint p {
+    font-size: 13px;
+    color: #8e8e8e;
+    margin: 0;
+}
+
+/* 用户信息显示 */
+.user-info {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 16px;
+    margin-right: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #667eea;
+}
+
+#current-username {
+    white-space: nowrap;
+}
+
 .chat-container {
     display: flex;
     flex-direction: column;
@@ -69,6 +229,7 @@ body {
 
 .header-actions {
     display: flex;
+    align-items: center;
     gap: 8px;
 }
 
@@ -1664,4 +1825,228 @@ body {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+}
+
+/* ========== 英语学习入口卡片 ========== */
+.english-learning-card {
+    margin: 16px;
+    padding: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.35);
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: cardEntrance 0.5s ease-out, cardPulse 3s ease-in-out infinite;
+}
+
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes cardPulse {
+    0%, 100% {
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.35);
+    }
+    50% {
+        box-shadow: 0 8px 40px rgba(102, 126, 234, 0.5);
+    }
+}
+
+.english-learning-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 48px rgba(102, 126, 234, 0.45);
+}
+
+.english-card-badge {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.english-card-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+    gap: 20px;
+}
+
+.english-card-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+}
+
+.english-card-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.english-icon {
+    color: white;
+    width: 36px;
+    height: 36px;
+}
+
+.english-card-text {
+    flex: 1;
+    color: white;
+}
+
+.english-card-text h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.english-card-desc {
+    font-size: 14px;
+    margin: 0 0 12px 0;
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1.5;
+}
+
+.english-card-features {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.feature-tag {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.english-card-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: white;
+    color: #667eea;
+    border: none;
+    border-radius: 28px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.english-card-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(102, 126, 234, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.english-card-btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.english-card-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+    background: #f8f9ff;
+}
+
+.english-card-btn:active {
+    transform: translateY(0) scale(1);
+}
+
+.btn-icon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.btn-text {
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-arrow {
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s;
+}
+
+.english-card-btn:hover .btn-arrow {
+    transform: translateX(4px);
+}
+
+/* 当进入英语学习模式后，隐藏卡片 */
+.english-learning-card.hidden {
+    display: none;
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+    .english-card-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .english-card-left {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .english-card-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .english-card-text h3 {
+        font-size: 20px;
+        justify-content: center;
+    }
 }

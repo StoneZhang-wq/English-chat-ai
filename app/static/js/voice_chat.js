@@ -16,6 +16,15 @@ document.addEventListener("DOMContentLoaded", function() {
     const sendBtn = document.getElementById('send-btn');
     const startEnglishBtn = document.getElementById('start-english-btn');
     
+    // 登录相关元素
+    const loginOverlay = document.getElementById('login-overlay');
+    const chatContainer = document.getElementById('chat-container');
+    const usernameInput = document.getElementById('username-input');
+    const loginBtn = document.getElementById('login-btn');
+    const switchAccountBtn = document.getElementById('switch-account-btn');
+    const currentUsernameSpan = document.getElementById('current-username');
+    const userInfo = document.getElementById('user-info');
+    
     // 检查元素是否存在
     if (!textInput || !sendBtn) {
         console.error('Text input or send button not found');
@@ -33,6 +42,8 @@ document.addEventListener("DOMContentLoaded", function() {
     let lastUserMessage = ''; // 用于防止重复显示
     let isProcessingAudio = false; // 标记是否正在处理音频
     let isProcessing = false; // 标记系统是否正在处理消息（包括生成回复和播放语音）
+    let englishLearningCard = null; // 英语学习卡片元素
+    let startEnglishCardBtn = null; // 卡片上的按钮元素
 
     // 初始化WebSocket连接
     function initWebSocket() {
@@ -452,6 +463,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 添加用户消息
     function addUserMessage(text) {
+        // 重新获取 messagesList，确保元素可用
+        const messagesList = document.getElementById('messages-list');
+        if (!messagesList) {
+            console.error('Messages list not found in addUserMessage');
+            return;
+        }
+        
         // 防止重复显示相同的消息
         if (text === lastUserMessage && messagesList.lastElementChild) {
             const lastMsg = messagesList.lastElementChild;
@@ -472,6 +490,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 添加AI消息
     function addAIMessage(text) {
+        // 重新获取 messagesList，确保元素可用
+        const messagesList = document.getElementById('messages-list');
+        if (!messagesList) {
+            console.error('Messages list not found in addAIMessage');
+            return;
+        }
+        
         const message = createMessageElement('ai', text, 'text');
         messagesList.appendChild(message);
         scrollToBottom();
@@ -479,6 +504,17 @@ document.addEventListener("DOMContentLoaded", function() {
         // 自动播放AI语音（如果需要）
         // playAIVoice(text);
     }
+    
+    // 将函数暴露到全局作用域，以便外部可以调用
+    window.addAIMessage = addAIMessage;
+    window.addUserMessage = addUserMessage;
+    window.createMessageElement = createMessageElement;
+    window.scrollToBottom = scrollToBottom;
+    window.showSuccess = showSuccess;
+    window.showError = showError;
+    window.initWebSocket = initWebSocket;
+    window.loadCharacters = loadCharacters;
+    window.initializeEnglishLearningCard = initializeEnglishLearningCard;
 
     // 创建消息元素
     function createMessageElement(sender, content, type = 'text') {
@@ -897,6 +933,16 @@ document.addEventListener("DOMContentLoaded", function() {
                                 );
                                 addAIMessage('已切换到英文学习模式！现在我会用英文和你交流。');
                                 showSuccess('英文对话已生成，已切换到英文学习模式！');
+                                
+                                // 成功后隐藏卡片
+                                if (englishLearningCard) {
+                                    englishLearningCard.style.transition = 'opacity 0.3s, transform 0.3s';
+                                    englishLearningCard.style.opacity = '0';
+                                    englishLearningCard.style.transform = 'translateY(-20px)';
+                                    setTimeout(() => {
+                                        englishLearningCard.classList.add('hidden');
+                                    }, 300);
+                                }
                             } else {
                                 // 即使生成失败，也切换到英文学习阶段
                                 await switchToEnglishLearning();
@@ -929,6 +975,34 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     
+    // 初始化英语学习卡片
+    function initializeEnglishLearningCard() {
+        englishLearningCard = document.getElementById('english-learning-card');
+        startEnglishCardBtn = document.getElementById('start-english-card-btn');
+        
+        if (!englishLearningCard || !startEnglishCardBtn) {
+            return;
+        }
+        
+        // 卡片按钮点击事件
+        startEnglishCardBtn.addEventListener('click', async (e) => {
+            e.stopPropagation(); // 阻止事件冒泡
+            if (startEnglishBtn) {
+                startEnglishBtn.click();
+            }
+        });
+        
+        // 点击整个卡片也可以触发（除了按钮区域）
+        englishLearningCard.addEventListener('click', (e) => {
+            // 如果点击的不是按钮本身
+            if (!startEnglishCardBtn.contains(e.target)) {
+                if (startEnglishBtn) {
+                    startEnglishBtn.click();
+                }
+            }
+        });
+    }
+    
     // 切换到英文学习阶段的辅助函数
     async function switchToEnglishLearning() {
         try {
@@ -944,9 +1018,24 @@ document.addEventListener("DOMContentLoaded", function() {
             if (result.status === 'success') {
                 addAIMessage('已切换到英文学习模式！现在我会用英文和你交流。');
                 showSuccess('已切换到英文学习模式');
+                
+                // 成功后隐藏卡片
+                if (englishLearningCard) {
+                    englishLearningCard.style.transition = 'opacity 0.3s, transform 0.3s';
+                    englishLearningCard.style.opacity = '0';
+                    englishLearningCard.style.transform = 'translateY(-20px)';
+                    setTimeout(() => {
+                        englishLearningCard.classList.add('hidden');
+                    }, 300);
+                }
             } else if (result.status === 'info') {
                 // 已经处于英文学习阶段
                 showSuccess('已经处于英文学习模式');
+                
+                // 隐藏卡片
+                if (englishLearningCard) {
+                    englishLearningCard.classList.add('hidden');
+                }
             } else {
                 showError(result.message || '切换失败');
             }
@@ -2173,13 +2262,282 @@ document.addEventListener("DOMContentLoaded", function() {
         messagesList: !!messagesList
     });
     
-    // 初始化
-    initWebSocket();
-    loadCharacters();
-    
-    // 添加欢迎消息
-    setTimeout(() => {
-        addAIMessage('你好！我是你的AI助手，可以输入文字或点击麦克风开始对话！');
-    }, 1000);
+    // 初始化账号系统（会检查登录状态，然后初始化其他功能）
+    initializeAccountSystem();
 });
+
+// ========== 账号系统相关函数 ==========
+let currentAccountName = null;
+
+async function initializeAccountSystem() {
+    // 每次启动都显示登录界面，不自动登录
+    // 检查是否有已保存的账号，用于在输入框中显示提示（可选）
+    const savedAccount = localStorage.getItem('current_account');
+    
+    // 显示登录界面
+    showLoginInterface();
+    
+    // 绑定登录按钮事件
+    const loginBtn = document.getElementById('login-btn');
+    const usernameInput = document.getElementById('username-input');
+    const switchAccountBtn = document.getElementById('switch-account-btn');
+    
+    // 如果有保存的账号，可以在输入框中显示占位提示（但不自动填充）
+    if (usernameInput && savedAccount) {
+        // 可选：在占位符中提示上次使用的账号
+        usernameInput.placeholder = `上次使用：${savedAccount}（请输入您的名字）`;
+    }
+    
+    if (loginBtn) {
+        loginBtn.addEventListener('click', handleLogin);
+    }
+    
+    // 绑定回车键登录
+    if (usernameInput) {
+        usernameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleLogin();
+            }
+        });
+    }
+    
+    // 绑定切换账号按钮
+    if (switchAccountBtn) {
+        switchAccountBtn.addEventListener('click', () => {
+            if (confirm('确定要切换账号吗？当前对话的记忆将被保存。')) {
+                handleLogout();
+            }
+        });
+    }
+}
+
+function showLoginInterface() {
+    const loginOverlay = document.getElementById('login-overlay');
+    const chatContainer = document.getElementById('chat-container');
+    
+    // 确保对话界面隐藏
+    if (chatContainer) {
+        chatContainer.style.display = 'none';
+    }
+    
+    // 确保登录界面显示
+    if (loginOverlay) {
+        loginOverlay.classList.remove('hidden');
+        loginOverlay.style.display = 'flex';
+    }
+    
+    // 聚焦输入框
+    const usernameInput = document.getElementById('username-input');
+    if (usernameInput) {
+        setTimeout(() => usernameInput.focus(), 100);
+    }
+}
+
+function showChatInterface() {
+    const loginOverlay = document.getElementById('login-overlay');
+    const chatContainer = document.getElementById('chat-container');
+    
+    // 确保登录界面完全隐藏
+    if (loginOverlay) {
+        loginOverlay.classList.add('hidden');
+        loginOverlay.style.display = 'none'; // 双重保险
+    }
+    
+    // 确保对话界面显示
+    if (chatContainer) {
+        chatContainer.style.display = 'flex';
+        chatContainer.classList.remove('hidden'); // 移除可能的hidden类
+    }
+    
+    // 重新获取 messagesList，确保元素可用
+    const messagesList = document.getElementById('messages-list');
+    if (!messagesList) {
+        console.error('Messages list not found after showing chat interface');
+    } else {
+        console.log('Chat interface shown, messagesList available');
+    }
+}
+
+async function handleLogin() {
+    const usernameInput = document.getElementById('username-input');
+    const loginBtn = document.getElementById('login-btn');
+    const username = usernameInput ? usernameInput.value.trim() : '';
+    
+    if (!username) {
+        showError('请输入您的名字');
+        return;
+    }
+    
+    if (username.length > 20) {
+        showError('名字不能超过20个字符');
+        return;
+    }
+    
+    // 禁用按钮
+    if (loginBtn) {
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<span>登录中...</span>';
+    }
+    
+    try {
+        const response = await fetch('/api/account/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ account_name: username })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            currentAccountName = username;
+            localStorage.setItem('current_account', username);
+            
+            // 先隐藏登录界面，显示对话界面
+            showChatInterface();
+            
+            // 更新用户信息
+            updateUserInfo(username);
+            
+            // 等待界面切换完成后再初始化其他功能
+            setTimeout(() => {
+                // 重新获取 messagesList，确保在界面显示后获取
+                const messagesList = document.getElementById('messages-list');
+                if (!messagesList) {
+                    console.error('Messages list not found after login');
+                    if (typeof window.showError === 'function') {
+                        window.showError('界面初始化失败，请刷新页面');
+                    }
+                    return;
+                }
+                
+                // 初始化其他功能
+                if (typeof window.initWebSocket === 'function') {
+                    window.initWebSocket();
+                } else {
+                    console.error('initWebSocket function not available');
+                }
+                if (typeof window.loadCharacters === 'function') {
+                    window.loadCharacters();
+                } else {
+                    console.error('loadCharacters function not available');
+                }
+                if (typeof window.initializeEnglishLearningCard === 'function') {
+                    window.initializeEnglishLearningCard();
+                } else {
+                    console.error('initializeEnglishLearningCard function not available');
+                }
+                
+                // 添加欢迎消息
+                setTimeout(() => {
+                    console.log('Attempting to add welcome message...');
+                    console.log('window.addAIMessage available:', typeof window.addAIMessage === 'function');
+                    console.log('messagesList element:', document.getElementById('messages-list'));
+                    
+                    if (typeof window.addAIMessage === 'function') {
+                        try {
+                            window.addAIMessage(`你好 ${username}！我是你的AI助手，可以输入文字或点击麦克风开始对话！`);
+                            console.log('Welcome message added successfully');
+                        } catch (error) {
+                            console.error('Error adding welcome message:', error);
+                        }
+                    } else {
+                        console.error('addAIMessage function not available');
+                        // 尝试直接添加消息作为备用方案
+                        const messagesList = document.getElementById('messages-list');
+                        if (messagesList && typeof window.createMessageElement === 'function') {
+                            try {
+                                const message = window.createMessageElement('ai', `你好 ${username}！我是你的AI助手，可以输入文字或点击麦克风开始对话！`, 'text');
+                                messagesList.appendChild(message);
+                                if (typeof window.scrollToBottom === 'function') {
+                                    window.scrollToBottom();
+                                }
+                                console.log('Welcome message added using fallback method');
+                            } catch (error) {
+                                console.error('Error in fallback method:', error);
+                            }
+                        }
+                    }
+                }, 500);
+            }, 200); // 增加延迟到200ms，确保界面切换完成
+            
+            if (typeof window.showSuccess === 'function') {
+                window.showSuccess('登录成功！');
+            }
+        } else {
+            if (typeof window.showError === 'function') {
+                window.showError(result.message || '登录失败');
+            }
+            if (loginBtn) {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<span>开始使用</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+            }
+        }
+    } catch (error) {
+        console.error('Error logging in:', error);
+        if (typeof window.showError === 'function') {
+            window.showError('登录失败：' + error.message);
+        }
+        if (loginBtn) {
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<span>开始使用</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+        }
+    }
+}
+
+async function handleLogout() {
+    try {
+        const response = await fetch('/api/account/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            currentAccountName = null;
+            localStorage.removeItem('current_account');
+            
+            // 关闭WebSocket连接
+            if (typeof websocket !== 'undefined' && websocket) {
+                websocket.close();
+            }
+            
+            // 清空消息
+            const messagesList = document.getElementById('messages-list');
+            if (messagesList) {
+                messagesList.innerHTML = '';
+            }
+            
+            // 清空输入框
+            const usernameInput = document.getElementById('username-input');
+            if (usernameInput) {
+                usernameInput.value = '';
+            }
+            
+            // 显示登录界面
+            showLoginInterface();
+            showSuccess('已退出账号');
+        } else {
+            showError(result.message || '退出失败');
+        }
+    } catch (error) {
+        console.error('Error logging out:', error);
+        showError('退出失败：' + error.message);
+    }
+}
+
+function updateUserInfo(username) {
+    const currentUsernameSpan = document.getElementById('current-username');
+    const userInfo = document.getElementById('user-info');
+    if (currentUsernameSpan) {
+        currentUsernameSpan.textContent = username;
+    }
+    if (userInfo) {
+        userInfo.style.display = 'flex';
+    }
+}
 
