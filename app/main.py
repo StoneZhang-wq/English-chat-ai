@@ -91,29 +91,11 @@ app.add_middleware(
 
 @app.get("/", response_class=HTMLResponse)
 async def get_index(request: Request):
-    model_provider = os.getenv("MODEL_PROVIDER")
-    character_name = os.getenv("CHARACTER_NAME", "english_tutor") 
-    tts_provider = os.getenv("TTS_PROVIDER")
-    openai_tts_voice = os.getenv("OPENAI_TTS_VOICE")
-    openai_model = os.getenv("OPENAI_MODEL")
-    ollama_model = os.getenv("OLLAMA_MODEL")
-    voice_speed = os.getenv("VOICE_SPEED")
-    elevenlabs_voice = os.getenv("ELEVENLABS_TTS_VOICE")
-    kokoro_voice = os.getenv("KOKORO_TTS_VOICE")
-    faster_whisper_local = os.getenv("FASTER_WHISPER_LOCAL", "true").lower() == "true"
-
-    return templates.TemplateResponse("index.html", {
+    """默认显示英语学习页面"""
+    character_name = os.getenv("CHARACTER_NAME", "english_tutor")
+    return templates.TemplateResponse("voice_chat.html", {
         "request": request,
-        "model_provider": model_provider,
         "character_name": character_name,
-        "tts_provider": tts_provider,
-        "openai_tts_voice": openai_tts_voice,
-        "openai_model": openai_model,
-        "ollama_model": ollama_model,
-        "voice_speed": voice_speed,
-        "elevenlabs_voice": elevenlabs_voice,
-        "kokoro_voice": kokoro_voice,
-        "faster_whisper_local": faster_whisper_local,
     })
 
 @app.get("/voice_chat", response_class=HTMLResponse)
@@ -553,6 +535,8 @@ async def proxy_openai_realtime(request: Request):
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     add_client(websocket)
+    logger.info(f"✅ WebSocket client connected. Total clients: {len(clients)}")
+    print(f"✅ WebSocket client connected. Total clients: {len(clients)}")
     try:
         while True:
             data = await websocket.receive_text()

@@ -47,38 +47,101 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 初始化WebSocket连接
     function initWebSocket() {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        websocket = new WebSocket(`${protocol}//${window.location.hostname}:8000/ws`);
+        console.log('initWebSocket function called');
         
-        websocket.onopen = () => {
-            console.log('WebSocket connected');
-        };
+        // 如果已经有连接，先关闭
+        if (websocket && websocket.readyState !== WebSocket.CLOSED) {
+            console.log('Closing existing WebSocket connection');
+            websocket.close();
+        }
         
-        websocket.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                handleWebSocketMessage(data);
-            } catch (e) {
-                // 处理文本消息
-                if (event.data.startsWith('You:') || event.data.includes(':')) {
-                    handleTextMessage(event.data);
+        try {
+            // ✅ 修复：使用 window.location.host（自动包含端口或使用默认端口）
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            // window.location.host 自动处理：
+            // - ngrok: 只包含域名（如 xxx.ngrok-free.app）
+            // - localhost: 包含域名和端口（如 localhost:8000）
+            const host = window.location.host || `${window.location.hostname}:8000`;
+            const wsUrl = `${protocol}//${host}/ws`;
+            
+            // ✅ 打印正确的地址供调试
+            console.log('✅ 正确的WebSocket地址:', wsUrl);
+            console.log('✅ 当前页面地址:', window.location.href);
+            console.log('✅ 协议:', protocol);
+            console.log('✅ Host:', host);
+            
+            websocket = new WebSocket(wsUrl);
+            
+            // ✅ 连接成功回调
+            websocket.onopen = () => {
+                console.log('✅ WebSocket连接成功！');
+                console.log('✅ 当前连接状态:', websocket.readyState); // 1=已连接
+            };
+            
+            // ✅ 接收后端消息（使用现有的完整消息处理逻辑）
+            websocket.onmessage = (event) => {
+                console.log('📥 收到后端WebSocket消息:', event.data);
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('✅ 解析后的消息数据:', data);
+                    // ✅ 使用现有的完整消息处理函数（处理所有消息类型）
+                    handleWebSocketMessage(data);
+                } catch (e) {
+                    console.log('⚠️ 解析JSON失败，尝试作为文本消息处理:', e);
+                    // 处理文本消息
+                    if (event.data.startsWith('You:') || event.data.includes(':')) {
+                        handleTextMessage(event.data);
+                    } else {
+                        // 如果不是标准格式，也尝试作为 AI 消息显示
+                        addAIMessage(event.data);
+                    }
                 }
-            }
-        };
-        
-               websocket.onerror = (error) => {
-                   console.error('WebSocket error:', error);
-                   showError('连接错误，请刷新页面');
-               };
-        
-               websocket.onclose = () => {
-                   console.log('WebSocket closed');
-                   setTimeout(initWebSocket, 3000);
-               };
+            };
+            
+            // ✅ 连接错误回调（添加自动重试）
+            websocket.onerror = (error) => {
+                console.error('❌ WebSocket连接错误:', error);
+                console.error('WebSocket readyState:', websocket?.readyState);
+                console.error('WebSocket URL:', wsUrl);
+                // 不显示错误提示，因为可能是 ngrok 警告页面导致的临时错误
+            };
+            
+            // ✅ 连接关闭回调（添加自动重试）
+            websocket.onclose = (event) => {
+                console.log('🔌 WebSocket连接关闭:', event.code, event.reason);
+                console.log('WebSocket wasClean:', event.wasClean);
+                
+                // WebSocket 关闭代码说明：
+                // 1006: 异常关闭（连接失败）
+                // 1000: 正常关闭
+                if (event.code === 1006) {
+                    console.error('❌ WebSocket连接失败 (1006)，可能原因:');
+                    console.error('  1. ngrok 不支持 WebSocket');
+                    console.error('  2. 防火墙阻止 WebSocket');
+                    console.error('  3. 服务器未运行');
+                    console.error('  4. ngrok 警告页面阻止连接');
+                }
+                
+                // ✅ 自动重试（仅在异常关闭时）
+                if (!event.wasClean && event.code !== 1000) {
+                    console.log('⚠️ WebSocket异常关闭，5秒后重试...');
+                    setTimeout(() => {
+                        if (!websocket || websocket.readyState !== WebSocket.OPEN) {
+                            console.log('🔄 重试WebSocket连接...');
+                            initWebSocket();
+                        }
+                    }, 5000);
+                }
+            };
+        } catch (error) {
+            console.error('❌ Error in initWebSocket:', error);
+            showError('WebSocket 初始化失败: ' + error.message);
+        }
     }
 
     // 处理WebSocket消息
     function handleWebSocketMessage(data) {
+        console.log('handleWebSocketMessage called with data:', data);
         if (data.action === 'recording_started') {
             showRecordingIndicator();
         } else if (data.action === 'recording_stopped') {
@@ -94,13 +157,28 @@ document.addEventListener("DOMContentLoaded", function() {
             setInputEnabled(true);
             console.log('AI stopped speaking, input enabled');
         } else if (data.action === 'ai_message') {
+            console.log('Received ai_message action, text:', data.text);
             // 在练习模式下，不显示AI的正常回复（因为AI应该按卡片内容回复）
             if (!practiceState || !practiceState.isActive) {
+                console.log('Calling addAIMessage with text:', data.text);
                 addAIMessage(data.text);
             } else {
                 console.log('Practice mode: ignoring AI message from normal flow');
             }
         } else if (data.action === 'user_message') {
+            console.log('Received user_message action, text:', data.text);
+            // ✅ 如果用户消息已经在界面上显示（通过 sendTextMessage），则跳过
+            // 这样可以避免重复显示，同时也能处理通过语音发送的消息
+            const messagesList = document.getElementById('messages-list');
+            if (messagesList && messagesList.lastElementChild) {
+                const lastMsg = messagesList.lastElementChild;
+                const lastMsgText = lastMsg.querySelector('.text-message')?.textContent;
+                if (lastMsgText === data.text && lastMsg.classList.contains('user')) {
+                    console.log('User message already displayed, skipping WebSocket message');
+                    return;
+                }
+            }
+            
             // 在练习模式下，用户消息已经在handlePracticeInput中显示
             if (!practiceState || !practiceState.isActive) {
                 addUserMessage(data.text);
@@ -108,12 +186,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 console.log('Practice mode: ignoring user message from normal flow');
             }
         } else if (data.message) {
+            console.log('Received message field (fallback), text:', data.message);
             addAIMessage(data.message);
         } else if (data.action === 'error') {
+            console.error('Received error action:', data.message);
             showError(data.message || '发生错误');
             // 发生错误时也重新启用输入
             isProcessing = false;
             setInputEnabled(true);
+        } else {
+            console.warn('Unknown WebSocket message format:', data);
         }
     }
 
@@ -186,6 +268,27 @@ document.addEventListener("DOMContentLoaded", function() {
         isProcessing = true;
         setInputEnabled(false);
         
+        // ✅ 立即显示用户消息（不等待 WebSocket）
+        console.log('Displaying user message immediately:', text);
+        try {
+            addUserMessage(text);
+            console.log('User message displayed successfully');
+        } catch (error) {
+            console.error('Error displaying user message:', error);
+            // 即使出错也尝试显示
+            const messagesList = document.getElementById('messages-list');
+            if (messagesList) {
+                const message = createMessageElement('user', text, 'text');
+                if (message) {
+                    messagesList.appendChild(message);
+                    scrollToBottom();
+                }
+            }
+        }
+        
+        // 清空输入框
+        textInput.value = '';
+        
         try {
             console.log('Sending request to /api/text/send', { text, character: currentCharacter });
             
@@ -210,9 +313,6 @@ document.addEventListener("DOMContentLoaded", function() {
             
             const result = await response.json();
             console.log('Success response:', result);
-            
-            // 清空输入框
-            textInput.value = '';
             
             // 注意：不在这里重新启用输入，等待 ai_stop_speaking 事件
             
@@ -463,6 +563,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 添加用户消息
     function addUserMessage(text) {
+        console.log('addUserMessage called with text:', text);
         // 重新获取 messagesList，确保元素可用
         const messagesList = document.getElementById('messages-list');
         if (!messagesList) {
@@ -471,25 +572,34 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         
         // 防止重复显示相同的消息
-        if (text === lastUserMessage && messagesList.lastElementChild) {
+        // 检查最后一条消息是否已经是这条用户消息
+        if (messagesList.lastElementChild) {
             const lastMsg = messagesList.lastElementChild;
             const lastMsgText = lastMsg.querySelector('.text-message')?.textContent;
             if (lastMsgText === text && lastMsg.classList.contains('user')) {
-                console.log('Duplicate message detected, skipping:', text);
-                isProcessingAudio = false;
+                console.log('Duplicate user message detected, skipping:', text);
                 return;
             }
         }
         
+        console.log('Creating user message element');
         lastUserMessage = text;
         isProcessingAudio = false;
         const message = createMessageElement('user', text, 'text');
+        if (!message) {
+            console.error('Failed to create user message element');
+            return;
+        }
+        
+        console.log('Appending user message to messages list');
         messagesList.appendChild(message);
         scrollToBottom();
+        console.log('User message added successfully');
     }
 
     // 添加AI消息
     function addAIMessage(text) {
+        console.log('addAIMessage called with text:', text);
         // 重新获取 messagesList，确保元素可用
         const messagesList = document.getElementById('messages-list');
         if (!messagesList) {
@@ -497,9 +607,17 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
         
+        console.log('Creating message element for AI message');
         const message = createMessageElement('ai', text, 'text');
+        if (!message) {
+            console.error('Failed to create message element');
+            return;
+        }
+        
+        console.log('Appending message to messages list');
         messagesList.appendChild(message);
         scrollToBottom();
+        console.log('AI message added successfully');
         
         // 自动播放AI语音（如果需要）
         // playAIVoice(text);
@@ -2413,11 +2531,29 @@ async function handleLogin() {
                 }
                 
                 // 初始化其他功能
-                if (typeof window.initWebSocket === 'function') {
-                    window.initWebSocket();
-                } else {
-                    console.error('initWebSocket function not available');
-                }
+                // 延迟 WebSocket 连接，确保用户已经通过 ngrok 警告页面
+                console.log('Initializing WebSocket (delayed for ngrok compatibility)...');
+                setTimeout(() => {
+                    if (typeof window.initWebSocket === 'function') {
+                        console.log('Calling initWebSocket function');
+                        try {
+                            window.initWebSocket();
+                            console.log('initWebSocket called successfully');
+                            
+                            // 检查连接状态，如果失败则重试
+                            setTimeout(() => {
+                                if (!websocket || websocket.readyState !== WebSocket.OPEN) {
+                                    console.warn('⚠️ WebSocket not connected after 3 seconds, retrying...');
+                                    window.initWebSocket();
+                                }
+                            }, 3000);
+                        } catch (error) {
+                            console.error('Error calling initWebSocket:', error);
+                        }
+                    } else {
+                        console.error('initWebSocket function not available');
+                    }
+                }, 2000); // 延迟 2 秒，给用户时间通过警告页面
                 if (typeof window.loadCharacters === 'function') {
                     window.loadCharacters();
                 } else {

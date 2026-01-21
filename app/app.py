@@ -411,12 +411,23 @@ async def send_message_to_clients(message):
         message_str = json.dumps(message)
     else:
         message_str = message
+    
+    print(f"📤 Sending message to clients. Total clients: {len(clients)}")
+    print(f"📤 Message content: {message_str[:100]}...")  # 只打印前100个字符
+    
+    if len(clients) == 0:
+        print("⚠️ Warning: No clients connected!")
+        return
         
     for client in clients:
         try:
+            print(f"📤 Sending to client: {client}")
             await client.send_text(message_str)
+            print(f"✅ Message sent successfully to client")
         except Exception as e:
-            print(f"Error sending message to client: {e}")
+            print(f"❌ Error sending message to client: {e}")
+            import traceback
+            traceback.print_exc()
 
 def save_pcm_as_wav(pcm_data: bytes, file_path: str, sample_rate: int = 24000, channels: int = 1, sample_width: int = 2):
     with wave.open(file_path, 'wb') as wav_file:

@@ -34,7 +34,10 @@ document.addEventListener("DOMContentLoaded", function() {
             websocket.close();
         }
         
-        websocket = new WebSocket(`ws://${window.location.hostname}:8000/ws_enhanced`);
+        // 动态获取 WebSocket 地址，支持 ngrok 等代理
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const host = window.location.host || `${window.location.hostname}:8000`;
+        websocket = new WebSocket(`${protocol}//${host}/ws_enhanced`);
         
         websocket.onopen = function(event) {
             console.log("WebSocket connection established");

@@ -1,5 +1,8 @@
 document.addEventListener("DOMContentLoaded", function() {
-    const websocket = new WebSocket(`ws://${window.location.hostname}:8000/ws`);
+    // 动态获取 WebSocket 地址，支持 ngrok 等代理
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host || `${window.location.hostname}:8000`;
+    const websocket = new WebSocket(`${protocol}//${host}/ws`);
     const themeToggle = document.getElementById('theme-toggle');
     const downloadButton = document.getElementById('download-button');
     const body = document.body;
