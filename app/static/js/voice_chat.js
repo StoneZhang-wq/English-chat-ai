@@ -1,5 +1,8 @@
 // Instagram风格的语音消息界面JavaScript
 
+// 全局变量，让外部函数可以访问
+let websocket = null;
+
 document.addEventListener("DOMContentLoaded", function() {
     // 元素引用
     const messagesList = document.getElementById('messages-list');
@@ -34,7 +37,6 @@ document.addEventListener("DOMContentLoaded", function() {
     let isRecording = false;
     let mediaRecorder = null;
     let audioChunks = [];
-    let websocket = null;
     let currentCharacter = 'english_tutor';
     let audioContext = null;
     let analyser = null;
@@ -1393,27 +1395,78 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
         
-        // 朗读功能
+        // 朗读功能 - 使用后端生成的音频文件（豆包TTS）
         const readBtn = card.querySelector('.read-btn');
+        let isReading = false;
+        let readAudioQueue = [];
+        let currentReadAudio = null;
+        
         readBtn.addEventListener('click', () => {
-            if ('speechSynthesis' in window) {
-                // 使用提取的纯内容，不包含A:和B:标签
-                const cleanText = extractDialogueText(dialogue);
-                const utterance = new SpeechSynthesisUtterance(cleanText);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.9;
-                utterance.pitch = 1;
-                
+            if (isReading) {
+                // 如果正在朗读，停止
+                if (currentReadAudio) {
+                    currentReadAudio.pause();
+                    currentReadAudio.currentTime = 0;
+                    currentReadAudio = null;
+                }
+                readAudioQueue = [];
+                isReading = false;
                 readBtn.innerHTML = `
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="6" y="4" width="4" height="16" rx="1"></rect>
-                        <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                     </svg>
-                    <span>朗读中...</span>
+                    <span>朗读</span>
                 `;
-                readBtn.disabled = true;
-                
-                utterance.onend = () => {
+                readBtn.disabled = false;
+                return;
+            }
+            
+            // 收集所有有音频的对话行
+            const audioLines = dialogueLines.filter(line => line.audio_url);
+            
+            if (audioLines.length === 0) {
+                showError('暂无音频文件，请等待音频生成完成');
+                return;
+            }
+            
+            // 按顺序排列音频（根据对话顺序）
+            const lines = dialogue.split('\n').filter(line => line.trim());
+            readAudioQueue = [];
+            
+            for (const line of lines) {
+                const trimmedLine = line.trim();
+                if (trimmedLine.startsWith('A:') || trimmedLine.startsWith('B:')) {
+                    const content = trimmedLine.replace(/^[AB]:\s*/, '').trim();
+                    const audioLine = audioLines.find(l => l.text === content);
+                    if (audioLine && audioLine.audio_url) {
+                        readAudioQueue.push(audioLine.audio_url);
+                    }
+                }
+            }
+            
+            if (readAudioQueue.length === 0) {
+                showError('暂无可播放的音频文件');
+                return;
+            }
+            
+            // 开始播放
+            isReading = true;
+            readBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+                    <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+                </svg>
+                <span>朗读中...</span>
+            `;
+            readBtn.disabled = false; // 允许点击停止
+            
+            // 播放音频队列
+            let currentIndex = 0;
+            function playNextAudio() {
+                if (currentIndex >= readAudioQueue.length || !isReading) {
+                    // 播放完成
+                    isReading = false;
                     readBtn.innerHTML = `
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
@@ -1421,13 +1474,32 @@ document.addEventListener("DOMContentLoaded", function() {
                         </svg>
                         <span>朗读</span>
                     `;
-                    readBtn.disabled = false;
+                    currentReadAudio = null;
+                    return;
+                }
+                
+                const audioUrl = readAudioQueue[currentIndex];
+                currentReadAudio = new Audio(audioUrl);
+                
+                currentReadAudio.onended = () => {
+                    currentIndex++;
+                    playNextAudio();
                 };
                 
-                speechSynthesis.speak(utterance);
-            } else {
-                showError('您的浏览器不支持语音朗读功能');
+                currentReadAudio.onerror = (e) => {
+                    console.error('Audio playback error:', e);
+                    currentIndex++;
+                    playNextAudio(); // 继续播放下一个
+                };
+                
+                currentReadAudio.play().catch(err => {
+                    console.error('Failed to play audio:', err);
+                    currentIndex++;
+                    playNextAudio(); // 继续播放下一个
+                });
             }
+            
+            playNextAudio();
         });
         
         // 开始练习功能
@@ -2362,14 +2434,42 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // 提供商选择变化
-    providerSelect.addEventListener('change', (e) => {
-        if (websocket && websocket.readyState === WebSocket.OPEN) {
-            websocket.send(JSON.stringify({
-                action: 'set_provider',
-                provider: e.target.value
-            }));
-        }
-    });
+    if (providerSelect) {
+        providerSelect.addEventListener('change', (e) => {
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                websocket.send(JSON.stringify({
+                    action: 'set_provider',
+                    provider: e.target.value
+                }));
+            }
+        });
+    }
+
+    // TTS提供商选择变化
+    const ttsSelect = document.getElementById('tts-select');
+    if (ttsSelect) {
+        ttsSelect.addEventListener('change', (e) => {
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                websocket.send(JSON.stringify({
+                    action: 'set_tts',
+                    tts: e.target.value
+                }));
+            }
+        });
+    }
+
+    // ASR提供商选择变化
+    const asrSelect = document.getElementById('asr-select');
+    if (asrSelect) {
+        asrSelect.addEventListener('change', (e) => {
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                websocket.send(JSON.stringify({
+                    action: 'set_asr',
+                    asr: e.target.value
+                }));
+            }
+        });
+    }
 
     // 初始化检查
     console.log('Initializing voice chat interface...');

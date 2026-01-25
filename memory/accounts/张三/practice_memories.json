@@ -180,6 +180,549 @@
           }
         ]
       }
+    },
+    {
+      "id": "practice_1768929283042",
+      "date": "2026-01-20",
+      "timestamp": "2026-01-20T17:14:43.042Z",
+      "dialogue_topic": "父子关系, 争吵",
+      "review_notes": {
+        "vocabulary": {
+          "key_words": [
+            "argument",
+            "father",
+            "things"
+          ],
+          "new_words": [],
+          "difficult_words": []
+        },
+        "grammar": [],
+        "corrections": [],
+        "suggestions": [
+          "Try to expand your vocabulary related to emotions and relationships, as it will help you articulate personal experiences more clearly.",
+          "Practice using different tenses to describe past events and current situations to improve your communication."
+        ]
+      },
+      "expansion_materials": {
+        "dialogues": [
+          {
+            "scene": "母女间的误解",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hi Mom, do you have a moment to talk about what happened yesterday?"
+              },
+              {
+                "speaker": "B",
+                "text": "Of course, dear. I'm sorry if I made you upset."
+              },
+              {
+                "speaker": "A",
+                "text": "I know you meant well. I just felt like you weren't listening to my side."
+              },
+              {
+                "speaker": "B",
+                "text": "I apologize. Let's make sure to communicate better from now on."
+              }
+            ]
+          },
+          {
+            "scene": "兄弟间的争吵",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hey, I wanted to say sorry for snapping at you earlier."
+              },
+              {
+                "speaker": "B",
+                "text": "It's okay, I understand it was a rough day."
+              },
+              {
+                "speaker": "A",
+                "text": "Thanks for being forgiving. Can we start fresh?"
+              },
+              {
+                "speaker": "B",
+                "text": "Absolutely, let's move on together."
+              }
+            ]
+          },
+          {
+            "scene": "夫妻关系修复",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "I feel like we've been distant lately. Can we talk about it?"
+              },
+              {
+                "speaker": "B",
+                "text": "I agree. I think it's important we address it."
+              },
+              {
+                "speaker": "A",
+                "text": "I miss how close we used to be. Let's work on rebuilding that."
+              },
+              {
+                "speaker": "B",
+                "text": "I miss it too. Let's make more time for each other."
+              }
+            ]
+          },
+          {
+            "scene": "与室友的误会",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hey, about that thing I said yesterday, I didn't mean to sound harsh."
+              },
+              {
+                "speaker": "B",
+                "text": "No worries, I can see it was a misunderstanding."
+              },
+              {
+                "speaker": "A",
+                "text": "Thanks for understanding. Let's make sure to talk things out next time."
+              },
+              {
+                "speaker": "B",
+                "text": "Definitely. Communication is key, right?"
+              }
+            ]
+          },
+          {
+            "scene": "父子关系修复",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Dad, can we talk about the argument we had?"
+              },
+              {
+                "speaker": "B",
+                "text": "Yes, I'm glad you brought it up. I didn't mean to be so harsh."
+              },
+              {
+                "speaker": "A",
+                "text": "I should have been more respectful. Let's try to understand each other better."
+              },
+              {
+                "speaker": "B",
+                "text": "I agree. I'm proud of you for wanting to work on this."
+              }
+            ]
+          }
+        ],
+        "expressions": [
+          {
+            "phrase": "Let's talk about it.",
+            "meaning": "我们谈谈吧。",
+            "example": "I think we need to solve this issue. Let's talk about it."
+          },
+          {
+            "phrase": "I apologize.",
+            "meaning": "我道歉。",
+            "example": "I apologize for my behavior earlier."
+          },
+          {
+            "phrase": "Can we start fresh?",
+            "meaning": "我们可以重新开始吗？",
+            "example": "After the argument, I asked if we could start fresh."
+          },
+          {
+            "phrase": "No worries.",
+            "meaning": "没关系。",
+            "example": "No worries about the mistake, it happens."
+          },
+          {
+            "phrase": "Communication is key.",
+            "meaning": "沟通是关键。",
+            "example": "To solve any conflict, remember that communication is key."
+          }
+        ]
+      }
+    },
+    {
+      "id": "practice_1769277517449",
+      "date": "2026-01-24",
+      "timestamp": "2026-01-24T17:58:37.449Z",
+      "dialogue_topic": "工作英语，词汇学习",
+      "review_notes": {
+        "vocabulary": {
+          "key_words": [
+            "work-related",
+            "work word",
+            "English words"
+          ],
+          "new_words": [
+            "work-related"
+          ],
+          "difficult_words": []
+        },
+        "grammar": [
+          {
+            "point": "情态动词引导的礼貌请求句型",
+            "user_usage": "Can you teach me a simple work word first?",
+            "correct_usage": "Can you teach me a simple work word first? / Could you teach me a simple work word first?",
+            "explanation": "使用Can you...?表达礼貌请求是正确的，若想更贴合职场正式语境，可用Could you...?，语气会更委婉得体"
+          }
+        ],
+        "corrections": [],
+        "suggestions": [
+          "建立职场词汇分类本，按场景（如沟通、办公、汇报等）积累核心词汇，强化work-related这类合成词的搭配记忆（如work-related skills, work-related tasks）",
+          "多练习不同委婉程度的职场请求句型，对比Can you...? / Could you...? / Would you mind...?的使用场景差异，提升表达得体性",
+          "每次学习新职场词汇后，尝试用其造1-2个职场相关例句，加深词汇的实际运用能力"
+        ]
+      },
+      "expansion_materials": {
+        "dialogues": [
+          {
+            "scene": "新人入职报到",
+            "dialogue": [
+              {
+                "speaker": "A (HR)",
+                "text": "Hi Zhang San! Welcome to the team. Today we’ll help you get onboard."
+              },
+              {
+                "speaker": "B (Zhang San)",
+                "text": "Thank you so much! I’m a little nervous but excited."
+              },
+              {
+                "speaker": "A (HR)",
+                "text": "Don’t worry. First, we’ll have a short orientation about company rules."
+              },
+              {
+                "speaker": "B (Zhang San)",
+                "text": "Great. What else do I need to do today?"
+              },
+              {
+                "speaker": "A (HR)",
+                "text": "You’ll meet your team leader and get your work laptop later."
+              },
+              {
+                "speaker": "B (Zhang San)",
+                "text": "That sounds good. Thank you for your help!"
+              }
+            ]
+          },
+          {
+            "scene": "询问日常工作任务",
+            "dialogue": [
+              {
+                "speaker": "A (Colleague)",
+                "text": "Hi Zhang San, do you know your daily work tasks yet?"
+              },
+              {
+                "speaker": "B (Zhang San)",
+                "text": "Not really. Can you tell me, please?"
+              },
+              {
+                "speaker": "A (Colleague)",
+                "text": "Sure. Your main tasks are answering customer emails and filing documents."
+              },
+              {
+                "speaker": "B (Zhang San)",
+                "text": "Okay. Is there any deadline for these tasks?"
+              },
+              {
+                "speaker": "A (Colleague)",
+                "text": "You need to finish the daily emails before 5 PM every day."
+              },
+              {
+                "speaker": "B (Zhang San)",
+                "text": "Got it. I’ll remember that."
+              }
+            ]
+          },
+          {
+            "scene": "午休讨论工作进度",
+            "dialogue": [
+              {
+                "speaker": "A (Colleague)",
+                "text": "Hey Zhang San, how’s your work progress going today?"
+              },
+              {
+                "speaker": "B (Zhang San)",
+                "text": "It’s going well. I’ve finished half of the email replies."
+              },
+              {
+                "speaker": "A (Colleague)",
+                "text": "That’s fast! We need to meet the target of 20 replies today."
+              },
+              {
+                "speaker": "B (Zhang San)",
+                "text": "I think I can finish on time. What about you?"
+              },
+              {
+                "speaker": "A (Colleague)",
+                "text": "I’m still working on document filing, but I’ll be done soon."
+              },
+              {
+                "speaker": "B (Zhang San)",
+                "text": "Let’s keep it up!"
+              }
+            ]
+          },
+          {
+            "scene": "向主管提交周报",
+            "dialogue": [
+              {
+                "speaker": "A (Zhang San)",
+                "text": "Hi Manager, I’ve brought my weekly report for this week."
+              },
+              {
+                "speaker": "B (Manager)",
+                "text": "Thanks Zhang San. Let me take a look. What’s the main update?"
+              },
+              {
+                "speaker": "A (Zhang San)",
+                "text": "I finished all my daily tasks and helped the team with a small project."
+              },
+              {
+                "speaker": "B (Manager)",
+                "text": "Good job. Did you meet any problems?"
+              },
+              {
+                "speaker": "A (Zhang San)",
+                "text": "No, everything went smoothly this week."
+              },
+              {
+                "speaker": "B (Manager)",
+                "text": "Great. Keep up the good work!"
+              }
+            ]
+          }
+        ],
+        "expressions": [
+          {
+            "phrase": "get onboard",
+            "meaning": "入职；熟悉工作环境与流程",
+            "example": "I’m happy to get onboard with this friendly team."
+          },
+          {
+            "phrase": "daily work tasks",
+            "meaning": "日常工作任务",
+            "example": "My daily work tasks include printing reports and answering phone calls."
+          },
+          {
+            "phrase": "deadline",
+            "meaning": "截止日期",
+            "example": "Please tell me the deadline for this assignment so I can plan my time."
+          },
+          {
+            "phrase": "work progress",
+            "meaning": "工作进度",
+            "example": "I need to check my work progress every afternoon to stay on track."
+          },
+          {
+            "phrase": "weekly report",
+            "meaning": "周报",
+            "example": "I usually write my weekly report on Friday afternoon."
+          },
+          {
+            "phrase": "meet the target",
+            "meaning": "完成目标",
+            "example": "We all need to work hard to meet the target this month."
+          },
+          {
+            "phrase": "ask for leave",
+            "meaning": "请假",
+            "example": "I need to ask for leave next Wednesday to see a doctor."
+          },
+          {
+            "phrase": "team leader",
+            "meaning": "团队主管",
+            "example": "My team leader is very helpful and teaches me a lot about the job."
+          }
+        ]
+      }
+    },
+    {
+      "id": "practice_1769324654613",
+      "date": "2026-01-25",
+      "timestamp": "2026-01-25T07:04:14.613Z",
+      "dialogue_topic": "职场英语，词汇学习",
+      "review_notes": {
+        "vocabulary": {
+          "key_words": [
+            "office",
+            "work-related words"
+          ],
+          "new_words": [
+            "office"
+          ],
+          "difficult_words": []
+        },
+        "grammar": [
+          {
+            "point": "感叹句（That's + 形容词）结构",
+            "user_usage": "That's easy!",
+            "correct_usage": "That's easy!",
+            "explanation": "该结构用于简洁表达对事物难易程度的评价，用户使用的语法结构规范，表达准确自然。"
+          },
+          {
+            "point": "情态动词can引导的礼貌请求疑问句",
+            "user_usage": "Can we learn another simple work word next?",
+            "correct_usage": "Can we learn another simple work word next?",
+            "explanation": "结构为\"Can + 主语 + 动词原形 + 其他?\"，用于礼貌地提出请求或询问，用户的表达符合语法规则，语气得体。"
+          },
+          {
+            "point": "限定词another的用法",
+            "user_usage": "another simple work word",
+            "correct_usage": "another simple work word",
+            "explanation": "another用于修饰单数可数名词，指代三者或以上中的“另一个”，此处用来询问另一个职场词汇，使用准确恰当。"
+          }
+        ],
+        "corrections": [],
+        "suggestions": [
+          "鉴于你认为基础职场词汇难度较低，可优先系统积累更多基础级职场核心词汇，如desk, computer, colleague, meeting等，搭建初步的职场词汇体系。",
+          "学习新词汇时，尝试将其融入模拟职场场景的简单句子中练习，例如\"I finish my tasks in the office every day.\"，强化词汇的运用能力。",
+          "制定每日小目标，每天学习3-5个基础职场词汇，通过默写、造句或与他人对话的方式定期复习，巩固记忆效果。",
+          "当掌握一定基础词汇后，可逐步拓展学习职场常用短语，如\"work overtime\", \"attend a meeting\"等，提升职场英语的实用性。"
+        ]
+      },
+      "expansion_materials": {
+        "dialogues": [
+          {
+            "scene": "新同事熟悉办公区域",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hi Zhang San, let me show you around the office."
+              },
+              {
+                "speaker": "B",
+                "text": "Thank you! That's very kind of you."
+              },
+              {
+                "speaker": "A",
+                "text": "This is your desk, and there's a new computer on it."
+              },
+              {
+                "speaker": "B",
+                "text": "Great! Where can I print documents?"
+              },
+              {
+                "speaker": "A",
+                "text": "The printer is over there, next to the meeting room."
+              },
+              {
+                "speaker": "B",
+                "text": "Got it, thanks a lot!"
+              }
+            ]
+          },
+          {
+            "scene": "讨论日常工作任务",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hi Zhang San, let's talk about your daily work tasks."
+              },
+              {
+                "speaker": "B",
+                "text": "Sure, what do I need to do first?"
+              },
+              {
+                "speaker": "A",
+                "text": "Every morning, you need to check and reply to work emails."
+              },
+              {
+                "speaker": "B",
+                "text": "Okay, and what else do I have to do?"
+              },
+              {
+                "speaker": "A",
+                "text": "You also need to write a short daily report before you leave."
+              },
+              {
+                "speaker": "B",
+                "text": "I understand, I'll finish it carefully."
+              }
+            ]
+          },
+          {
+            "scene": "申请病假",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hi Zhang San, you look pale. Are you feeling okay?"
+              },
+              {
+                "speaker": "B",
+                "text": "I'm not feeling well. Can I ask for a sick leave tomorrow?"
+              },
+              {
+                "speaker": "A",
+                "text": "Of course. Take good care of yourself and rest well."
+              },
+              {
+                "speaker": "B",
+                "text": "Thank you. I'll finish my urgent work today."
+              },
+              {
+                "speaker": "A",
+                "text": "Don't worry about it. Health is the most important thing."
+              }
+            ]
+          },
+          {
+            "scene": "询问工作截止日期",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hi Zhang San, have you started the client's report?"
+              },
+              {
+                "speaker": "B",
+                "text": "Yes, but I don't know the deadline. When do I need to finish it?"
+              },
+              {
+                "speaker": "A",
+                "text": "You need to hand it in by this Friday afternoon."
+              },
+              {
+                "speaker": "B",
+                "text": "Okay, I'll make sure to finish it on time."
+              },
+              {
+                "speaker": "A",
+                "text": "If you have any problems, just let me know."
+              }
+            ]
+          }
+        ],
+        "expressions": [
+          {
+            "phrase": "Show sb around the office",
+            "meaning": "带某人参观办公室",
+            "example": "When I joined the company, my colleague showed me around the office."
+          },
+          {
+            "phrase": "Ask for sick leave",
+            "meaning": "请病假",
+            "example": "I have a fever, so I need to ask for sick leave today."
+          },
+          {
+            "phrase": "Check and reply to work emails",
+            "meaning": "查看并回复工作邮件",
+            "example": "My first task every morning is to check and reply to work emails."
+          },
+          {
+            "phrase": "Meet the deadline",
+            "meaning": "赶上截止日期",
+            "example": "We have to work together to meet the deadline of this project."
+          },
+          {
+            "phrase": "Hand in the report",
+            "meaning": "提交报告",
+            "example": "Please hand in the weekly report before 5 PM every Friday."
+          },
+          {
+            "phrase": "Take care of yourself",
+            "meaning": "照顾好自己",
+            "example": "You look tired. Go home early and take care of yourself."
+          }
+        ]
+      }
     }
   ]
 }

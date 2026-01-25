@@ -26,6 +26,23 @@ load_dotenv()
 # Get API keys and base URL
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+# ASR_PROVIDER将从app.py导入，以便支持动态切换
+from .app import ASR_PROVIDER
+
+# 初始化豆包ASR客户端（可选）
+doubao_asr_client = None
+
+try:
+    from .doubao import DoubaoASRClient
+    try:
+        doubao_asr_client = DoubaoASRClient()
+        print(f"{NEON_GREEN}豆包ASR客户端初始化成功{RESET_COLOR}")
+    except ValueError as e:
+        print(f"{YELLOW}豆包ASR客户端初始化失败: {e}{RESET_COLOR}")
+    except Exception as e:
+        print(f"{YELLOW}豆包ASR客户端初始化失败: {e}{RESET_COLOR}")
+except ImportError as e:
+    print(f"{YELLOW}无法导入豆包ASR客户端模块: {e}{RESET_COLOR}")
 
 # Debug flag for audio levels
 DEBUG_AUDIO_LEVELS = os.getenv("DEBUG_AUDIO_LEVELS", "false").lower() == "true"
@@ -75,6 +92,33 @@ def transcribe_with_whisper(audio_file):
     for segment in segments:
         transcription += segment.text + " "
     return transcription.strip()
+
+async def transcribe_with_doubao_asr(audio_file):
+    """Transcribe audio using Doubao ASR API"""
+    global doubao_asr_client
+    
+    if doubao_asr_client is None:
+        raise ValueError("豆包ASR客户端未初始化，请检查环境变量配置")
+    
+    try:
+        # 读取音频文件
+        with open(audio_file, "rb") as f:
+            audio_data = f.read()
+        
+        # 调用豆包ASR API（同步方法，需要在异步环境中运行）
+        transcription = await asyncio.to_thread(
+            doubao_asr_client.transcribe,
+            audio_data
+        )
+        
+        if transcription:
+            return transcription
+        else:
+            raise Exception("豆包ASR返回空结果")
+            
+    except Exception as e:
+        print(f"Error from Doubao ASR API: {e}")
+        raise Exception(f"豆包ASR转录错误: {str(e)}")
 
 async def transcribe_with_openai_api(audio_file, model="gpt-4o-mini-transcribe"):
     """Transcribe audio using OpenAI's API"""
@@ -372,8 +416,11 @@ async def transcribe_audio(transcription_model="gpt-4o-mini-transcribe", use_loc
                 initialize_whisper_model()
                 
             transcription = transcribe_with_whisper(temp_filename)
+        elif ASR_PROVIDER == 'doubao':
+            # Use Doubao ASR API
+            transcription = await transcribe_with_doubao_asr(temp_filename)
         else:
-            # Use OpenAI API
+            # Use OpenAI API (default)
             transcription = await transcribe_with_openai_api(temp_filename, transcription_model)
             
         # Clean up temp file

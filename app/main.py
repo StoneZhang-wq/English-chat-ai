@@ -555,6 +555,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 set_env_variable("MODEL_PROVIDER", message["provider"])
             elif message["action"] == "set_tts":
                 set_env_variable("TTS_PROVIDER", message["tts"])
+            elif message["action"] == "set_asr":
+                set_env_variable("ASR_PROVIDER", message["asr"])
             elif message["action"] == "set_openai_voice":
                 set_env_variable("OPENAI_TTS_VOICE", message["voice"])
             elif message["action"] == "set_openai_model":

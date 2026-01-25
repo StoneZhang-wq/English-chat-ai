@@ -1,0 +1,182 @@
+{
+  "practices": [
+    {
+      "id": "practice_1768929557138",
+      "date": "2026-01-20",
+      "timestamp": "2026-01-20T17:19:17.138Z",
+      "dialogue_topic": "疲惫, 失眠",
+      "review_notes": {
+        "vocabulary": {
+          "key_words": [
+            "tired",
+            "resting",
+            "sleep"
+          ],
+          "new_words": [
+            "exclusive",
+            "rainbow"
+          ],
+          "difficult_words": [
+            "exclusive"
+          ]
+        },
+        "grammar": [
+          {
+            "point": "Comparison",
+            "user_usage": "it's more exclusive than the rainbow",
+            "correct_usage": "I had trouble sleeping; it's more elusive than a rainbow.",
+            "explanation": "The sentence uses 'more exclusive' incorrectly to mean difficult to grasp or hard to achieve, where 'elusive' is the correct adjective that means difficult to find, catch, or achieve."
+          }
+        ],
+        "corrections": [
+          {
+            "user_said": "it's more exclusive than the rainbow.",
+            "correct": "it's more elusive than a rainbow.",
+            "explanation": "'Exclusive' means limited to certain people, whereas 'elusive' means difficult to find or understand, which fits the context of sleep being hard to achieve."
+          }
+        ],
+        "suggestions": [
+          "Practice using adjectives with similar sounding words like 'exclusive' and 'elusive' in different sentences to understand their meanings better.",
+          "Review comparison grammar rules to ensure clarity in expressing comparisons.",
+          "Engage in vocabulary exercises focusing on context to improve word choice accuracy."
+        ]
+      },
+      "expansion_materials": {
+        "dialogues": [
+          {
+            "scene": "办公室交谈",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "You look exhausted today. Everything okay?"
+              },
+              {
+                "speaker": "B",
+                "text": "Yeah, I just couldn't fall asleep last night and kept tossing and turning."
+              },
+              {
+                "speaker": "A",
+                "text": "That sounds tough. Maybe try a warm drink before bed?"
+              },
+              {
+                "speaker": "B",
+                "text": "That's a good idea. I'll give it a shot tonight."
+              }
+            ]
+          },
+          {
+            "scene": "朋友聚会",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hey, you seem a bit out of it. Didn't sleep well?"
+              },
+              {
+                "speaker": "B",
+                "text": "Yeah, I couldn't get comfortable at all."
+              },
+              {
+                "speaker": "A",
+                "text": "Have you tried meditation? It really helps me relax."
+              },
+              {
+                "speaker": "B",
+                "text": "No, but I'll definitely look into it. Thanks for the tip!"
+              }
+            ]
+          },
+          {
+            "scene": "家庭对话",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "You look like you need a nap. Late night?"
+              },
+              {
+                "speaker": "B",
+                "text": "I was up late. Just couldn't switch off my mind."
+              },
+              {
+                "speaker": "A",
+                "text": "How about we go for a short walk? It might help clear your mind."
+              },
+              {
+                "speaker": "B",
+                "text": "That sounds perfect. Fresh air might do the trick."
+              }
+            ]
+          },
+          {
+            "scene": "医生咨询",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Doctor, I've been struggling with severe insomnia."
+              },
+              {
+                "speaker": "B",
+                "text": "Can you tell me more about your sleeping patterns?"
+              },
+              {
+                "speaker": "A",
+                "text": "I find it hard to fall asleep and stay asleep."
+              },
+              {
+                "speaker": "B",
+                "text": "Let's explore some techniques that might improve your sleep quality."
+              }
+            ]
+          },
+          {
+            "scene": "公园闲聊",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "You look like you could use some rest. Everything alright?"
+              },
+              {
+                "speaker": "B",
+                "text": "I had trouble sleeping again last night."
+              },
+              {
+                "speaker": "A",
+                "text": "Listening to calming music before bed helps me. Have you tried that?"
+              },
+              {
+                "speaker": "B",
+                "text": "I haven't, but I'll definitely try it tonight."
+              }
+            ]
+          }
+        ],
+        "expressions": [
+          {
+            "phrase": "toss and turn",
+            "meaning": "辗转反侧",
+            "example": "I couldn't sleep, I just kept tossing and turning."
+          },
+          {
+            "phrase": "can't switch off",
+            "meaning": "无法放下心事",
+            "example": "I can't switch off my mind before bedtime."
+          },
+          {
+            "phrase": "get comfortable",
+            "meaning": "找到舒服的姿势",
+            "example": "It's so hard for me to get comfortable at night."
+          },
+          {
+            "phrase": "switch off",
+            "meaning": "关闭，放松",
+            "example": "I find it difficult to switch off after work."
+          },
+          {
+            "phrase": "clear your mind",
+            "meaning": "清空思绪",
+            "example": "A short walk can help clear your mind before bed."
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -19,6 +19,7 @@ from .app import (
     init_elevenlabs_tts_voice,
     init_set_tts,
     init_set_provider,
+    init_set_asr,
     init_kokoro_tts_voice,
     init_voice_speed,
     send_message_to_clients,
@@ -468,6 +469,8 @@ def set_env_variable(key: str, value: str):
         init_set_tts(value)      # Reinitialize TTS Providers
     if key == "MODEL_PROVIDER":
         init_set_provider(value)  # Reinitialize Model Providers
+    if key == "ASR_PROVIDER":
+        init_set_asr(value)  # Reinitialize ASR Providers
 
 
 def adjust_prompt(mood):

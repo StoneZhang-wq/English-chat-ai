@@ -1102,7 +1102,7 @@ A: That's wonderful to hear.
         
         # 生成每句对话的音频
         import uuid
-        from .app import openai_text_to_speech
+        from .app import TTS_PROVIDER, doubao_text_to_speech, openai_text_to_speech, elevenlabs_text_to_speech, kokoro_text_to_speech
         
         # 创建音频存储目录
         dialogue_id = str(uuid.uuid4())[:8]
@@ -1122,11 +1122,48 @@ A: That's wonderful to hear.
         audio_success_count = 0
         for i, line in enumerate(dialogue_lines):
             try:
-                audio_filename = f"{line['speaker']}_{i}.wav"
+                # 根据TTS_ENCODING环境变量确定输出格式
+                tts_encoding = os.getenv('TTS_ENCODING', 'mp3')
+                if TTS_PROVIDER == 'doubao' and tts_encoding == 'mp3':
+                    audio_filename = f"{line['speaker']}_{i}.mp3"
+                else:
+                    audio_filename = f"{line['speaker']}_{i}.wav"
                 audio_path = os.path.join(audio_dir, audio_filename)
                 
-                # 生成TTS音频
-                await openai_text_to_speech(line['text'], audio_path)
+                # 根据TTS_PROVIDER选择相应的TTS函数
+                if TTS_PROVIDER == 'doubao':
+                    success = await doubao_text_to_speech(line['text'], audio_path)
+                    if not success:
+                        print(f"Warning: Doubao TTS failed for line {i}")
+                        line['audio_url'] = None
+                        continue
+                elif TTS_PROVIDER == 'openai':
+                    await openai_text_to_speech(line['text'], audio_path)
+                elif TTS_PROVIDER == 'elevenlabs':
+                    success = await elevenlabs_text_to_speech(line['text'], audio_path)
+                    if not success:
+                        print(f"Warning: ElevenLabs TTS failed for line {i}")
+                        line['audio_url'] = None
+                        continue
+                elif TTS_PROVIDER == 'kokoro':
+                    success = await kokoro_text_to_speech(line['text'], audio_path)
+                    if not success:
+                        print(f"Warning: Kokoro TTS failed for line {i}")
+                        line['audio_url'] = None
+                        continue
+                elif TTS_PROVIDER == 'sparktts':
+                    # Spark-TTS需要特殊处理，这里暂时跳过或使用其他TTS
+                    print(f"Warning: Spark-TTS not supported for dialogue cards, skipping line {i}")
+                    line['audio_url'] = None
+                    continue
+                else:
+                    # 默认使用豆包TTS
+                    print(f"Warning: Unknown TTS_PROVIDER '{TTS_PROVIDER}', using Doubao TTS as fallback")
+                    success = await doubao_text_to_speech(line['text'], audio_path)
+                    if not success:
+                        print(f"Warning: Doubao TTS fallback failed for line {i}")
+                        line['audio_url'] = None
+                        continue
                 
                 # 检查文件是否成功创建
                 if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:

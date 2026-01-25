@@ -122,6 +122,7 @@
                 <label for="provider-select">* Model Provider:</label>
                 <select id="provider-select">
                     <option value="openai">OpenAI</option>
+                    <option value="doubao">豆包 (Doubao)</option>
                     <option value="ollama">Ollama</option>
                     <option value="xai">XAI</option>
                     <option value="anthropic">Anthropic</option>
@@ -131,9 +132,18 @@
                 <label for="tts-select">* TTS Provider:</label>
                 <select id="tts-select" data-initial="{{ tts_provider }}">
                     <option value="openai">OpenAI</option>
+                    <option value="doubao">豆包 (Doubao)</option>
                     <option value="elevenlabs">ElevenLabs</option>
                     <option value="kokoro">Kokoro-TTS</option>
                     <option value="sparktts">Spark-TTS (Local)</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label for="asr-select">* ASR Provider:</label>
+                <select id="asr-select" data-initial="{{ asr_provider }}">
+                    <option value="openai">OpenAI</option>
+                    <option value="doubao">豆包 (Doubao)</option>
+                    <option value="faster_whisper">Faster Whisper (Local)</option>
                 </select>
             </div>
             <div class="setting-group">

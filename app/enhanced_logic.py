@@ -134,6 +134,49 @@ async def enhanced_text_to_speech(text, detected_mood=None):
         # Create a persistent file path for enhanced audio
         enhanced_audio_filename = os.path.join(outputs_dir, "output_enhanced.wav")
         
+        # Get TTS provider from environment
+        from .app import TTS_PROVIDER, doubao_text_to_speech, elevenlabs_text_to_speech, kokoro_text_to_speech
+        
+        # 如果TTS_PROVIDER不是openai，使用标准TTS函数（不支持voice instructions）
+        if TTS_PROVIDER != 'openai':
+            success = False
+            if TTS_PROVIDER == 'doubao':
+                success = await doubao_text_to_speech(text, enhanced_audio_filename)
+            elif TTS_PROVIDER == 'elevenlabs':
+                success = await elevenlabs_text_to_speech(text, enhanced_audio_filename)
+            elif TTS_PROVIDER == 'kokoro':
+                success = await kokoro_text_to_speech(text, enhanced_audio_filename)
+            
+            if success and os.path.exists(enhanced_audio_filename):
+                # 通知开始播放
+                await send_message_to_enhanced_clients({"action": "ai_start_speaking"})
+                await send_message_to_enhanced_clients({"action": "audio_actually_playing"})
+                # 播放音频
+                try:
+                    wf = wave.open(enhanced_audio_filename, 'rb')
+                    p = pyaudio.PyAudio()
+                    buffer_size = 1024
+                    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+                                    channels=wf.getnchannels(),
+                                    rate=wf.getframerate(),
+                                    output=True,
+                                    frames_per_buffer=buffer_size)
+                    data = wf.readframes(buffer_size)
+                    while data and len(data) > 0:
+                        stream.write(data)
+                        data = wf.readframes(buffer_size)
+                    stream.stop_stream()
+                    stream.close()
+                    p.terminate()
+                    wf.close()
+                except Exception as e:
+                    print(f"Error playing audio: {e}")
+                    estimated_duration = len(text) * 0.08
+                    await asyncio.sleep(estimated_duration)
+                await send_message_to_enhanced_clients({"action": "ai_stop_speaking"})
+            return
+        
+        # 以下代码仅用于OpenAI TTS（支持voice instructions）
         # Get OpenAI API key
         openai_api_key = os.getenv("OPENAI_API_KEY")
         if not openai_api_key:

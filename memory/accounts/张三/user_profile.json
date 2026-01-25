@@ -1,17 +1,26 @@
 {
   "version": "1.0",
   "created_at": "2026-01-20T01:00:01.108755",
-  "last_updated": "2026-01-20T01:01:31.438185",
+  "last_updated": "2026-01-25T02:16:18.346981",
   "name": "张三",
   "age": null,
   "occupation": null,
   "interests": [],
   "preferences": {},
-  "goals": [],
+  "goals": [
+    "学习工作相关的词汇"
+  ],
   "habits": [],
   "english_level": "beginner",
   "english_level_description": "",
   "other_info": {
-    "英文水平": "只能跟外国人日常交流,涉及到比较technical的词,会比较为难"
+    "英文水平": "基础不错，但专业词汇学习有困难",
+    "过往情况": "曾与父亲吵架",
+    "之前提到过和父亲吵架": true,
+    "被询问想学习的工作相关词汇类别": [
+      "行政办公",
+      "技术类",
+      "其他方向"
+    ]
   }
 }

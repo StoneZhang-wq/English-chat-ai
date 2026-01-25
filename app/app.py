@@ -39,9 +39,53 @@ except ImportError as e:
 # Load environment variables
 load_dotenv()
 
-MODEL_PROVIDER = os.getenv('MODEL_PROVIDER', 'openai')
+# ANSI escape codes for colors
+PINK = '\033[95m'
+CYAN = '\033[96m'
+YELLOW = '\033[93m'
+NEON_GREEN = '\033[92m'
+RESET_COLOR = '\033[0m'
+
+MODEL_PROVIDER = os.getenv('MODEL_PROVIDER', 'doubao')  # 默认使用豆包
 CHARACTER_NAME = os.getenv('CHARACTER_NAME', 'english_tutor')
-TTS_PROVIDER = os.getenv('TTS_PROVIDER', 'openai')
+TTS_PROVIDER = os.getenv('TTS_PROVIDER', 'doubao')  # 默认使用豆包
+ASR_PROVIDER = os.getenv('ASR_PROVIDER', 'doubao')  # 默认使用豆包
+
+# 初始化豆包客户端（可选）
+doubao_tts_client = None
+doubao_asr_client = None
+doubao_llm_client = None
+
+try:
+    from .doubao import DoubaoTTSClient, DoubaoASRClient, DoubaoLLMClient
+    # 初始化TTS客户端
+    try:
+        doubao_tts_client = DoubaoTTSClient()
+        print(f"{NEON_GREEN}豆包TTS客户端初始化成功{RESET_COLOR}")
+    except ValueError as e:
+        print(f"{YELLOW}豆包TTS客户端初始化失败: {e}{RESET_COLOR}")
+    except Exception as e:
+        print(f"{YELLOW}豆包TTS客户端初始化失败: {e}{RESET_COLOR}")
+    
+    # 初始化ASR客户端
+    try:
+        doubao_asr_client = DoubaoASRClient()
+        print(f"{NEON_GREEN}豆包ASR客户端初始化成功{RESET_COLOR}")
+    except ValueError as e:
+        print(f"{YELLOW}豆包ASR客户端初始化失败: {e}{RESET_COLOR}")
+    except Exception as e:
+        print(f"{YELLOW}豆包ASR客户端初始化失败: {e}{RESET_COLOR}")
+    
+    # 初始化LLM客户端
+    try:
+        doubao_llm_client = DoubaoLLMClient()
+        print(f"{NEON_GREEN}豆包LLM客户端初始化成功{RESET_COLOR}")
+    except ValueError as e:
+        print(f"{YELLOW}豆包LLM客户端初始化失败: {e}{RESET_COLOR}")
+    except Exception as e:
+        print(f"{YELLOW}豆包LLM客户端初始化失败: {e}{RESET_COLOR}")
+except ImportError as e:
+    print(f"{YELLOW}无法导入豆包客户端模块: {e}{RESET_COLOR}")
 OPENAI_TTS_URL = os.getenv('OPENAI_TTS_URL', 'https://api.openai.com/v1/audio/speech')
 OPENAI_TTS_VOICE = os.getenv('OPENAI_TTS_VOICE', 'alloy')
 OPENAI_MODEL_TTS = os.getenv('OPENAI_MODEL_TTS', 'gpt-4o-mini-tts')
@@ -64,14 +108,6 @@ MAX_CHAR_LENGTH = int(os.getenv('MAX_CHAR_LENGTH', 500))
 VOICE_SPEED = os.getenv('VOICE_SPEED', '1.0')
 SPARKTTS_MODEL_DIR = os.getenv('SPARKTTS_MODEL_DIR', 'pretrained_models/Spark-TTS-0.5B')
 SPARKTTS_MAX_CHARS = int(os.getenv('SPARKTTS_MAX_CHARS', 1000))
-
-# ANSI escape codes for colors
-PINK = '\033[95m'
-CYAN = '\033[96m'
-YELLOW = '\033[93m'
-NEON_GREEN = '\033[92m'
-BLUE = '\033[94m'
-RESET_COLOR = '\033[0m'
 
 # Initialize OpenAI API key if available
 if OPENAI_API_KEY:
@@ -215,6 +251,11 @@ def init_set_provider(set_provider):
     global MODEL_PROVIDER
     MODEL_PROVIDER = set_provider
     print(f"Switched to Model Provider: {set_provider}")
+
+def init_set_asr(set_asr):
+    global ASR_PROVIDER
+    ASR_PROVIDER = set_asr
+    print(f"Switched to ASR Provider: {set_asr}")
     
 
 # Function to display ElevenLabs quota
@@ -391,6 +432,28 @@ async def process_and_play(prompt, audio_file_pth):
             await send_message_to_clients(json.dumps({
                 "action": "error",
                 "message": "Spark-TTS model is not loaded"
+            }))
+    elif TTS_PROVIDER == 'doubao':
+        # 根据TTS_ENCODING环境变量确定输出格式
+        tts_encoding = os.getenv('TTS_ENCODING', 'mp3')
+        if tts_encoding == 'mp3':
+            output_path = os.path.join(output_dir, 'output.mp3')
+        else:
+            output_path = os.path.join(output_dir, 'output.wav')
+        
+        success = await doubao_text_to_speech(prompt, output_path)
+        if success and os.path.exists(output_path):
+            print("Playing generated audio...")
+            await send_message_to_clients(json.dumps({"action": "ai_start_speaking"}))
+            await play_audio(output_path)
+            await send_message_to_clients(json.dumps({"action": "ai_stop_speaking"}))
+        elif not success:
+            print("Failed to generate Doubao audio.")
+        else:
+            print("Error: Doubao audio file not found after generation.")
+            await send_message_to_clients(json.dumps({
+                "action": "error",
+                "message": "豆包TTS音频文件未找到"
             }))
     else:
         print(f"Unknown TTS provider: {TTS_PROVIDER}")
@@ -924,6 +987,42 @@ def chatgpt_streamed(user_input, system_message, mood_prompt, conversation_histo
         except Exception as e:
             full_response = f"Error connecting to Anthropic model: {e}"
             print(f"Debug: Anthropic error - {e}")
+    
+    elif MODEL_PROVIDER == 'doubao':
+        global doubao_llm_client
+        if doubao_llm_client is None:
+            full_response = "Error: 豆包LLM客户端未初始化，请检查环境变量配置"
+            print(f"Debug: {full_response}")
+            return full_response
+        
+        try:
+            # 构建消息列表
+            messages = [{"role": "system", "content": system_message + "\n" + mood_prompt}] + conversation_history + [{"role": "user", "content": user_input}]
+            
+            print(f"Debug: Sending request to Doubao LLM")
+            
+            # 豆包LLM客户端是同步的，直接调用
+            # 注意：豆包LLM API目前不支持流式响应，所以直接返回完整响应
+            response = doubao_llm_client.chat(
+                messages,
+                temperature=0.7
+            )
+            
+            if response:
+                full_response = response
+                # 打印响应（模拟流式输出）
+                print("豆包LLM响应:")
+                print(NEON_GREEN + full_response + RESET_COLOR)
+                print("\n豆包LLM响应完成.")
+            else:
+                full_response = "Error: 豆包LLM返回空响应"
+                print(f"Debug: {full_response}")
+                
+        except Exception as e:
+            full_response = f"Error connecting to Doubao LLM: {e}"
+            print(f"Debug: 豆包LLM错误 - {e}")
+            import traceback
+            traceback.print_exc()
 
     print(f"streaming complete. Response length: {PINK}{len(full_response)}{RESET_COLOR}")
     return full_response
@@ -1137,6 +1236,27 @@ async def analyze_image(image_path, question_prompt):
             print(f"XAI image analysis failed: {e}, falling back to OpenAI")
             return await fallback_to_openai_image_analysis(encoded_image, question_prompt)
     
+    elif MODEL_PROVIDER == 'doubao':
+        # 豆包LLM目前不支持图片分析，使用文本描述
+        global doubao_llm_client
+        if doubao_llm_client is None:
+            print("豆包LLM客户端未初始化，无法进行图片分析")
+            return {"choices": [{"message": {"content": "豆包LLM客户端未初始化，无法进行图片分析"}}]}
+        
+        # 将图片转换为base64描述（简化处理）
+        prompt_with_image = f"{question_prompt}\n\n注意：当前豆包LLM不支持图片分析，请基于文本描述回答。"
+        
+        try:
+            messages = [{"role": "user", "content": prompt_with_image}]
+            response = doubao_llm_client.chat(messages, temperature=0.7)
+            if response:
+                return {"choices": [{"message": {"content": response}}]}
+            else:
+                return {"choices": [{"message": {"content": "豆包LLM返回空响应"}}]}
+        except Exception as e:
+            print(f"豆包LLM图片分析失败: {e}")
+            return {"choices": [{"message": {"content": f"豆包LLM图片分析失败: {str(e)}"}}]}
+    
     else:  # OpenAI as default
         return await fallback_to_openai_image_analysis(encoded_image, question_prompt)
 
@@ -1188,6 +1308,24 @@ async def generate_speech(text, temp_audio_path):
     
     elif TTS_PROVIDER == 'kokoro':
         await kokoro_text_to_speech(text, temp_audio_path)
+    
+    elif TTS_PROVIDER == 'doubao':
+        # 根据TTS_ENCODING环境变量确定输出格式
+        tts_encoding = os.getenv('TTS_ENCODING', 'mp3')
+        # 如果temp_audio_path是.wav但doubao输出mp3，需要调整
+        if tts_encoding == 'mp3' and temp_audio_path.endswith('.wav'):
+            # 生成mp3文件，然后转换为wav
+            temp_mp3_path = temp_audio_path.replace('.wav', '.mp3')
+            success = await doubao_text_to_speech(text, temp_mp3_path)
+            if success and os.path.exists(temp_mp3_path):
+                # 转换mp3到wav
+                audio = AudioSegment.from_mp3(temp_mp3_path)
+                audio.export(temp_audio_path, format="wav")
+                os.remove(temp_mp3_path)  # 删除临时mp3文件
+        else:
+            success = await doubao_text_to_speech(text, temp_audio_path)
+            if not success:
+                print(f"Failed to generate Doubao speech")
 
     else:  # Spark-TTS
         if sparktts_model is not None:
@@ -1268,6 +1406,64 @@ async def kokoro_text_to_speech(text, output_path):
         await send_message_to_clients(json.dumps({
             "action": "error",
             "message": f"Kokoro TTS error: {str(e)}"
+        }))
+        return False
+
+async def doubao_text_to_speech(text, output_path):
+    """Convert text to speech using Doubao TTS API."""
+    global doubao_tts_client
+    
+    if doubao_tts_client is None:
+        print("豆包TTS客户端未初始化")
+        await send_message_to_clients(json.dumps({
+            "action": "error",
+            "message": "豆包TTS客户端未初始化，请检查环境变量配置"
+        }))
+        return False
+    
+    try:
+        # 调用豆包TTS API
+        audio_data = await asyncio.to_thread(
+            doubao_tts_client.synthesize,
+            text
+        )
+        
+        if audio_data:
+            # 根据输出路径的扩展名确定格式
+            file_extension = Path(output_path).suffix.lstrip('.').lower()
+            
+            # 如果输出格式是mp3，直接保存
+            if file_extension == 'mp3':
+                with open(output_path, 'wb') as f:
+                    f.write(audio_data)
+            else:
+                # 如果输出格式是wav，需要转换
+                # 豆包TTS默认返回mp3，需要转换为wav
+                from pydub import AudioSegment
+                import io
+                
+                # 从内存中读取mp3数据
+                audio_segment = AudioSegment.from_mp3(io.BytesIO(audio_data))
+                # 导出为wav
+                audio_segment.export(output_path, format="wav")
+            
+            print("Audio generated successfully with Doubao TTS.")
+            return True
+        else:
+            print("豆包TTS返回空数据")
+            await send_message_to_clients(json.dumps({
+                "action": "error",
+                "message": "豆包TTS生成失败：返回空数据"
+            }))
+            return False
+            
+    except Exception as e:
+        print(f"Error during Doubao TTS generation: {e}")
+        import traceback
+        traceback.print_exc()
+        await send_message_to_clients(json.dumps({
+            "action": "error",
+            "message": f"豆包TTS错误: {str(e)}"
         }))
         return False
 
