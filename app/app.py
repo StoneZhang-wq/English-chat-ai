@@ -46,10 +46,16 @@ YELLOW = '\033[93m'
 NEON_GREEN = '\033[92m'
 RESET_COLOR = '\033[0m'
 
-MODEL_PROVIDER = os.getenv('MODEL_PROVIDER', 'doubao')  # 默认使用豆包
+# 全局API供应商开关：统一控制LLM、TTS、ASR的供应商
+# 可选值：'doubao' 或 'openai'
+API_PROVIDER = os.getenv('API_PROVIDER', 'doubao')  # 默认使用豆包
+
+# 为了向后兼容，保留这些变量，但它们现在从API_PROVIDER派生
+MODEL_PROVIDER = API_PROVIDER
+TTS_PROVIDER = API_PROVIDER
+ASR_PROVIDER = API_PROVIDER
+
 CHARACTER_NAME = os.getenv('CHARACTER_NAME', 'english_tutor')
-TTS_PROVIDER = os.getenv('TTS_PROVIDER', 'doubao')  # 默认使用豆包
-ASR_PROVIDER = os.getenv('ASR_PROVIDER', 'doubao')  # 默认使用豆包
 
 # 初始化豆包客户端（可选）
 doubao_tts_client = None
@@ -216,7 +222,30 @@ def init_voice_speed(speed_value):
     VOICE_SPEED = speed_value
     print(f"Switched to global voice speed: {speed_value}")
 
+def init_set_api_provider(provider):
+    """全局API供应商开关：统一设置LLM、TTS、ASR的供应商"""
+    global API_PROVIDER, MODEL_PROVIDER, TTS_PROVIDER, ASR_PROVIDER, sparktts_model
+    
+    # 只支持 doubao 和 openai
+    if provider not in ['doubao', 'openai']:
+        print(f"{YELLOW}警告: 不支持的API供应商 '{provider}'，仅支持 'doubao' 或 'openai'{RESET_COLOR}")
+        return False
+    
+    API_PROVIDER = provider
+    MODEL_PROVIDER = provider
+    TTS_PROVIDER = provider
+    ASR_PROVIDER = provider
+    
+    # 如果切换到非sparktts，清空sparktts模型
+    if provider != 'sparktts':
+        sparktts_model = None
+    
+    print(f"{NEON_GREEN}已切换到全局API供应商: {provider} (LLM/TTS/ASR统一使用){RESET_COLOR}")
+    return True
+
+# 为了向后兼容，保留这些函数，但它们现在统一调用init_set_api_provider
 def init_set_tts(set_tts):
+    """已废弃：请使用init_set_api_provider设置全局供应商"""
     global TTS_PROVIDER, sparktts_model
     if set_tts == 'sparktts':
         if not SPARKTTS_AVAILABLE:
@@ -243,19 +272,31 @@ def init_set_tts(set_tts):
                 "message": f"Failed to load Spark-TTS model: {str(e)}"
             })))
     else:
-        TTS_PROVIDER = set_tts
-        sparktts_model = None
-        print(f"Switched to TTS Provider: {set_tts}")
+        # 如果设置的是doubao或openai，统一设置全局供应商
+        if set_tts in ['doubao', 'openai']:
+            init_set_api_provider(set_tts)
+        else:
+            TTS_PROVIDER = set_tts
+            sparktts_model = None
+            print(f"Switched to TTS Provider: {set_tts}")
 
 def init_set_provider(set_provider):
+    """已废弃：请使用init_set_api_provider设置全局供应商"""
     global MODEL_PROVIDER
-    MODEL_PROVIDER = set_provider
-    print(f"Switched to Model Provider: {set_provider}")
+    if set_provider in ['doubao', 'openai']:
+        init_set_api_provider(set_provider)
+    else:
+        MODEL_PROVIDER = set_provider
+        print(f"Switched to Model Provider: {set_provider}")
 
 def init_set_asr(set_asr):
+    """已废弃：请使用init_set_api_provider设置全局供应商"""
     global ASR_PROVIDER
-    ASR_PROVIDER = set_asr
-    print(f"Switched to ASR Provider: {set_asr}")
+    if set_asr in ['doubao', 'openai']:
+        init_set_api_provider(set_asr)
+    else:
+        ASR_PROVIDER = set_asr
+        print(f"Switched to ASR Provider: {set_asr}")
     
 
 # Function to display ElevenLabs quota
@@ -318,10 +359,12 @@ output_dir = os.path.join(project_dir, 'outputs')
 os.makedirs(output_dir, exist_ok=True)
 
 print(f"{NEON_GREEN}Using device: {device}{RESET_COLOR}")
-print(f"{NEON_GREEN}Model provider: {MODEL_PROVIDER}{RESET_COLOR}")
-print(f"{NEON_GREEN}Model: {OPENAI_MODEL if MODEL_PROVIDER == 'openai' else XAI_MODEL if MODEL_PROVIDER == 'xai' else ANTHROPIC_MODEL if MODEL_PROVIDER == 'anthropic' else OLLAMA_MODEL}{RESET_COLOR}")
+print(f"{NEON_GREEN}全局API供应商: {API_PROVIDER} (LLM/TTS/ASR统一使用){RESET_COLOR}")
+if API_PROVIDER == 'openai':
+    print(f"{NEON_GREEN}OpenAI Model: {OPENAI_MODEL}{RESET_COLOR}")
+elif API_PROVIDER == 'doubao':
+    print(f"{NEON_GREEN}豆包LLM Model: {os.getenv('LLM_MODEL', '未配置')}{RESET_COLOR}")
 print(f"{NEON_GREEN}Character: {character_display_name}{RESET_COLOR}")
-print(f"{NEON_GREEN}Text-to-Speech provider: {TTS_PROVIDER}{RESET_COLOR}")
 print(f"To stop chatting say Quit or Exit. One moment please loading...")
 
 async def process_and_play(prompt, audio_file_pth):
@@ -345,121 +388,51 @@ async def process_and_play(prompt, audio_file_pth):
         # Using current character audio without printing to CLI
         pass
         
-    if TTS_PROVIDER == 'openai':
+    # 只使用全局API_PROVIDER指定的TTS供应商
+    if API_PROVIDER == 'openai':
         output_path = os.path.join(output_dir, 'output.wav')
         try:
             await openai_text_to_speech(prompt, output_path)
-            # print(f"Generated audio file at: {output_path}")
             if os.path.exists(output_path):
                 print("Playing generated audio...")
                 await send_message_to_clients(json.dumps({"action": "ai_start_speaking"}))
                 await play_audio(output_path)
                 await send_message_to_clients(json.dumps({"action": "ai_stop_speaking"}))
             else:
-                print("Error: Audio file not found.")
+                error_msg = "Error: OpenAI TTS生成失败，音频文件未找到"
+                print(error_msg)
                 await send_message_to_clients(json.dumps({
                     "action": "error",
-                    "message": "Failed to generate audio with OpenAI TTS"
+                    "message": error_msg
                 }))
         except Exception as e:
-            print(f"Error in OpenAI TTS: {str(e)}")
+            error_msg = f"Error: OpenAI TTS API调用失败 - {str(e)}"
+            print(error_msg)
             await send_message_to_clients(json.dumps({
                 "action": "error",
-                "message": f"OpenAI TTS error: {str(e)}"
+                "message": error_msg
             }))
-    elif TTS_PROVIDER == 'elevenlabs':
-        output_path = os.path.join(output_dir, 'output.mp3')
-        success = await elevenlabs_text_to_speech(prompt, output_path)
-        # Only attempt to play if TTS was successful
-        if success and os.path.exists(output_path):
-            print("Playing generated audio...")
-            await send_message_to_clients(json.dumps({"action": "ai_start_speaking"}))
-            await play_audio(output_path)
-            await send_message_to_clients(json.dumps({"action": "ai_stop_speaking"}))
-        elif not success:
-            print("Failed to generate ElevenLabs audio.")
-            # Error notifications are now handled in elevenlabs_text_to_speech
-        else:
-            print("Error: ElevenLabs audio file not found after generation.")
-            await send_message_to_clients(json.dumps({
-                "action": "error",
-                "message": "ElevenLabs audio file not found after generation"
-            }))
-    elif TTS_PROVIDER == 'kokoro':
+    elif API_PROVIDER == 'doubao':
         output_path = os.path.join(output_dir, 'output.wav')
-        success = await kokoro_text_to_speech(prompt, output_path)
-        if success and os.path.exists(output_path):
-            print("Playing generated audio...")
-            await send_message_to_clients(json.dumps({"action": "ai_start_speaking"}))
-            await play_audio(output_path)
-            await send_message_to_clients(json.dumps({"action": "ai_stop_speaking"}))
-        elif not success:
-            print("Failed to generate Kokoro audio.")
-        else:
-            print("Error: Kokoro audio file not found after generation.")
-            await send_message_to_clients(json.dumps({
-                "action": "error",
-                "message": "Kokoro audio file not found after generation"
-            }))
-    elif TTS_PROVIDER == 'sparktts':
-        if sparktts_model is not None:
-            try:
-                # Spark-TTS inference
-                wav_np = await asyncio.to_thread(
-                    sparktts_model.inference,
-                    text=prompt,
-                    prompt_speech_path=Path(current_audio_file),
-                    prompt_text=None,  # Will auto-transcribe if needed
-                    temperature=0.8,
-                    top_k=50,
-                    top_p=0.95
-                )
-                src_path = os.path.join(output_dir, 'output.wav')
-                # Spark-TTS already returns numpy array
-                sf.write(src_path, wav_np, sparktts_model.sample_rate)
-                print("Audio generated successfully with Spark-TTS.")
-                await send_message_to_clients(json.dumps({"action": "ai_start_speaking"}))
-                await play_audio(src_path)
-                await send_message_to_clients(json.dumps({"action": "ai_stop_speaking"}))
-            except Exception as e:
-                print(f"Error during Spark-TTS audio generation: {e}")
-                await send_message_to_clients(json.dumps({
-                    "action": "error",
-                    "message": f"Spark-TTS error: {str(e)}"
-                }))
-        else:
-            print("Spark-TTS model is not loaded. Please ensure initialization succeeded.")
-            await send_message_to_clients(json.dumps({
-                "action": "error",
-                "message": "Spark-TTS model is not loaded"
-            }))
-    elif TTS_PROVIDER == 'doubao':
-        # 根据TTS_ENCODING环境变量确定输出格式
-        tts_encoding = os.getenv('TTS_ENCODING', 'mp3')
-        if tts_encoding == 'mp3':
-            output_path = os.path.join(output_dir, 'output.mp3')
-        else:
-            output_path = os.path.join(output_dir, 'output.wav')
-        
         success = await doubao_text_to_speech(prompt, output_path)
         if success and os.path.exists(output_path):
             print("Playing generated audio...")
             await send_message_to_clients(json.dumps({"action": "ai_start_speaking"}))
             await play_audio(output_path)
             await send_message_to_clients(json.dumps({"action": "ai_stop_speaking"}))
-        elif not success:
-            print("Failed to generate Doubao audio.")
         else:
-            print("Error: Doubao audio file not found after generation.")
+            error_msg = "Error: 豆包TTS API调用失败，请检查环境变量配置"
+            print(error_msg)
             await send_message_to_clients(json.dumps({
                 "action": "error",
-                "message": "豆包TTS音频文件未找到"
+                "message": error_msg
             }))
     else:
-        print(f"Unknown TTS provider: {TTS_PROVIDER}")
+        error_msg = f"Error: 不支持的API供应商 '{API_PROVIDER}'，仅支持 'doubao' 或 'openai'"
+        print(error_msg)
         await send_message_to_clients(json.dumps({
             "action": "error",
-            "message": f"Unknown TTS provider: {TTS_PROVIDER}"
+            "message": error_msg
         }))
 
 
@@ -795,100 +768,15 @@ def analyze_mood(user_input):
     return mood
 
 def chatgpt_streamed(user_input, system_message, mood_prompt, conversation_history):
+    """LLM调用函数：只支持全局API_PROVIDER指定的供应商，失败时直接返回错误"""
     full_response = ""
-    print(f"Debug: streamed started. MODEL_PROVIDER: {MODEL_PROVIDER}")
+    print(f"Debug: streamed started. API_PROVIDER: {API_PROVIDER}")
 
     # Calculate token limit based on character limit Approximate token conversion, So if MAX_CHAR_LENGTH is 500, then 500 * 4 // 3 = 666 tokens
     token_limit = min(4000, MAX_CHAR_LENGTH * 4 // 3)
 
-    if MODEL_PROVIDER == 'ollama':
-        headers = {'Content-Type': 'application/json'}
-        payload = {
-            "model": OLLAMA_MODEL,
-            "messages": [{"role": "system", "content": system_message + "\n" + mood_prompt}] + conversation_history + [{"role": "user", "content": user_input}],
-            "stream": True,
-            "options": {"num_predict": -2, "temperature": 1.0}
-        }
-        try:
-            print(f"Debug: Sending request to Ollama: {OLLAMA_BASE_URL}/v1/chat/completions")
-            response = requests.post(f'{OLLAMA_BASE_URL}/v1/chat/completions', headers=headers, json=payload, stream=True, timeout=30)
-            response.raise_for_status()
-
-            line_buffer = ""
-            for line in response.iter_lines(decode_unicode=True):
-                if line.startswith("data:"):
-                    line = line[5:].strip()
-                if line:
-                    try:
-                        chunk = json.loads(line)
-                        delta_content = chunk['choices'][0]['delta'].get('content', '')
-                        if delta_content:
-                            line_buffer += delta_content
-                            if '\n' in line_buffer:
-                                lines = line_buffer.split('\n')
-                                for line in lines[:-1]:
-                                    print(NEON_GREEN + line + RESET_COLOR)
-                                    full_response += line + '\n'
-                                line_buffer = lines[-1]
-                    except json.JSONDecodeError:
-                        continue
-            if line_buffer:
-                print(NEON_GREEN + line_buffer + RESET_COLOR)
-                full_response += line_buffer
-
-        except requests.exceptions.RequestException as e:
-            full_response = f"Error connecting to Ollama model: {e}"
-            print(f"Debug: Ollama error - {e}")
-    
-    elif MODEL_PROVIDER == 'xai':
-        messages = [{"role": "system", "content": system_message + "\n" + mood_prompt}] + conversation_history + [{"role": "user", "content": user_input}]
-        headers = {
-            'Authorization': f'Bearer {XAI_API_KEY}',
-            'Content-Type': 'application/json'
-        }
-        payload = {
-            "model": XAI_MODEL,
-            "messages": messages,
-            "stream": True,
-            "max_tokens": token_limit  # Approximate token conversion
-        }
-        try:
-            print(f"Debug: Sending request to XAI: {XAI_BASE_URL}")
-            response = requests.post(f"{XAI_BASE_URL}/chat/completions", headers=headers, json=payload, stream=True, timeout=30)
-            response.raise_for_status()
-
-            print("Starting XAI stream...")
-            line_buffer = ""
-            for line in response.iter_lines(decode_unicode=True):
-                if line.startswith("data:"):
-                    line = line[5:].strip()
-                if line:
-                    try:
-                        chunk = json.loads(line)
-                        delta_content = chunk['choices'][0]['delta'].get('content', '')
-                        # print(f"Raw delta_content: {repr(delta_content)}")
-                        if delta_content:
-                            # Clean the weird characters
-                            delta_content = delta_content.replace('â\x80\x99', "'")
-                            line_buffer += delta_content
-                            if '\n' in line_buffer:
-                                lines = line_buffer.split('\n')
-                                for line in lines[:-1]:
-                                    print(NEON_GREEN + line + RESET_COLOR)
-                                    full_response += line + '\n'
-                                line_buffer = lines[-1]
-                    except json.JSONDecodeError:
-                        continue
-            if line_buffer:
-                print(NEON_GREEN + line_buffer + RESET_COLOR)
-                full_response += line_buffer
-            print("\nXAI stream complete.")
-
-        except requests.exceptions.RequestException as e:
-            full_response = f"Error connecting to XAI model: {e}"
-            print(f"Debug: XAI error - {e}")
-
-    elif MODEL_PROVIDER == 'openai':
+    # 只支持全局API_PROVIDER指定的供应商（doubao 或 openai）
+    if API_PROVIDER == 'openai':
         messages = [{"role": "system", "content": system_message + "\n" + mood_prompt}] + conversation_history + [{"role": "user", "content": user_input}]
         headers = {'Authorization': f'Bearer {OPENAI_API_KEY}', 'Content-Type': 'application/json'}
         payload = {
@@ -930,68 +818,10 @@ def chatgpt_streamed(user_input, system_message, mood_prompt, conversation_histo
             full_response = f"Error connecting to OpenAI model: {e}"
             print(f"Debug: OpenAI error - {e}")
             
-    elif MODEL_PROVIDER == 'anthropic':
-        if anthropic is None:
-            full_response = "Error: Anthropic library not installed. Please install using: pip install anthropic"
-            print(f"Debug: {full_response}")
-            return full_response
-            
-        # Convert the conversation history to Anthropic format
-        anthropic_messages = []
-        for msg in conversation_history:
-            anthropic_messages.append({
-                "role": msg["role"],
-                "content": msg["content"]
-            })
-            
-        try:
-            # Create the client with default settings
-            client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-            
-            print(f"Debug: Sending request to Anthropic with model {ANTHROPIC_MODEL}")
-            
-            # Format system and mood prompt for Anthropic
-            system_content = system_message + "\n" + mood_prompt
-            
-            # Start the streaming message request
-            with client.messages.stream(
-            max_tokens=token_limit,  # Approximate token conversion
-            model=ANTHROPIC_MODEL,
-            system=system_content,
-            messages=anthropic_messages + [{"role": "user", "content": user_input}],
-            temperature=0.8
-        ) as stream:
-                print("Starting Anthropic stream...")
-                line_buffer = ""
-                
-                # Process the stream events
-                for event in stream:
-                    if event.type == "content_block_delta":
-                        delta_content = event.delta.text
-                        if delta_content:
-                            line_buffer += delta_content
-                            if '\n' in line_buffer:
-                                lines = line_buffer.split('\n')
-                                for line in lines[:-1]:
-                                    print(NEON_GREEN + line + RESET_COLOR)
-                                    full_response += line + '\n'
-                                line_buffer = lines[-1]
-                
-                # Print any remaining content in the buffer
-                if line_buffer:
-                    print(NEON_GREEN + line_buffer + RESET_COLOR)
-                    full_response += line_buffer
-                    
-                print("\nAnthropic stream complete.")
-        
-        except Exception as e:
-            full_response = f"Error connecting to Anthropic model: {e}"
-            print(f"Debug: Anthropic error - {e}")
-    
-    elif MODEL_PROVIDER == 'doubao':
+    elif API_PROVIDER == 'doubao':
         global doubao_llm_client
         if doubao_llm_client is None:
-            full_response = "Error: 豆包LLM客户端未初始化，请检查环境变量配置"
+            full_response = "Error: 豆包LLM客户端未初始化，请检查环境变量配置（DOUBAO_API_KEY, LLM_MODEL）"
             print(f"Debug: {full_response}")
             return full_response
         
@@ -1015,14 +845,21 @@ def chatgpt_streamed(user_input, system_message, mood_prompt, conversation_histo
                 print(NEON_GREEN + full_response + RESET_COLOR)
                 print("\n豆包LLM响应完成.")
             else:
-                full_response = "Error: 豆包LLM返回空响应"
+                full_response = "Error: 豆包LLM返回空响应，请检查API配置"
                 print(f"Debug: {full_response}")
+                return full_response
                 
         except Exception as e:
-            full_response = f"Error connecting to Doubao LLM: {e}"
+            full_response = f"Error: 豆包LLM API调用失败 - {e}"
             print(f"Debug: 豆包LLM错误 - {e}")
             import traceback
             traceback.print_exc()
+            return full_response  # 直接返回错误，不进行兜底
+    else:
+        # 不支持的供应商
+        full_response = f"Error: 不支持的API供应商 '{API_PROVIDER}'，仅支持 'doubao' 或 'openai'"
+        print(f"Debug: {full_response}")
+        return full_response
 
     print(f"streaming complete. Response length: {PINK}{len(full_response)}{RESET_COLOR}")
     return full_response
@@ -1292,24 +1129,30 @@ async def fallback_to_openai_image_analysis(encoded_image, question_prompt):
 
 
 async def generate_speech(text, temp_audio_path):
-    if TTS_PROVIDER == 'openai':
+    """TTS生成函数：只使用全局API_PROVIDER指定的供应商，失败时直接返回错误"""
+    # 只使用全局API_PROVIDER指定的TTS供应商
+    if API_PROVIDER == 'openai':
+        if not OPENAI_API_KEY:
+            print("Error: OpenAI API密钥未配置")
+            return False
         headers = {"Content-Type": "application/json", "Authorization": f"Bearer {OPENAI_API_KEY}"}
         payload = {"model": OPENAI_MODEL_TTS, "voice": OPENAI_TTS_VOICE, "speed": float(VOICE_SPEED), "input": text, "response_format": "wav"}
-        async with aiohttp.ClientSession() as session:
-            async with session.post(OPENAI_TTS_URL, headers=headers, json=payload, timeout=30) as response:
-                if response.status == 200:
-                    with open(temp_audio_path, "wb") as audio_file:
-                        audio_file.write(await response.read())
-                else:
-                    print(f"Failed to generate speech: {response.status} - {await response.text()}")
-
-    elif TTS_PROVIDER == 'elevenlabs':
-        await elevenlabs_text_to_speech(text, temp_audio_path)
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(OPENAI_TTS_URL, headers=headers, json=payload, timeout=30) as response:
+                    if response.status == 200:
+                        with open(temp_audio_path, "wb") as audio_file:
+                            audio_file.write(await response.read())
+                        return True
+                    else:
+                        error_text = await response.text()
+                        print(f"Error: OpenAI TTS API调用失败 - HTTP {response.status}: {error_text}")
+                        return False
+        except Exception as e:
+            print(f"Error: OpenAI TTS API调用失败 - {str(e)}")
+            return False
     
-    elif TTS_PROVIDER == 'kokoro':
-        await kokoro_text_to_speech(text, temp_audio_path)
-    
-    elif TTS_PROVIDER == 'doubao':
+    elif API_PROVIDER == 'doubao':
         # 根据TTS_ENCODING环境变量确定输出格式
         tts_encoding = os.getenv('TTS_ENCODING', 'mp3')
         # 如果temp_audio_path是.wav但doubao输出mp3，需要调整
@@ -1322,30 +1165,18 @@ async def generate_speech(text, temp_audio_path):
                 audio = AudioSegment.from_mp3(temp_mp3_path)
                 audio.export(temp_audio_path, format="wav")
                 os.remove(temp_mp3_path)  # 删除临时mp3文件
+                return True
+            else:
+                print("Error: 豆包TTS API调用失败")
+                return False
         else:
             success = await doubao_text_to_speech(text, temp_audio_path)
             if not success:
-                print(f"Failed to generate Doubao speech")
-
-    else:  # Spark-TTS
-        if sparktts_model is not None:
-            try:
-                wav_np = await asyncio.to_thread(
-                    sparktts_model.inference,
-                    text=text,
-                    prompt_speech_path=Path(character_audio_file),
-                    prompt_text=None,
-                    temperature=0.8,
-                    top_k=50,
-                    top_p=0.95
-                )
-                # Spark-TTS already returns numpy array
-                sf.write(temp_audio_path, wav_np, sparktts_model.sample_rate)
-                print("Audio generated successfully with Spark-TTS.")
-            except Exception as e:
-                print(f"Error during Spark-TTS audio generation: {e}")
-        else:
-            print("Spark-TTS model is not loaded.")
+                print("Error: 豆包TTS API调用失败")
+            return success
+    else:
+        print(f"Error: 不支持的API供应商 '{API_PROVIDER}'，仅支持 'doubao' 或 'openai'")
+        return False
 
 async def kokoro_text_to_speech(text, output_path):
     """Convert text to speech using Kokoro TTS API."""

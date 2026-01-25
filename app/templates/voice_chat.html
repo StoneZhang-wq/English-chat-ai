@@ -169,33 +169,17 @@
                 <label for="character-select">角色:</label>
                 <select id="character-select"></select>
             </div>
-            <div class="setting-group">
-                <label for="provider-select">模型提供商:</label>
-                <select id="provider-select">
-                    <option value="openai">OpenAI</option>
+            <div class="setting-group" style="border: 2px solid #4CAF50; padding: 10px; border-radius: 8px; background: #f0f9f0;">
+                <label for="api-provider-select" style="font-weight: bold; color: #2E7D32;">
+                    🌐 全局API供应商 (LLM/TTS/ASR统一):
+                </label>
+                <select id="api-provider-select" style="font-size: 14px; padding: 8px;">
                     <option value="doubao">豆包 (Doubao)</option>
-                    <option value="ollama">Ollama</option>
-                    <option value="xai">XAI</option>
-                    <option value="anthropic">Anthropic</option>
-                </select>
-            </div>
-            <div class="setting-group">
-                <label for="tts-select">TTS提供商:</label>
-                <select id="tts-select">
                     <option value="openai">OpenAI</option>
-                    <option value="doubao">豆包 (Doubao)</option>
-                    <option value="elevenlabs">ElevenLabs</option>
-                    <option value="kokoro">Kokoro-TTS</option>
-                    <option value="sparktts">Spark-TTS (Local)</option>
                 </select>
-            </div>
-            <div class="setting-group">
-                <label for="asr-select">ASR提供商:</label>
-                <select id="asr-select">
-                    <option value="openai">OpenAI</option>
-                    <option value="doubao">豆包 (Doubao)</option>
-                    <option value="faster_whisper">Faster Whisper (Local)</option>
-                </select>
+                <p style="font-size: 12px; color: #666; margin-top: 5px; margin-bottom: 0;">
+                    ⚠️ 设置后将统一使用该供应商的LLM、TTS和ASR服务
+                </p>
             </div>
             <div class="setting-group">
                 <label for="custom-length-input">自定义对话句数 (2-30):</label>

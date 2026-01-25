@@ -1,14 +1,16 @@
 {
   "version": "1.0",
   "created_at": "2026-01-20T01:00:01.108755",
-  "last_updated": "2026-01-25T02:16:18.346981",
+  "last_updated": "2026-01-25T15:58:09.950886",
   "name": "张三",
   "age": null,
   "occupation": null,
   "interests": [],
   "preferences": {},
   "goals": [
-    "学习工作相关的词汇"
+    "学习工作相关的词汇",
+    "学习工作相关词汇",
+    "解决专业术语掌握困难的问题"
   ],
   "habits": [],
   "english_level": "beginner",
@@ -21,6 +23,7 @@
       "行政办公",
       "技术类",
       "其他方向"
-    ]
+    ],
+    "曾与父亲吵架": true
   }
 }

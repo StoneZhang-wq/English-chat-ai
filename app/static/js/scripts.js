@@ -13,8 +13,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const messages = document.getElementById('messages');
     const micIcon = document.getElementById('mic-icon');
     const characterSelect = document.getElementById('character-select');
-    const providerSelect = document.getElementById('provider-select');
-    const ttsSelect = document.getElementById('tts-select');
+    const apiProviderSelect = document.getElementById('api-provider-select');
     const openaiVoiceSelect = document.getElementById('openai-voice-select');
     
     // Set initial TTS provider from server
@@ -384,8 +383,21 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
+    // 全局API供应商选择器
+    if (apiProviderSelect) {
+        apiProviderSelect.addEventListener('change', function() {
+            const selectedProvider = apiProviderSelect.value;
+            console.log(`切换全局API供应商到: ${selectedProvider}`);
+            websocket.send(JSON.stringify({ 
+                action: "set_api_provider", 
+                provider: selectedProvider 
+            }));
+        });
+    }
+
     function setProvider() {
-        const provider = providerSelect.value;
+        // 已废弃：请使用全局API供应商选择器
+        const provider = providerSelect ? providerSelect.value : 'openai';
         websocket.send(JSON.stringify({ action: "set_provider", provider: provider }));
         
         // When Ollama is selected, fetch available models
@@ -395,7 +407,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function setTTS() {
-        const selectedTTS = document.getElementById('tts-select').value;
+        // 已废弃：请使用全局API供应商选择器
+        const selectedTTS = document.getElementById('tts-select') ? document.getElementById('tts-select').value : 'openai';
         websocket.send(JSON.stringify({ action: "set_tts", tts: selectedTTS }));
     }
 
@@ -528,8 +541,9 @@ document.addEventListener("DOMContentLoaded", function() {
         .catch(error => console.error('Error setting character:', error));
     });
 
-    providerSelect.addEventListener('change', setProvider);
-    ttsSelect.addEventListener('change', setTTS);
+    // 已废弃：使用全局API供应商选择器
+    // providerSelect.addEventListener('change', setProvider);
+    // ttsSelect.addEventListener('change', setTTS);
     openaiVoiceSelect.addEventListener('change', setOpenAIVoice);
     openaiModelSelect.addEventListener('change', setOpenAIModel);
     ollamaModelSelect.addEventListener('change', setOllamaModel);

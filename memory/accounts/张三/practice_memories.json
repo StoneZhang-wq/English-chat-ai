@@ -723,6 +723,307 @@
           }
         ]
       }
+    },
+    {
+      "id": "practice_1769327794948",
+      "date": "2026-01-25",
+      "timestamp": "2026-01-25T07:56:34.948Z",
+      "dialogue_topic": "工作英语，词汇学习",
+      "review_notes": {
+        "vocabulary": {
+          "key_words": [
+            "desk",
+            "work-related"
+          ],
+          "new_words": [
+            "desk"
+          ],
+          "difficult_words": []
+        },
+        "grammar": [
+          {
+            "point": "单音节形容词的比较级构成",
+            "user_usage": "more easy",
+            "correct_usage": "easier",
+            "explanation": "easy是单音节形容词，其比较级变化规则为将词尾的y改为i再加-er，构成easier；more通常用于多音节形容词（如difficult, important）或部分双音节形容词前构成比较级，不适用于单音节形容词easy。"
+          }
+        ],
+        "corrections": [
+          {
+            "user_said": "I want to learn more easy work-related words.",
+            "correct": "I want to learn easier work-related words.",
+            "explanation": "用户使用了错误的比较级表达more easy，正确的比较级形式应为easier。单音节形容词的比较级一般通过在词尾加-er（或变y为i加-er）构成，而more多用于多音节形容词前。"
+          }
+        ],
+        "suggestions": [
+          "系统学习形容词比较级和最高级的构成规则，重点区分单音节、双音节和多音节形容词的不同变化方式，通过造句练习巩固正确用法。",
+          "按办公场景类别积累基础工作词汇，比如办公家具类（chair, cabinet）、办公用品类（pen, notebook）等，逐步扩大词汇量。",
+          "在日常表达中刻意练习正确的比较级结构，遇到不确定的形容词变化可及时查阅语法资料或进行专项对比练习。"
+        ]
+      },
+      "expansion_materials": {
+        "dialogues": [
+          {
+            "scene": "线上英语一对一课堂：拓展办公基础词汇",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hi Zhang San! Last time we learned the word \"desk\". Do you remember what it means?"
+              },
+              {
+                "speaker": "B",
+                "text": "Yes! It means \"办公桌\" in Chinese. I use my desk every day at work."
+              },
+              {
+                "speaker": "A",
+                "text": "Great job! Now let's learn another easy word: \"chair\". It's the thing you sit on at your desk."
+              },
+              {
+                "speaker": "B",
+                "text": "Oh right! I sit on a chair in front of my desk. Can we learn one more?"
+              },
+              {
+                "speaker": "A",
+                "text": "Sure! Next is \"laptop\"—it's a small computer you can carry around."
+              },
+              {
+                "speaker": "B",
+                "text": "I have a laptop too! That's easy to remember."
+              }
+            ]
+          },
+          {
+            "scene": "办公室茶水间：同事教新人办公物品词汇",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hey Zhang San, need help finding something?"
+              },
+              {
+                "speaker": "B",
+                "text": "Yes! I'm looking for the place to put my documents, but I don't know the English word for it."
+              },
+              {
+                "speaker": "A",
+                "text": "Oh, that's a \"file cabinet\"—it's the big metal cabinet over there."
+              },
+              {
+                "speaker": "B",
+                "text": "Thank you! Can you tell me another simple work word?"
+              },
+              {
+                "speaker": "A",
+                "text": "Of course! \"Printer\"—it's the machine that prints out papers from your computer."
+              },
+              {
+                "speaker": "B",
+                "text": "Got it! I'll need to use the printer later."
+              }
+            ]
+          },
+          {
+            "scene": "求职准备：朋友帮忙教基础求职词汇",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Zhang San, you're preparing for a job interview, right? Do you know some basic work-related words?"
+              },
+              {
+                "speaker": "B",
+                "text": "I know \"desk\", but I need more. Can you teach me?"
+              },
+              {
+                "speaker": "A",
+                "text": "Let's start with \"resume\"—it's the document with your work experience and skills."
+              },
+              {
+                "speaker": "B",
+                "text": "Oh, that's my \"简历\"! What about the word for the meeting with the boss?"
+              },
+              {
+                "speaker": "A",
+                "text": "That's \"interview\"—you'll talk to the interviewer about your background."
+              },
+              {
+                "speaker": "B",
+                "text": "Thanks! That helps a lot for my interview."
+              }
+            ]
+          },
+          {
+            "scene": "远程会议前：询问会议设备词汇",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Zhang San, are you ready for the online meeting later?"
+              },
+              {
+                "speaker": "B",
+                "text": "Almost! But I don't know the English word for the thing I speak into."
+              },
+              {
+                "speaker": "A",
+                "text": "That's a \"mic\"—short for microphone. You need to turn on your mic to talk."
+              },
+              {
+                "speaker": "B",
+                "text": "Got it! And what's the word for the thing that plays sound?"
+              },
+              {
+                "speaker": "A",
+                "text": "That's a \"speaker\". Make sure your speaker is on so you can hear everyone."
+              },
+              {
+                "speaker": "B",
+                "text": "Thanks! I won't get confused now."
+              }
+            ]
+          }
+        ],
+        "expressions": [
+          {
+            "phrase": "Can you teach me more work-related easy words?",
+            "meaning": "你能教我更多简单的工作相关词汇吗？",
+            "example": "A: I learned the word \"desk\" in my English class today. B: Can you teach me more work-related easy words?"
+          },
+          {
+            "phrase": "What’s the English word for...?",
+            "meaning": "……的英语单词是什么？",
+            "example": "A: What’s the English word for \"打印机\"? B: It's \"printer\"."
+          },
+          {
+            "phrase": "How do you pronounce this word?",
+            "meaning": "这个单词怎么发音？",
+            "example": "A: This word is \"laptop\". B: How do you pronounce this word? A: /ˈlæptɒp/."
+          },
+          {
+            "phrase": "This word means... in Chinese.",
+            "meaning": "这个单词在中文里的意思是……",
+            "example": "A: Do you know the word \"resume\"? B: This word means \"简历\" in Chinese."
+          },
+          {
+            "phrase": "I need to learn more basic work words for...",
+            "meaning": "我需要为……学习更多基础的工作词汇。",
+            "example": "A: Why are you practicing English every day? B: I need to learn more basic work words for my new job."
+          }
+        ]
+      }
+    },
+    {
+      "id": "practice_1769327935337",
+      "date": "2026-01-25",
+      "timestamp": "2026-01-25T07:58:55.337Z",
+      "dialogue_topic": "工作, 词汇",
+      "review_notes": {
+        "vocabulary": {
+          "key_words": [
+            "office"
+          ],
+          "new_words": [],
+          "difficult_words": []
+        },
+        "grammar": [],
+        "corrections": [],
+        "suggestions": [
+          "尝试学习更多与工作相关的词汇，例如'department', 'colleague', 'meeting'等，以扩展词汇量。",
+          "进一步提升对基本工作词汇的理解和记忆，例如通过使用这些词汇造句。",
+          "利用词典或在线资源查找词汇的定义，以更好地掌握每个词汇的使用语境。"
+        ]
+      },
+      "expansion_materials": {
+        "dialogues": [
+          {
+            "scene": "Office Vocabulary",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hey, do you know what 'meeting' means?"
+              },
+              {
+                "speaker": "B",
+                "text": "Yes, a meeting is when people come together to discuss or decide on something."
+              },
+              {
+                "speaker": "A",
+                "text": "Oh, I see. What other words are related to meetings?"
+              },
+              {
+                "speaker": "B",
+                "text": "Well, you might hear 'agenda' or 'minutes'. Both are important for meetings."
+              }
+            ]
+          },
+          {
+            "scene": "Learning New Office Terms",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Can you explain what 'deadline' means?"
+              },
+              {
+                "speaker": "B",
+                "text": "Certainly! A deadline is the latest time by which a task must be completed."
+              },
+              {
+                "speaker": "A",
+                "text": "Got it. Are there other words similar to 'deadline'?"
+              },
+              {
+                "speaker": "B",
+                "text": "Yes, 'due date' is another term you might hear."
+              }
+            ]
+          },
+          {
+            "scene": "Understanding Workplace Jargon",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "I often hear the word 'promotion' at work. What does it mean?"
+              },
+              {
+                "speaker": "B",
+                "text": "Promotion means you are advanced to a higher position or rank."
+              },
+              {
+                "speaker": "A",
+                "text": "Interesting. Are promotions common in your industry?"
+              },
+              {
+                "speaker": "B",
+                "text": "It really depends, but they are generally used to reward strong performance."
+              }
+            ]
+          }
+        ],
+        "expressions": [
+          {
+            "phrase": "meeting",
+            "meaning": "会议",
+            "example": "We have a team meeting every Monday morning."
+          },
+          {
+            "phrase": "agenda",
+            "meaning": "议程",
+            "example": "The meeting agenda was sent out yesterday."
+          },
+          {
+            "phrase": "deadline",
+            "meaning": "截止日期",
+            "example": "The deadline for the project is next Friday."
+          },
+          {
+            "phrase": "promotion",
+            "meaning": "晋升",
+            "example": "She received a promotion after her successful project."
+          },
+          {
+            "phrase": "due date",
+            "meaning": "到期日",
+            "example": "The due date for this assignment is this Thursday."
+          }
+        ]
+      }
     }
   ]
 }

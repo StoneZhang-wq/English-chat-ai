@@ -26,8 +26,8 @@ load_dotenv()
 # Get API keys and base URL
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
-# ASR_PROVIDER将从app.py导入，以便支持动态切换
-from .app import ASR_PROVIDER
+# API_PROVIDER将从app.py导入，以便支持动态切换
+from .app import API_PROVIDER
 
 # 初始化豆包ASR客户端（可选）
 doubao_asr_client = None
@@ -94,11 +94,16 @@ def transcribe_with_whisper(audio_file):
     return transcription.strip()
 
 async def transcribe_with_doubao_asr(audio_file):
-    """Transcribe audio using Doubao ASR API"""
+    """Transcribe audio using Doubao ASR API
+    
+    Returns:
+        str: 转录文本，如果失败则返回None
+    """
     global doubao_asr_client
     
     if doubao_asr_client is None:
-        raise ValueError("豆包ASR客户端未初始化，请检查环境变量配置")
+        print("Error: 豆包ASR客户端未初始化，请检查环境变量配置（VOLCENGINE_ASR_APP_ID, VOLCENGINE_ASR_ACCESS_TOKEN）")
+        return None
     
     try:
         # 读取音频文件
@@ -114,16 +119,22 @@ async def transcribe_with_doubao_asr(audio_file):
         if transcription:
             return transcription
         else:
-            raise Exception("豆包ASR返回空结果")
+            print("Error: 豆包ASR返回空结果")
+            return None
             
     except Exception as e:
-        print(f"Error from Doubao ASR API: {e}")
-        raise Exception(f"豆包ASR转录错误: {str(e)}")
+        print(f"Error: 豆包ASR API调用失败 - {str(e)}")
+        return None
 
 async def transcribe_with_openai_api(audio_file, model="gpt-4o-mini-transcribe"):
-    """Transcribe audio using OpenAI's API"""
+    """Transcribe audio using OpenAI's API
+    
+    Returns:
+        str: 转录文本，如果失败则返回None
+    """
     if not OPENAI_API_KEY:
-        raise ValueError("API key missing. Please set OPENAI_API_KEY in your environment.")
+        print("Error: OpenAI API密钥未配置，请在.env文件中设置OPENAI_API_KEY")
+        return None
     
     # Construct API URL from base URL (support proxy APIs)
     # If OPENAI_BASE_URL is like "https://api.gptsapi.net/v1", use it directly
@@ -143,30 +154,34 @@ async def transcribe_with_openai_api(audio_file, model="gpt-4o-mini-transcribe")
     
     api_url = f"{base_url}/audio/transcriptions"
     
-    async with aiohttp.ClientSession() as session:
-        with open(audio_file, "rb") as audio_file_data:
-            form_data = aiohttp.FormData()
-            form_data.add_field('file', 
-                                audio_file_data.read(),
-                                filename=os.path.basename(audio_file),
-                                content_type='audio/wav')
-            
-            # Use the model directly
-            form_data.add_field('model', model)
-            
-            headers = {
-                "Authorization": f"Bearer {OPENAI_API_KEY}"
-            }
-            
-            async with session.post(api_url, data=form_data, headers=headers) as response:
-                if response.status == 200:
-                    result = await response.json()
-                    transcription = result.get("text", "")
-                    return transcription
-                else:
-                    error_text = await response.text()
-                    print(f"Error from OpenAI API: {error_text}")
-                    raise Exception(f"Transcription error: {response.status} - {error_text}")
+    try:
+        async with aiohttp.ClientSession() as session:
+            with open(audio_file, "rb") as audio_file_data:
+                form_data = aiohttp.FormData()
+                form_data.add_field('file', 
+                                    audio_file_data.read(),
+                                    filename=os.path.basename(audio_file),
+                                    content_type='audio/wav')
+                
+                # Use the model directly
+                form_data.add_field('model', model)
+                
+                headers = {
+                    "Authorization": f"Bearer {OPENAI_API_KEY}"
+                }
+                
+                async with session.post(api_url, data=form_data, headers=headers) as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        transcription = result.get("text", "")
+                        return transcription
+                    else:
+                        error_text = await response.text()
+                        print(f"Error: OpenAI ASR API调用失败 - HTTP {response.status}: {error_text}")
+                        return None
+    except Exception as e:
+        print(f"Error: OpenAI ASR API调用失败 - {str(e)}")
+        return None
 
 def detect_silence(data, threshold=512, chunk_size=1024):
     """Detect silence in audio data"""
@@ -387,13 +402,15 @@ async def send_status_message(callback, message):
 async def transcribe_audio(transcription_model="gpt-4o-mini-transcribe", use_local=False, send_status_callback=None):
     """Main function to record audio and transcribe it
     
+    注意：use_local参数已废弃，现在只使用全局API_PROVIDER指定的供应商
+    
     Args:
-        transcription_model: Model to use for OpenAI transcription
-        use_local: Whether to use local Faster Whisper
+        transcription_model: Model to use for OpenAI transcription (仅用于OpenAI)
+        use_local: 已废弃，不再支持本地Faster Whisper
         send_status_callback: Callback to send status messages
     
     Returns:
-        Transcribed text
+        Transcribed text or error message
     """
     try:
         # Create an async wrapper for the callback
@@ -409,19 +426,50 @@ async def transcribe_audio(transcription_model="gpt-4o-mini-transcribe", use_loc
         if not temp_filename:
             return None
             
-        # Transcribe based on method
-        if use_local:
-            # Lazy initialize Faster Whisper if needed
-            if whisper_model is None:
-                initialize_whisper_model()
-                
-            transcription = transcribe_with_whisper(temp_filename)
-        elif ASR_PROVIDER == 'doubao':
+        # 只使用全局API_PROVIDER指定的ASR供应商
+        transcription = None
+        if API_PROVIDER == 'doubao':
             # Use Doubao ASR API
             transcription = await transcribe_with_doubao_asr(temp_filename)
-        else:
-            # Use OpenAI API (default)
+            if transcription is None:
+                error_msg = "Error: 豆包ASR API调用失败，请检查环境变量配置"
+                print(error_msg)
+                if send_status_callback:
+                    await send_status_message(send_status_callback, {
+                        "action": "error",
+                        "message": error_msg
+                    })
+                return error_msg
+        elif API_PROVIDER == 'openai':
+            # Use OpenAI API
+            if not OPENAI_API_KEY:
+                error_msg = "Error: OpenAI API密钥未配置，请在.env文件中设置OPENAI_API_KEY"
+                print(error_msg)
+                if send_status_callback:
+                    await send_status_message(send_status_callback, {
+                        "action": "error",
+                        "message": error_msg
+                    })
+                return error_msg
             transcription = await transcribe_with_openai_api(temp_filename, transcription_model)
+            if transcription is None:
+                error_msg = "Error: OpenAI ASR API调用失败"
+                print(error_msg)
+                if send_status_callback:
+                    await send_status_message(send_status_callback, {
+                        "action": "error",
+                        "message": error_msg
+                    })
+                return error_msg
+        else:
+            error_msg = f"Error: 不支持的API供应商 '{API_PROVIDER}'，仅支持 'doubao' 或 'openai'"
+            print(error_msg)
+            if send_status_callback:
+                await send_status_message(send_status_callback, {
+                    "action": "error",
+                    "message": error_msg
+                })
+            return error_msg
             
         # Clean up temp file
         try:
@@ -432,10 +480,11 @@ async def transcribe_audio(transcription_model="gpt-4o-mini-transcribe", use_loc
         return transcription
         
     except Exception as e:
-        print(f"Error in transcription: {e}")
+        error_msg = f"Error: ASR调用失败 - {str(e)}"
+        print(error_msg)
         if send_status_callback:
             await send_status_message(send_status_callback, {
                 "action": "error", 
-                "message": f"Error: {str(e)}"
+                "message": error_msg
             })
-        return f"Error: {str(e)}" 
+        return error_msg 

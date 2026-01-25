@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const closeSettings = document.getElementById('close-settings');
     const customLengthInput = document.getElementById('custom-length-input');
     const characterSelect = document.getElementById('character-select');
-    const providerSelect = document.getElementById('provider-select');
+    const apiProviderSelect = document.getElementById('api-provider-select');
     const textInput = document.getElementById('text-input');
     const sendBtn = document.getElementById('send-btn');
     const startEnglishBtn = document.getElementById('start-english-btn');
@@ -86,9 +86,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 try {
                     const data = JSON.parse(event.data);
                     console.log('✅ 解析后的消息数据:', data);
+                    console.log('🔍 准备调用 handleWebSocketMessage, action:', data.action);
+                    
                     // ✅ 使用现有的完整消息处理函数（处理所有消息类型）
                     handleWebSocketMessage(data);
+                    console.log('✅ handleWebSocketMessage 调用完成');
                 } catch (e) {
+                    console.error('❌ 处理WebSocket消息时出错:', e);
                     console.log('⚠️ 解析JSON失败，尝试作为文本消息处理:', e);
                     // 处理文本消息
                     if (event.data.startsWith('You:') || event.data.includes(':')) {
@@ -143,7 +147,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 处理WebSocket消息
     function handleWebSocketMessage(data) {
-        console.log('handleWebSocketMessage called with data:', data);
+        console.log('🔍 [handleWebSocketMessage] 函数被调用');
+        console.log('🔍 [handleWebSocketMessage] data:', JSON.stringify(data));
+        console.log('🔍 [handleWebSocketMessage] data.action:', data.action);
+        console.log('🔍 [handleWebSocketMessage] data.text:', data.text);
+        
+        if (!data || !data.action) {
+            console.warn('⚠️ [handleWebSocketMessage] data 或 data.action 为空');
+            return;
+        }
+        
         if (data.action === 'recording_started') {
             showRecordingIndicator();
         } else if (data.action === 'recording_stopped') {
@@ -159,13 +172,37 @@ document.addEventListener("DOMContentLoaded", function() {
             setInputEnabled(true);
             console.log('AI stopped speaking, input enabled');
         } else if (data.action === 'ai_message') {
-            console.log('Received ai_message action, text:', data.text);
+            console.log('🎯 [handleWebSocketMessage] 进入 ai_message 分支');
+            console.log('🎯 [handleWebSocketMessage] text:', data.text);
+            console.log('🎯 [handleWebSocketMessage] practiceState:', practiceState);
+            console.log('🎯 [handleWebSocketMessage] practiceState?.isActive:', practiceState?.isActive);
+            
+            if (!data.text) {
+                console.error('❌ [handleWebSocketMessage] data.text 为空！');
+                return;
+            }
+            
+            // 检查消息是否已经显示（防止重复）
+            const messagesList = document.getElementById('messages-list');
+            if (messagesList) {
+                const lastMessage = messagesList.lastElementChild;
+                if (lastMessage && lastMessage.classList.contains('ai')) {
+                    const lastText = lastMessage.querySelector('.text-message')?.textContent;
+                    if (lastText === data.text) {
+                        console.log('⚠️ [handleWebSocketMessage] 消息已显示，跳过重复显示');
+                        return;
+                    }
+                }
+            }
+            
             // 在练习模式下，不显示AI的正常回复（因为AI应该按卡片内容回复）
             if (!practiceState || !practiceState.isActive) {
-                console.log('Calling addAIMessage with text:', data.text);
+                console.log('✅ [handleWebSocketMessage] 准备调用 addAIMessage, text:', data.text);
+                console.log('✅ [handleWebSocketMessage] messagesList element:', messagesList);
                 addAIMessage(data.text);
+                console.log('✅ [handleWebSocketMessage] addAIMessage 调用完成');
             } else {
-                console.log('Practice mode: ignoring AI message from normal flow');
+                console.log('⚠️ [handleWebSocketMessage] Practice mode: ignoring AI message from normal flow');
             }
         } else if (data.action === 'user_message') {
             console.log('Received user_message action, text:', data.text);
@@ -190,6 +227,18 @@ document.addEventListener("DOMContentLoaded", function() {
         } else if (data.message) {
             console.log('Received message field (fallback), text:', data.message);
             addAIMessage(data.message);
+        } else if (data.action === 'ai_message' && data.text) {
+            // 备用处理：如果上面的 ai_message 处理没有执行，这里再次处理
+            console.log('⚠️ 备用处理: 收到 ai_message，直接显示:', data.text);
+            addAIMessage(data.text);
+        } else if (data.action === 'api_provider_changed') {
+            console.log('API供应商已切换:', data.provider);
+            if (apiProviderSelect) {
+                apiProviderSelect.value = data.provider;
+            }
+            if (data.message) {
+                showNotification(data.message);
+            }
         } else if (data.action === 'error') {
             console.error('Received error action:', data.message);
             showError(data.message || '发生错误');
@@ -601,25 +650,89 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 添加AI消息
     function addAIMessage(text) {
-        console.log('addAIMessage called with text:', text);
+        console.log('🔵 [addAIMessage] 函数被调用, text:', text);
+        console.log('🔵 [addAIMessage] text type:', typeof text);
+        console.log('🔵 [addAIMessage] text length:', text ? text.length : 0);
+        
+        if (!text || text.trim() === '') {
+            console.warn('⚠️ [addAIMessage] 文本为空，跳过');
+            return;
+        }
+        
         // 重新获取 messagesList，确保元素可用
         const messagesList = document.getElementById('messages-list');
         if (!messagesList) {
-            console.error('Messages list not found in addAIMessage');
+            console.error('❌ [addAIMessage] Messages list not found');
+            console.error('❌ [addAIMessage] 尝试查找 messages-list 元素...');
+            const allElements = document.querySelectorAll('[id*="message"]');
+            console.error('❌ [addAIMessage] 找到的相关元素:', allElements);
             return;
         }
         
-        console.log('Creating message element for AI message');
+        console.log('🔵 [addAIMessage] messagesList found:', messagesList);
+        console.log('🔵 [addAIMessage] messagesList style:', window.getComputedStyle(messagesList));
+        console.log('🔵 [addAIMessage] messagesList display:', window.getComputedStyle(messagesList).display);
+        console.log('🔵 [addAIMessage] messagesList visibility:', window.getComputedStyle(messagesList).visibility);
+        console.log('🔵 [addAIMessage] messagesList opacity:', window.getComputedStyle(messagesList).opacity);
+        
+        console.log('🔵 [addAIMessage] Creating message element for AI message');
         const message = createMessageElement('ai', text, 'text');
         if (!message) {
-            console.error('Failed to create message element');
+            console.error('❌ [addAIMessage] Failed to create message element');
             return;
         }
         
-        console.log('Appending message to messages list');
+        console.log('🔵 [addAIMessage] Message element created:', message);
+        console.log('🔵 [addAIMessage] Message element innerHTML:', message.innerHTML);
+        console.log('🔵 [addAIMessage] Message element style:', window.getComputedStyle(message));
+        
+        // 强制设置样式，确保消息可见
+        message.style.display = 'flex';
+        message.style.visibility = 'visible';
+        message.style.opacity = '1';
+        message.style.position = 'relative';
+        message.style.zIndex = '1';
+        
+        const textMessage = message.querySelector('.text-message');
+        if (textMessage) {
+            textMessage.style.color = '#262626';
+            textMessage.style.visibility = 'visible';
+            textMessage.style.opacity = '1';
+            textMessage.style.display = 'block';
+            console.log('🔵 [addAIMessage] text-message 元素样式已强制设置');
+        }
+        
+        console.log('🔵 [addAIMessage] Appending message to messages list');
         messagesList.appendChild(message);
+        console.log('🔵 [addAIMessage] Message appended, current children count:', messagesList.children.length);
+        
+        // 强制滚动到底部
         scrollToBottom();
-        console.log('AI message added successfully');
+        setTimeout(() => {
+            scrollToBottom();
+        }, 100);
+        
+        console.log('✅ [addAIMessage] AI message added successfully');
+        
+        // 验证消息是否真的添加了
+        setTimeout(() => {
+            const lastChild = messagesList.lastElementChild;
+            if (lastChild && lastChild.classList.contains('ai')) {
+                const textContent = lastChild.querySelector('.text-message')?.textContent;
+                console.log('✅ [addAIMessage] 验证成功: AI消息已添加到DOM');
+                console.log('✅ [addAIMessage] 消息内容:', textContent);
+                console.log('✅ [addAIMessage] 消息元素:', lastChild);
+                console.log('✅ [addAIMessage] 消息元素样式:', window.getComputedStyle(lastChild));
+                
+                // 检查是否有遮挡
+                const rect = lastChild.getBoundingClientRect();
+                console.log('✅ [addAIMessage] 消息位置:', rect);
+                console.log('✅ [addAIMessage] 消息是否可见:', rect.width > 0 && rect.height > 0);
+            } else {
+                console.error('❌ [addAIMessage] 验证失败: AI消息未正确添加到DOM');
+                console.error('❌ [addAIMessage] lastChild:', lastChild);
+            }
+        }, 100);
         
         // 自动播放AI语音（如果需要）
         // playAIVoice(text);
@@ -725,6 +838,33 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // 显示错误
+    function showNotification(message) {
+        const notificationDiv = document.createElement('div');
+        notificationDiv.className = 'notification-message';
+        notificationDiv.textContent = message;
+        notificationDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 10000;
+            font-size: 14px;
+            max-width: 400px;
+            animation: slideIn 0.3s ease-out;
+        `;
+        document.body.appendChild(notificationDiv);
+        setTimeout(() => {
+            notificationDiv.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => {
+                document.body.removeChild(notificationDiv);
+            }, 300);
+        }, 3000);
+    }
+
     function showError(message) {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
@@ -2433,40 +2573,18 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // 提供商选择变化
-    if (providerSelect) {
-        providerSelect.addEventListener('change', (e) => {
+    // 全局API供应商选择变化（统一控制LLM/TTS/ASR）
+    if (apiProviderSelect) {
+        apiProviderSelect.addEventListener('change', (e) => {
+            const selectedProvider = e.target.value;
             if (websocket && websocket.readyState === WebSocket.OPEN) {
+                console.log(`切换全局API供应商到: ${selectedProvider}`);
                 websocket.send(JSON.stringify({
-                    action: 'set_provider',
-                    provider: e.target.value
+                    action: 'set_api_provider',
+                    provider: selectedProvider
                 }));
-            }
-        });
-    }
-
-    // TTS提供商选择变化
-    const ttsSelect = document.getElementById('tts-select');
-    if (ttsSelect) {
-        ttsSelect.addEventListener('change', (e) => {
-            if (websocket && websocket.readyState === WebSocket.OPEN) {
-                websocket.send(JSON.stringify({
-                    action: 'set_tts',
-                    tts: e.target.value
-                }));
-            }
-        });
-    }
-
-    // ASR提供商选择变化
-    const asrSelect = document.getElementById('asr-select');
-    if (asrSelect) {
-        asrSelect.addEventListener('change', (e) => {
-            if (websocket && websocket.readyState === WebSocket.OPEN) {
-                websocket.send(JSON.stringify({
-                    action: 'set_asr',
-                    asr: e.target.value
-                }));
+                // 显示提示消息
+                showNotification(`已切换到 ${selectedProvider === 'doubao' ? '豆包' : 'OpenAI'} API供应商（LLM/TTS/ASR统一使用）`);
             }
         });
     }

@@ -261,10 +261,11 @@ async def process_text(user_input):
             traceback.print_exc()
     
     # 先发送AI消息到客户端显示文字（立即执行，无阻塞）
-    await send_message_to_clients(json.dumps({
+    # 注意：直接传递字典，send_message_to_clients会自动处理JSON编码
+    await send_message_to_clients({
         "action": "ai_message",
         "text": chatbot_response
-    }))
+    })
     
     # 让出控制权，确保WebSocket消息已经真正发送到网络
     # 这确保消息发送完成后再创建音频任务
@@ -465,12 +466,17 @@ def set_env_variable(key: str, value: str):
         init_kokoro_tts_voice(value)  # Reinitialize Kokoro TTS voice
     if key == "VOICE_SPEED":
         init_voice_speed(value)  # Reinitialize Voice Speed for all TTS providers
+    if key == "API_PROVIDER":
+        from .app import init_set_api_provider
+        success = init_set_api_provider(value)  # 全局API供应商开关
+        if not success:
+            print(f"Warning: 设置API_PROVIDER失败，值 '{value}' 不支持")
     if key == "TTS_PROVIDER":
-        init_set_tts(value)      # Reinitialize TTS Providers
+        init_set_tts(value)      # Reinitialize TTS Providers (已废弃，请使用API_PROVIDER)
     if key == "MODEL_PROVIDER":
-        init_set_provider(value)  # Reinitialize Model Providers
+        init_set_provider(value)  # Reinitialize Model Providers (已废弃，请使用API_PROVIDER)
     if key == "ASR_PROVIDER":
-        init_set_asr(value)  # Reinitialize ASR Providers
+        init_set_asr(value)  # Reinitialize ASR Providers (已废弃，请使用API_PROVIDER)
 
 
 def adjust_prompt(mood):

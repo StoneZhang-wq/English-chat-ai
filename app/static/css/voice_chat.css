@@ -256,20 +256,28 @@ body {
     overflow-y: auto;
     padding: 16px;
     background: #fafafa;
+    position: relative;
+    z-index: 1;
 }
 
 .messages-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    position: relative;
+    z-index: 1;
 }
 
 /* 消息气泡样式 */
 .message {
-    display: flex;
+    display: flex !important;
     align-items: flex-start;
     gap: 8px;
     animation: messageSlideIn 0.3s ease-out;
+    position: relative;
+    z-index: 1;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 @keyframes messageSlideIn {
@@ -346,6 +354,15 @@ body {
     color: #262626;
     border: 1px solid #e0e0e0;
     border-bottom-left-radius: 4px;
+    position: relative;
+    z-index: 1;
+}
+
+.message.ai .text-message {
+    color: #262626 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
 }
 
 /* 语音消息样式 */

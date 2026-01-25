@@ -551,11 +551,22 @@ async def websocket_endpoint(websocket: WebSocket):
             elif message["action"] == "set_character":
                 set_current_character(message["character"])
                 await websocket.send_json({"message": f"Character: {message['character']}"})
+            elif message["action"] == "set_api_provider":
+                # 全局API供应商开关：统一设置LLM、TTS、ASR
+                set_env_variable("API_PROVIDER", message["provider"])
+                await websocket.send_json({
+                    "action": "api_provider_changed",
+                    "provider": message["provider"],
+                    "message": f"已切换到 {message['provider']} API供应商（LLM/TTS/ASR统一使用）"
+                })
             elif message["action"] == "set_provider":
+                # 已废弃：请使用set_api_provider
                 set_env_variable("MODEL_PROVIDER", message["provider"])
             elif message["action"] == "set_tts":
+                # 已废弃：请使用set_api_provider
                 set_env_variable("TTS_PROVIDER", message["tts"])
             elif message["action"] == "set_asr":
+                # 已废弃：请使用set_api_provider
                 set_env_variable("ASR_PROVIDER", message["asr"])
             elif message["action"] == "set_openai_voice":
                 set_env_variable("OPENAI_TTS_VOICE", message["voice"])
