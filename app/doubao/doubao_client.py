@@ -44,16 +44,18 @@ class DoubaoLLMClient:
         if not self.api_key:
             raise ValueError("请设置DOUBAO_API_KEY环境变量")
     
-    def chat(self, messages: List[Dict[str, str]], temperature: float = 0.7) -> Optional[str]:
+    def chat(self, messages: List[Dict[str, str]], temperature: float = 0.7, max_tokens: int = None, stream: bool = False) -> Optional[str]:
         """
         发送聊天请求
         
         Args:
             messages: 消息列表，格式为 [{"role": "user", "content": "..."}]
-            temperature: 温度参数，控制回复的随机性
+            temperature: 温度参数，控制回复的随机性（与OpenAI保持一致）
+            max_tokens: 最大生成token数（对应OpenAI的max_completion_tokens，用于控制输出长度）
+            stream: 是否使用流式响应（与OpenAI保持一致，提升响应速度）
         
         Returns:
-            AI回复内容
+            AI回复内容（流式模式下返回完整内容）
         """
         url = f"{self.base_url}/chat/completions"
         
@@ -68,19 +70,148 @@ class DoubaoLLMClient:
             "temperature": temperature
         }
         
+        # 添加max_tokens参数（如果提供），与OpenAI保持一致
+        if max_tokens is not None:
+            data["max_tokens"] = max_tokens
+        
+        # 添加stream参数，启用流式响应（关键优化）
+        if stream:
+            data["stream"] = True
+        
+        # 添加详细调试日志，打印实际发送的payload（摘要）
+        print(f"Debug: Doubao API Request Payload:")
+        print(f"  - Model: {self.model}")
+        print(f"  - Temperature: {temperature}")
+        print(f"  - Max Tokens: {max_tokens}")
+        print(f"  - Stream: {stream}")
+        print(f"  - Messages count: {len(messages)}")
+        if messages:
+            print(f"  - System message length: {len(messages[0].get('content', ''))} chars")
+            print(f"  - User message: {messages[-1].get('content', '')[:100]}..." if len(messages) > 0 and len(messages[-1].get('content', '')) > 100 else f"  - User message: {messages[-1].get('content', '') if messages else ''}")
+        
         try:
-            # 增加超时时间到60秒，因为生成复杂内容可能需要更长时间
-            response = requests.post(url, headers=headers, json=data, timeout=60)
-            response.raise_for_status()
+            import time
+            start_time = time.time()
             
-            result = response.json()
-            
-            # 提取回复内容
-            if "choices" in result and len(result["choices"]) > 0:
-                return result["choices"][0]["message"]["content"]
+            # 统一超时时间为45秒，与OpenAI保持一致
+            if stream:
+                # 流式响应模式：边接收边处理，提升响应速度
+                response = requests.post(url, headers=headers, json=data, stream=True, timeout=45)
+                response.raise_for_status()
+                
+                full_response = ""
+                json_buffer = ""  # 用于累积可能跨行的JSON
+                first_chunk_time = None
+                brace_count = 0  # 用于跟踪JSON对象的完整性
+                
+                # 使用iter_lines，累积JSON直到找到完整的对象
+                for line_bytes in response.iter_lines(decode_unicode=False):
+                    if first_chunk_time is None:
+                        first_chunk_time = time.time()
+                        print(f"Debug: Doubao first chunk received in {first_chunk_time - start_time:.2f}s")
+                    
+                    if not line_bytes:
+                        # 空行，尝试解析累积的buffer
+                        if json_buffer.strip():
+                            try:
+                                chunk = json.loads(json_buffer.strip())
+                                json_buffer = ""
+                                brace_count = 0
+                                
+                                # 提取content
+                                delta_content = ""
+                                if "choices" in chunk and len(chunk["choices"]) > 0:
+                                    choice = chunk["choices"][0]
+                                    if "delta" in choice:
+                                        delta = choice["delta"]
+                                        # 只提取content字段，忽略reasoning_content（推理过程）
+                                        delta_content = delta.get("content", "")
+                                    
+                                    if not delta_content and "message" in choice:
+                                        delta_content = choice["message"].get("content", "")
+                                
+                                if delta_content:
+                                    full_response += delta_content
+                            except json.JSONDecodeError:
+                                pass
+                        continue
+                    
+                    # 解码为字符串
+                    try:
+                        line_text = line_bytes.decode('utf-8')
+                    except UnicodeDecodeError:
+                        continue
+                    
+                    # 处理SSE格式（data: 开头）
+                    if line_text.startswith("data:"):
+                        line_text = line_text[5:].strip()
+                    
+                    if not line_text or line_text == "[DONE]":
+                        continue
+                    
+                    # 累积到buffer
+                    json_buffer += line_text
+                    
+                    # 计算大括号数量，判断JSON是否完整
+                    brace_count += line_text.count('{') - line_text.count('}')
+                    
+                    # 如果大括号平衡，尝试解析
+                    if brace_count == 0 and json_buffer.strip():
+                        try:
+                            chunk = json.loads(json_buffer.strip())
+                            json_buffer = ""
+                            brace_count = 0
+                            
+                            # 提取content
+                            delta_content = ""
+                            if "choices" in chunk and len(chunk["choices"]) > 0:
+                                choice = chunk["choices"][0]
+                                if "delta" in choice:
+                                    delta = choice["delta"]
+                                    # 只提取content字段，忽略reasoning_content
+                                    delta_content = delta.get("content", "")
+                                
+                                if not delta_content and "message" in choice:
+                                    delta_content = choice["message"].get("content", "")
+                            
+                            if delta_content:
+                                full_response += delta_content
+                        except json.JSONDecodeError:
+                            # 解析失败，继续累积
+                            pass
+                
+                # 处理剩余的buffer
+                if json_buffer.strip():
+                    try:
+                        chunk = json.loads(json_buffer.strip())
+                        if "choices" in chunk and len(chunk["choices"]) > 0:
+                            choice = chunk["choices"][0]
+                            if "delta" in choice:
+                                delta_content = choice["delta"].get("content", "")
+                                if delta_content:
+                                    full_response += delta_content
+                    except json.JSONDecodeError:
+                        pass
+                
+                total_time = time.time() - start_time
+                print(f"Debug: Doubao stream complete in {total_time:.2f}s, response length: {len(full_response)}")
+                return full_response
             else:
-                print(f"API响应格式异常: {result}")
-                return None
+                # 非流式模式（向后兼容）
+                response = requests.post(url, headers=headers, json=data, timeout=45)
+                response.raise_for_status()
+                
+                result = response.json()
+                
+                total_time = time.time() - start_time
+                print(f"Debug: Doubao non-stream complete in {total_time:.2f}s")
+                
+                # 提取回复内容
+                if "choices" in result and len(result["choices"]) > 0:
+                    return result["choices"][0]["message"]["content"]
+                else:
+                    print(f"API响应格式异常: {result}")
+                    return None
                 
         except requests.exceptions.RequestException as e:
             print(f"API请求失败: {e}")

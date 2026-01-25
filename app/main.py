@@ -1103,7 +1103,7 @@ async def start_practice(request: Request):
     """开始练习阶段，解析对话卡片并初始化状态"""
     try:
         from .shared import get_memory_system
-        from .app import chatgpt_streamed
+        from .app import chatgpt_streamed_async
         import asyncio
         import uuid
         
@@ -1170,15 +1170,11 @@ async def start_practice(request: Request):
 
 只返回主题关键词，用中文，用逗号分隔，例如：电影,篮球 或 学习,工作。不要其他说明。"""
             
-            loop = asyncio.get_event_loop()
-            topic_response = await loop.run_in_executor(
-                None,
-                lambda: chatgpt_streamed(
-                    topic_prompt,
-                    "你是一个专业的英语教学助手，能够准确分析对话主题。只返回主题关键词，不要其他说明。",
-                    "neutral",
-                    []
-                )
+            topic_response = await chatgpt_streamed_async(
+                topic_prompt,
+                "你是一个专业的英语教学助手，能够准确分析对话主题。只返回主题关键词，不要其他说明。",
+                "neutral",
+                []
             )
             # 提取主题关键词
             if topic_response:
@@ -1245,7 +1241,7 @@ async def practice_respond(request: Request):
     """用户回复，验证意思一致性"""
     try:
         from .shared import get_memory_system
-        from .app import chatgpt_streamed
+        from .app import chatgpt_streamed_async
         import asyncio
         
         data = await request.json()
@@ -1403,7 +1399,7 @@ async def end_practice(request: Request):
         
         if combined_text:
             try:
-                from .app import chatgpt_streamed
+                from .app import chatgpt_streamed_async
                 topic_prompt = f"""分析以下英文对话和用户练习内容，提取出主要讨论的主题（1-2个中文关键词）：
 
 对话内容：
@@ -1414,15 +1410,11 @@ async def end_practice(request: Request):
 
 只返回主题关键词，用中文，用逗号分隔，例如：电影,篮球。不要其他说明。"""
                 
-                loop = asyncio.get_event_loop()
-                topic_response = await loop.run_in_executor(
-                    None,
-                    lambda: chatgpt_streamed(
-                        topic_prompt,
-                        "你是一个专业的英语教学助手，能够准确分析对话主题。只返回主题关键词，不要其他说明。",
-                        "neutral",
-                        []
-                    )
+                topic_response = await chatgpt_streamed_async(
+                    topic_prompt,
+                    "你是一个专业的英语教学助手，能够准确分析对话主题。只返回主题关键词，不要其他说明。",
+                    "neutral",
+                    []
                 )
                 if topic_response:
                     topics = [t.strip() for t in topic_response.strip().split(",") if t.strip()]
@@ -1485,7 +1477,7 @@ async def generate_review_notes(request: Request):
     """生成复习笔记"""
     try:
         from .shared import get_memory_system
-        from .app import chatgpt_streamed
+        from .app import chatgpt_streamed_async
         import asyncio
         import json
         
@@ -1553,15 +1545,11 @@ async def generate_review_notes(request: Request):
 """
         
         # 调用AI生成
-        loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None,
-            lambda: chatgpt_streamed(
-                prompt,
-                "你是一个专业的英语教学助手，能够分析学生的练习表现并生成个性化的复习笔记。",
-                "neutral",
-                []
-            )
+        response = await chatgpt_streamed_async(
+            prompt,
+            "你是一个专业的英语教学助手，能够分析学生的练习表现并生成个性化的复习笔记。",
+            "neutral",
+            []
         )
         
         if not response or not response.strip():
@@ -1613,7 +1601,7 @@ async def generate_expansion_materials(request: Request):
     """生成场景拓展资料"""
     try:
         from .shared import get_memory_system
-        from .app import chatgpt_streamed
+        from .app import chatgpt_streamed_async
         import asyncio
         import json
         
@@ -1639,15 +1627,11 @@ async def generate_expansion_materials(request: Request):
 
 只返回主题关键词，用中文，用逗号分隔，例如：电影,篮球,娱乐。不要其他说明。"""
                     
-                    loop = asyncio.get_event_loop()
-                    topic_response = await loop.run_in_executor(
-                        None,
-                        lambda: chatgpt_streamed(
-                            topic_prompt,
-                            "你是一个专业的英语教学助手，能够分析对话主题。只返回主题关键词，不要其他说明。",
-                            "neutral",
-                            []
-                        )
+                    topic_response = await chatgpt_streamed_async(
+                        topic_prompt,
+                        "你是一个专业的英语教学助手，能够分析对话主题。只返回主题关键词，不要其他说明。",
+                        "neutral",
+                        []
                     )
                     if topic_response:
                         actual_practice_topics = [t.strip() for t in topic_response.strip().split(",") if t.strip()]
@@ -1701,15 +1685,11 @@ async def generate_expansion_materials(request: Request):
 """
         
         # 调用AI生成
-        loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None,
-            lambda: chatgpt_streamed(
-                prompt,
-                "你是一个专业的英语教学助手，能够生成场景相关的对话示例和常用表达。",
-                "neutral",
-                []
-            )
+        response = await chatgpt_streamed_async(
+            prompt,
+            "你是一个专业的英语教学助手，能够生成场景相关的对话示例和常用表达。",
+            "neutral",
+            []
         )
         
         if not response or not response.strip():
@@ -1896,7 +1876,7 @@ async def practice_transcribe_audio(
 # 辅助函数
 async def check_meaning_consistency(user_input: str, reference_text: str) -> Dict:
     """检查用户输入是否与参考文本意思一致（部分一致即可）"""
-    from .app import chatgpt_streamed
+    from .app import chatgpt_streamed_async
     import asyncio
     import json
     
@@ -1916,15 +1896,11 @@ async def check_meaning_consistency(user_input: str, reference_text: str) -> Dic
 只返回JSON格式，不要其他说明：
 {{"result": "consistent/inconsistent/consistent_with_errors", "reason": "简要说明原因"}}"""
     
-    loop = asyncio.get_event_loop()
-    response = await loop.run_in_executor(
-        None,
-        lambda: chatgpt_streamed(
-            prompt,
-            "你是一个专业的英语教学助手，能够判断句子意思的一致性。",
-            "neutral",
-            []
-        )
+    response = await chatgpt_streamed_async(
+        prompt,
+        "你是一个专业的英语教学助手，能够判断句子意思的一致性。",
+        "neutral",
+        []
     )
     
     # 尝试解析JSON
@@ -1942,7 +1918,7 @@ async def check_meaning_consistency(user_input: str, reference_text: str) -> Dic
 
 async def extract_hints(reference_text: str) -> Dict:
     """从参考文本中提取提示信息"""
-    from .app import chatgpt_streamed
+    from .app import chatgpt_streamed_async
     import asyncio
     import json
     
@@ -1964,15 +1940,11 @@ async def extract_hints(reference_text: str) -> Dict:
     "grammar": "语法点说明"
 }}"""
     
-    loop = asyncio.get_event_loop()
-    response = await loop.run_in_executor(
-        None,
-        lambda: chatgpt_streamed(
-            prompt,
-            "你是一个专业的英语教学助手，能够提取句子中的学习要点。",
-            "neutral",
-            []
-        )
+    response = await chatgpt_streamed_async(
+        prompt,
+        "你是一个专业的英语教学助手，能够提取句子中的学习要点。",
+        "neutral",
+        []
     )
     
     # 尝试解析JSON

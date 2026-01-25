@@ -832,17 +832,25 @@ def chatgpt_streamed(user_input, system_message, mood_prompt, conversation_histo
             print(f"Debug: Sending request to Doubao LLM")
             
             # 豆包LLM客户端是同步的，直接调用
-            # 注意：豆包LLM API目前不支持流式响应，所以直接返回完整响应
+            # 关键优化：启用流式响应，边接收边处理，提升响应速度
+            # 与OpenAI保持一致的参数设置
             response = doubao_llm_client.chat(
                 messages,
-                temperature=0.7
+                temperature=0.7,  # 保持现有设置
+                max_tokens=token_limit,  # 添加token限制，与OpenAI保持一致
+                stream=True  # 启用流式响应，关键优化点！
             )
             
             if response:
                 full_response = response
-                # 打印响应（模拟流式输出）
+                # 模拟流式输出，逐行打印（与OpenAI格式一致）
                 print("豆包LLM响应:")
-                print(NEON_GREEN + full_response + RESET_COLOR)
+                print("Starting Doubao stream...")
+                # 按行分割，逐行打印（模拟流式效果）
+                lines = full_response.split('\n')
+                for line in lines:
+                    if line.strip():  # 只打印非空行
+                        print(NEON_GREEN + line + RESET_COLOR)
                 print("\n豆包LLM响应完成.")
             else:
                 full_response = "Error: 豆包LLM返回空响应，请检查API配置"
@@ -855,6 +863,150 @@ def chatgpt_streamed(user_input, system_message, mood_prompt, conversation_histo
             import traceback
             traceback.print_exc()
             return full_response  # 直接返回错误，不进行兜底
+    else:
+        # 不支持的供应商
+        full_response = f"Error: 不支持的API供应商 '{API_PROVIDER}'，仅支持 'doubao' 或 'openai'"
+        print(f"Debug: {full_response}")
+        return full_response
+
+    print(f"streaming complete. Response length: {PINK}{len(full_response)}{RESET_COLOR}")
+    return full_response
+
+async def chatgpt_streamed_async(user_input, system_message, mood_prompt, conversation_history):
+    """异步版本的LLM调用函数：只支持全局API_PROVIDER指定的供应商，失败时直接返回错误
+    
+    这个异步版本可以避免阻塞事件循环，特别是对于豆包这种同步API调用。
+    对于OpenAI，保持流式响应；对于豆包，使用asyncio.to_thread包装同步调用，并启用流式响应。
+    """
+    import time
+    start_time = time.time()
+    full_response = ""
+    print(f"Debug: streamed_async started. API_PROVIDER: {API_PROVIDER}")
+
+    # Calculate token limit based on character limit
+    token_limit = min(4000, MAX_CHAR_LENGTH * 4 // 3)
+
+    # 只支持全局API_PROVIDER指定的供应商（doubao 或 openai）
+    if API_PROVIDER == 'openai':
+        messages = [{"role": "system", "content": system_message + "\n" + mood_prompt}] + conversation_history + [{"role": "user", "content": user_input}]
+        headers = {'Authorization': f'Bearer {OPENAI_API_KEY}', 'Content-Type': 'application/json'}
+        payload = {
+            "model": OPENAI_MODEL,
+            "messages": messages,
+            "stream": True,
+            "max_completion_tokens": token_limit
+        }
+        try:
+            print(f"Debug: Sending request to OpenAI: {OPENAI_BASE_URL}")
+            # 添加详细调试日志，打印实际发送的payload（摘要）
+            print(f"Debug: OpenAI API Request Payload:")
+            print(f"  - Model: {OPENAI_MODEL}")
+            print(f"  - Stream: True")
+            print(f"  - Max Completion Tokens: {token_limit}")
+            print(f"  - Messages count: {len(messages)}")
+            if messages:
+                print(f"  - System message length: {len(messages[0].get('content', ''))} chars")
+                print(f"  - User message: {messages[-1].get('content', '')[:100]}..." if len(messages) > 0 and len(messages[-1].get('content', '')) > 100 else f"  - User message: {messages[-1].get('content', '') if messages else ''}")
+            
+            # 将OpenAI的同步流式调用包装到线程池，避免阻塞事件循环
+            def _openai_stream_sync():
+                """同步的OpenAI流式调用，将在线程池中执行"""
+                response = requests.post(OPENAI_BASE_URL, headers=headers, json=payload, stream=True, timeout=45)
+                response.raise_for_status()
+                
+                full_response = ""
+                line_buffer = ""
+                for line in response.iter_lines(decode_unicode=True):
+                    if line.startswith("data:"):
+                        line = line[5:].strip()
+                    if line:
+                        try:
+                            chunk = json.loads(line)
+                            delta_content = chunk['choices'][0]['delta'].get('content', '')
+                            if delta_content:
+                                line_buffer += delta_content
+                                if '\n' in line_buffer:
+                                    lines = line_buffer.split('\n')
+                                    for line in lines[:-1]:
+                                        print(NEON_GREEN + line + RESET_COLOR)
+                                        full_response += line + '\n'
+                                    line_buffer = lines[-1]
+                        except json.JSONDecodeError:
+                            continue
+                if line_buffer:
+                    print(NEON_GREEN + line_buffer + RESET_COLOR)
+                    full_response += line_buffer
+                print("\nOpenAI stream complete.")
+                return full_response
+            
+            # 在线程池中执行同步调用，不阻塞事件循环
+            print("Starting OpenAI stream...")
+            full_response = await asyncio.to_thread(_openai_stream_sync)
+            
+            total_time = time.time() - start_time
+            print(f"Debug: OpenAI total time: {total_time:.2f}s, response length: {len(full_response)}")
+
+        except Exception as e:
+            full_response = f"Error connecting to OpenAI model: {e}"
+            print(f"Debug: OpenAI error - {e}")
+            
+    elif API_PROVIDER == 'doubao':
+        global doubao_llm_client
+        if doubao_llm_client is None:
+            full_response = "Error: 豆包LLM客户端未初始化，请检查环境变量配置（DOUBAO_API_KEY, LLM_MODEL）"
+            print(f"Debug: {full_response}")
+            return full_response
+        
+        try:
+            # 构建消息列表
+            messages = [{"role": "system", "content": system_message + "\n" + mood_prompt}] + conversation_history + [{"role": "user", "content": user_input}]
+            
+            print(f"Debug: Sending request to Doubao LLM (async)")
+            
+            # 使用asyncio.to_thread包装同步调用，避免阻塞事件循环
+            def _doubao_chat_sync():
+                """同步的豆包LLM调用，将在线程池中执行"""
+                # 与OpenAI保持一致的参数设置
+                # 关键优化：启用流式响应，边接收边处理，提升响应速度
+                # 注意：豆包API使用max_tokens（对应OpenAI的max_completion_tokens）
+                # temperature设置为0.7（OpenAI默认值通常是1.0，但0.7是更常用的值，保持现有设置）
+                return doubao_llm_client.chat(
+                    messages,
+                    temperature=0.7,  # 保持现有设置
+                    max_tokens=token_limit,  # 添加token限制，与OpenAI保持一致
+                    stream=True  # 启用流式响应，关键优化点！
+                )
+            
+            # 在线程池中执行同步调用，不阻塞事件循环
+            api_start_time = time.time()
+            response = await asyncio.to_thread(_doubao_chat_sync)
+            api_time = time.time() - api_start_time
+            
+            if response:
+                full_response = response
+                # 模拟流式输出，逐行打印（与OpenAI格式一致）
+                print("豆包LLM响应:")
+                print("Starting Doubao stream...")
+                # 按行分割，逐行打印（模拟流式效果）
+                lines = full_response.split('\n')
+                for line in lines:
+                    if line.strip():  # 只打印非空行
+                        print(NEON_GREEN + line + RESET_COLOR)
+                print("\n豆包LLM响应完成.")
+                
+                total_time = time.time() - start_time
+                print(f"Debug: Doubao API call time: {api_time:.2f}s, total time: {total_time:.2f}s, response length: {len(full_response)}")
+            else:
+                full_response = "Error: 豆包LLM返回空响应，请检查API配置"
+                print(f"Debug: {full_response}")
+                return full_response
+                
+        except Exception as e:
+            full_response = f"Error: 豆包LLM API调用失败 - {e}"
+            print(f"Debug: 豆包LLM错误 - {e}")
+            import traceback
+            traceback.print_exc()
+            return full_response
     else:
         # 不支持的供应商
         full_response = f"Error: 不支持的API供应商 '{API_PROVIDER}'，仅支持 'doubao' 或 'openai'"
@@ -1085,7 +1237,9 @@ async def analyze_image(image_path, question_prompt):
         
         try:
             messages = [{"role": "user", "content": prompt_with_image}]
-            response = doubao_llm_client.chat(messages, temperature=0.7)
+            # 图片分析也使用max_tokens限制，与OpenAI保持一致
+            image_analysis_token_limit = min(4000, MAX_CHAR_LENGTH * 4 // 3)
+            response = doubao_llm_client.chat(messages, temperature=0.7, max_tokens=image_analysis_token_limit)
             if response:
                 return {"choices": [{"message": {"content": response}}]}
             else:
@@ -1412,7 +1566,7 @@ async def user_chatbot_conversation():
             mood = analyze_mood(user_input)
             
             print(PINK + f"{character_display_name}:..." + RESET_COLOR)
-            chatbot_response = chatgpt_streamed(user_input, base_system_message, mood, conversation_history)
+            chatbot_response = await chatgpt_streamed_async(user_input, base_system_message, mood, conversation_history)
             conversation_history.append({"role": "assistant", "content": chatbot_response})
             sanitized_response = sanitize_response(chatbot_response)
             if len(sanitized_response) > 400:

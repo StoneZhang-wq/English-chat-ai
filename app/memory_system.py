@@ -408,7 +408,7 @@ class DiaryMemorySystem:
     async def generate_diary_summary(self, session_messages: List[Dict], character: str):
         """从会话生成文本摘要（不设字数限制，实事求是）"""
         import asyncio
-        from .app import chatgpt_streamed
+        from .app import chatgpt_streamed_async
         
         conversation_text = "\n".join([
             f"{msg['role']}: {msg['content']}" 
@@ -436,15 +436,11 @@ class DiaryMemorySystem:
 只返回摘要文本，不要其他说明。"""
         
         # 将同步函数包装成异步调用
-        loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None,
-            lambda: chatgpt_streamed(
-                summary_prompt,
-                "你是一个专业的对话摘要助手，实事求是地总结对话内容，不添加任何细节。",
-                "neutral",
-                []
-            )
+        response = await chatgpt_streamed_async(
+            summary_prompt,
+            "你是一个专业的对话摘要助手，实事求是地总结对话内容，不添加任何细节。",
+            "neutral",
+            []
         )
         
         # 检查是否为错误响应
@@ -717,7 +713,7 @@ class DiaryMemorySystem:
     async def extract_user_info(self, conversation_text: str):
         """从对话中提取用户关键信息（严格模式：只提取明确提到的内容）"""
         import asyncio
-        from .app import chatgpt_streamed
+        from .app import chatgpt_streamed_async
         
         extract_prompt = f"""请从以下对话中提取用户明确提到的关键信息，以JSON格式返回。
 
@@ -754,15 +750,11 @@ class DiaryMemorySystem:
 
 只返回JSON，不要其他说明。如果某项信息不存在，使用null或空数组/对象。"""
         
-        loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None,
-            lambda: chatgpt_streamed(
-                extract_prompt,
-                "你是一个专业的信息提取助手，只提取对话中明确提到的信息，不进行推断。",
-                "neutral",
-                []
-            )
+        response = await chatgpt_streamed_async(
+            extract_prompt,
+            "你是一个专业的信息提取助手，只提取对话中明确提到的信息，不进行推断。",
+            "neutral",
+            []
         )
         
         # 检查是否为错误响应
@@ -887,7 +879,7 @@ class DiaryMemorySystem:
             custom_sentence_count: 自定义句数（2-30）
         """
         import asyncio
-        from .app import chatgpt_streamed
+        from .app import chatgpt_streamed_async
         
         # 对话长度映射（长度优先，不受难度影响）
         DIALOGUE_LENGTH_MAP = {
@@ -1053,15 +1045,11 @@ A: That's wonderful to hear.
         
         # 调用AI生成
         try:
-            loop = asyncio.get_event_loop()
-            response = await loop.run_in_executor(
-                None,
-                lambda: chatgpt_streamed(
-                    prompt,
-                    "你是一个专业的英语教学助手，能够根据用户的水平和兴趣生成个性化的英文对话。",
-                    "neutral",
-                    []
-                )
+            response = await chatgpt_streamed_async(
+                prompt,
+                "你是一个专业的英语教学助手，能够根据用户的水平和兴趣生成个性化的英文对话。",
+                "neutral",
+                []
             )
         except Exception as e:
             print(f"Error calling chatgpt_streamed: {e}")

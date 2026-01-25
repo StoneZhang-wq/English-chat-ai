@@ -235,7 +235,9 @@ async def process_text(user_input):
             import traceback
             traceback.print_exc()
 
-    chatbot_response = chatgpt_streamed(user_input, base_system_message, mood_prompt, conversation_history)
+    # 使用异步版本的LLM调用，避免阻塞事件循环
+    from .app import chatgpt_streamed_async
+    chatbot_response = await chatgpt_streamed_async(user_input, base_system_message, mood_prompt, conversation_history)
     sanitized_response = sanitize_response(chatbot_response)
     # Limit the response length to the MAX_CHAR_LENGTH for audio generation
     if len(sanitized_response) > MAX_CHAR_LENGTH:
