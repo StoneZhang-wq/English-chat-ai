@@ -1024,6 +1024,593 @@
           }
         ]
       }
+    },
+    {
+      "id": "practice_1769329385932",
+      "date": "2026-01-25",
+      "timestamp": "2026-01-25T08:23:05.932Z",
+      "dialogue_topic": "金融词汇学习，家庭和解",
+      "review_notes": {
+        "vocabulary": {
+          "key_words": [
+            "dive into",
+            "juggling work and study",
+            "time-efficient",
+            "manageable plan"
+          ],
+          "new_words": [
+            "tearing my hair out",
+            "godsend"
+          ],
+          "difficult_words": [
+            "juggling",
+            "godsend"
+          ]
+        },
+        "grammar": [
+          {
+            "point": "现在完成进行时",
+            "user_usage": "I’ve been tearing my hair out lately",
+            "correct_usage": "I’ve been tearing my hair out lately",
+            "explanation": "用户正确使用现在完成进行时（have/has been + doing）描述从过去持续到现在的状态，准确表达近期因兼顾工作和学习而持续焦虑的情况，语法结构规范。"
+          },
+          {
+            "point": "现在分词短语作伴随状语",
+            "user_usage": "juggling work and study",
+            "correct_usage": "juggling work and study",
+            "explanation": "用户正确运用现在分词短语作伴随状语，补充说明主句动作发生时的并行行为，清晰传达同时处理工作与学习的状态，符合英语语法逻辑。"
+          },
+          {
+            "point": "复合形容词作前置定语",
+            "user_usage": "time-efficient tips",
+            "correct_usage": "time-efficient tips",
+            "explanation": "用户正确使用复合形容词time-efficient前置修饰名词tips，精准描述建议的时间特性，契合英语复合形容词的前置修饰用法习惯。"
+          }
+        ],
+        "corrections": [],
+        "suggestions": [
+          "结合你兼顾工作和学习的时间现状，建议采用场景关联记忆法，每天用10-15分钟碎片化时间记忆金融职场核心词汇（如dive into），并结合自身工作场景造句，强化词汇运用能力。",
+          "持续积累像tearing my hair out、godsend这类地道口语习语，每周整理3-5个并在口语练习中主动使用，提升表达的生动性与自然度。",
+          "每周设定1次金融主题模拟对话练习，围绕职场常见场景展开，巩固所学语法和词汇，增强口语流利度。",
+          "建立个人分类词汇本，分别记录重点词汇、新学词汇和易错词汇，每周定期复习回顾，强化记忆效果。"
+        ]
+      },
+      "expansion_materials": {
+        "dialogues": [
+          {
+            "scene": "职场午休间和同事交流金融词汇高效学习法",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hey Li Na, I heard you’re learning finance work vocab for your new project. Any quick tips?"
+              },
+              {
+                "speaker": "B",
+                "text": "Oh hey! I make 5-word flashcards every night and review them during my commute—super time-efficient."
+              },
+              {
+                "speaker": "A",
+                "text": "That’s smart! I’ve been tearing my hair out trying to memorize everything at once."
+              },
+              {
+                "speaker": "B",
+                "text": "Don’t cram! Break the vocab down into small groups, like 'banking terms' and 'investment words.' You’ll remember better."
+              },
+              {
+                "speaker": "A",
+                "text": "Thanks a lot! That sounds way more manageable than what I was doing."
+              }
+            ]
+          },
+          {
+            "scene": "和英语老师定制金融词汇学习计划",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hi Teacher Wang, I need a beginner-friendly plan to learn finance work vocab. Can you help?"
+              },
+              {
+                "speaker": "B",
+                "text": "Of course! Let’s kick things off with 10 basic terms a week, like 'interest rate' and 'down payment.'"
+              },
+              {
+                "speaker": "A",
+                "text": "Great, but I’m busy with work—how can I fit this in?"
+              },
+              {
+                "speaker": "B",
+                "text": "Use 10-minute breaks each day to review flashcards, and we’ll have a 15-minute check-in every Friday. That’s doable, right?"
+              },
+              {
+                "speaker": "A",
+                "text": "Perfect! That won’t take too much time, and I can stick to it easily."
+              }
+            ]
+          },
+          {
+            "scene": "线上和学友讨论碎片时间学习金融词汇",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hi there! I’m a beginner trying to learn finance vocab while working full-time. Do you have any tricks?"
+              },
+              {
+                "speaker": "B",
+                "text": "Me too! I use a vocab app that sends me 3 terms every morning when I drink my coffee. It’s a godsend."
+              },
+              {
+                "speaker": "A",
+                "text": "Oh, I haven’t tried that! Do you focus on any specific types of terms first?"
+              },
+              {
+                "speaker": "B",
+                "text": "Yeah, I started with daily work-related words, like 'invoice' and 'budget,' since I use them at my job. It helps me remember faster."
+              },
+              {
+                "speaker": "A",
+                "text": "That makes sense—learning words I actually use will be more useful. Thanks!"
+              }
+            ]
+          },
+          {
+            "scene": "和职场前辈请教金融词汇学习实用技巧",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Mr. Zhang, you’re great with finance terms. How did you learn them efficiently when you started?"
+              },
+              {
+                "speaker": "B",
+                "text": "Well, I didn’t just memorize words—I wrote them down in sentences related to our work, like 'We need to approve the budget by Friday.'"
+              },
+              {
+                "speaker": "A",
+                "text": "That’s a good idea! I’ve been just memorizing definitions, which is boring and hard."
+              },
+              {
+                "speaker": "B",
+                "text": "Also, try to use one new term in a work email every day. Practice makes perfect, right?"
+              },
+              {
+                "speaker": "A",
+                "text": "Definitely! I’ll start doing that tomorrow. Thanks for the advice!"
+              }
+            ]
+          }
+        ],
+        "expressions": [
+          {
+            "phrase": "tear one's hair out",
+            "meaning": "（因焦虑、挫败而）抓狂，愁得要命",
+            "example": "I’ve been tearing my hair out trying to memorize all these finance vocab words before the company training."
+          },
+          {
+            "phrase": "time-efficient",
+            "meaning": "省时高效的",
+            "example": "Making digital flashcards is a time-efficient way to review finance work vocab during short breaks."
+          },
+          {
+            "phrase": "godsend",
+            "meaning": "天赐之物，极有用的事物/人",
+            "example": "The vocab app that sends daily finance term reminders is a godsend for busy full-time workers."
+          },
+          {
+            "phrase": "kick things off",
+            "meaning": "开始着手，启动（某事）",
+            "example": "Let’s kick things off with a simple weekly plan: learn 8 basic finance terms and use 2 of them in work conversations."
+          },
+          {
+            "phrase": "stick to a schedule",
+            "meaning": "遵守计划，按时间表执行",
+            "example": "If you want to learn finance vocab steadily, you need to stick to your 10-minute daily study schedule."
+          },
+          {
+            "phrase": "break down into chunks",
+            "meaning": "把（大任务）拆分成小块",
+            "example": "Break the long list of finance terms down into small chunks, like 'banking' and 'investment' groups, to avoid feeling overwhelmed."
+          },
+          {
+            "phrase": "pick up vocab on the go",
+            "meaning": "在通勤或忙碌间隙学习词汇",
+            "example": "I like to pick up finance vocab on the go by listening to a 5-minute term explanation podcast during my subway ride to work."
+          }
+        ]
+      }
+    },
+    {
+      "id": "practice_1769332604780",
+      "date": "2026-01-25",
+      "timestamp": "2026-01-25T09:16:44.780Z",
+      "dialogue_topic": "日常祝福，金融词汇",
+      "review_notes": {
+        "vocabulary": {
+          "key_words": [
+            "nice time",
+            "finance word",
+            "Thank you"
+          ],
+          "new_words": [
+            "finance word"
+          ],
+          "difficult_words": []
+        },
+        "grammar": [
+          {
+            "point": "when引导的时间状语从句（一般现在时表将来）",
+            "user_usage": "I want to learn a basic finance word when I'm back.",
+            "correct_usage": "I want to learn a basic finance word when I'm back.",
+            "explanation": "在表达将来某个时间要执行的动作时，时间状语从句中常用一般现在时替代一般将来时。此处when I'm back使用一般现在时，对应主句中表将来意愿的want to learn，语法运用完全正确。"
+          }
+        ],
+        "corrections": [],
+        "suggestions": [
+          "积累更多日常祝福的多样化表达，比如“Have a wonderful date!”“Enjoy your quality time together!”等，丰富日常交流的语料库。",
+          "从高频基础金融词汇入手系统学习，例如“budget（预算）”“savings（储蓄）”“investment（投资）”，并整理成词汇卡片定期复习。",
+          "学习新金融词汇后，尝试结合生活场景造简单句子，比如“When I receive my monthly pay, I plan to learn more about savings.”，提升词汇的实际运用能力。"
+        ]
+      },
+      "expansion_materials": {
+        "dialogues": [
+          {
+            "scene": "约会前和好友讨论约会预算",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hey Li Ming, I’m planning a dinner date with my girlfriend tonight. Any simple tips?"
+              },
+              {
+                "speaker": "B",
+                "text": "First, you should set a clear budget for the date. Don’t spend too much!"
+              },
+              {
+                "speaker": "A",
+                "text": "Oh right, what’s “budget” exactly? It’s a basic finance word, right?"
+              },
+              {
+                "speaker": "B",
+                "text": "Yes! It means the money you plan to spend. My date budget is usually 200 yuan."
+              },
+              {
+                "speaker": "A",
+                "text": "Got it! I’ll set a 300-yuan budget for dinner and a movie."
+              },
+              {
+                "speaker": "B",
+                "text": "That’s perfect—neither too much nor too tight."
+              }
+            ]
+          },
+          {
+            "scene": "约会中和女友提议分摊费用",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "The steak and dessert here are so delicious, aren’t they?"
+              },
+              {
+                "speaker": "B",
+                "text": "Yes! I’m really enjoying our time together."
+              },
+              {
+                "speaker": "A",
+                "text": "Let’s split the bill when we pay, okay? I don’t want you to feel pressured."
+              },
+              {
+                "speaker": "B",
+                "text": "That’s sweet! Split the bill means we each pay half, right?"
+              },
+              {
+                "speaker": "A",
+                "text": "Exactly! It’s a fair way to share our expenses."
+              },
+              {
+                "speaker": "B",
+                "text": "Great, that makes me feel comfortable."
+              }
+            ]
+          },
+          {
+            "scene": "约会后和英语助手复习金融词汇",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hi, I just finished my date! Can we review some finance words I used today?"
+              },
+              {
+                "speaker": "B",
+                "text": "Sure! What words would you like to go over?"
+              },
+              {
+                "speaker": "A",
+                "text": "I know “budget” now, but can you explain “expense” for me?"
+              },
+              {
+                "speaker": "B",
+                "text": "“Expense” is the money you spend on something. Like, your dinner was an expense for the date."
+              },
+              {
+                "speaker": "A",
+                "text": "Oh I see! My total date expense was 280 yuan, which was under my budget."
+              },
+              {
+                "speaker": "B",
+                "text": "Well done! You managed your money really well."
+              }
+            ]
+          },
+          {
+            "scene": "约会时聊未来出行计划（涉及存款）",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Do you have any favorite places you want to visit next month?"
+              },
+              {
+                "speaker": "B",
+                "text": "I really want to go to the new botanical garden downtown!"
+              },
+              {
+                "speaker": "A",
+                "text": "That sounds lovely. I can use part of my savings to pay for tickets and snacks."
+              },
+              {
+                "speaker": "B",
+                "text": "What’s “savings”? Is it the money you keep in the bank?"
+              },
+              {
+                "speaker": "A",
+                "text": "Yes! It’s the money I’ve saved instead of spending it all right away."
+              },
+              {
+                "speaker": "B",
+                "text": "That’s smart. Let’s start planning our little trip then!"
+              }
+            ]
+          }
+        ],
+        "expressions": [
+          {
+            "phrase": "set a budget for...",
+            "meaning": "为……制定预算",
+            "example": "I need to set a budget for my weekend date with my girlfriend."
+          },
+          {
+            "phrase": "split the bill",
+            "meaning": "AA制；分摊账单",
+            "example": "We decided to split the bill after the nice dinner date."
+          },
+          {
+            "phrase": "total expense",
+            "meaning": "总开支",
+            "example": "My total expense for the movie and coffee date was 150 yuan."
+          },
+          {
+            "phrase": "use savings to do sth",
+            "meaning": "用存款做某事",
+            "example": "I can use my savings to buy tickets for our upcoming date trip."
+          },
+          {
+            "phrase": "stay under budget",
+            "meaning": "开支不超预算",
+            "example": "I was happy that my date stayed under budget last night."
+          },
+          {
+            "phrase": "share expenses",
+            "meaning": "分担开支",
+            "example": "Sharing expenses is a fair way when dating with friends or partners."
+          }
+        ]
+      }
+    },
+    {
+      "id": "practice_1769518376357",
+      "date": "2026-01-27",
+      "timestamp": "2026-01-27T12:52:56.357Z",
+      "dialogue_topic": "金融词汇，英语学习",
+      "review_notes": {
+        "vocabulary": {
+          "key_words": [
+            "solid progress",
+            "map out",
+            "manageable plan",
+            "tackle",
+            "tricky terms"
+          ],
+          "new_words": [
+            "spare a moment",
+            "juggling work and study",
+            "time-efficient crash course",
+            "godsend",
+            "office rush dies down"
+          ],
+          "difficult_words": [
+            "juggling",
+            "godsend",
+            "tackle"
+          ]
+        },
+        "grammar": [
+          {
+            "point": "现在完成进行时",
+            "user_usage": "you’ve been making solid progress with your work-related English words these past weeks",
+            "correct_usage": "you’ve been making solid progress with your work-related English words these past weeks",
+            "explanation": "现在完成进行时用于表示从过去某一时刻开始持续到现在的动作，且动作可能仍在进行。此处用来描述对方过去几周持续取得学习进步的状态，符合语境。"
+          },
+          {
+            "point": "目的状语不定式",
+            "user_usage": "to tackle those tricky terms",
+            "correct_usage": "to tackle those tricky terms",
+            "explanation": "不定式to do结构在句中作目的状语，清晰表明制定计划的核心目标是处理复杂术语，符合英语表达逻辑。"
+          },
+          {
+            "point": "once引导的时间状语从句",
+            "user_usage": "once the office rush dies down",
+            "correct_usage": "once the office rush dies down",
+            "explanation": "once引导时间状语从句，表达“一旦……就……”的条件关系，明确了开展学习的时间节点，逻辑连贯。"
+          }
+        ],
+        "corrections": [
+          {
+            "user_said": "you’ve been making solid progress with your work-related English words these past weeks",
+            "correct": "you’ve been making solid progress with your work-related finance words these past weeks",
+            "explanation": "对话主题聚焦金融词汇学习，将“English words”改为“finance words”更贴合具体学习目标，使表达更精准，紧扣主题。"
+          },
+          {
+            "user_said": "so let’s map out a manageable plan to tackle those tricky terms over a nice time by my desk once the office rush dies down",
+            "correct": "so let’s map out a manageable, time-efficient plan to tackle those tricky finance terms in a focused session by my desk once the office rush dies down",
+            "explanation": "1. “over a nice time”未呼应AI提及的“time-efficient crash course”需求，改为“in a focused session”并增加“time-efficient”修饰plan，贴合高效学习的诉求；2. 补充“finance”修饰terms，明确指向金融领域术语，紧扣对话核心主题。"
+          }
+        ],
+        "suggestions": [
+          "在领域相关对话练习中，优先使用精准的领域词汇替代泛化表达，比如用“finance words”替代“English words”，强化主题贴合度。",
+          "积累“高效学习”“任务处理”类的场景固定表达，如“time-efficient crash course”“focused session”，提升交流的语境适配性。",
+          "针对多义动词（如tackle、map out）进行金融语境下的专项记忆，整理其在金融场景中的具体用法，增强词汇运用准确性。"
+        ]
+      },
+      "expansion_materials": {
+        "dialogues": [
+          {
+            "scene": "办公室午休请教同事金融词汇",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hey, do you have 5 minutes? I’m stuck on some basic finance words from the new loan report."
+              },
+              {
+                "speaker": "B",
+                "text": "Sure, what’s confusing you?"
+              },
+              {
+                "speaker": "A",
+                "text": "What does \"down payment\" mean exactly? I saw it in the housing loan section."
+              },
+              {
+                "speaker": "B",
+                "text": "Oh, it’s the initial money you pay when buying something expensive, like a house. For example, if a house costs $100,000, you might pay 10% ($10,000) as a down payment first."
+              },
+              {
+                "speaker": "A",
+                "text": "That makes total sense! Thanks for explaining it simply."
+              },
+              {
+                "speaker": "B",
+                "text": "No problem—just ask if you hit more tricky words later."
+              }
+            ]
+          },
+          {
+            "scene": "线上英语课和老师讨论金融入门词汇",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Excuse me, teacher? I don’t get the difference between \"interest rate\" and \"APR\"."
+              },
+              {
+                "speaker": "B",
+                "text": "Great question! The interest rate is just the percentage you pay to borrow money. APR stands for Annual Percentage Rate, which includes interest plus extra fees."
+              },
+              {
+                "speaker": "A",
+                "text": "So APR is the total cost I’d pay in a year, right?"
+              },
+              {
+                "speaker": "B",
+                "text": "Exactly! If you borrow $1000 with a 5% interest rate and $50 fees, the APR will be a bit higher than 5%."
+              },
+              {
+                "speaker": "A",
+                "text": "Got it, that’s much clearer now. Thank you!"
+              }
+            ]
+          },
+          {
+            "scene": "和同学一起复习金融词汇备考",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Let’s go over some finance terms for our quiz tomorrow, okay?"
+              },
+              {
+                "speaker": "B",
+                "text": "Sounds good! First, what’s a \"dividend\"?"
+              },
+              {
+                "speaker": "A",
+                "text": "Um, is it the money a company gives to people who own its stock?"
+              },
+              {
+                "speaker": "B",
+                "text": "Yes! For example, if you own stock in a coffee company, they might send you a small dividend every 3 months."
+              },
+              {
+                "speaker": "A",
+                "text": "I remember now! What about \"budget\"?"
+              },
+              {
+                "speaker": "B",
+                "text": "A budget is a plan for how you spend and save your money each month, like setting aside $200 for groceries."
+              }
+            ]
+          },
+          {
+            "scene": "银行实习请教前辈基础金融术语",
+            "dialogue": [
+              {
+                "speaker": "A",
+                "text": "Hi, Ms. Lee? I’m the new intern, and I’m not sure what a \"balance sheet\" is."
+              },
+              {
+                "speaker": "B",
+                "text": "Don’t worry—it’s a basic document that shows a company’s finances at a specific time: assets (like cash or buildings), liabilities (like loans), and owners’ equity."
+              },
+              {
+                "speaker": "A",
+                "text": "So it’s like a snapshot of the company’s money situation?"
+              },
+              {
+                "speaker": "B",
+                "text": "Exactly! A small restaurant’s balance sheet might list $5000 in cash (asset) and $2000 in loan debt (liability)."
+              },
+              {
+                "speaker": "A",
+                "text": "That’s easy to understand. I really appreciate your help!"
+              }
+            ]
+          }
+        ],
+        "expressions": [
+          {
+            "phrase": "Could you explain...in simple terms?",
+            "meaning": "你能用简单的语言解释……吗？",
+            "example": "Could you explain \"net profit\" in simple terms? I’m new to finance."
+          },
+          {
+            "phrase": "What’s the difference between...and...?",
+            "meaning": "……和……有什么区别？",
+            "example": "What’s the difference between \"savings account\" and \"checking account\"?"
+          },
+          {
+            "phrase": "Can you give me a real-life example of...?",
+            "meaning": "你能给我一个……的实际例子吗？",
+            "example": "Can you give me a real-life example of \"compound interest\"?"
+          },
+          {
+            "phrase": "I’m confused about...",
+            "meaning": "我对……感到困惑。",
+            "example": "I’m confused about the meaning of \"stock market index\"."
+          },
+          {
+            "phrase": "Let’s go over some key finance terms.",
+            "meaning": "我们来复习一些关键的金融术语。",
+            "example": "Let’s go over some key finance terms before our quiz next week."
+          },
+          {
+            "phrase": "What does...mean exactly?",
+            "meaning": "……到底是什么意思？",
+            "example": "What does \"credit score\" mean exactly? How is it calculated?"
+          }
+        ]
+      }
     }
   ]
 }

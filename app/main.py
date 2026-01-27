@@ -1736,6 +1736,94 @@ async def generate_expansion_materials(request: Request):
             "message": f"生成场景拓展资料时出错: {str(e)}"
         }, status_code=500)
 
+@app.post("/api/knowledge/select-scene")
+async def select_scene(request: Request):
+    """用户选择场景，更新场景偏好"""
+    try:
+        from .shared import get_memory_system, get_current_account
+        from .knowledge_db import KnowledgeDatabase
+        
+        data = await request.json()
+        scene_primary = data.get("scene_primary", "").strip()
+        scene_secondary = data.get("scene_secondary", "").strip()
+        
+        if not scene_primary or not scene_secondary:
+            return JSONResponse({
+                "status": "error",
+                "message": "场景一级和二级不能为空"
+            }, status_code=400)
+        
+        account_name = get_current_account()
+        if not account_name:
+            return JSONResponse({
+                "status": "error",
+                "message": "用户未登录"
+            }, status_code=401)
+        
+        # 更新场景选择次数
+        kb = KnowledgeDatabase()
+        kb.increment_scene_choice(account_name, scene_primary, scene_secondary)
+        
+        return JSONResponse({
+            "status": "success",
+            "message": "场景选择已记录"
+        })
+        
+    except Exception as e:
+        logger.error(f"Error selecting scene: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"选择场景时出错: {str(e)}"
+        }, status_code=500)
+
+@app.get("/api/knowledge/recommended")
+async def get_recommended_knowledge(request: Request):
+    """获取推荐知识点"""
+    try:
+        from .shared import get_memory_system, get_current_account
+        from .knowledge_db import KnowledgeDatabase
+        
+        account_name = get_current_account()
+        if not account_name:
+            return JSONResponse({
+                "status": "error",
+                "message": "用户未登录"
+            }, status_code=401)
+        
+        # 获取用户水平
+        memory_system = get_memory_system()
+        user_level = "beginner"
+        if memory_system:
+            user_level = memory_system.user_profile.get("english_level", "beginner")
+        
+        # 获取场景参数（可选）
+        scene_secondary = request.query_params.get("scene_secondary", None)
+        
+        # 获取推荐
+        kb = KnowledgeDatabase()
+        recommended = kb.get_recommended_knowledge(
+            user_id=account_name,
+            user_level=user_level,
+            selected_scene_secondary=scene_secondary
+        )
+        
+        return JSONResponse({
+            "status": "success",
+            "recommended": recommended,
+            "count": len(recommended)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting recommended knowledge: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"获取推荐知识点时出错: {str(e)}"
+        }, status_code=500)
+
 @app.post("/api/practice/save-memory")
 async def save_practice_memory(request: Request):
     """保存练习记忆到文件"""

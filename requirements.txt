@@ -55,3 +55,7 @@ av>=14.0.0
 pydantic==2.7.4
 python-dotenv==1.0.1
 pillow==10.3.0
+
+# Excel processing
+pandas==2.2.2
+openpyxl==3.1.5

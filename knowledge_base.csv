@@ -1,0 +1,706 @@
+﻿知识点ID,场景一级,场景二级,类型,内容,英文,难度,分类标签,创建时间
+KB00001,社交,日常社交,单词,你好,hello,beginner,"社交,日常社交,单词",2026-01-25
+KB00002,社交,日常社交,单词,你好,hi,beginner,"社交,日常社交,单词",2026-01-25
+KB00003,社交,日常社交,单词,再见,goodbye,beginner,"社交,日常社交,单词",2026-01-25
+KB00004,社交,日常社交,单词,再见,bye,beginner,"社交,日常社交,单词",2026-01-25
+KB00005,社交,日常社交,单词,是,yes,beginner,"社交,日常社交,单词",2026-01-25
+KB00006,社交,日常社交,单词,不,no,beginner,"社交,日常社交,单词",2026-01-25
+KB00007,社交,日常社交,单词,请,please,beginner,"社交,日常社交,单词",2026-01-25
+KB00008,社交,日常社交,单词,谢谢,thank you,beginner,"社交,日常社交,单词",2026-01-25
+KB00009,社交,日常社交,单词,谢谢,thanks,beginner,"社交,日常社交,单词",2026-01-25
+KB00010,社交,日常社交,单词,对不起,sorry,beginner,"社交,日常社交,单词",2026-01-25
+KB00011,社交,日常社交,单词,好的,good,beginner,"社交,日常社交,单词",2026-01-25
+KB00012,社交,日常社交,单词,坏的,bad,beginner,"社交,日常社交,单词",2026-01-25
+KB00013,社交,日常社交,单词,大的,big,beginner,"社交,日常社交,单词",2026-01-25
+KB00014,社交,日常社交,单词,小的,small,beginner,"社交,日常社交,单词",2026-01-25
+KB00015,社交,日常社交,单词,新的,new,beginner,"社交,日常社交,单词",2026-01-25
+KB00016,社交,日常社交,单词,旧的,old,beginner,"社交,日常社交,单词",2026-01-25
+KB00017,社交,日常社交,单词,热的,hot,beginner,"社交,日常社交,单词",2026-01-25
+KB00018,社交,日常社交,单词,冷的,cold,beginner,"社交,日常社交,单词",2026-01-25
+KB00019,社交,日常社交,单词,高兴的,happy,beginner,"社交,日常社交,单词",2026-01-25
+KB00020,社交,日常社交,单词,悲伤的,sad,beginner,"社交,日常社交,单词",2026-01-25
+KB00021,社交,日常社交,单词,我,I,beginner,"社交,日常社交,单词",2026-01-25
+KB00022,社交,日常社交,单词,你,you,beginner,"社交,日常社交,单词",2026-01-25
+KB00023,社交,日常社交,单词,他,he,beginner,"社交,日常社交,单词",2026-01-25
+KB00024,社交,日常社交,单词,她,she,beginner,"社交,日常社交,单词",2026-01-25
+KB00025,社交,日常社交,单词,我们,we,beginner,"社交,日常社交,单词",2026-01-25
+KB00026,社交,日常社交,单词,他们,they,beginner,"社交,日常社交,单词",2026-01-25
+KB00027,社交,日常社交,单词,这个,this,beginner,"社交,日常社交,单词",2026-01-25
+KB00028,社交,日常社交,单词,那个,that,beginner,"社交,日常社交,单词",2026-01-25
+KB00029,社交,日常社交,单词,这里,here,beginner,"社交,日常社交,单词",2026-01-25
+KB00030,社交,日常社交,单词,那里,there,beginner,"社交,日常社交,单词",2026-01-25
+KB00031,社交,日常社交,单词,什么,what,beginner,"社交,日常社交,单词",2026-01-25
+KB00032,社交,日常社交,单词,谁,who,beginner,"社交,日常社交,单词",2026-01-25
+KB00033,社交,日常社交,单词,哪里,where,beginner,"社交,日常社交,单词",2026-01-25
+KB00034,社交,日常社交,单词,什么时候,when,beginner,"社交,日常社交,单词",2026-01-25
+KB00035,社交,日常社交,单词,为什么,why,beginner,"社交,日常社交,单词",2026-01-25
+KB00036,社交,日常社交,单词,怎么,how,beginner,"社交,日常社交,单词",2026-01-25
+KB00037,社交,日常社交,单词,名字,name,beginner,"社交,日常社交,单词",2026-01-25
+KB00038,社交,日常社交,单词,年龄,age,beginner,"社交,日常社交,单词",2026-01-25
+KB00039,工作,商务会议,单词,工作,job,beginner,"工作,商务会议,单词",2026-01-25
+KB00040,工作,商务会议,单词,工作,work,beginner,"工作,商务会议,单词",2026-01-25
+KB00041,生活,饮食烹饪,单词,吃,eat,beginner,"生活,饮食烹饪,单词",2026-01-25
+KB00042,生活,饮食烹饪,单词,喝,drink,beginner,"生活,饮食烹饪,单词",2026-01-25
+KB00043,社交,日常社交,单词,睡觉,sleep,beginner,"社交,日常社交,单词",2026-01-25
+KB00044,社交,日常社交,单词,去,go,beginner,"社交,日常社交,单词",2026-01-25
+KB00045,社交,日常社交,单词,来,come,beginner,"社交,日常社交,单词",2026-01-25
+KB00046,社交,日常社交,单词,看,see,beginner,"社交,日常社交,单词",2026-01-25
+KB00047,社交,日常社交,单词,知道,know,beginner,"社交,日常社交,单词",2026-01-25
+KB00048,社交,日常社交,单词,想,think,beginner,"社交,日常社交,单词",2026-01-25
+KB00049,社交,日常社交,单词,想要,want,beginner,"社交,日常社交,单词",2026-01-25
+KB00050,娱乐,兴趣爱好,单词,喜欢,like,beginner,"娱乐,兴趣爱好,单词",2026-01-25
+KB00051,生活,家居生活,单词,房子,house,beginner,"生活,家居生活,单词",2026-01-25
+KB00052,生活,家居生活,单词,家,home,beginner,"生活,家居生活,单词",2026-01-25
+KB00053,生活,家居生活,单词,房间,room,beginner,"生活,家居生活,单词",2026-01-25
+KB00054,生活,家居生活,单词,门,door,beginner,"生活,家居生活,单词",2026-01-25
+KB00055,生活,家居生活,单词,窗户,window,beginner,"生活,家居生活,单词",2026-01-25
+KB00056,生活,家居生活,单词,桌子,table,beginner,"生活,家居生活,单词",2026-01-25
+KB00057,生活,家居生活,单词,椅子,chair,beginner,"生活,家居生活,单词",2026-01-25
+KB00058,生活,家居生活,单词,床,bed,beginner,"生活,家居生活,单词",2026-01-25
+KB00059,娱乐,阅读写作,单词,书,book,beginner,"娱乐,阅读写作,单词",2026-01-25
+KB00060,社交,日常社交,单词,笔,pen,beginner,"社交,日常社交,单词",2026-01-25
+KB00061,旅行,交通出行,单词,汽车,car,beginner,"旅行,交通出行,单词",2026-01-25
+KB00062,旅行,交通出行,单词,公交车,bus,beginner,"旅行,交通出行,单词",2026-01-25
+KB00063,旅行,交通出行,单词,火车,train,beginner,"旅行,交通出行,单词",2026-01-25
+KB00064,旅行,交通出行,单词,飞机,plane,beginner,"旅行,交通出行,单词",2026-01-25
+KB00065,社交,日常社交,单词,自行车,bike,beginner,"社交,日常社交,单词",2026-01-25
+KB00066,社交,日常社交,单词,walk,walk,beginner,"社交,日常社交,单词",2026-01-25
+KB00067,社交,日常社交,单词,run,run,beginner,"社交,日常社交,单词",2026-01-25
+KB00068,社交,日常社交,单词,sit,sit,beginner,"社交,日常社交,单词",2026-01-25
+KB00069,社交,日常社交,单词,stand,stand,beginner,"社交,日常社交,单词",2026-01-25
+KB00070,社交,日常社交,单词,open,open,beginner,"社交,日常社交,单词",2026-01-25
+KB00071,社交,日常社交,单词,close,close,beginner,"社交,日常社交,单词",2026-01-25
+KB00072,娱乐,阅读写作,单词,读,read,beginner,"娱乐,阅读写作,单词",2026-01-25
+KB00073,娱乐,阅读写作,单词,写,write,beginner,"娱乐,阅读写作,单词",2026-01-25
+KB00074,社交,日常社交,单词,说,speak,beginner,"社交,日常社交,单词",2026-01-25
+KB00075,娱乐,电影音乐,单词,听,listen,beginner,"娱乐,电影音乐,单词",2026-01-25
+KB00076,娱乐,电影音乐,单词,看,watch,beginner,"娱乐,电影音乐,单词",2026-01-25
+KB00077,娱乐,游戏娱乐,单词,玩,play,beginner,"娱乐,游戏娱乐,单词",2026-01-25
+KB00078,生活,日常购物,单词,买,buy,beginner,"生活,日常购物,单词",2026-01-25
+KB00079,生活,日常购物,单词,卖,sell,beginner,"生活,日常购物,单词",2026-01-25
+KB00080,社交,日常社交,单词,给,give,beginner,"社交,日常社交,单词",2026-01-25
+KB00081,社交,日常社交,单词,拿,take,beginner,"社交,日常社交,单词",2026-01-25
+KB00082,社交,日常社交,单词,得到,get,beginner,"社交,日常社交,单词",2026-01-25
+KB00083,社交,日常社交,单词,放,put,beginner,"社交,日常社交,单词",2026-01-25
+KB00084,社交,日常社交,单词,做,make,beginner,"社交,日常社交,单词",2026-01-25
+KB00085,社交,日常社交,单词,做,do,beginner,"社交,日常社交,单词",2026-01-25
+KB00086,社交,日常社交,单词,有,have,beginner,"社交,日常社交,单词",2026-01-25
+KB00087,社交,日常社交,单词,是,be,beginner,"社交,日常社交,单词",2026-01-25
+KB00088,社交,日常社交,单词,am,am,beginner,"社交,日常社交,单词",2026-01-25
+KB00089,社交,日常社交,单词,is,is,beginner,"社交,日常社交,单词",2026-01-25
+KB00090,社交,日常社交,单词,are,are,beginner,"社交,日常社交,单词",2026-01-25
+KB00091,社交,日常社交,单词,天,day,beginner,"社交,日常社交,单词",2026-01-25
+KB00092,社交,日常社交,单词,夜晚,night,beginner,"社交,日常社交,单词",2026-01-25
+KB00093,社交,日常社交,单词,早上,morning,beginner,"社交,日常社交,单词",2026-01-25
+KB00094,社交,日常社交,单词,下午,afternoon,beginner,"社交,日常社交,单词",2026-01-25
+KB00095,社交,日常社交,单词,晚上,evening,beginner,"社交,日常社交,单词",2026-01-25
+KB00096,社交,日常社交,单词,今天,today,beginner,"社交,日常社交,单词",2026-01-25
+KB00097,社交,日常社交,单词,明天,tomorrow,beginner,"社交,日常社交,单词",2026-01-25
+KB00098,社交,日常社交,单词,昨天,yesterday,beginner,"社交,日常社交,单词",2026-01-25
+KB00099,社交,日常社交,单词,周,week,beginner,"社交,日常社交,单词",2026-01-25
+KB00100,社交,日常社交,单词,月,month,beginner,"社交,日常社交,单词",2026-01-25
+KB00101,社交,日常社交,单词,年,year,beginner,"社交,日常社交,单词",2026-01-25
+KB00102,社交,日常社交,单词,时间,time,beginner,"社交,日常社交,单词",2026-01-25
+KB00103,社交,日常社交,单词,小时,hour,beginner,"社交,日常社交,单词",2026-01-25
+KB00104,社交,日常社交,单词,分钟,minute,beginner,"社交,日常社交,单词",2026-01-25
+KB00105,社交,日常社交,单词,现在,now,beginner,"社交,日常社交,单词",2026-01-25
+KB00106,社交,日常社交,单词,然后,then,beginner,"社交,日常社交,单词",2026-01-25
+KB00107,社交,日常社交,单词,之前,before,beginner,"社交,日常社交,单词",2026-01-25
+KB00108,社交,日常社交,单词,之后,after,beginner,"社交,日常社交,单词",2026-01-25
+KB00109,社交,日常社交,单词,今天,today,beginner,"社交,日常社交,单词",2026-01-25
+KB00110,社交,日常社交,单词,现在,now,beginner,"社交,日常社交,单词",2026-01-25
+KB00111,社交,日常社交,单词,精彩的,wonderful,elementary,"社交,日常社交,单词",2026-01-25
+KB00112,娱乐,兴趣爱好,单词,有趣的,interesting,elementary,"娱乐,兴趣爱好,单词",2026-01-25
+KB00113,社交,日常社交,单词,美丽的,beautiful,elementary,"社交,日常社交,单词",2026-01-25
+KB00114,社交,日常社交,单词,好的,nice,elementary,"社交,日常社交,单词",2026-01-25
+KB00115,生活,饮食烹饪,单词,伟大的,great,elementary,"生活,饮食烹饪,单词",2026-01-25
+KB00116,社交,日常社交,单词,优秀的,excellent,elementary,"社交,日常社交,单词",2026-01-25
+KB00117,社交,日常社交,单词,好的,fine,elementary,"社交,日常社交,单词",2026-01-25
+KB00118,社交,日常社交,单词,好的,okay,elementary,"社交,日常社交,单词",2026-01-25
+KB00119,社交,日常社交,单词,也许,maybe,elementary,"社交,日常社交,单词",2026-01-25
+KB00120,社交,日常社交,单词,也许,perhaps,elementary,"社交,日常社交,单词",2026-01-25
+KB00121,社交,日常社交,单词,朋友,friend,elementary,"社交,日常社交,单词",2026-01-25
+KB00122,生活,家庭关系,单词,家庭,family,elementary,"生活,家庭关系,单词",2026-01-25
+KB00123,生活,家庭关系,单词,父母,parent,elementary,"生活,家庭关系,单词",2026-01-25
+KB00124,生活,家庭关系,单词,孩子,child,elementary,"生活,家庭关系,单词",2026-01-25
+KB00125,生活,家庭关系,单词,兄弟,brother,elementary,"生活,家庭关系,单词",2026-01-25
+KB00126,生活,家庭关系,单词,姐妹,sister,elementary,"生活,家庭关系,单词",2026-01-25
+KB00127,生活,家庭关系,单词,母亲,mother,elementary,"生活,家庭关系,单词",2026-01-25
+KB00128,生活,家庭关系,单词,父亲,father,elementary,"生活,家庭关系,单词",2026-01-25
+KB00129,生活,家庭关系,单词,儿子,son,elementary,"生活,家庭关系,单词",2026-01-25
+KB00130,生活,家庭关系,单词,女儿,daughter,elementary,"生活,家庭关系,单词",2026-01-25
+KB00131,学习,学校课程,单词,学校,school,elementary,"学习,学校课程,单词",2026-01-25
+KB00132,学习,学校课程,单词,学生,student,elementary,"学习,学校课程,单词",2026-01-25
+KB00133,生活,饮食烹饪,单词,老师,teacher,elementary,"生活,饮食烹饪,单词",2026-01-25
+KB00134,学习,学校课程,单词,班级,class,elementary,"学习,学校课程,单词",2026-01-25
+KB00135,生活,家庭关系,单词,课程,lesson,elementary,"生活,家庭关系,单词",2026-01-25
+KB00136,学习,学校课程,单词,学习,study,elementary,"学习,学校课程,单词",2026-01-25
+KB00137,学习,学校课程,单词,学习,learn,elementary,"学习,学校课程,单词",2026-01-25
+KB00138,生活,饮食烹饪,单词,教,teach,elementary,"生活,饮食烹饪,单词",2026-01-25
+KB00139,学习,考试准备,单词,测试,test,elementary,"学习,考试准备,单词",2026-01-25
+KB00140,学习,考试准备,单词,考试,exam,elementary,"学习,考试准备,单词",2026-01-25
+KB00141,生活,饮食烹饪,单词,食物,food,elementary,"生活,饮食烹饪,单词",2026-01-25
+KB00142,生活,饮食烹饪,单词,早餐,breakfast,elementary,"生活,饮食烹饪,单词",2026-01-25
+KB00143,生活,饮食烹饪,单词,午餐,lunch,elementary,"生活,饮食烹饪,单词",2026-01-25
+KB00144,生活,饮食烹饪,单词,晚餐,dinner,elementary,"生活,饮食烹饪,单词",2026-01-25
+KB00145,社交,日常社交,单词,水,water,elementary,"社交,日常社交,单词",2026-01-25
+KB00146,生活,饮食烹饪,单词,咖啡,coffee,elementary,"生活,饮食烹饪,单词",2026-01-25
+KB00147,生活,饮食烹饪,单词,茶,tea,elementary,"生活,饮食烹饪,单词",2026-01-25
+KB00148,生活,饮食烹饪,单词,牛奶,milk,elementary,"生活,饮食烹饪,单词",2026-01-25
+KB00149,生活,饮食烹饪,单词,面包,bread,elementary,"生活,饮食烹饪,单词",2026-01-25
+KB00150,生活,饮食烹饪,单词,米饭,rice,elementary,"生活,饮食烹饪,单词",2026-01-25
+KB00151,生活,饮食烹饪,单词,餐厅,restaurant,elementary,"生活,饮食烹饪,单词",2026-01-25
+KB00152,生活,日常购物,单词,商店,shop,elementary,"生活,日常购物,单词",2026-01-25
+KB00153,生活,日常购物,单词,商店,store,elementary,"生活,日常购物,单词",2026-01-25
+KB00154,生活,日常购物,单词,市场,market,elementary,"生活,日常购物,单词",2026-01-25
+KB00155,生活,日常购物,单词,买,buy,elementary,"生活,日常购物,单词",2026-01-25
+KB00156,生活,日常购物,单词,卖,sell,elementary,"生活,日常购物,单词",2026-01-25
+KB00157,生活,日常购物,单词,价格,price,elementary,"生活,日常购物,单词",2026-01-25
+KB00158,生活,日常购物,单词,钱,money,elementary,"生活,日常购物,单词",2026-01-25
+KB00159,生活,日常购物,单词,便宜的,cheap,elementary,"生活,日常购物,单词",2026-01-25
+KB00160,生活,日常购物,单词,贵的,expensive,elementary,"生活,日常购物,单词",2026-01-25
+KB00161,生活,饮食烹饪,单词,天气,weather,elementary,"生活,饮食烹饪,单词",2026-01-25
+KB00162,社交,日常社交,单词,晴朗的,sunny,elementary,"社交,日常社交,单词",2026-01-25
+KB00163,社交,日常社交,单词,下雨的,rainy,elementary,"社交,日常社交,单词",2026-01-25
+KB00164,社交,日常社交,单词,多云的,cloudy,elementary,"社交,日常社交,单词",2026-01-25
+KB00165,社交,日常社交,单词,有风的,windy,elementary,"社交,日常社交,单词",2026-01-25
+KB00166,社交,日常社交,单词,雪,snow,elementary,"社交,日常社交,单词",2026-01-25
+KB00167,社交,日常社交,单词,雨,rain,elementary,"社交,日常社交,单词",2026-01-25
+KB00168,社交,日常社交,单词,太阳,sun,elementary,"社交,日常社交,单词",2026-01-25
+KB00169,社交,日常社交,单词,云,cloud,elementary,"社交,日常社交,单词",2026-01-25
+KB00170,社交,日常社交,单词,风,wind,elementary,"社交,日常社交,单词",2026-01-25
+KB00171,社交,日常社交,单词,衣服,clothes,elementary,"社交,日常社交,单词",2026-01-25
+KB00172,社交,日常社交,单词,衬衫,shirt,elementary,"社交,日常社交,单词",2026-01-25
+KB00173,社交,日常社交,单词,裤子,pants,elementary,"社交,日常社交,单词",2026-01-25
+KB00174,社交,日常社交,单词,鞋子,shoes,elementary,"社交,日常社交,单词",2026-01-25
+KB00175,社交,日常社交,单词,帽子,hat,elementary,"社交,日常社交,单词",2026-01-25
+KB00176,社交,日常社交,单词,裙子,dress,elementary,"社交,日常社交,单词",2026-01-25
+KB00177,社交,日常社交,单词,夹克,jacket,elementary,"社交,日常社交,单词",2026-01-25
+KB00178,社交,日常社交,单词,外套,coat,elementary,"社交,日常社交,单词",2026-01-25
+KB00179,社交,日常社交,单词,穿,wear,elementary,"社交,日常社交,单词",2026-01-25
+KB00180,社交,日常社交,单词,穿上,put on,elementary,"社交,日常社交,单词",2026-01-25
+KB00181,娱乐,兴趣爱好,单词,爱好,hobby,elementary,"娱乐,兴趣爱好,单词",2026-01-25
+KB00182,娱乐,运动健身,单词,运动,sport,elementary,"娱乐,运动健身,单词",2026-01-25
+KB00183,娱乐,运动健身,单词,足球,football,elementary,"娱乐,运动健身,单词",2026-01-25
+KB00184,娱乐,运动健身,单词,篮球,basketball,elementary,"娱乐,运动健身,单词",2026-01-25
+KB00185,娱乐,运动健身,单词,游泳,swim,elementary,"娱乐,运动健身,单词",2026-01-25
+KB00186,娱乐,运动健身,单词,跳舞,dance,elementary,"娱乐,运动健身,单词",2026-01-25
+KB00187,社交,日常社交,单词,唱歌,sing,elementary,"社交,日常社交,单词",2026-01-25
+KB00188,娱乐,电影音乐,单词,音乐,music,elementary,"娱乐,电影音乐,单词",2026-01-25
+KB00189,娱乐,电影音乐,单词,电影,movie,elementary,"娱乐,电影音乐,单词",2026-01-25
+KB00190,娱乐,电影音乐,单词,电影,film,elementary,"娱乐,电影音乐,单词",2026-01-25
+KB00191,旅行,交通出行,单词,travel,travel,elementary,"旅行,交通出行,单词",2026-01-25
+KB00192,旅行,交通出行,单词,旅行,trip,elementary,"旅行,交通出行,单词",2026-01-25
+KB00193,旅行,交通出行,单词,假期,vacation,elementary,"旅行,交通出行,单词",2026-01-25
+KB00194,旅行,交通出行,单词,假期,holiday,elementary,"旅行,交通出行,单词",2026-01-25
+KB00195,旅行,酒店住宿,单词,酒店,hotel,elementary,"旅行,酒店住宿,单词",2026-01-25
+KB00196,旅行,交通出行,单词,机场,airport,elementary,"旅行,交通出行,单词",2026-01-25
+KB00197,旅行,交通出行,单词,车站,station,elementary,"旅行,交通出行,单词",2026-01-25
+KB00198,旅行,交通出行,单词,票,ticket,elementary,"旅行,交通出行,单词",2026-01-25
+KB00199,旅行,交通出行,单词,护照,passport,elementary,"旅行,交通出行,单词",2026-01-25
+KB00200,旅行,交通出行,单词,行李,luggage,elementary,"旅行,交通出行,单词",2026-01-25
+KB00201,生活,健康医疗,单词,感觉,feel,elementary,"生活,健康医疗,单词",2026-01-25
+KB00202,生活,健康医疗,单词,累的,tired,elementary,"生活,健康医疗,单词",2026-01-25
+KB00203,生活,健康医疗,单词,饿的,hungry,elementary,"生活,健康医疗,单词",2026-01-25
+KB00204,生活,健康医疗,单词,渴的,thirsty,elementary,"生活,健康医疗,单词",2026-01-25
+KB00205,生活,健康医疗,单词,生病的,sick,elementary,"生活,健康医疗,单词",2026-01-25
+KB00206,生活,健康医疗,单词,健康的,healthy,elementary,"生活,健康医疗,单词",2026-01-25
+KB00207,社交,日常社交,单词,强壮的,strong,elementary,"社交,日常社交,单词",2026-01-25
+KB00208,社交,日常社交,单词,弱的,weak,elementary,"社交,日常社交,单词",2026-01-25
+KB00209,社交,日常社交,单词,快的,fast,elementary,"社交,日常社交,单词",2026-01-25
+KB00210,社交,日常社交,单词,慢的,slow,elementary,"社交,日常社交,单词",2026-01-25
+KB00211,社交,日常社交,单词,容易的,easy,elementary,"社交,日常社交,单词",2026-01-25
+KB00212,社交,日常社交,单词,困难的,difficult,elementary,"社交,日常社交,单词",2026-01-25
+KB00213,社交,日常社交,单词,困难的,hard,elementary,"社交,日常社交,单词",2026-01-25
+KB00214,社交,日常社交,单词,简单的,simple,elementary,"社交,日常社交,单词",2026-01-25
+KB00215,社交,日常社交,单词,重要的,important,elementary,"社交,日常社交,单词",2026-01-25
+KB00216,社交,日常社交,单词,必要的,necessary,elementary,"社交,日常社交,单词",2026-01-25
+KB00217,社交,日常社交,单词,可能的,possible,elementary,"社交,日常社交,单词",2026-01-25
+KB00218,社交,日常社交,单词,不可能的,impossible,elementary,"社交,日常社交,单词",2026-01-25
+KB00219,社交,日常社交,单词,对的,right,elementary,"社交,日常社交,单词",2026-01-25
+KB00220,社交,日常社交,单词,错的,wrong,elementary,"社交,日常社交,单词",2026-01-25
+KB00221,旅行,紧急情况,单词,帮助,help,elementary,"旅行,紧急情况,单词",2026-01-25
+KB00222,旅行,紧急情况,单词,有帮助的,helpful,elementary,"旅行,紧急情况,单词",2026-01-25
+KB00223,社交,日常社交,单词,善良的,kind,elementary,"社交,日常社交,单词",2026-01-25
+KB00224,社交,日常社交,单词,友好的,friendly,elementary,"社交,日常社交,单词",2026-01-25
+KB00225,社交,日常社交,单词,有礼貌的,polite,elementary,"社交,日常社交,单词",2026-01-25
+KB00226,社交,日常社交,单词,粗鲁的,rude,elementary,"社交,日常社交,单词",2026-01-25
+KB00227,社交,日常社交,单词,安静的,quiet,elementary,"社交,日常社交,单词",2026-01-25
+KB00228,社交,日常社交,单词,吵闹的,noisy,elementary,"社交,日常社交,单词",2026-01-25
+KB00229,生活,家居生活,单词,干净的,clean,elementary,"生活,家居生活,单词",2026-01-25
+KB00230,生活,家居生活,单词,脏的,dirty,elementary,"生活,家居生活,单词",2026-01-25
+KB00231,社交,日常社交,单词,复杂的,sophisticated,intermediate,"社交,日常社交,单词",2026-01-25
+KB00232,工作,商务会议,单词,全面的,comprehensive,intermediate,"工作,商务会议,单词",2026-01-25
+KB00233,工作,商务会议,单词,详尽的,elaborate,intermediate,"工作,商务会议,单词",2026-01-25
+KB00234,工作,商务会议,单词,重要的,significant,intermediate,"工作,商务会议,单词",2026-01-25
+KB00235,工作,商务会议,单词,相当大的,considerable,intermediate,"工作,商务会议,单词",2026-01-25
+KB00236,工作,商务会议,单词,大量的,substantial,intermediate,"工作,商务会议,单词",2026-01-25
+KB00237,工作,商务会议,单词,足够的,adequate,intermediate,"工作,商务会议,单词",2026-01-25
+KB00238,工作,商务会议,单词,充足的,sufficient,intermediate,"工作,商务会议,单词",2026-01-25
+KB00239,工作,商务会议,单词,合适的,appropriate,intermediate,"工作,商务会议,单词",2026-01-25
+KB00240,生活,家居生活,单词,适合的,suitable,intermediate,"生活,家居生活,单词",2026-01-25
+KB00241,工作,商务会议,单词,职业,career,intermediate,"工作,商务会议,单词",2026-01-25
+KB00242,工作,商务会议,单词,职业,profession,intermediate,"工作,商务会议,单词",2026-01-25
+KB00243,工作,商务会议,单词,职业,occupation,intermediate,"工作,商务会议,单词",2026-01-25
+KB00244,工作,商务会议,单词,同事,colleague,intermediate,"工作,商务会议,单词",2026-01-25
+KB00245,工作,商务会议,单词,老板,boss,intermediate,"工作,商务会议,单词",2026-01-25
+KB00246,工作,商务会议,单词,员工,employee,intermediate,"工作,商务会议,单词",2026-01-25
+KB00247,工作,商务会议,单词,会议,meeting,intermediate,"工作,商务会议,单词",2026-01-25
+KB00248,工作,项目管理,单词,项目,project,intermediate,"工作,项目管理,单词",2026-01-25
+KB00249,工作,项目管理,单词,截止日期,deadline,intermediate,"工作,项目管理,单词",2026-01-25
+KB00250,工作,商务会议,单词,时间表,schedule,intermediate,"工作,商务会议,单词",2026-01-25
+KB00251,学习,学校课程,单词,教育,education,intermediate,"学习,学校课程,单词",2026-01-25
+KB00252,学习,学校课程,单词,大学,university,intermediate,"学习,学校课程,单词",2026-01-25
+KB00253,学习,学校课程,单词,学院,college,intermediate,"学习,学校课程,单词",2026-01-25
+KB00254,学习,考试准备,单词,学位,degree,intermediate,"学习,考试准备,单词",2026-01-25
+KB00255,学习,学校课程,单词,课程,course,intermediate,"学习,学校课程,单词",2026-01-25
+KB00256,学习,学校课程,单词,科目,subject,intermediate,"学习,学校课程,单词",2026-01-25
+KB00257,学习,学术研究,单词,研究,research,intermediate,"学习,学术研究,单词",2026-01-25
+KB00258,学习,考试准备,单词,作业,assignment,intermediate,"学习,考试准备,单词",2026-01-25
+KB00259,学习,考试准备,单词,论文,essay,intermediate,"学习,考试准备,单词",2026-01-25
+KB00260,学习,考试准备,单词,演示,presentation,intermediate,"学习,考试准备,单词",2026-01-25
+KB00261,工作,商务会议,单词,经验,experience,intermediate,"工作,商务会议,单词",2026-01-25
+KB00262,工作,商务会议,单词,有经验的,experienced,intermediate,"工作,商务会议,单词",2026-01-25
+KB00263,学习,技能培训,单词,技能,skill,intermediate,"学习,技能培训,单词",2026-01-25
+KB00264,学习,技能培训,单词,能力,ability,intermediate,"学习,技能培训,单词",2026-01-25
+KB00265,学习,技能培训,单词,天赋,talent,intermediate,"学习,技能培训,单词",2026-01-25
+KB00266,工作,商务会议,单词,知识,knowledge,intermediate,"工作,商务会议,单词",2026-01-25
+KB00267,工作,商务会议,单词,专业知识,expertise,intermediate,"工作,商务会议,单词",2026-01-25
+KB00268,学习,考试准备,单词,资格,qualification,intermediate,"学习,考试准备,单词",2026-01-25
+KB00269,学习,考试准备,单词,证书,certificate,intermediate,"学习,考试准备,单词",2026-01-25
+KB00270,学习,考试准备,单词,文凭,diploma,intermediate,"学习,考试准备,单词",2026-01-25
+KB00271,工作,商务会议,单词,意见,opinion,intermediate,"工作,商务会议,单词",2026-01-25
+KB00272,旅行,景点游览,单词,观点,viewpoint,intermediate,"旅行,景点游览,单词",2026-01-25
+KB00273,工作,商务会议,单词,视角,perspective,intermediate,"工作,商务会议,单词",2026-01-25
+KB00274,工作,商务会议,单词,态度,attitude,intermediate,"工作,商务会议,单词",2026-01-25
+KB00275,工作,商务会议,单词,信念,belief,intermediate,"工作,商务会议,单词",2026-01-25
+KB00276,工作,商务会议,单词,同意,agree,intermediate,"工作,商务会议,单词",2026-01-25
+KB00277,工作,商务会议,单词,不同意,disagree,intermediate,"工作,商务会议,单词",2026-01-25
+KB00278,工作,商务会议,单词,讨论,discuss,intermediate,"工作,商务会议,单词",2026-01-25
+KB00279,工作,商务会议,单词,辩论,debate,intermediate,"工作,商务会议,单词",2026-01-25
+KB00280,工作,商务会议,单词,争论,argue,intermediate,"工作,商务会议,单词",2026-01-25
+KB00281,旅行,紧急情况,单词,问题,problem,intermediate,"旅行,紧急情况,单词",2026-01-25
+KB00282,工作,商务会议,单词,问题,issue,intermediate,"工作,商务会议,单词",2026-01-25
+KB00283,工作,商务会议,单词,挑战,challenge,intermediate,"工作,商务会议,单词",2026-01-25
+KB00284,工作,商务会议,单词,困难,difficulty,intermediate,"工作,商务会议,单词",2026-01-25
+KB00285,工作,商务会议,单词,解决方案,solution,intermediate,"工作,商务会议,单词",2026-01-25
+KB00286,工作,商务会议,单词,解决,solve,intermediate,"工作,商务会议,单词",2026-01-25
+KB00287,工作,商务会议,单词,解决,resolve,intermediate,"工作,商务会议,单词",2026-01-25
+KB00288,工作,商务会议,单词,处理,handle,intermediate,"工作,商务会议,单词",2026-01-25
+KB00289,工作,商务会议,单词,管理,manage,intermediate,"工作,商务会议,单词",2026-01-25
+KB00290,工作,商务会议,单词,处理,deal with,intermediate,"工作,商务会议,单词",2026-01-25
+KB00291,工作,商务会议,单词,决定,decision,intermediate,"工作,商务会议,单词",2026-01-25
+KB00292,工作,商务会议,单词,选择,choose,intermediate,"工作,商务会议,单词",2026-01-25
+KB00293,工作,商务会议,单词,选择,choice,intermediate,"工作,商务会议,单词",2026-01-25
+KB00294,工作,商务会议,单词,选项,option,intermediate,"工作,商务会议,单词",2026-01-25
+KB00295,工作,商务会议,单词,替代方案,alternative,intermediate,"工作,商务会议,单词",2026-01-25
+KB00296,娱乐,兴趣爱好,单词,更喜欢,prefer,intermediate,"娱乐,兴趣爱好,单词",2026-01-25
+KB00297,娱乐,兴趣爱好,单词,偏好,preference,intermediate,"娱乐,兴趣爱好,单词",2026-01-25
+KB00298,工作,商务会议,单词,推荐,recommend,intermediate,"工作,商务会议,单词",2026-01-25
+KB00299,工作,商务会议,单词,建议,suggest,intermediate,"工作,商务会议,单词",2026-01-25
+KB00300,工作,商务会议,单词,建议,advise,intermediate,"工作,商务会议,单词",2026-01-25
+KB00301,工作,商务会议,单词,环境,environment,intermediate,"工作,商务会议,单词",2026-01-25
+KB00302,工作,商务会议,单词,污染,pollution,intermediate,"工作,商务会议,单词",2026-01-25
+KB00303,工作,商务会议,单词,回收,recycle,intermediate,"工作,商务会议,单词",2026-01-25
+KB00304,工作,商务会议,单词,浪费,waste,intermediate,"工作,商务会议,单词",2026-01-25
+KB00305,工作,商务会议,单词,能源,energy,intermediate,"工作,商务会议,单词",2026-01-25
+KB00306,工作,商务会议,单词,资源,resource,intermediate,"工作,商务会议,单词",2026-01-25
+KB00307,工作,商务会议,单词,气候,climate,intermediate,"工作,商务会议,单词",2026-01-25
+KB00308,工作,商务会议,单词,温度,temperature,intermediate,"工作,商务会议,单词",2026-01-25
+KB00309,工作,商务会议,单词,全球的,global,intermediate,"工作,商务会议,单词",2026-01-25
+KB00310,社交,社区活动,单词,本地的,local,intermediate,"社交,社区活动,单词",2026-01-25
+KB00311,社交,网络社交,单词,技术,technology,intermediate,"社交,网络社交,单词",2026-01-25
+KB00312,社交,网络社交,单词,电脑,computer,intermediate,"社交,网络社交,单词",2026-01-25
+KB00313,社交,网络社交,单词,互联网,internet,intermediate,"社交,网络社交,单词",2026-01-25
+KB00314,社交,网络社交,单词,网站,website,intermediate,"社交,网络社交,单词",2026-01-25
+KB00315,社交,网络社交,单词,电子邮件,email,intermediate,"社交,网络社交,单词",2026-01-25
+KB00316,社交,网络社交,单词,软件,software,intermediate,"社交,网络社交,单词",2026-01-25
+KB00317,社交,网络社交,单词,应用程序,application,intermediate,"社交,网络社交,单词",2026-01-25
+KB00318,社交,网络社交,单词,设备,device,intermediate,"社交,网络社交,单词",2026-01-25
+KB00319,社交,网络社交,单词,数字的,digital,intermediate,"社交,网络社交,单词",2026-01-25
+KB00320,社交,网络社交,单词,在线的,online,intermediate,"社交,网络社交,单词",2026-01-25
+KB00321,工作,商务会议,单词,文化,culture,intermediate,"工作,商务会议,单词",2026-01-25
+KB00322,工作,商务会议,单词,传统,tradition,intermediate,"工作,商务会议,单词",2026-01-25
+KB00323,工作,商务会议,单词,习俗,custom,intermediate,"工作,商务会议,单词",2026-01-25
+KB00324,工作,商务会议,单词,节日,festival,intermediate,"工作,商务会议,单词",2026-01-25
+KB00325,社交,朋友聚会,单词,庆祝,celebrate,intermediate,"社交,朋友聚会,单词",2026-01-25
+KB00326,工作,商务会议,单词,仪式,ceremony,intermediate,"工作,商务会议,单词",2026-01-25
+KB00327,工作,商务会议,单词,宗教,religion,intermediate,"工作,商务会议,单词",2026-01-25
+KB00328,工作,商务会议,单词,语言,language,intermediate,"工作,商务会议,单词",2026-01-25
+KB00329,工作,商务会议,单词,沟通,communication,intermediate,"工作,商务会议,单词",2026-01-25
+KB00330,工作,商务会议,单词,互动,interaction,intermediate,"工作,商务会议,单词",2026-01-25
+KB00331,工作,商务会议,单词,情感,emotion,intermediate,"工作,商务会议,单词",2026-01-25
+KB00332,生活,健康医疗,单词,感觉,feeling,intermediate,"生活,健康医疗,单词",2026-01-25
+KB00333,工作,商务会议,单词,情绪,mood,intermediate,"工作,商务会议,单词",2026-01-25
+KB00334,工作,商务会议,单词,兴奋的,excited,intermediate,"工作,商务会议,单词",2026-01-25
+KB00335,工作,商务会议,单词,紧张的,nervous,intermediate,"工作,商务会议,单词",2026-01-25
+KB00336,工作,商务会议,单词,焦虑的,anxious,intermediate,"工作,商务会议,单词",2026-01-25
+KB00337,工作,商务会议,单词,自信的,confident,intermediate,"工作,商务会议,单词",2026-01-25
+KB00338,工作,商务会议,单词,骄傲的,proud,intermediate,"工作,商务会议,单词",2026-01-25
+KB00339,工作,商务会议,单词,羞愧的,ashamed,intermediate,"工作,商务会议,单词",2026-01-25
+KB00340,工作,商务会议,单词,尴尬的,embarrassed,intermediate,"工作,商务会议,单词",2026-01-25
+KB00341,生活,家庭关系,单词,关系,relationship,intermediate,"生活,家庭关系,单词",2026-01-25
+KB00342,生活,家庭关系,单词,浪漫的,romantic,intermediate,"生活,家庭关系,单词",2026-01-25
+KB00343,生活,家庭关系,单词,婚姻,marriage,intermediate,"生活,家庭关系,单词",2026-01-25
+KB00344,生活,家庭关系,单词,婚礼,wedding,intermediate,"生活,家庭关系,单词",2026-01-25
+KB00345,生活,家庭关系,单词,离婚,divorce,intermediate,"生活,家庭关系,单词",2026-01-25
+KB00346,生活,家庭关系,单词,单身的,single,intermediate,"生活,家庭关系,单词",2026-01-25
+KB00347,生活,家庭关系,单词,已婚的,married,intermediate,"生活,家庭关系,单词",2026-01-25
+KB00348,工作,商务会议,单词,订婚的,engaged,intermediate,"工作,商务会议,单词",2026-01-25
+KB00349,工作,商务会议,单词,分居的,separated,intermediate,"工作,商务会议,单词",2026-01-25
+KB00350,工作,商务会议,单词,丧偶的,widowed,intermediate,"工作,商务会议,单词",2026-01-25
+KB00351,学习,学术研究,单词,微妙的,nuanced,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00352,学习,学术研究,单词,复杂的,intricate,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00353,学习,学术研究,单词,复杂的,complex,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00354,社交,日常社交,单词,复杂的,sophisticated,upper_intermediate,"社交,日常社交,单词",2026-01-25
+KB00355,学习,学术研究,单词,详尽的,elaborate,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00356,学习,学术研究,单词,全面的,comprehensive,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00357,学习,学术研究,单词,彻底的,thorough,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00358,学习,学术研究,单词,详细的,detailed,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00359,学习,学术研究,单词,广泛的,extensive,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00360,学习,学术研究,单词,深刻的,profound,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00361,学习,学术研究,单词,分析,analyze,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00362,学习,学术研究,单词,分析,analysis,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00363,学习,学术研究,单词,评估,evaluate,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00364,学习,学术研究,单词,评估,evaluation,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00365,学习,学术研究,单词,评估,assess,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00366,学习,学术研究,单词,评估,assessment,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00367,学习,考试准备,单词,检查,examine,upper_intermediate,"学习,考试准备,单词",2026-01-25
+KB00368,学习,学术研究,单词,调查,investigate,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00369,学习,学术研究,单词,研究,research,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00370,学习,学校课程,单词,学习,study,upper_intermediate,"学习,学校课程,单词",2026-01-25
+KB00371,学习,学术研究,单词,策略,strategy,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00372,学习,学术研究,单词,方法,approach,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00373,学习,学术研究,单词,方法,method,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00374,学习,学术研究,单词,技术,technique,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00375,学习,学术研究,单词,程序,procedure,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00376,学习,学术研究,单词,过程,process,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00377,学习,学术研究,单词,系统,system,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00378,工作,商务会议,单词,框架,framework,upper_intermediate,"工作,商务会议,单词",2026-01-25
+KB00379,学习,学术研究,单词,结构,structure,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00380,学习,学术研究,单词,组织,organization,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00381,社交,日常社交,单词,实现,achieve,upper_intermediate,"社交,日常社交,单词",2026-01-25
+KB00382,学习,学术研究,单词,完成,accomplish,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00383,学习,学术研究,单词,达到,attain,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00384,学习,学术研究,单词,获得,obtain,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00385,学习,学术研究,单词,获得,acquire,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00386,学习,学术研究,单词,获得,gain,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00387,学习,学术研究,单词,赚取,earn,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00388,学习,学术研究,单词,赢得,win,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00389,学习,学术研究,单词,成功,succeed,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00390,学习,学术研究,单词,成功,succeed,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00391,学习,学术研究,单词,影响,influence,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00392,学习,学术研究,单词,影响,impact,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00393,学习,学术研究,单词,效果,effect,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00394,学习,学术研究,单词,影响,affect,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00395,学习,学术研究,单词,后果,consequence,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00396,学习,学术研究,单词,结果,result,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00397,学习,学术研究,单词,结果,outcome,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00398,学习,学术研究,单词,结论,conclusion,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00399,学习,学术研究,单词,总结,summary,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00400,旅行,景点游览,单词,概述,overview,upper_intermediate,"旅行,景点游览,单词",2026-01-25
+KB00401,学习,学术研究,单词,贡献,contribute,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00402,学习,学术研究,单词,贡献,contribution,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00403,学习,学术研究,单词,参与,participate,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00404,学习,学术研究,单词,参与,participation,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00405,学习,学术研究,单词,涉及,involve,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00406,学习,学术研究,单词,参与,involvement,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00407,学习,学术研究,单词,参与,engage,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00408,学习,学术研究,单词,参与,engagement,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00409,学习,学术研究,单词,承诺,commit,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00410,学习,学术研究,单词,承诺,commitment,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00411,学习,技能培训,单词,发展,develop,upper_intermediate,"学习,技能培训,单词",2026-01-25
+KB00412,学习,技能培训,单词,发展,development,upper_intermediate,"学习,技能培训,单词",2026-01-25
+KB00413,学习,技能培训,单词,改善,improve,upper_intermediate,"学习,技能培训,单词",2026-01-25
+KB00414,学习,技能培训,单词,改善,improvement,upper_intermediate,"学习,技能培训,单词",2026-01-25
+KB00415,学习,技能培训,单词,增强,enhance,upper_intermediate,"学习,技能培训,单词",2026-01-25
+KB00416,学习,技能培训,单词,增强,enhancement,upper_intermediate,"学习,技能培训,单词",2026-01-25
+KB00417,学习,学术研究,单词,进步,progress,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00418,学习,学术研究,单词,前进,advance,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00419,学习,学术研究,单词,进步,advancement,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00420,学习,学术研究,单词,增长,growth,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00421,学习,学术研究,单词,维持,maintain,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00422,学习,学术研究,单词,维护,maintenance,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00423,学习,学术研究,单词,保存,preserve,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00424,旅行,酒店住宿,单词,保存,preservation,upper_intermediate,"旅行,酒店住宿,单词",2026-01-25
+KB00425,学习,学术研究,单词,维持,sustain,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00426,学习,技能培训,单词,可持续性,sustainability,upper_intermediate,"学习,技能培训,单词",2026-01-25
+KB00427,学习,学术研究,单词,支持,support,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00428,学习,学术研究,单词,支持的,supportive,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00429,学习,学术研究,单词,维持,maintain,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00430,学习,学术研究,单词,维持,maintain,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00431,学习,学术研究,单词,建立,establish,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00432,学习,学术研究,单词,建立,establishment,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00433,学习,学术研究,单词,建立,found,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00434,学习,学术研究,单词,基础,foundation,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00435,生活,饮食烹饪,单词,创建,create,upper_intermediate,"生活,饮食烹饪,单词",2026-01-25
+KB00436,生活,饮食烹饪,单词,创造,creation,upper_intermediate,"生活,饮食烹饪,单词",2026-01-25
+KB00437,学习,学术研究,单词,建造,build,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00438,学习,学术研究,单词,建设,construction,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00439,学习,学术研究,单词,设计,design,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00440,学习,学术研究,单词,设计,design,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00441,学习,学术研究,单词,演示,demonstrate,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00442,学习,学术研究,单词,演示,demonstration,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00443,学习,学术研究,单词,说明,illustrate,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00444,学习,学术研究,单词,说明,illustration,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00445,学习,学术研究,单词,解释,explain,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00446,学习,学术研究,单词,解释,explanation,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00447,学习,学术研究,单词,澄清,clarify,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00448,学习,学术研究,单词,澄清,clarification,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00449,学习,学术研究,单词,定义,define,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00450,学习,学术研究,单词,定义,definition,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00451,学习,学术研究,单词,说服,persuade,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00452,学习,学术研究,单词,说服,persuasion,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00453,学习,学术研究,单词,说服,convince,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00454,学习,学术研究,单词,令人信服的,convincing,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00455,学习,学术研究,单词,影响,influence,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00456,学习,学术研究,单词,有影响力的,influential,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00457,学习,学术研究,单词,激励,motivate,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00458,学习,学术研究,单词,动机,motivation,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00459,学习,学术研究,单词,激励,inspire,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00460,学习,学术研究,单词,灵感,inspiration,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00461,学习,学术研究,单词,批评,criticize,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00462,学习,学术研究,单词,批评,criticism,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00463,学习,学术研究,单词,评论,critique,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00464,学习,学术研究,单词,关键的,critical,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00465,学习,学术研究,单词,判断,judge,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00466,学习,学术研究,单词,判断,judgment,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00467,学习,学术研究,单词,评估,evaluate,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00468,学习,学术研究,单词,评估,evaluation,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00469,学习,学术研究,单词,评估,assess,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00470,学习,学术研究,单词,评估,assessment,upper_intermediate,"学习,学术研究,单词",2026-01-25
+KB00471,学习,学术研究,单词,异常地,exceptionally,advanced,"学习,学术研究,单词",2026-01-25
+KB00472,学习,学术研究,单词,显著地,remarkably,advanced,"学习,学术研究,单词",2026-01-25
+KB00473,学习,学术研究,单词,大量地,substantially,advanced,"学习,学术研究,单词",2026-01-25
+KB00474,学习,学术研究,单词,相当地,considerably,advanced,"学习,学术研究,单词",2026-01-25
+KB00475,学习,学术研究,单词,显著地,significantly,advanced,"学习,学术研究,单词",2026-01-25
+KB00476,学习,学术研究,单词,显著地,notably,advanced,"学习,学术研究,单词",2026-01-25
+KB00477,学习,学术研究,单词,特别地,particularly,advanced,"学习,学术研究,单词",2026-01-25
+KB00478,学习,学术研究,单词,特别地,especially,advanced,"学习,学术研究,单词",2026-01-25
+KB00479,学习,学术研究,单词,极端地,extremely,advanced,"学习,学术研究,单词",2026-01-25
+KB00480,社交,日常社交,单词,高度地,highly,advanced,"社交,日常社交,单词",2026-01-25
+KB00481,学习,学术研究,单词,理解,comprehend,advanced,"学习,学术研究,单词",2026-01-25
+KB00482,学习,学术研究,单词,理解,comprehension,advanced,"学习,学术研究,单词",2026-01-25
+KB00483,学习,学术研究,单词,感知,perceive,advanced,"学习,学术研究,单词",2026-01-25
+KB00484,学习,学术研究,单词,感知,perception,advanced,"学习,学术研究,单词",2026-01-25
+KB00485,学习,学术研究,单词,构思,conceive,advanced,"学习,学术研究,单词",2026-01-25
+KB00486,学习,学术研究,单词,概念,conception,advanced,"学习,学术研究,单词",2026-01-25
+KB00487,学习,学术研究,单词,理解,apprehend,advanced,"学习,学术研究,单词",2026-01-25
+KB00488,学习,学术研究,单词,理解,apprehension,advanced,"学习,学术研究,单词",2026-01-25
+KB00489,学习,学术研究,单词,掌握,grasp,advanced,"学习,学术研究,单词",2026-01-25
+KB00490,学习,学术研究,单词,理解,understanding,advanced,"学习,学术研究,单词",2026-01-25
+KB00491,学习,学术研究,单词,表达,articulate,advanced,"学习,学术研究,单词",2026-01-25
+KB00492,学习,学术研究,单词,表达,articulation,advanced,"学习,学术研究,单词",2026-01-25
+KB00493,学习,学术研究,单词,表达,express,advanced,"学习,学术研究,单词",2026-01-25
+KB00494,学习,学术研究,单词,表达,expression,advanced,"学习,学术研究,单词",2026-01-25
+KB00495,学习,学术研究,单词,沟通,communicate,advanced,"学习,学术研究,单词",2026-01-25
+KB00496,学习,学术研究,单词,沟通,communication,advanced,"学习,学术研究,单词",2026-01-25
+KB00497,学习,学术研究,单词,传达,convey,advanced,"学习,学术研究,单词",2026-01-25
+KB00498,学习,学术研究,单词,传达,conveyance,advanced,"学习,学术研究,单词",2026-01-25
+KB00499,学习,学术研究,单词,传输,transmit,advanced,"学习,学术研究,单词",2026-01-25
+KB00500,学习,学术研究,单词,传输,transmission,advanced,"学习,学术研究,单词",2026-01-25
+KB00501,学习,学术研究,单词,综合,synthesize,advanced,"学习,学术研究,单词",2026-01-25
+KB00502,学习,学术研究,单词,综合,synthesis,advanced,"学习,学术研究,单词",2026-01-25
+KB00503,学习,学术研究,单词,整合,integrate,advanced,"学习,学术研究,单词",2026-01-25
+KB00504,学习,学术研究,单词,整合,integration,advanced,"学习,学术研究,单词",2026-01-25
+KB00505,学习,学术研究,单词,结合,combine,advanced,"学习,学术研究,单词",2026-01-25
+KB00506,学习,学术研究,单词,结合,combination,advanced,"学习,学术研究,单词",2026-01-25
+KB00507,学习,学术研究,单词,合并,merge,advanced,"学习,学术研究,单词",2026-01-25
+KB00508,学习,学术研究,单词,合并,merger,advanced,"学习,学术研究,单词",2026-01-25
+KB00509,学习,学术研究,单词,联合,unite,advanced,"学习,学术研究,单词",2026-01-25
+KB00510,学习,学术研究,单词,统一,unity,advanced,"学习,学术研究,单词",2026-01-25
+KB00511,学习,学术研究,单词,区分,differentiate,advanced,"学习,学术研究,单词",2026-01-25
+KB00512,学习,学术研究,单词,区分,differentiation,advanced,"学习,学术研究,单词",2026-01-25
+KB00513,学习,学术研究,单词,区分,distinguish,advanced,"学习,学术研究,单词",2026-01-25
+KB00514,学习,学术研究,单词,区别,distinction,advanced,"学习,学术研究,单词",2026-01-25
+KB00515,学习,学术研究,单词,歧视,discriminate,advanced,"学习,学术研究,单词",2026-01-25
+KB00516,学习,学术研究,单词,歧视,discrimination,advanced,"学习,学术研究,单词",2026-01-25
+KB00517,学习,学术研究,单词,分离,separate,advanced,"学习,学术研究,单词",2026-01-25
+KB00518,学习,学术研究,单词,分离,separation,advanced,"学习,学术研究,单词",2026-01-25
+KB00519,学习,学术研究,单词,分割,divide,advanced,"学习,学术研究,单词",2026-01-25
+KB00520,学习,学术研究,单词,分割,division,advanced,"学习,学术研究,单词",2026-01-25
+KB00521,学习,学术研究,单词,促进,facilitate,advanced,"学习,学术研究,单词",2026-01-25
+KB00522,学习,学术研究,单词,促进,facilitation,advanced,"学习,学术研究,单词",2026-01-25
+KB00523,学习,学术研究,单词,使能够,enable,advanced,"学习,学术研究,单词",2026-01-25
+KB00524,学习,学术研究,单词,使能够,enablement,advanced,"学习,学术研究,单词",2026-01-25
+KB00525,学习,学术研究,单词,授权,empower,advanced,"学习,学术研究,单词",2026-01-25
+KB00526,学习,学术研究,单词,授权,empowerment,advanced,"学习,学术研究,单词",2026-01-25
+KB00527,学习,学术研究,单词,授权,authorize,advanced,"学习,学术研究,单词",2026-01-25
+KB00528,学习,学术研究,单词,授权,authorization,advanced,"学习,学术研究,单词",2026-01-25
+KB00529,学习,学术研究,单词,允许,permit,advanced,"学习,学术研究,单词",2026-01-25
+KB00530,学习,学术研究,单词,许可,permission,advanced,"学习,学术研究,单词",2026-01-25
+KB00531,学习,学术研究,单词,优化,optimize,advanced,"学习,学术研究,单词",2026-01-25
+KB00532,学习,学术研究,单词,优化,optimization,advanced,"学习,学术研究,单词",2026-01-25
+KB00533,学习,学术研究,单词,最大化,maximize,advanced,"学习,学术研究,单词",2026-01-25
+KB00534,学习,学术研究,单词,最大化,maximization,advanced,"学习,学术研究,单词",2026-01-25
+KB00535,学习,学术研究,单词,最小化,minimize,advanced,"学习,学术研究,单词",2026-01-25
+KB00536,学习,学术研究,单词,最小化,minimization,advanced,"学习,学术研究,单词",2026-01-25
+KB00537,学习,技能培训,单词,增强,enhance,advanced,"学习,技能培训,单词",2026-01-25
+KB00538,学习,技能培训,单词,增强,enhancement,advanced,"学习,技能培训,单词",2026-01-25
+KB00539,学习,技能培训,单词,改善,improve,advanced,"学习,技能培训,单词",2026-01-25
+KB00540,学习,技能培训,单词,改善,improvement,advanced,"学习,技能培训,单词",2026-01-25
+KB00541,学习,学术研究,单词,创新,innovate,advanced,"学习,学术研究,单词",2026-01-25
+KB00542,学习,学术研究,单词,创新,innovation,advanced,"学习,学术研究,单词",2026-01-25
+KB00543,学习,学术研究,单词,创新的,innovative,advanced,"学习,学术研究,单词",2026-01-25
+KB00544,生活,饮食烹饪,单词,创造力,creativity,advanced,"生活,饮食烹饪,单词",2026-01-25
+KB00545,生活,饮食烹饪,单词,创造性的,creative,advanced,"生活,饮食烹饪,单词",2026-01-25
+KB00546,学习,学术研究,单词,原创性,originality,advanced,"学习,学术研究,单词",2026-01-25
+KB00547,学习,学术研究,单词,原始的,original,advanced,"学习,学术研究,单词",2026-01-25
+KB00548,娱乐,阅读写作,单词,新颖,novelty,advanced,"娱乐,阅读写作,单词",2026-01-25
+KB00549,娱乐,阅读写作,单词,新颖的,novel,advanced,"娱乐,阅读写作,单词",2026-01-25
+KB00550,学习,学术研究,单词,独特性,uniqueness,advanced,"学习,学术研究,单词",2026-01-25
+KB00551,社交,日常社交,单词,哲学,philosophy,advanced,"社交,日常社交,单词",2026-01-25
+KB00552,社交,日常社交,单词,哲学的,philosophical,advanced,"社交,日常社交,单词",2026-01-25
+KB00553,学习,学术研究,单词,理论,theory,advanced,"学习,学术研究,单词",2026-01-25
+KB00554,学习,学术研究,单词,理论的,theoretical,advanced,"学习,学术研究,单词",2026-01-25
+KB00555,学习,学术研究,单词,概念,concept,advanced,"学习,学术研究,单词",2026-01-25
+KB00556,学习,学术研究,单词,概念的,conceptual,advanced,"学习,学术研究,单词",2026-01-25
+KB00557,学习,学术研究,单词,原则,principle,advanced,"学习,学术研究,单词",2026-01-25
+KB00558,学习,学术研究,单词,原则,principles,advanced,"学习,学术研究,单词",2026-01-25
+KB00559,学习,学术研究,单词,教义,doctrine,advanced,"学习,学术研究,单词",2026-01-25
+KB00560,学习,学术研究,单词,教义的,doctrinal,advanced,"学习,学术研究,单词",2026-01-25
+KB00561,学习,学术研究,单词,当代的,contemporary,advanced,"学习,学术研究,单词",2026-01-25
+KB00562,学习,学术研究,单词,现代的,modern,advanced,"学习,学术研究,单词",2026-01-25
+KB00563,学习,学术研究,单词,当前的,current,advanced,"学习,学术研究,单词",2026-01-25
+KB00564,学习,学术研究,单词,现在的,present,advanced,"学习,学术研究,单词",2026-01-25
+KB00565,学习,学术研究,单词,最近的,recent,advanced,"学习,学术研究,单词",2026-01-25
+KB00566,学习,考试准备,单词,最新的,latest,advanced,"学习,考试准备,单词",2026-01-25
+KB00567,社交,约会恋爱,单词,最新的,up-to-date,advanced,"社交,约会恋爱,单词",2026-01-25
+KB00568,学习,学术研究,单词,最先进的,state-of-the-art,advanced,"学习,学术研究,单词",2026-01-25
+KB00569,学习,学术研究,单词,前沿的,cutting-edge,advanced,"学习,学术研究,单词",2026-01-25
+KB00570,学习,学术研究,单词,先进的,advanced,advanced,"学习,学术研究,单词",2026-01-25
+KB00571,学习,学术研究,单词,模糊的,ambiguous,advanced,"学习,学术研究,单词",2026-01-25
+KB00572,学习,学术研究,单词,模糊性,ambiguity,advanced,"学习,学术研究,单词",2026-01-25
+KB00573,学习,学术研究,单词,模糊的,vague,advanced,"学习,学术研究,单词",2026-01-25
+KB00574,学习,学术研究,单词,模糊性,vagueness,advanced,"学习,学术研究,单词",2026-01-25
+KB00575,学习,学术研究,单词,不清楚的,unclear,advanced,"学习,学术研究,单词",2026-01-25
+KB00576,学习,学术研究,单词,清晰,clarity,advanced,"学习,学术研究,单词",2026-01-25
+KB00577,学习,学术研究,单词,清楚的,clear,advanced,"学习,学术研究,单词",2026-01-25
+KB00578,学习,学术研究,单词,精确的,precise,advanced,"学习,学术研究,单词",2026-01-25
+KB00579,学习,学术研究,单词,精确性,precision,advanced,"学习,学术研究,单词",2026-01-25
+KB00580,学习,学术研究,单词,准确的,accurate,advanced,"学习,学术研究,单词",2026-01-25
+KB00581,学习,学术研究,单词,悖论,paradox,advanced,"学习,学术研究,单词",2026-01-25
+KB00582,学习,学术研究,单词,矛盾的,paradoxical,advanced,"学习,学术研究,单词",2026-01-25
+KB00583,学习,学术研究,单词,矛盾,contradiction,advanced,"学习,学术研究,单词",2026-01-25
+KB00584,学习,学术研究,单词,矛盾的,contradictory,advanced,"学习,学术研究,单词",2026-01-25
+KB00585,学习,学术研究,单词,不一致,inconsistency,advanced,"学习,学术研究,单词",2026-01-25
+KB00586,学习,学术研究,单词,不一致的,inconsistent,advanced,"学习,学术研究,单词",2026-01-25
+KB00587,学习,学术研究,单词,连贯性,coherence,advanced,"学习,学术研究,单词",2026-01-25
+KB00588,学习,学术研究,单词,连贯的,coherent,advanced,"学习,学术研究,单词",2026-01-25
+KB00589,学习,学术研究,单词,逻辑的,logical,advanced,"学习,学术研究,单词",2026-01-25
+KB00590,学习,学术研究,单词,逻辑,logic,advanced,"学习,学术研究,单词",2026-01-25
+KB00591,社交,日常社交,词组,你好吗,how are you,beginner,"社交,日常社交,词组",2026-01-25
+KB00592,社交,日常社交,词组,很高兴见到你,nice to meet you,beginner,"社交,日常社交,词组",2026-01-25
+KB00593,社交,日常社交,词组,你叫什么名字,what's your name,beginner,"社交,日常社交,词组",2026-01-25
+KB00594,社交,日常社交,词组,我很好,I'm fine,beginner,"社交,日常社交,词组",2026-01-25
+KB00595,社交,日常社交,词组,非常感谢,thank you very much,beginner,"社交,日常社交,词组",2026-01-25
+KB00596,社交,日常社交,词组,不客气,you're welcome,beginner,"社交,日常社交,词组",2026-01-25
+KB00597,社交,日常社交,词组,打扰一下,excuse me,beginner,"社交,日常社交,词组",2026-01-25
+KB00598,社交,日常社交,词组,对不起,I'm sorry,beginner,"社交,日常社交,词组",2026-01-25
+KB00599,社交,日常社交,词组,没关系,that's okay,beginner,"社交,日常社交,词组",2026-01-25
+KB00600,社交,日常社交,词组,稍后见,see you later,beginner,"社交,日常社交,词组",2026-01-25
+KB00601,社交,日常社交,词组,早上好,good morning,beginner,"社交,日常社交,词组",2026-01-25
+KB00602,社交,日常社交,词组,下午好,good afternoon,beginner,"社交,日常社交,词组",2026-01-25
+KB00603,社交,日常社交,词组,晚上好,good evening,beginner,"社交,日常社交,词组",2026-01-25
+KB00604,社交,日常社交,词组,晚安,good night,beginner,"社交,日常社交,词组",2026-01-25
+KB00605,社交,日常社交,词组,祝你有美好的一天,have a nice day,beginner,"社交,日常社交,词组",2026-01-25
+KB00606,社交,日常社交,词组,怎么样,how's it going,elementary,"社交,日常社交,词组",2026-01-25
+KB00607,社交,日常社交,词组,怎么了,what's up,elementary,"社交,日常社交,词组",2026-01-25
+KB00608,社交,日常社交,词组,好久不见,long time no see,elementary,"社交,日常社交,词组",2026-01-25
+KB00609,旅行,交通出行,词组,保重,take care,elementary,"旅行,交通出行,词组",2026-01-25
+KB00610,社交,日常社交,词组,玩得开心,have a good time,elementary,"社交,日常社交,词组",2026-01-25
+KB00611,社交,日常社交,词组,祝你好运,good luck,elementary,"社交,日常社交,词组",2026-01-25
+KB00612,社交,朋友聚会,词组,恭喜,congratulations,elementary,"社交,朋友聚会,词组",2026-01-25
+KB00613,社交,日常社交,词组,做得好,well done,elementary,"社交,日常社交,词组",2026-01-25
+KB00614,生活,饮食烹饪,词组,太好了,that's great,elementary,"生活,饮食烹饪,词组",2026-01-25
+KB00615,社交,日常社交,词组,我也这么认为,I think so,elementary,"社交,日常社交,词组",2026-01-25
+KB00616,社交,日常社交,词组,我不这么认为,I don't think so,elementary,"社交,日常社交,词组",2026-01-25
+KB00617,社交,日常社交,词组,对的,that's right,elementary,"社交,日常社交,词组",2026-01-25
+KB00618,社交,日常社交,词组,错的,that's wrong,elementary,"社交,日常社交,词组",2026-01-25
+KB00619,社交,日常社交,词组,我同意,I agree,elementary,"社交,日常社交,词组",2026-01-25
+KB00620,社交,日常社交,词组,我不同意,I disagree,elementary,"社交,日常社交,词组",2026-01-25
+KB00621,工作,商务会议,词组,在我看来,in my opinion,intermediate,"工作,商务会议,词组",2026-01-25
+KB00622,工作,商务会议,词组,我相信,I believe that,intermediate,"工作,商务会议,词组",2026-01-25
+KB00623,工作,商务会议,词组,在我看来,it seems to me,intermediate,"工作,商务会议,词组",2026-01-25
+KB00624,旅行,景点游览,词组,从我的角度来看,from my point of view,intermediate,"旅行,景点游览,词组",2026-01-25
+KB00625,工作,商务会议,词组,就我而言,as far as I'm concerned,intermediate,"工作,商务会议,词组",2026-01-25
+KB00626,工作,商务会议,词组,一方面,on the one hand,intermediate,"工作,商务会议,词组",2026-01-25
+KB00627,工作,商务会议,词组,另一方面,on the other hand,intermediate,"工作,商务会议,词组",2026-01-25
+KB00628,工作,商务会议,词组,此外,in addition,intermediate,"工作,商务会议,词组",2026-01-25
+KB00629,工作,商务会议,词组,此外,furthermore,intermediate,"工作,商务会议,词组",2026-01-25
+KB00630,工作,商务会议,词组,而且,moreover,intermediate,"工作,商务会议,词组",2026-01-25
+KB00631,工作,商务会议,词组,结果,as a result,intermediate,"工作,商务会议,词组",2026-01-25
+KB00632,工作,商务会议,词组,因此,therefore,intermediate,"工作,商务会议,词组",2026-01-25
+KB00633,工作,商务会议,词组,因此,consequently,intermediate,"工作,商务会议,词组",2026-01-25
+KB00634,工作,商务会议,词组,然而,however,intermediate,"工作,商务会议,词组",2026-01-25
+KB00635,工作,商务会议,词组,尽管如此,nevertheless,intermediate,"工作,商务会议,词组",2026-01-25
+KB00636,学习,学术研究,词组,不用说,it goes without saying,upper_intermediate,"学习,学术研究,词组",2026-01-25
+KB00637,学习,学术研究,词组,不用说,needless to say,upper_intermediate,"学习,学术研究,词组",2026-01-25
+KB00638,学习,学术研究,词组,简单来说,to put it simply,upper_intermediate,"学习,学术研究,词组",2026-01-25
+KB00639,学习,学术研究,词组,换句话说,in other words,upper_intermediate,"学习,学术研究,词组",2026-01-25
+KB00640,学习,学术研究,词组,总结,to sum up,upper_intermediate,"学习,学术研究,词组",2026-01-25
+KB00641,社交,日常社交,词组,综合考虑,all things considered,upper_intermediate,"社交,日常社交,词组",2026-01-25
+KB00642,社交,日常社交,词组,考虑到一切,taking everything into account,upper_intermediate,"社交,日常社交,词组",2026-01-25
+KB00643,学习,学术研究,词组,值得注意的是,it is worth noting,upper_intermediate,"学习,学术研究,词组",2026-01-25
+KB00644,学习,学术研究,词组,应该强调的是,it should be emphasized,upper_intermediate,"学习,学术研究,词组",2026-01-25
+KB00645,学习,学术研究,词组,重要的是要提到,it is important to mention,upper_intermediate,"学习,学术研究,词组",2026-01-25
+KB00646,学习,学术研究,词组,必须,it is imperative that,advanced,"学习,学术研究,词组",2026-01-25
+KB00647,学习,学术研究,词组,关键是,it is crucial to,advanced,"学习,学术研究,词组",2026-01-25
+KB00648,学习,学术研究,词组,必须,it is essential that,advanced,"学习,学术研究,词组",2026-01-25
+KB00649,学习,学术研究,词组,不能过分强调,it cannot be overstated,advanced,"学习,学术研究,词组",2026-01-25
+KB00650,学习,学术研究,词组,值得强调,it bears emphasizing,advanced,"学习,学术研究,词组",2026-01-25
+KB00651,学习,学术研究,词组,深入探讨,to delve deeper into,advanced,"学习,学术研究,词组",2026-01-25
+KB00652,学习,学术研究,词组,阐明,to shed light on,advanced,"学习,学术研究,词组",2026-01-25
+KB00653,学习,学术研究,词组,突出,to bring to the fore,advanced,"学习,学术研究,词组",2026-01-25
+KB00654,学习,学术研究,词组,强调重要性,to underscore the significance,advanced,"学习,学术研究,词组",2026-01-25
+KB00655,社交,日常社交,词组,强调重要性,to highlight the importance,advanced,"社交,日常社交,词组",2026-01-25
+KB00656,学习,学校课程,语法,我是...,I am...,beginner,"学习,学校课程,语法",2026-01-25
+KB00657,学习,学校课程,语法,你是...,You are...,beginner,"学习,学校课程,语法",2026-01-25
+KB00658,学习,学校课程,语法,他/她是...,He/She is...,beginner,"学习,学校课程,语法",2026-01-25
+KB00659,娱乐,兴趣爱好,语法,我喜欢...,I like...,beginner,"娱乐,兴趣爱好,语法",2026-01-25
+KB00660,娱乐,兴趣爱好,语法,我不喜欢...,I don't like...,beginner,"娱乐,兴趣爱好,语法",2026-01-25
+KB00661,学习,学校课程,语法,你能...吗？,Can you...?,beginner,"学习,学校课程,语法",2026-01-25
+KB00662,学习,学校课程,语法,你...吗？,Do you...?,beginner,"学习,学校课程,语法",2026-01-25
+KB00663,学习,学校课程,语法,什么是...？,What is...?,beginner,"学习,学校课程,语法",2026-01-25
+KB00664,学习,学校课程,语法,哪里是...？,Where is...?,beginner,"学习,学校课程,语法",2026-01-25
+KB00665,学习,学校课程,语法,...怎么样？,How are...?,beginner,"学习,学校课程,语法",2026-01-25
+KB00666,学习,学校课程,语法,我过去是...,I was...,elementary,"学习,学校课程,语法",2026-01-25
+KB00667,学习,学校课程,语法,我将...,I will...,elementary,"学习,学校课程,语法",2026-01-25
+KB00668,学习,学校课程,语法,我打算...,I'm going to...,elementary,"学习,学校课程,语法",2026-01-25
+KB00669,学习,学校课程,语法,我有...,I have...,elementary,"学习,学校课程,语法",2026-01-25
+KB00670,学习,学校课程,语法,我能...,I can...,elementary,"学习,学校课程,语法",2026-01-25
+KB00671,学习,学校课程,语法,我应该...,I should...,elementary,"学习,学校课程,语法",2026-01-25
+KB00672,学习,学校课程,语法,我想要...,I want to...,elementary,"学习,学校课程,语法",2026-01-25
+KB00673,学习,学校课程,语法,我需要...,I need to...,elementary,"学习,学校课程,语法",2026-01-25
+KB00674,娱乐,兴趣爱好,语法,我喜欢...,I like to...,elementary,"娱乐,兴趣爱好,语法",2026-01-25
+KB00675,娱乐,兴趣爱好,语法,我更喜欢...,I prefer to...,elementary,"娱乐,兴趣爱好,语法",2026-01-25
+KB00676,工作,商务会议,语法,我一直在...,I have been...,intermediate,"工作,商务会议,语法",2026-01-25
+KB00677,工作,商务会议,语法,我过去有...,I had...,intermediate,"工作,商务会议,语法",2026-01-25
+KB00678,工作,商务会议,语法,我会...,I would...,intermediate,"工作,商务会议,语法",2026-01-25
+KB00679,工作,商务会议,语法,如果我是...,If I were...,intermediate,"工作,商务会议,语法",2026-01-25
+KB00680,工作,商务会议,语法,我希望我能...,I wish I could...,intermediate,"工作,商务会议,语法",2026-01-25
+KB00681,工作,商务会议,语法,重要的是...,It is important to...,intermediate,"工作,商务会议,语法",2026-01-25
+KB00682,工作,商务会议,语法,似乎...,It seems that...,intermediate,"工作,商务会议,语法",2026-01-25
+KB00683,社交,日常社交,语法,我认为...,I think that...,intermediate,"社交,日常社交,语法",2026-01-25
+KB00684,工作,商务会议,语法,我相信...,I believe that...,intermediate,"工作,商务会议,语法",2026-01-25
+KB00685,工作,商务会议,语法,在我看来...,In my opinion...,intermediate,"工作,商务会议,语法",2026-01-25
+KB00686,学习,学术研究,语法,话虽如此...,Having said that...,upper_intermediate,"学习,学术研究,语法",2026-01-25
+KB00687,学习,学术研究,语法,值得注意的是...,It is worth noting that...,upper_intermediate,"学习,学术研究,语法",2026-01-25
+KB00688,学习,学术研究,语法,让我印象深刻的是...,What strikes me is...,upper_intermediate,"学习,学术研究,语法",2026-01-25
+KB00689,学习,学术研究,语法,很明显...,It is evident that...,upper_intermediate,"学习,学术研究,语法",2026-01-25
+KB00690,学习,学术研究,语法,不能否认...,One cannot deny that...,upper_intermediate,"学习,学术研究,语法",2026-01-25
+KB00691,学习,学术研究,语法,不仅...而且...,Not only... but also...,upper_intermediate,"学习,学术研究,语法",2026-01-25
+KB00692,学习,学术研究,语法,既不...也不...,Neither... nor...,upper_intermediate,"学习,学术研究,语法",2026-01-25
+KB00693,学习,学术研究,语法,无论...还是...,Whether... or...,upper_intermediate,"学习,学术研究,语法",2026-01-25
+KB00694,学习,学术研究,语法,尽管...,Despite the fact that...,upper_intermediate,"学习,学术研究,语法",2026-01-25
+KB00695,学习,学术研究,语法,尽管...,In spite of...,upper_intermediate,"学习,学术研究,语法",2026-01-25
+KB00696,学习,学术研究,语法,必须...,It is imperative that...,advanced,"学习,学术研究,语法",2026-01-25
+KB00697,学习,学术研究,语法,如果不是...,Were it not for...,advanced,"学习,学术研究,语法",2026-01-25
+KB00698,学习,学术研究,语法,如果不是...,Had it not been for...,advanced,"学习,学术研究,语法",2026-01-25
+KB00699,学习,学术研究,语法,尽管...,Notwithstanding the fact that...,advanced,"学习,学术研究,语法",2026-01-25
+KB00700,学习,学术研究,语法,由于...,Inasmuch as...,advanced,"学习,学术研究,语法",2026-01-25
+KB00701,学习,学术研究,语法,到什么程度...,To what extent...,advanced,"学习,学术研究,语法",2026-01-25
+KB00702,学习,学术研究,语法,到...的程度,To the extent that...,advanced,"学习,学术研究,语法",2026-01-25
+KB00703,学习,学术研究,语法,就...而言,Insofar as...,advanced,"学习,学术研究,语法",2026-01-25
+KB00704,学习,学术研究,语法,尽管...,Albeit...,advanced,"学习,学术研究,语法",2026-01-25
+KB00705,学习,学术研究,语法,尽管...,Albeit the fact that...,advanced,"学习,学术研究,语法",2026-01-25
