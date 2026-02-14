@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
@@ -6,6 +7,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 # 英语水平配置
 ENGLISH_LEVELS = {
@@ -147,10 +149,9 @@ ENGLISH_LEVELS = {
 class DiaryMemorySystem:
     """简化版日记式记忆系统，使用文本摘要存储对话内容"""
     
-    def __init__(self, 
+    def __init__(self,
                  memory_file=None,
                  max_entries=None,
-                 cefr_vocab_file=None,
                  account_name=None):
         # 获取项目根目录（app 的父目录）
         current_file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -193,22 +194,14 @@ class DiaryMemorySystem:
         self.session_temp_file = self.diary_file.parent / "session_temp.json"
         self.user_profile_file = self.diary_file.parent / "user_profile.json"
         
-        # CEFR词汇表文件路径
-        if cefr_vocab_file:
-            self.cefr_vocab_file = Path(cefr_vocab_file)
-        else:
-            self.cefr_vocab_file = self.diary_file.parent / "cefr_vocabulary.json"
-        
         self.diary_data = self.load_diary()
         self.user_profile = self.load_user_profile()
-        self.cefr_vocab_data = self.load_cefr_vocabulary()
         
         # 打印调试信息
         print(f"Memory system initialized:")
         print(f"  Diary file: {self.diary_file}")
         print(f"  Session temp: {self.session_temp_file}")
         print(f"  User profile: {self.user_profile_file}")
-        print(f"  CEFR vocabulary: {self.cefr_vocab_file}")
         
     def load_diary(self) -> Dict:
         """加载日记文件"""
@@ -608,80 +601,6 @@ class DiaryMemorySystem:
             return "\n".join(context_parts)
         return ""
     
-    def load_cefr_vocabulary(self) -> Dict:
-        """加载CEFR分级词汇表"""
-        try:
-            if self.cefr_vocab_file.exists():
-                with open(self.cefr_vocab_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    vocab_levels = len(data.get('vocabulary', {}))
-                    print(f"CEFR vocabulary loaded: {vocab_levels} levels")
-                    return data
-            else:
-                print(f"CEFR vocabulary file not found: {self.cefr_vocab_file}")
-                return {}
-        except Exception as e:
-            print(f"Error loading CEFR vocabulary: {e}")
-            import traceback
-            traceback.print_exc()
-            return {}
-    
-    def get_cefr_vocab_for_level(self, level: str) -> Dict:
-        """根据难度级别获取对应的CEFR词汇、短语和句型
-        
-        Args:
-            level: 难度级别 (minimal/beginner/elementary/pre_intermediate/intermediate/upper_intermediate/advanced)
-        
-        Returns:
-            包含vocabulary, phrases, grammar_patterns的字典
-        """
-        if not self.cefr_vocab_data:
-            return {}
-        
-        # 映射难度级别到CEFR级别
-        level_mapping = {
-            "minimal": "A1",
-            "beginner": "A1",
-            "elementary": "A2",
-            "pre_intermediate": "B1",
-            "intermediate": "B1",
-            "upper_intermediate": "B2",
-            "advanced": "C1"
-        }
-        
-        cefr_level = level_mapping.get(level, "A1")
-        vocab_data = self.cefr_vocab_data.get("vocabulary", {})
-        phrases_data = self.cefr_vocab_data.get("phrases", {})
-        patterns_data = self.cefr_vocab_data.get("grammar_patterns", {})
-        
-        # 获取当前级别及以下级别的词汇（允许使用更简单的词汇）
-        result = {
-            "vocabulary": [],
-            "phrases": [],
-            "grammar_patterns": []
-        }
-        
-        # CEFR级别顺序
-        cefr_order = ["A1", "A2", "B1", "B2", "C1"]
-        target_index = cefr_order.index(cefr_level) if cefr_level in cefr_order else 0
-        
-        # 收集当前级别及以下级别的词汇（最多包含当前级别和上一级别）
-        for i in range(max(0, target_index - 1), target_index + 1):
-            level_key = cefr_order[i]
-            if level_key in vocab_data:
-                result["vocabulary"].extend(vocab_data[level_key])
-            if level_key in phrases_data:
-                result["phrases"].extend(phrases_data[level_key])
-            if level_key in patterns_data:
-                result["grammar_patterns"].extend(patterns_data[level_key])
-        
-        # 限制数量，避免prompt过长
-        result["vocabulary"] = result["vocabulary"][:50]  # 最多50个词汇
-        result["phrases"] = result["phrases"][:20]  # 最多20个短语
-        result["grammar_patterns"] = result["grammar_patterns"][:15]  # 最多15个句型
-        
-        return result
-    
     def is_first_conversation(self) -> bool:
         """判断是否是第一次沟通（检查用户档案是否已有基本信息）"""
         if not self.user_profile:
@@ -868,15 +787,20 @@ class DiaryMemorySystem:
     async def generate_english_dialogue(self, today_chinese_summary: str = "", 
                                         dialogue_length: str = "auto",
                                         difficulty_level: str = None,
-                                        custom_sentence_count: int = None):
-        """基于今天的中文对话和历史记忆生成英文教学对话
+                                        custom_sentence_count: int = None,
+                                        scene_primary: str = None,
+                                        scene_secondary: str = None,
+                                        scene_label_id: int = None):
+        """基于语块/句型库生成英文教学对话，内容完全来自 chunk_core 表
         
         Args:
-            today_chinese_summary: 今天的中文对话摘要
+            today_chinese_summary: 仅用于上下文说明，不用于生成内容
             dialogue_length: 对话长度 (short/medium/long/custom/auto)
-            difficulty_level: 难度水平 (beginner/elementary/pre_intermediate/intermediate/upper_intermediate/advanced)
-                            如果为None，使用用户当前水平
+            difficulty_level: 难度水平
             custom_sentence_count: 自定义句数（2-30）
+            scene_primary: 用户选择的场景一级（必填，用于从知识库取内容）
+            scene_secondary: 用户选择的场景二级（必填）
+            scene_label_id: 可选，场景 label_id；有则优先生成该场景
         """
         import asyncio
         from .app import chatgpt_streamed_async
@@ -888,59 +812,9 @@ class DiaryMemorySystem:
             "long": 20
         }
         
-        # 获取用户档案和记忆上下文
+        # 获取用户档案和记忆上下文（本流程生成内容以语块/句型库为主，不依赖练习记录文件）
         user_profile = self.get_user_profile_context()
         memory_context = self.get_memory_context()
-        
-        # 获取练习记忆（最近的10条），只使用有复习笔记的记录
-        practice_memories = self.get_practice_memories(limit=10)
-        # 过滤掉没有复习笔记的记录
-        practice_memories_with_review = [m for m in practice_memories if m.get("review_notes")]
-        
-        # 提取主题和词汇信息（不包含用户具体对话内容）
-        learning_themes = []  # 学习主题列表
-        all_key_words = []  # 所有重点词汇
-        all_difficult_words = []  # 所有易错词汇
-        all_grammar_points = []  # 所有语法点
-        
-        if practice_memories_with_review:
-            for memory in practice_memories_with_review:
-                topic = memory.get("dialogue_topic", "未知主题")
-                if topic and topic != "未知主题":
-                    learning_themes.append(topic)
-                
-                review_notes = memory.get("review_notes", {})
-                vocabulary = review_notes.get("vocabulary", {})
-                
-                # 只提取词汇和语法点，不包含用户具体错误内容
-                if vocabulary.get("key_words"):
-                    all_key_words.extend(vocabulary.get("key_words", [])[:5])
-                if vocabulary.get("difficult_words"):
-                    all_difficult_words.extend(vocabulary.get("difficult_words", [])[:5])
-                
-                grammar_points = review_notes.get("grammar", [])
-                for g in grammar_points[:3]:
-                    grammar_point = g.get("point", "")
-                    if grammar_point:
-                        all_grammar_points.append(grammar_point)
-        
-        # 去重并构建学习主题上下文（只包含主题、词汇、语法点，不包含用户具体内容）
-        unique_themes = list(set(learning_themes))[:5]  # 最多5个主题
-        unique_key_words = list(set(all_key_words))[:15]  # 最多15个重点词汇
-        unique_difficult_words = list(set(all_difficult_words))[:10]  # 最多10个易错词汇
-        unique_grammar_points = list(set(all_grammar_points))[:5]  # 最多5个语法点
-        
-        practice_memories_context = ""
-        if unique_themes or unique_key_words or unique_difficult_words or unique_grammar_points:
-            practice_memories_context = "\n\n【学习主题和词汇参考】（基于历史练习，用于生成相关主题的通用对话）：\n"
-            if unique_themes:
-                practice_memories_context += f"学习主题：{', '.join(unique_themes)}\n"
-            if unique_key_words:
-                practice_memories_context += f"重点词汇：{', '.join(unique_key_words)}\n"
-            if unique_difficult_words:
-                practice_memories_context += f"易错词汇：{', '.join(unique_difficult_words)}\n"
-            if unique_grammar_points:
-                practice_memories_context += f"语法要点：{', '.join(unique_grammar_points)}\n"
         
         # 获取用户当前水平
         user_level = self.user_profile.get("english_level", "beginner")
@@ -971,141 +845,80 @@ class DiaryMemorySystem:
         else:
             target_sentences = DIALOGUE_LENGTH_MAP.get(dialogue_length, DIALOGUE_LENGTH_MAP["medium"])
         
-        # 尝试使用知识点数据库推荐系统
+        # 英语卡片内容完全来自 knowledge_base：必须传入用户选择的场景
+        if not scene_primary or not scene_secondary:
+            print("Error: 生成英语卡片必须传入用户选择的场景 scene_primary 和 scene_secondary")
+            return None
+        
         resource_context = ""
         recommended_knowledge = []
-        selected_scene_secondary = None  # 可以从参数传入，暂时留空
-        
         try:
             from .knowledge_db import KnowledgeDatabase
             kb = KnowledgeDatabase()
-            
-            # 从主题关键词推断场景（简化版）
-            # 如果theme_keywords包含特定关键词，可以映射到场景
-            # 这里先使用推荐系统，不指定场景
             recommended_knowledge = kb.get_recommended_knowledge(
                 user_id=self.account_name,
                 user_level=target_level,
-                selected_scene_secondary=selected_scene_secondary
+                selected_label_id=scene_label_id,
+                scene_primary=scene_primary,
+                scene_secondary=scene_secondary,
             )
             
             if recommended_knowledge:
-                # 从推荐知识点中提取词汇、词组、语法
-                recommended_vocab = [k['英文'] for k in recommended_knowledge if k['类型'] == '单词'][:30]
-                recommended_phrases = [k['英文'] for k in recommended_knowledge if k['类型'] == '词组'][:15]
-                recommended_grammar = [k['英文'] for k in recommended_knowledge if k['类型'] == '语法'][:10]
+                # 新表：类型为「语块」「句型」（语块含词组/单词/俚语，句型含语法/句子）
+                recommended_chunks = [k['英文'] for k in recommended_knowledge if k['类型'] == '语块'][:30]
+                recommended_patterns = [k['英文'] for k in recommended_knowledge if k['类型'] == '句型'][:15]
                 
                 resource_parts = []
-                if recommended_vocab:
-                    vocab_display = ", ".join(recommended_vocab)
-                    resource_parts.append(f"【推荐词汇】{vocab_display}")
-                if recommended_phrases:
-                    phrases_display = ", ".join(recommended_phrases)
-                    resource_parts.append(f"【常用短语】{phrases_display}")
-                if recommended_grammar:
-                    patterns_display = ", ".join(recommended_grammar)
-                    resource_parts.append(f"【推荐句型】{patterns_display}")
+                if recommended_chunks:
+                    resource_parts.append(f"【必须使用的语块】{', '.join(recommended_chunks)}")
+                if recommended_patterns:
+                    resource_parts.append(f"【必须使用的句型】{', '.join(recommended_patterns)}")
                 
                 if resource_parts:
                     resource_context = "\n".join(resource_parts)
         except Exception as e:
-            # 如果知识点数据库不可用，回退到CEFR词汇表
-            print(f"Warning: 知识点数据库不可用，使用CEFR词汇表: {e}")
-            cefr_vocab = self.get_cefr_vocab_for_level(target_level)
-            
-            if cefr_vocab and (cefr_vocab.get("vocabulary") or cefr_vocab.get("phrases") or cefr_vocab.get("grammar_patterns")):
-                vocab_list = cefr_vocab.get("vocabulary", [])
-                phrases_list = cefr_vocab.get("phrases", [])
-                patterns_list = cefr_vocab.get("grammar_patterns", [])
-                
-                resource_parts = []
-                if vocab_list:
-                    vocab_display = ", ".join(vocab_list[:30])
-                    resource_parts.append(f"【推荐词汇】{vocab_display}")
-                if phrases_list:
-                    phrases_display = ", ".join(phrases_list[:15])
-                    resource_parts.append(f"【常用短语】{phrases_display}")
-                if patterns_list:
-                    patterns_display = ", ".join(patterns_list[:10])
-                    resource_parts.append(f"【推荐句型】{patterns_display}")
-                
-                if resource_parts:
-                    resource_context = "\n".join(resource_parts)
+            print(f"Error: 语块/句型数据库不可用，无法生成英语卡片: {e}")
+            return None
         
-        resource_context_block = f"\n\n【知识点推荐参考】\n{resource_context}" if resource_context else "\n\n【知识点推荐参考】无（将使用通用词汇）"
+        if not resource_context:
+            msg = (
+                "所选场景下没有可用的语块/句型，无法生成英语卡片。"
+                "请检查 data/ 下语块库（scenes.json、chunks.json、chunk_scene_mapping.json）是否包含该场景。"
+            )
+            print(f"Error: {msg}")
+            return {"error": "no_chunks", "message": msg}
         
-        # 从中文对话摘要中提取主题关键词（而不是直接使用具体内容）
-        theme_keywords = ""
-        if today_chinese_summary:
-            # 使用AI提取主题关键词
-            try:
-                theme_extraction_prompt = f"""从以下中文对话摘要中提取1-3个主题关键词（如：金融行业、时间管理、家庭关系等），只返回关键词，用中文，用逗号分隔，不要其他说明：
-
-{today_chinese_summary[:200]}
-
-只返回主题关键词："""
-                
-                theme_response = await chatgpt_streamed_async(
-                    theme_extraction_prompt,
-                    "你是一个专业的文本分析助手，能够从对话中提取主题关键词。只返回关键词，不要其他说明。",
-                    "neutral",
-                    []
-                )
-                if theme_response and theme_response.strip():
-                    theme_keywords = theme_response.strip()
-            except Exception as e:
-                print(f"Error extracting theme keywords: {e}")
-                # 如果提取失败，使用空字符串，后续会基于历史主题生成
+        resource_context_block = f"\n\n【硬性要求：对话内容必须且仅能来自以下语块与句型】\n{resource_context}\n不得使用以上列表之外的语块或句型。"
         
-        # 构建提示词
-        prompt = f"""基于以下信息，生成一段适合用户的英文教学对话内容。
+        # 构建提示词：内容必须且仅能来自 chunk_core 提供的语块/句型
+        scene_label = f"{scene_primary} - {scene_secondary}"
+        prompt = f"""生成一段英文教学对话，内容必须且仅能来自下方提供的语块与句型列表。
 
-【⚠️ 最高优先级：句数限制（不可违反）】
-必须生成严格{target_sentences}句对话，这是硬性要求。
-- 对话必须正好是{target_sentences}句，不能多也不能少
-- 无论难度如何，句数限制优先于所有其他要求
-- 如果无法在{target_sentences}句内完成，宁可简化内容也要保证句数
+【场景】{scene_label}
 
-【⚠️ 核心要求：基于主题生成通用场景，不绑定个人经历】
-- **重要**：中文沟通和英语卡片是**完全独立**的两部分，不是同一段对话的延续
-- 英语卡片不是中文对话的英文版本，而是基于**主题**生成的**通用场景**对话
-- 对话必须基于学习主题和词汇，但场景必须是通用的、可拓展的
-- **不要**使用用户的具体个人经历或对话内容
-- 角色A和B是通用角色（如同事、朋友、同学等），**不是**"AI"和"用户"
-- 场景应该是该主题下的通用场景，而不是用户个人的具体经历
-- 例如：如果主题是"金融行业"，生成"同事讨论工作项目"的通用场景，而不是"张三在金融公司工作"的个人场景
+【⚠️ 最高优先级：句数限制】
+必须生成严格{target_sentences}句对话，不能多也不能少。
 
-用户水平信息（仅用于确定难度）：
-{user_profile if user_profile else "暂无用户信息"}
+【⚠️ 核心要求：语块与句型来源】
+- 对话中使用的**所有**语块、句型必须来自下方「必须使用的语块/句型」列表
+- **禁止**使用列表之外的语块或句型
+- 若列表中没有足够表达，用列表内语块组合或简化表达，不可自造词
 
-{practice_memories_context}
 {resource_context_block}
 
 目标难度水平：{level_config['name']} - {level_config['description']}
 
-【难度要求】（用于控制每句话的用词和句型，不影响总句数）：
+【难度与风格】：
 {difficulty_instructions}
-
-【内容要求】：
-1. **主题关联**：对话主题必须与学习主题相关{f"（参考主题：{theme_keywords}）" if theme_keywords else ""}，如果学习主题是"金融行业"，生成金融工作场景的通用对话
-2. **通用场景**：场景必须是该主题下的通用场景，不绑定任何个人经历
-   - 例如：如果主题是"金融行业"，生成"同事讨论工作项目"的通用场景，而不是"张三在金融公司工作"的个人场景
-3. **角色设定**：A和B是通用角色（如同事、朋友、同学、客户等），**不是**"AI"和"用户"
-4. **词汇使用**：自然融入重点词汇和易错词汇，但不要刻意堆砌
-5. **语法应用**：自然使用指定的时态和语法点，符合真实对话场景
-6. **实用性强**：对话要实用，能帮助用户在实际场景中应用
-7. **自然流畅**：对话要自然流畅，像真实的口语交流，不要像教科书
-8. **难度适配**：根据难度水平包含适量的习语、俚语或地道表达（不要过度使用）
 
 【格式要求】：
 - 每句话一行，用 "A: " 和 "B: " 表示对话双方
 - 只返回英文对话内容，不要中文解释
-- 确保对话连贯，有逻辑性，有真实感
+- 对话自然连贯，符合场景 {scene_label}
 
 示例格式：
-A: Hi, how are you today?
-B: I'm doing great, thanks for asking!
-A: That's wonderful to hear.
+A: (使用列表中的语块/句型)
+B: (使用列表中的语块/句型)
 ...
 
 现在生成对话："""
@@ -1232,111 +1045,109 @@ A: That's wonderful to hear.
             "dialogue_lines": dialogue_lines,
             "dialogue_id": dialogue_id
         }
-    
+
+    async def generate_english_dialogue_from_oral_db(self, scene: str, difficulty: str):
+        """从口语训练数据库取一条记录，转成 dialogue_lines（含 hint）并生成 TTS。"""
+        from . import oral_training_db as otd
+        record = otd.get_dialogue_record_for_user(scene, difficulty, self.account_name)
+        if not record:
+            return {"error": "no_record", "message": "该场景与难度下暂无可用对话，请更换场景或难度。"}
+        logger.info(
+            "Oral DB 选卡: dialogue_id=%s scene=%s difficulty=%s unit=%s batch=%s",
+            record.get("dialogue_id"), record.get("scene"), difficulty,
+            record.get("unit"), record.get("batch")
+        )
+        content = record.get("content", [])
+        if not content:
+            return {"error": "no_content", "message": "该条记录无对话内容。"}
+        dialogue_lines = []
+        dialogue_parts = []
+        for item in content:
+            role = item.get("role", "A")
+            text = item.get("content", "").strip()
+            hint = item.get("hint", "")
+            if not text:
+                continue
+            dialogue_lines.append({
+                "speaker": role,
+                "text": text,
+                "hint": hint,
+            })
+            dialogue_parts.append(f"{role}: {text}")
+        dialogue_text = "\n".join(dialogue_parts)
+        dialogue_id = record.get("dialogue_id", "")
+        if not dialogue_id:
+            import uuid
+            dialogue_id = str(uuid.uuid4())[:8]
+        current_file_dir = os.path.dirname(os.path.abspath(__file__))
+        project_dir = os.path.dirname(current_file_dir)
+        audio_dir = os.path.join(project_dir, "outputs", "english_dialogue", dialogue_id)
+        try:
+            os.makedirs(audio_dir, exist_ok=True)
+        except Exception as e:
+            print(f"Error creating audio directory: {e}")
+        from .app import API_PROVIDER, doubao_text_to_speech, openai_text_to_speech
+        tts_encoding = os.getenv("TTS_ENCODING", "mp3")
+        for i, line in enumerate(dialogue_lines):
+            try:
+                if API_PROVIDER == "doubao" and tts_encoding == "mp3":
+                    audio_filename = f"{line['speaker']}_{i}.mp3"
+                else:
+                    audio_filename = f"{line['speaker']}_{i}.wav"
+                audio_path = os.path.join(audio_dir, audio_filename)
+                success = False
+                if API_PROVIDER == "doubao":
+                    success = await doubao_text_to_speech(line["text"], audio_path)
+                elif API_PROVIDER == "openai":
+                    try:
+                        await openai_text_to_speech(line["text"], audio_path)
+                        success = True
+                    except Exception as e:
+                        print(f"Error OpenAI TTS for line {i}: {e}")
+                else:
+                    print(f"Unsupported TTS provider: {API_PROVIDER}")
+                if success and os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+                    line["audio_url"] = f"/audio/english_dialogue/{dialogue_id}/{audio_filename}"
+                else:
+                    line["audio_url"] = None
+            except Exception as e:
+                print(f"Error generating audio for line {i}: {e}")
+                line["audio_url"] = None
+        return {
+            "dialogue_text": dialogue_text,
+            "dialogue_lines": dialogue_lines,
+            "dialogue_id": dialogue_id,
+            "unit": record.get("unit"),
+            "batch": record.get("batch"),
+        }
+
     def save_practice_memory(self, practice_data: Dict) -> bool:
-        """保存练习记忆到文件（创建新记录）
+        """根据本次练习结果更新进度与知识库，不写入练习记录文件。
+        
+        项目仅依赖 unit_practice.json（内含场景选择次数与场景/unit/批次完成状态）
+        用于推荐场景与下一批次；复习内容由 oral_training_db 的 Review 记录按需生成。
         
         Args:
-            practice_data: 练习数据字典，包含：
-                - id: 练习ID（必需）
-                - date: 日期
-                - timestamp: 时间戳
-                - dialogue_topic: 对话主题
-                - review_notes: 复习笔记
-                - expansion_materials: 场景拓展资料
+            practice_data: 当次练习数据，需包含 dialogue_id（用于更新 unit_practice，标记该批次已完成）
         
         Returns:
-            bool: 是否保存成功
+            bool: 是否执行成功
         """
         try:
-            practice_memories_file = os.path.join(str(self.diary_file.parent), "practice_memories.json")
-            practice_id = practice_data.get("id")
-            
-            if not practice_id:
-                print("Error: practice_id is required")
-                return False
-            
-            # 读取现有数据
-            if os.path.exists(practice_memories_file):
-                with open(practice_memories_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-            else:
-                data = {"practices": []}
-            
-            practices = data.get("practices", [])
-            
-            # 添加新的练习记忆
-            practices.append(practice_data)
-            print(f"Practice memory created: {practice_id}")
-            
-            data["practices"] = practices
-            
-            # 保存到文件
-            with open(practice_memories_file, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-            
-            # 更新知识点数据库（如果可用）
-            try:
-                from .knowledge_db import KnowledgeDatabase
-                kb = KnowledgeDatabase()
-                
-                # 从复习笔记中提取知识点
-                review_notes = practice_data.get("review_notes", {})
-                vocabulary = review_notes.get("vocabulary", {})
-                grammar_points = review_notes.get("grammar", [])
-                
-                # 获取总表，用于匹配知识点
-                master_df = kb.get_master_knowledge()
-                
-                # 处理重点词汇
-                key_words = vocabulary.get("key_words", [])
-                for word in key_words:
-                    # 在总表中查找匹配的知识点
-                    matches = master_df[master_df['英文'].str.lower() == word.lower()]
-                    if len(matches) > 0:
-                        # 使用第一个匹配的知识点
-                        knowledge_info = matches.iloc[0].to_dict()
-                        # 假设用户掌握了（因为这是重点词汇，通常会在对话中正确使用）
-                        # 实际应该根据用户回答的正确性来判断，这里先简化处理
-                        kb.update_learning_progress(
-                            user_id=self.account_name,
-                            knowledge_id=knowledge_info['知识点ID'],
-                            is_correct=True,  # 这里应该根据实际正确性判断
-                            knowledge_info=knowledge_info
-                        )
-                
-                # 处理语法点
-                for grammar in grammar_points:
-                    grammar_point = grammar.get("point", "")
-                    if grammar_point:
-                        # 在总表中查找匹配的语法知识点
-                        matches = master_df[
-                            (master_df['类型'] == '语法') & 
-                            (master_df['英文'].str.contains(grammar_point, case=False, na=False))
-                        ]
-                        if len(matches) > 0:
-                            knowledge_info = matches.iloc[0].to_dict()
-                            kb.update_learning_progress(
-                                user_id=self.account_name,
-                                knowledge_id=knowledge_info['知识点ID'],
-                                is_correct=True,
-                                knowledge_info=knowledge_info
-                            )
-                
-                # 更新场景偏好（基于对话主题推断场景）
-                dialogue_topic = practice_data.get("dialogue_topic", "")
-                if dialogue_topic:
-                    # 简化处理：根据主题关键词推断场景
-                    # 实际应该用AI或更智能的映射
-                    scene_primary, scene_secondary = self._infer_scene_from_topic(dialogue_topic)
-                    if scene_primary and scene_secondary:
-                        kb.update_scene_preference(self.account_name, scene_primary, scene_secondary)
-                
-            except Exception as e:
-                # 如果知识点数据库不可用，不影响主流程
-                print(f"Warning: 更新知识点数据库失败: {e}")
-                import traceback
-                traceback.print_exc()
+            # 口语训练库：根据 dialogue_id 更新 unit_practice（标记该批次已完成）
+            dialogue_id = practice_data.get("dialogue_id", "")
+            if dialogue_id:
+                try:
+                    from . import oral_training_db as otd
+                    rec = otd.get_record_by_dialogue_id(dialogue_id)
+                    if rec:
+                        scene = rec.get("scene")
+                        unit = rec.get("unit")
+                        batch = rec.get("batch")
+                        if scene and unit and batch and batch in ("A", "B", "C"):
+                            otd.mark_batch_completed(self.account_name, scene, unit, batch)
+                except Exception as e:
+                    print(f"Warning: oral_training_db mark_batch_completed failed: {e}")
             
             return True
             
@@ -1345,38 +1156,6 @@ A: That's wonderful to hear.
             import traceback
             traceback.print_exc()
             return False
-    
-    def get_practice_memories(self, limit: int = 10) -> List[Dict]:
-        """获取最近的练习记忆
-        
-        Args:
-            limit: 返回的记录数量限制
-        
-        Returns:
-            List[Dict]: 练习记忆列表，按时间倒序
-        """
-        try:
-            practice_memories_file = os.path.join(str(self.diary_file.parent), "practice_memories.json")
-            
-            if not os.path.exists(practice_memories_file):
-                return []
-            
-            with open(practice_memories_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            
-            practices = data.get("practices", [])
-            
-            # 按时间戳排序（最新的在前）
-            practices.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
-            
-            # 返回最近的limit条记录
-            return practices[:limit]
-            
-        except Exception as e:
-            print(f"Error loading practice memories: {e}")
-            import traceback
-            traceback.print_exc()
-            return []
     
     def _infer_scene_from_topic(self, topic: str) -> tuple:
         """从对话主题推断场景（简化版）
@@ -1420,5 +1199,37 @@ A: That's wonderful to hear.
         if any(kw in topic_lower for kw in ["电影", "音乐", "运动", "游戏", "娱乐"]):
             return ("娱乐", "电影音乐")
         
+        # 校园相关
+        if any(kw in topic_lower for kw in ["校园", "课堂", "宿舍", "同学", "老师"]):
+            if any(kw in topic_lower for kw in ["课堂", "上课", "课程"]):
+                return ("校园", "课堂")
+            elif any(kw in topic_lower for kw in ["宿舍", "生活"]):
+                return ("校园", "宿舍")
+            return ("校园", "课堂")
+        
         # 默认
         return ("社交", "日常社交")
+    
+    def get_suggested_first_scene(self, summary: str) -> Optional[str]:
+        """根据中文对话摘要推断一级场景（用于「先定一级，再给用户选三个二级」流程）
+        
+        Returns:
+            一级场景名，如 "社交"、"日常"；无则返回 None
+        """
+        if not summary or not summary.strip():
+            return None
+        primary, _ = self._infer_scene_from_topic(summary.strip())
+        return primary
+
+    def get_suggested_scenes_from_summary(self, summary: str) -> list:
+        """根据中文对话摘要推断用户可能感兴趣的场景（仅用于推荐，最终由用户选择）
+        
+        Returns:
+            list of {"scene_primary": str, "scene_secondary": str}
+        """
+        if not summary or not summary.strip():
+            return []
+        primary, secondary = self._infer_scene_from_topic(summary.strip())
+        if primary and secondary:
+            return [{"scene_primary": primary, "scene_secondary": secondary}]
+        return []

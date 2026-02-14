@@ -824,10 +824,13 @@ class DoubaoTTSClient:
         }
         
         try:
+            # 豆包 TTS 服务建连可能较慢，延长连接超时时间
             websocket = await websockets.connect(
                 self.endpoint,
                 additional_headers=headers,
-                max_size=10 * 1024 * 1024
+                max_size=10 * 1024 * 1024,
+                open_timeout=60,
+                close_timeout=10
             )
             
             try:

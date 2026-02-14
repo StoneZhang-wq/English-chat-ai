@@ -903,7 +903,7 @@ async def send_text_message(request: Request):
 async def end_conversation(request: Request):
     """结束对话并生成摘要，如果处于中文沟通阶段则提示可以生成英文对话"""
     try:
-        from .shared import get_memory_system, get_current_character, get_learning_stage
+        from .shared import get_memory_system, get_current_character, get_learning_stage, get_current_account
         
         memory_system = get_memory_system()
         if not memory_system:
@@ -936,20 +936,25 @@ async def end_conversation(request: Request):
         # 清空临时会话文件
         memory_system.clear_session_temp()
         
-        # 总是允许生成英文对话（即使没有今天的摘要，也可以基于历史记忆生成）
+        # 口语训练库：摘要推荐场景 + 场景列表（recommended / frequent / new）
+        from . import oral_training_db as otd
+        suggested_scene = otd.suggested_scene_from_summary(today_summary) if today_summary else None
+        account_name = get_current_account() or ""
+        scene_options = otd.get_scene_options_for_user(account_name, suggested_scene) if account_name else {"suggested_scene": None, "options": [{"scene": s, "label": "new"} for s in otd.get_unique_scenes()]}
+        available_scenes = scene_options.get("options", [])
+        if not available_scenes:
+            available_scenes = [{"scene": s, "label": "new"} for s in otd.get_unique_scenes()]
+        
         response_data = {
             "status": "success",
-            "message": "对话已结束，记忆已保存",
+            "message": "对话已结束，记忆已保存。请选择场景与难度后生成英语卡片",
             "summary": today_summary,
             "timestamp": entry.get("timestamp", "") if entry else "",
-            "should_generate_english": True  # 总是允许生成英文对话
+            "should_generate_english": True,
+            "suggested_scene": scene_options.get("suggested_scene"),
+            "available_scenes": available_scenes,
+            "available_difficulties": otd.get_unique_difficulties(),
         }
-        
-        if today_summary:
-            response_data["message"] = "对话已结束，记忆已保存。可以生成英文学习对话了"
-        else:
-            response_data["message"] = "可以生成英文学习对话了（将基于历史记忆生成）"
-        
         return JSONResponse(response_data)
             
     except Exception as e:
@@ -963,14 +968,27 @@ async def end_conversation(request: Request):
 
 @app.post("/api/english/generate")
 async def generate_english_dialogue(request: Request):
-    """生成英文教学对话"""
+    """生成英文教学对话（从口语训练库取一条记录 + TTS）"""
     try:
-        from .shared import get_memory_system, get_current_character, get_learning_stage, set_learning_stage
+        from .shared import get_memory_system, get_learning_stage, set_learning_stage
+        from . import oral_training_db as otd
         
         data = await request.json()
-        dialogue_length = data.get("dialogue_length", "auto")  # short/medium/long/custom/auto
-        difficulty_level = data.get("difficulty_level", None)  # 新增：难度水平，如果为None则使用用户当前水平
-        custom_sentence_count = data.get("custom_sentence_count", None)
+        scene = (data.get("scene") or data.get("scene_primary") or "").strip()
+        difficulty = (data.get("difficulty") or data.get("difficulty_level") or "").strip()
+        
+        if not scene or not difficulty:
+            return JSONResponse({
+                "status": "error",
+                "message": "请提供 scene（场景）与 difficulty（难度，如 Simple / Intermediate / Difficult）"
+            }, status_code=400)
+        
+        difficulties = otd.get_unique_difficulties()
+        if difficulty not in difficulties:
+            return JSONResponse({
+                "status": "error",
+                "message": f"难度无效，可选: {', '.join(difficulties)}"
+            }, status_code=400)
         
         memory_system = get_memory_system()
         if not memory_system:
@@ -979,52 +997,29 @@ async def generate_english_dialogue(request: Request):
                 "message": "记忆系统未初始化"
             }, status_code=500)
         
-        # 获取今天的中文对话摘要（从日记条目中获取）
-        current_character = get_current_character()
-        today_summary = ""
+        english_dialogue_result = await memory_system.generate_english_dialogue_from_oral_db(scene, difficulty)
         
-        diary_entries = memory_system.diary_data.get("entries", [])
-        if diary_entries:
-            today = datetime.now().strftime("%Y-%m-%d")
-            today_entries = [e for e in diary_entries if e.get("date") == today]
-            if today_entries:
-                # 获取今天最新的摘要
-                today_summary = today_entries[-1].get("summary", "")
-        
-        # 生成英文对话，传入难度参数
-        english_dialogue_result = await memory_system.generate_english_dialogue(
-            today_summary, 
-            dialogue_length,
-            difficulty_level,
-            custom_sentence_count
-        )
-        
-        if english_dialogue_result:
-            # 切换到英文学习阶段
-            set_learning_stage("english_learning")
-            
-            # 处理返回格式：可能是字典（新格式）或字符串（旧格式兼容）
-            if isinstance(english_dialogue_result, dict):
-                return JSONResponse({
-                    "status": "success",
-                    "message": "英文对话已生成",
-                    "dialogue": english_dialogue_result.get("dialogue_text", ""),
-                    "dialogue_lines": english_dialogue_result.get("dialogue_lines", []),
-                    "dialogue_id": english_dialogue_result.get("dialogue_id", "")
-                })
-            else:
-                # 兼容旧格式（纯文本）
-                return JSONResponse({
-                    "status": "success",
-                    "message": "英文对话已生成",
-                    "dialogue": english_dialogue_result
-                })
-        else:
-            logger.error("generate_english_dialogue returned None or empty result")
+        if isinstance(english_dialogue_result, dict) and english_dialogue_result.get("error"):
             return JSONResponse({
                 "status": "error",
-                "message": "生成英文对话失败：AI生成对话时出错，请检查控制台日志获取详细信息"
-            }, status_code=500)
+                "message": english_dialogue_result.get("message", "生成失败")
+            }, status_code=400)
+        
+        if english_dialogue_result:
+            set_learning_stage("english_learning")
+            return JSONResponse({
+                "status": "success",
+                "message": "英文对话已生成",
+                "dialogue": english_dialogue_result.get("dialogue_text", ""),
+                "dialogue_lines": english_dialogue_result.get("dialogue_lines", []),
+                "dialogue_id": english_dialogue_result.get("dialogue_id", ""),
+                "unit": english_dialogue_result.get("unit"),
+                "batch": english_dialogue_result.get("batch"),
+            })
+        return JSONResponse({
+            "status": "error",
+            "message": "生成英文对话失败"
+        }, status_code=500)
             
     except Exception as e:
         logger.error(f"Error generating english dialogue: {e}")
@@ -1200,20 +1195,19 @@ async def start_practice(request: Request):
         if len(dialogue_lines) > 1 and dialogue_lines[1]["speaker"] == "B":
             first_b_text = dialogue_lines[1]["text"]
         
-        # 如果有B的台词，提取提示
+        # 如果有B的台词，取提示：优先用口语库的 hint，否则 AI 抽取
         hints = None
         if first_b_text:
-            try:
-                hints = await extract_hints(first_b_text)
-            except Exception as e:
-                logger.error(f"Error extracting hints: {e}")
-                # 如果提取提示失败，使用空提示，不影响练习开始
-                hints = {
-                    "phrases": [],
-                    "pattern": "",
-                    "words": [],
-                    "grammar": ""
-                }
+            first_b_line = dialogue_lines[1] if len(dialogue_lines) > 1 else {}
+            if first_b_line.get("hint"):
+                h = first_b_line["hint"]
+                hints = {"phrases": [x.strip() for x in h.split("/") if x.strip()], "pattern": "", "words": [], "grammar": ""}
+            else:
+                try:
+                    hints = await extract_hints(first_b_text)
+                except Exception as e:
+                    logger.error(f"Error extracting hints: {e}")
+                    hints = {"phrases": [], "pattern": "", "words": [], "grammar": ""}
         
         return JSONResponse({
             "status": "success",
@@ -1322,12 +1316,16 @@ async def practice_respond(request: Request):
                             if dialogue_lines[j]["speaker"] == "A":
                                 next_a_text = dialogue_lines[j]["text"]
                                 next_a_audio_url = dialogue_lines[j].get("audio_url")  # 获取下一句A的音频URL
-                                # 如果A后面还有B，提取B的提示
+                                # 如果A后面还有B，取提示：优先用口语库的 hint，否则 AI 抽取
                                 if j + 1 < len(dialogue_lines) and dialogue_lines[j + 1]["speaker"] == "B":
-                                    next_b_hints = await extract_hints(dialogue_lines[j + 1]["text"])
+                                    next_b_line = dialogue_lines[j + 1]
+                                    if next_b_line.get("hint"):
+                                        h = next_b_line["hint"]
+                                        next_b_hints = {"phrases": [x.strip() for x in h.split("/") if x.strip()], "pattern": "", "words": [], "grammar": ""}
+                                    else:
+                                        next_b_hints = await extract_hints(next_b_line["text"])
                                     is_completed = False  # 还有下一轮，未完成
                                 else:
-                                    # A后面没有B了，说明这是最后一个A，练习应该完成
                                     is_completed = True
                                 break
                         break
@@ -1474,114 +1472,102 @@ async def get_practice_hints(request: Request):
 
 @app.post("/api/practice/generate-review")
 async def generate_review_notes(request: Request):
-    """生成复习笔记"""
+    """生成复习笔记。三部分：1) AI 纠错 2) 核心句型与语块（来自 DB 对应 Review）3) Review 短对话（来自 DB 对应 Review）"""
     try:
-        from .shared import get_memory_system
         from .app import chatgpt_streamed_async
-        import asyncio
         import json
-        
+
         data = await request.json()
         user_inputs = data.get("user_inputs", [])  # [{turn, ai_said, user_said}, ...]
         dialogue_topic = data.get("dialogue_topic", "日常对话")
-        
+        dialogue_id = data.get("dialogue_id", "")
+
         if not user_inputs:
             return JSONResponse({
                 "status": "error",
                 "message": "用户输入数据不能为空"
             }, status_code=400)
-        
-        # 构建对话上下文的文本（AI说的和用户说的）
+
+        # 第一部分：仅让 AI 生成纠错
         user_inputs_text = "\n".join([
             f"轮次 {item['turn']}:\n  AI说: {item.get('ai_said', '')}\n  用户说: {item.get('user_said', '')}"
             for item in user_inputs
         ])
-        
-        # 构建生成复习笔记的prompt
-        prompt = f"""基于以下练习会话数据，生成个性化的复习笔记。
+        prompt = f"""基于以下练习会话，仅对用户说的内容进行纠错，输出 JSON。
 
 对话主题：{dialogue_topic}
 
-用户输入和参考台词：
+会话内容：
 {user_inputs_text}
 
-请生成包含以下内容的复习笔记（JSON格式）：
+请只输出如下 JSON（不要其他文字）：
 {{
-  "vocabulary": {{
-    "key_words": ["重点词汇1", "重点词汇2", ...],
-    "new_words": ["新词汇1", "新词汇2", ...],
-    "difficult_words": ["易错词汇1", "易错词汇2", ...]
-  }},
-  "grammar": [
-    {{
-      "point": "语法点名称",
-      "user_usage": "用户使用的语法（如果有错误）",
-      "correct_usage": "正确用法",
-      "explanation": "解释说明"
-    }},
-    ...
-  ],
   "corrections": [
     {{
-      "user_said": "用户说的内容",
+      "user_said": "用户说的原句",
       "correct": "正确表达",
-      "explanation": "错误原因和纠正说明"
-    }},
-    ...
-  ],
-  "suggestions": [
-    "针对性的学习建议1",
-    "针对性的学习建议2",
-    ...
+      "explanation": "简要纠错说明"
+    }}
   ]
 }}
 
-要求：
-1. 词汇部分要包含用户在练习中使用的重要词汇、新出现的词汇、容易出错的词汇
-2. 语法点要分析用户使用的语法，指出错误（如果有）并提供正确用法
-3. 错误纠正要对比用户说的内容和参考台词，指出差异和正确表达
-4. 改进建议要针对用户的具体表现给出学习建议
-5. 只返回JSON格式，不要其他文字说明
+要求：只对有明显错误或可改进的句子给出纠错；若某句没问题可省略。只返回 JSON。
 """
-        
-        # 调用AI生成
+
         response = await chatgpt_streamed_async(
             prompt,
-            "你是一个专业的英语教学助手，能够分析学生的练习表现并生成个性化的复习笔记。",
+            "你是英语纠错助手，根据用户练习内容只做纠错并返回指定 JSON。",
             "neutral",
             []
         )
-        
+
         if not response or not response.strip():
             return JSONResponse({
                 "status": "error",
                 "message": "AI生成失败，返回空响应"
             }, status_code=500)
-        
-        # 尝试解析JSON响应
+
         try:
-            # 提取JSON部分
             response_text = response.strip()
             json_start = response_text.find('{')
             json_end = response_text.rfind('}') + 1
-            
             if json_start >= 0 and json_end > json_start:
-                json_str = response_text[json_start:json_end]
-                review_notes = json.loads(json_str)
+                ai_part = json.loads(response_text[json_start:json_end])
             else:
-                # 如果没有找到JSON，返回错误
-                logger.error(f"Failed to parse review notes JSON: {response_text[:200]}")
-                return JSONResponse({
-                    "status": "error",
-                    "message": "无法解析AI返回的复习笔记格式"
-                }, status_code=500)
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON decode error: {e}, response: {response_text[:200]}")
-            return JSONResponse({
-                "status": "error",
-                "message": f"解析复习笔记JSON失败: {str(e)}"
-            }, status_code=500)
-        
+                ai_part = {"corrections": []}
+        except json.JSONDecodeError:
+            ai_part = {"corrections": []}
+
+        corrections = ai_part.get("corrections") or []
+
+        # 第二、三部分：从数据库中对应 Review 记录取核心句型、语块与短对话
+        core_sentences = ""
+        core_chunks = ""
+        review_dialogue = []
+        if dialogue_id:
+            try:
+                from . import oral_training_db as otd
+                rec = otd.get_record_by_dialogue_id(dialogue_id)
+                if rec:
+                    review_row = otd.get_review_record(rec.get("scene", ""), rec.get("unit", ""))
+                    if review_row:
+                        core_sentences = review_row.get("core_sentences", "") or ""
+                        core_chunks = review_row.get("core_chunks", "") or ""
+                        if review_row.get("content"):
+                            review_dialogue = [
+                                {"speaker": item.get("role", "A"), "text": item.get("content", ""), "hint": item.get("hint", "")}
+                                for item in review_row["content"]
+                            ]
+            except Exception as e:
+                logger.warning(f"Oral DB review attachment failed: {e}")
+
+        review_notes = {
+            "corrections": corrections,
+            "core_sentences": core_sentences,
+            "core_chunks": core_chunks,
+            "review_dialogue": review_dialogue,
+        }
+
         return JSONResponse({
             "status": "success",
             "review_notes": review_notes
@@ -1596,162 +1582,16 @@ async def generate_review_notes(request: Request):
             "message": f"生成复习笔记时出错: {str(e)}"
         }, status_code=500)
 
-@app.post("/api/practice/generate-expansion")
-async def generate_expansion_materials(request: Request):
-    """生成场景拓展资料"""
-    try:
-        from .shared import get_memory_system
-        from .app import chatgpt_streamed_async
-        import asyncio
-        import json
-        
-        data = await request.json()
-        dialogue_topic = data.get("dialogue_topic", "日常对话")
-        user_inputs = data.get("user_inputs", [])  # 获取用户实际练习内容
-        user_level = data.get("user_level", "beginner")  # 可选：用户水平
-        
-        # 基于用户实际练习内容提取主题
-        actual_practice_topics = []
-        if user_inputs:
-            # 从用户输入中提取实际练习的主题
-            user_text = " ".join([
-                item.get("ai_said", "") + " " + item.get("user_said", "") 
-                for item in user_inputs
-            ])
-            
-            if user_text.strip():
-                try:
-                    topic_prompt = f"""分析以下英语练习对话，提取出主要讨论的主题（1-3个中文关键词）：
-
-{user_text}
-
-只返回主题关键词，用中文，用逗号分隔，例如：电影,篮球,娱乐。不要其他说明。"""
-                    
-                    topic_response = await chatgpt_streamed_async(
-                        topic_prompt,
-                        "你是一个专业的英语教学助手，能够分析对话主题。只返回主题关键词，不要其他说明。",
-                        "neutral",
-                        []
-                    )
-                    if topic_response:
-                        actual_practice_topics = [t.strip() for t in topic_response.strip().split(",") if t.strip()]
-                except Exception as e:
-                    logger.error(f"Error extracting practice topics: {e}")
-        
-        # 使用实际练习主题，如果没有则使用dialogue_topic
-        actual_topic = ", ".join(actual_practice_topics) if actual_practice_topics else dialogue_topic
-        
-        # 构建生成场景拓展资料的prompt
-        prompt = f"""基于以下实际练习内容，生成场景拓展资料。
-
-实际练习主题：{actual_topic}
-原始对话主题：{dialogue_topic}
-
-用户实际练习内容：
-{chr(10).join([f"- AI: {item.get('ai_said', '')}{chr(10)}  用户: {item.get('user_said', '')}" for item in user_inputs[:5]]) if user_inputs else "无"}
-
-用户水平：{user_level}
-
-请生成场景拓展资料（JSON格式）：
-{{
-  "dialogues": [
-    {{
-      "scene": "场景名称",
-      "dialogue": [
-        {{"speaker": "A", "text": "..."}},
-        {{"speaker": "B", "text": "..."}},
-        ...
-      ]
-    }},
-    ...
-  ],
-  "expressions": [
-    {{
-      "phrase": "常用短语或句型",
-      "meaning": "中文意思",
-      "example": "使用示例"
-    }},
-    ...
-  ]
-}}
-
-要求：
-1. 场景拓展必须与用户实际练习的主题相关（{actual_topic}），而不是原始对话主题
-2. 对话示例：生成3-5个与用户实际练习主题相关的不同场景对话（每个对话包含A和B的对话，约4-6句）
-3. 常用表达：提供该场景下的常用短语、句型，每个表达要有中文意思和使用示例
-4. 对话要自然流畅，符合真实场景
-5. 表达要实用，能帮助用户在实际场景中应用
-6. 只返回JSON格式，不要其他文字说明
-"""
-        
-        # 调用AI生成
-        response = await chatgpt_streamed_async(
-            prompt,
-            "你是一个专业的英语教学助手，能够生成场景相关的对话示例和常用表达。",
-            "neutral",
-            []
-        )
-        
-        if not response or not response.strip():
-            return JSONResponse({
-                "status": "error",
-                "message": "AI生成失败，返回空响应"
-            }, status_code=500)
-        
-        # 尝试解析JSON响应
-        try:
-            # 提取JSON部分
-            response_text = response.strip()
-            json_start = response_text.find('{')
-            json_end = response_text.rfind('}') + 1
-            
-            if json_start >= 0 and json_end > json_start:
-                json_str = response_text[json_start:json_end]
-                expansion_materials = json.loads(json_str)
-            else:
-                # 如果没有找到JSON，返回错误
-                logger.error(f"Failed to parse expansion materials JSON: {response_text[:200]}")
-                return JSONResponse({
-                    "status": "error",
-                    "message": "无法解析AI返回的场景拓展资料格式"
-                }, status_code=500)
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON decode error: {e}, response: {response_text[:200]}")
-            return JSONResponse({
-                "status": "error",
-                "message": f"解析场景拓展资料JSON失败: {str(e)}"
-            }, status_code=500)
-        
-        return JSONResponse({
-            "status": "success",
-            "expansion_materials": expansion_materials
-        })
-        
-    except Exception as e:
-        logger.error(f"Error generating expansion materials: {e}")
-        import traceback
-        logger.error(traceback.format_exc())
-        return JSONResponse({
-            "status": "error",
-            "message": f"生成场景拓展资料时出错: {str(e)}"
-        }, status_code=500)
-
 @app.post("/api/knowledge/select-scene")
 async def select_scene(request: Request):
-    """用户选择场景，更新场景偏好"""
+    """用户选择场景（与难度），记录到 scene_choices（口语训练库）"""
     try:
-        from .shared import get_memory_system, get_current_account
-        from .knowledge_db import KnowledgeDatabase
+        from .shared import get_current_account
+        from . import oral_training_db as otd
         
         data = await request.json()
-        scene_primary = data.get("scene_primary", "").strip()
-        scene_secondary = data.get("scene_secondary", "").strip()
-        
-        if not scene_primary or not scene_secondary:
-            return JSONResponse({
-                "status": "error",
-                "message": "场景一级和二级不能为空"
-            }, status_code=400)
+        scene = (data.get("scene") or data.get("scene_primary") or "").strip()
+        difficulty = (data.get("difficulty") or data.get("difficulty_level") or "").strip()
         
         account_name = get_current_account()
         if not account_name:
@@ -1760,13 +1600,18 @@ async def select_scene(request: Request):
                 "message": "用户未登录"
             }, status_code=401)
         
-        # 更新场景选择次数
-        kb = KnowledgeDatabase()
-        kb.increment_scene_choice(account_name, scene_primary, scene_secondary)
+        if not scene:
+            return JSONResponse({
+                "status": "error",
+                "message": "请提供 scene（场景）"
+            }, status_code=400)
         
+        otd.increment_scene_choice(account_name, scene)
         return JSONResponse({
             "status": "success",
-            "message": "场景选择已记录"
+            "message": "场景选择已记录",
+            "scene": scene,
+            "difficulty": difficulty or None,
         })
         
     except Exception as e:
@@ -1776,6 +1621,31 @@ async def select_scene(request: Request):
         return JSONResponse({
             "status": "error",
             "message": f"选择场景时出错: {str(e)}"
+        }, status_code=500)
+
+@app.get("/api/knowledge/available-scenes")
+async def get_available_scenes():
+    """获取可选场景（recommended + frequent + new）与难度列表，基于口语训练库"""
+    try:
+        from .shared import get_current_account
+        from . import oral_training_db as otd
+        account_name = get_current_account() or ""
+        scene_options = otd.get_scene_options_for_user(account_name, None)
+        return JSONResponse({
+            "status": "success",
+            "suggested_scene": scene_options.get("suggested_scene"),
+            "available_scenes": scene_options.get("options", []),
+            "available_difficulties": otd.get_unique_difficulties(),
+        })
+    except Exception as e:
+        logger.error(f"Error getting available scenes: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": str(e),
+            "available_scenes": [],
+            "available_difficulties": [],
         }, status_code=500)
 
 @app.get("/api/knowledge/recommended")
@@ -1798,15 +1668,23 @@ async def get_recommended_knowledge(request: Request):
         if memory_system:
             user_level = memory_system.user_profile.get("english_level", "beginner")
         
-        # 获取场景参数（可选）
-        scene_secondary = request.query_params.get("scene_secondary", None)
+        # 获取场景参数（可选）：label_id 或 scene_primary + scene_secondary
+        selected_label_id = request.query_params.get("label_id") or request.query_params.get("selected_label_id")
+        scene_primary = request.query_params.get("scene_primary")
+        scene_secondary = request.query_params.get("scene_secondary")
+        if selected_label_id is not None:
+            try:
+                selected_label_id = int(selected_label_id)
+            except (TypeError, ValueError):
+                selected_label_id = None
         
-        # 获取推荐
         kb = KnowledgeDatabase()
         recommended = kb.get_recommended_knowledge(
             user_id=account_name,
             user_level=user_level,
-            selected_scene_secondary=scene_secondary
+            selected_label_id=selected_label_id,
+            scene_primary=scene_primary,
+            scene_secondary=scene_secondary,
         )
         
         return JSONResponse({
@@ -1860,6 +1738,54 @@ async def save_practice_memory(request: Request):
         return JSONResponse({
             "status": "error",
             "message": f"保存练习记忆时出错: {str(e)}"
+        }, status_code=500)
+
+
+@app.post("/api/practice/mark-unit-mastered")
+async def mark_unit_mastered_api(request: Request):
+    """用户自评「掌握了」当前 unit 时调用，该 unit 不再推送 B/C 批次。"""
+    try:
+        from .shared import get_current_account
+        from . import oral_training_db as otd
+
+        account_name = get_current_account() or ""
+        if not account_name:
+            return JSONResponse({
+                "status": "error",
+                "message": "请先登录账户"
+            }, status_code=401)
+        data = await request.json()
+        dialogue_id = (data.get("dialogue_id") or "").strip()
+        if not dialogue_id:
+            return JSONResponse({
+                "status": "error",
+                "message": "缺少 dialogue_id"
+            }, status_code=400)
+        rec = otd.get_record_by_dialogue_id(dialogue_id)
+        if not rec:
+            return JSONResponse({
+                "status": "error",
+                "message": "未找到对应练习记录"
+            }, status_code=404)
+        scene = rec.get("scene") or ""
+        unit = rec.get("unit") or ""
+        if not scene or not unit:
+            return JSONResponse({
+                "status": "error",
+                "message": "记录缺少 scene 或 unit"
+            }, status_code=400)
+        otd.mark_unit_mastered(account_name, scene, unit)
+        return JSONResponse({
+            "status": "success",
+            "message": "已标记为本单元已掌握，下次将不再推荐该单元的后续批次"
+        })
+    except Exception as e:
+        logger.error(f"Error marking unit mastered: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({
+            "status": "error",
+            "message": f"标记失败: {str(e)}"
         }, status_code=500)
 
 @app.post("/api/practice/transcribe")

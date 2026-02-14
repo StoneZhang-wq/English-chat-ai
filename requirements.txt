@@ -59,3 +59,6 @@ pillow==10.3.0
 # Excel processing
 pandas==2.2.2
 openpyxl==3.1.5
+
+# 语块/句型数据库（可选，启用 MySQL 语块库时安装）
+# pymysql>=1.1.0

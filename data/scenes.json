@@ -1,0 +1,8 @@
+[
+  {"label_id": 1, "first_scene": "日常", "second_scene": "日常对话", "third_scene": "问候", "weight": 0.0},
+  {"label_id": 2, "first_scene": "日常", "second_scene": "日常对话", "third_scene": "介绍", "weight": 0.0},
+  {"label_id": 3, "first_scene": "日常", "second_scene": "购物", "third_scene": "询价", "weight": 0.0},
+  {"label_id": 4, "first_scene": "商务", "second_scene": "邮件", "third_scene": "开头", "weight": 0.0},
+  {"label_id": 5, "first_scene": "社交", "second_scene": "日常社交", "third_scene": "问候", "weight": 0.0},
+  {"label_id": 6, "first_scene": "社交", "second_scene": "日常社交", "third_scene": "聊天", "weight": 0.0}
+]

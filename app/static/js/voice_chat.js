@@ -945,8 +945,239 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     
-    // 显示对话选项选择对话框（长度和难度）
-    function showDialogueOptionsDialog() {
+    // 显示场景选择对话框（点击「开始英语学习」后先出现，选完场景再选长度和难度）
+    function showSceneSelectionDialog(suggestedScenes, availableScenes, defaultScene) {
+        console.log('[场景选择] 函数被调用', { 
+            suggestedCount: (suggestedScenes || []).length, 
+            availableCount: (availableScenes || []).length,
+            hasDefault: !!defaultScene,
+            suggestedScenes: suggestedScenes,
+            availableScenes: availableScenes
+        });
+        return new Promise((resolve) => {
+            console.log('[场景选择] Promise 创建，准备显示弹窗', { suggestedCount: (suggestedScenes || []).length, availableCount: (availableScenes || []).length, hasDefault: !!defaultScene });
+            const hasScenes = availableScenes && availableScenes.length > 0;
+            console.log('[场景选择] hasScenes =', hasScenes);
+
+            // 遮罩层：确保弹窗在最上层且背景变暗（z-index 高于聊天区域）
+            const overlay = document.createElement('div');
+            overlay.className = 'scene-selection-overlay';
+            overlay.setAttribute('data-scene-dialog', 'true');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 2147483647;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+
+            const dialog = document.createElement('div');
+            dialog.className = 'scene-selection-dialog';
+            dialog.style.cssText = `
+                position: relative;
+                z-index: 2147483647;
+                background: white;
+                padding: 24px;
+                border-radius: 12px;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+                min-width: 440px;
+                max-width: 90vw;
+                max-height: 85vh;
+                overflow-y: auto;
+            `;
+
+            const suggestedBlock = (suggestedScenes && suggestedScenes.length > 0) ? `
+                <div style="margin-bottom: 16px; padding: 12px; background: #e8f4fd; border-radius: 8px; border: 1px solid #b8daff;">
+                    <div style="font-weight: 600; color: #004085; margin-bottom: 8px; font-size: 14px;">根据你的对话推荐</div>
+                    <div id="suggested-scene-btns" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
+            ` : '';
+
+            const contentWhenNoScenes = `
+                <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #333; text-align: center;">选择练习场景</h3>
+                <p style="margin: 0 0 16px 0; font-size: 14px; color: #666; text-align: center;">暂无可用场景。</p>
+                <p style="margin: 0 0 20px 0; font-size: 13px; color: #888; text-align: center;">请先配置语块库（确认 data/ 下 scenes.json、chunks.json 已就绪）。</p>
+                <div style="display: flex; justify-content: center;">
+                    <button id="close-no-scenes" style="padding: 10px 24px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">确定</button>
+                </div>
+            `;
+
+            const contentWhenHasScenes = `
+                <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #333; text-align: center;">选择练习场景</h3>
+                <p style="margin: 0 0 16px 0; font-size: 13px; color: #666;">选择后将在你的学习偏好中记录，下一步将选择对话长度和难度。</p>
+                ${suggestedBlock}
+                <div style="margin-bottom: 20px;">
+                    <div style="font-weight: 600; color: #333; margin-bottom: 8px; font-size: 14px;">全部场景</div>
+                    <div id="available-scene-btns" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 240px; overflow-y: auto;"></div>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e9ecef;">
+                    <button id="cancel-scene-dialog" style="padding: 10px 20px; background: #f0f0f0; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; color: #333;">取消</button>
+                    <button id="confirm-scene-dialog" disabled style="padding: 10px 20px; background: #ccc; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">确认选择</button>
+                </div>
+            `;
+
+            dialog.innerHTML = hasScenes ? contentWhenHasScenes : contentWhenNoScenes;
+
+            function closeDialog(value) {
+                if (overlay.parentNode) document.body.removeChild(overlay);
+                resolve(value);
+            }
+
+            if (!hasScenes) {
+                overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDialog(null); });
+                dialog.querySelector('#close-no-scenes').addEventListener('click', () => closeDialog(null));
+                overlay.appendChild(dialog);
+                document.body.appendChild(overlay);
+                return;
+            }
+
+            let selectedScene = null;
+            const confirmBtn = dialog.querySelector('#confirm-scene-dialog');
+            function setSelected(s) {
+                selectedScene = s;
+                const lid = s && s.label_id != null ? String(s.label_id) : null;
+                const p = s ? scenePrimary(s) : null;
+                const q = s ? sceneSecondary(s) : null;
+                dialog.querySelectorAll('.scene-option-btn').forEach(btn => {
+                    const secEq = (btn.dataset.secondary || '') === (q != null && q !== '' ? q : '');
+                const active = lid && btn.dataset.labelId ? btn.dataset.labelId === lid : (btn.dataset.primary === p && secEq);
+                    btn.style.background = active ? '#007bff' : 'white';
+                    btn.style.color = active ? 'white' : '#333';
+                });
+                if (confirmBtn) {
+                    confirmBtn.disabled = !s;
+                    confirmBtn.style.background = s ? '#007bff' : '#ccc';
+                }
+            }
+            function scenePrimary(s) { return s.scene != null ? s.scene : (s.scene_primary != null ? s.scene_primary : s['场景一级']); }
+            function sceneSecondary(s) { return s.scene_secondary != null ? s.scene_secondary : s['场景二级']; }
+            function sceneTertiary(s) { return s.scene_tertiary != null ? s.scene_tertiary : s['场景三级'] || s.third_scene; }
+            function addSceneButton(container, scene) {
+                const primary = scenePrimary(scene);
+                const secondary = sceneSecondary(scene);
+                const tertiary = sceneTertiary(scene);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'scene-option-btn';
+                btn.dataset.primary = primary;
+                btn.dataset.secondary = secondary || '';
+                if (scene.label_id != null) btn.dataset.labelId = String(scene.label_id);
+                btn.textContent = scene.scene != null ? scene.scene : ((primary && secondary) ? (tertiary ? `${primary} - ${secondary} - ${tertiary}` : `${primary} - ${secondary}`) : primary || '未知场景');
+                btn.style.cssText = 'padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; transition: all 0.2s; white-space: nowrap;';
+                btn.addEventListener('click', () => setSelected(scene));
+                container.appendChild(btn);
+            }
+            const suggestedContainer = dialog.querySelector('#suggested-scene-btns');
+            if (suggestedContainer && suggestedScenes && suggestedScenes.length > 0) {
+                suggestedScenes.forEach(s => addSceneButton(suggestedContainer, s));
+            }
+            const availableContainer = dialog.querySelector('#available-scene-btns');
+            if (availableScenes.length === 0) {
+                const hint = document.createElement('p');
+                hint.style.cssText = 'margin: 0; font-size: 13px; color: #888; padding: 8px 0;';
+                hint.textContent = '暂无可用场景，请先配置语块库（确认 data/ 下 scenes.json、chunks.json 已就绪）。';
+                availableContainer.appendChild(hint);
+            } else {
+                availableScenes.forEach(s => addSceneButton(availableContainer, s));
+            }
+
+            // 未选择时由算法给出的默认场景：预选并允许直接确认
+            if (defaultScene && hasScenes) {
+                setSelected(defaultScene);
+            }
+            if (defaultScene && confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.style.background = '#007bff';
+            }
+
+            dialog.querySelector('#confirm-scene-dialog').addEventListener('click', () => closeDialog(selectedScene || defaultScene || null));
+            dialog.querySelector('#cancel-scene-dialog').addEventListener('click', () => closeDialog(null));
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDialog(null); });
+
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+            console.log('[场景选择] 弹窗已添加到 DOM', {
+                overlayInBody: document.body.contains(overlay),
+                dialogInOverlay: overlay.contains(dialog),
+                overlayVisible: overlay.offsetParent !== null,
+                dialogVisible: dialog.offsetParent !== null
+            });
+            // 强制显示：确保弹窗在最上层
+            overlay.style.display = 'flex';
+            dialog.style.display = 'block';
+            console.log('[场景选择] 弹窗已显示，请选择练习场景');
+        });
+    }
+
+    // 一级已定、给用户三个二级选一个（中文对话阶段确定一级 → 选一个二级 → 用该二级下三级的语块/句型生成卡片）
+    function showSecondLevelChoiceDialog(firstScene, secondLevelOptions, defaultOption) {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'second-level-choice-overlay';
+            overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2147483647; display: flex; align-items: center; justify-content: center;';
+            const dialog = document.createElement('div');
+            dialog.className = 'second-level-choice-dialog';
+            dialog.style.cssText = 'position: relative; z-index: 2147483647; background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); min-width: 380px; max-width: 90vw;';
+            dialog.innerHTML = `
+                <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #333; text-align: center;">选择练习场景</h3>
+                <p style="margin: 0 0 12px 0; font-size: 14px; color: #666;">已根据对话确定一级：<strong>${firstScene || '—'}</strong></p>
+                <p style="margin: 0 0 16px 0; font-size: 13px; color: #888;">请从下列三个二级中选一个，将使用该二级下所有三级的语块与句型生成英语卡片。</p>
+                <div id="second-level-btns" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;"></div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid #e9ecef;">
+                    <button id="cancel-second-level" style="padding: 10px 20px; background: #f0f0f0; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; color: #333;">取消</button>
+                    <button id="confirm-second-level" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">确认选择</button>
+                </div>
+            `;
+            let selectedOption = defaultOption || null;
+            const confirmBtn = dialog.querySelector('#confirm-second-level');
+            const btnContainer = dialog.querySelector('#second-level-btns');
+            secondLevelOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'second-level-option-btn';
+                btn.textContent = opt.second_scene || opt.scene_secondary || '—';
+                btn.style.cssText = 'padding: 12px 18px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; transition: all 0.2s;';
+                btn.addEventListener('click', () => {
+                    selectedOption = opt;
+                    dialog.querySelectorAll('.second-level-option-btn').forEach(b => { b.style.background = 'white'; b.style.color = '#333'; b.style.borderColor = '#e0e0e0'; });
+                    btn.style.background = '#007bff'; btn.style.color = 'white'; btn.style.borderColor = '#007bff';
+                    confirmBtn.disabled = false;
+                });
+                btnContainer.appendChild(btn);
+            });
+            if (defaultOption) {
+                const idx = secondLevelOptions.findIndex(o => (o.second_scene || o.scene_secondary) === (defaultOption.second_scene || defaultOption.scene_secondary));
+                if (idx >= 0 && btnContainer.children[idx]) {
+                    btnContainer.children[idx].click();
+                } else {
+                    selectedOption = defaultOption;
+                    confirmBtn.disabled = false;
+                }
+            } else if (secondLevelOptions.length > 0) {
+                confirmBtn.disabled = true;
+            }
+            function closeDialog(value) {
+                if (overlay.parentNode) document.body.removeChild(overlay);
+                resolve(value);
+            }
+            dialog.querySelector('#confirm-second-level').addEventListener('click', () => closeDialog(selectedOption));
+            dialog.querySelector('#cancel-second-level').addEventListener('click', () => closeDialog(null));
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDialog(null); });
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+        });
+    }
+
+    // 显示对话选项选择对话框（仅难度，口语训练库无长度选择）
+    function showDialogueOptionsDialog(availableDifficulties) {
+        const difficulties = Array.isArray(availableDifficulties) && availableDifficulties.length > 0
+            ? availableDifficulties
+            : ['Simple', 'Intermediate', 'Difficult'];
         return new Promise((resolve) => {
             const dialog = document.createElement('div');
             dialog.className = 'dialogue-options-dialog';
@@ -960,169 +1191,53 @@ document.addEventListener("DOMContentLoaded", function() {
                 border-radius: 12px;
                 box-shadow: 0 4px 20px rgba(0,0,0,0.15);
                 z-index: 10000;
-                min-width: 500px;
+                min-width: 380px;
                 max-width: 90%;
-                max-height: 90vh;
-                overflow-y: auto;
             `;
-            
-            const customCount = getCustomSentenceCount();
+            const difficultyBtns = difficulties.map(d => `
+                <button class="option-btn" data-type="difficulty" data-value="${d}" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s;">${d}</button>
+            `).join('');
             dialog.innerHTML = `
                 <h3 style="margin: 0 0 24px 0; font-size: 20px; color: #333; text-align: center;">生成英语对话卡片</h3>
-                
-                <!-- 对话长度选择（必选，放在最前面） -->
-                <div style="margin-bottom: 28px; padding: 16px; background: #f8f9fa; border-radius: 10px; border: 2px solid #e9ecef;">
-                    <label style="display: block; margin-bottom: 12px; font-weight: 700; color: #333; font-size: 15px;">
-                        📏 对话长度 <span style="color: #dc3545; font-size: 12px;">（必选）</span>
-                    </label>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
-                        <button class="option-btn" data-type="length" data-value="short" style="padding: 14px 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s;">
-                            <div style="font-size: 16px; font-weight: 600; color: #333;">短</div>
-                            <div style="font-size: 12px; color: #666; margin-top: 4px;">8句</div>
-                        </button>
-                        <button class="option-btn" data-type="length" data-value="medium" style="padding: 14px 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s;">
-                            <div style="font-size: 16px; font-weight: 600; color: #333;">中</div>
-                            <div style="font-size: 12px; color: #666; margin-top: 4px;">14句</div>
-                        </button>
-                        <button class="option-btn" data-type="length" data-value="long" style="padding: 14px 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s;">
-                            <div style="font-size: 16px; font-weight: 600; color: #333;">长</div>
-                            <div style="font-size: 12px; color: #666; margin-top: 4px;">20句</div>
-                        </button>
-                    </div>
-                    <div style="margin-top: 12px; padding: 12px; background: white; border-radius: 8px; border: 1px solid #dee2e6;">
-                        <button class="option-btn" data-type="length" data-value="custom" style="width: 100%; padding: 10px; border: 2px dashed #007bff; border-radius: 6px; background: #f0f7ff; cursor: pointer; font-size: 14px; color: #007bff; font-weight: 500;">
-                            ✏️ 自定义句数
-                        </button>
-                    </div>
-                    <div id="custom-length-input-container" style="display: none; margin-top: 12px; padding: 14px; background: white; border-radius: 8px; border: 2px solid #007bff;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 13px;">请输入句数（2-30句）：</label>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <input type="number" id="dialog-custom-length-input" min="2" max="30" step="1" value="${customCount}" 
-                                   style="flex: 1; padding: 10px 12px; border: 2px solid #007bff; border-radius: 6px; font-size: 15px; outline: none; font-weight: 500;" />
-                            <span style="color: #666; font-size: 14px; font-weight: 500;">句</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 难度水平选择（可选，分组显示） -->
-                <div style="margin-bottom: 24px; padding: 16px; background: #fff; border-radius: 10px; border: 2px solid #e9ecef;">
-                    <label style="display: block; margin-bottom: 12px; font-weight: 700; color: #333; font-size: 15px;">
-                        🎯 难度水平 <span style="color: #6c757d; font-size: 12px; font-weight: 400;">（可选，默认使用你的水平）</span>
-                    </label>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                        <button class="option-btn" data-type="difficulty" data-value="beginner" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; transition: all 0.2s;">
-                            <div style="font-weight: 600; color: #333;">基础级</div>
-                            <div style="font-size: 11px; color: #666; margin-top: 2px;">A1-A2</div>
-                        </button>
-                        <button class="option-btn" data-type="difficulty" data-value="intermediate" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; transition: all 0.2s;">
-                            <div style="font-weight: 600; color: #333;">中级</div>
-                            <div style="font-size: 11px; color: #666; margin-top: 2px;">B1-B2</div>
-                        </button>
-                        <button class="option-btn" data-type="difficulty" data-value="advanced" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; transition: all 0.2s;">
-                            <div style="font-weight: 600; color: #333;">高级</div>
-                            <div style="font-size: 11px; color: #666; margin-top: 2px;">B2-C1</div>
-                        </button>
-                        <button class="option-btn" data-type="difficulty" data-value="auto" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; transition: all 0.2s;">
-                            <div style="font-weight: 600; color: #333;">使用我的水平</div>
-                            <div style="font-size: 11px; color: #666; margin-top: 2px;">自动匹配</div>
-                        </button>
-                    </div>
+                <div style="margin-bottom: 24px; padding: 16px; background: #f8f9fa; border-radius: 10px; border: 2px solid #e9ecef;">
+                    <label style="display: block; margin-bottom: 12px; font-weight: 700; color: #333; font-size: 15px;">🎯 难度</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">${difficultyBtns}</div>
                 </div>
                 <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; padding-top: 20px; border-top: 1px solid #e9ecef;">
                     <button id="cancel-dialog" style="padding: 12px 24px; background: #f0f0f0; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; color: #333;">取消</button>
-                    <button id="confirm-dialog" style="padding: 12px 24px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; box-shadow: 0 2px 4px rgba(0,123,255,0.3);">确认生成</button>
+                    <button id="confirm-dialog" disabled style="padding: 12px 24px; background: #ccc; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">确认生成</button>
                 </div>
             `;
+            let selectedDifficulty = null;
             
-            let selectedLength = null;  // 改为null，强制用户选择
-            let selectedDifficulty = "auto";
-            
-            // 选项按钮点击事件
             dialog.querySelectorAll('.option-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const type = btn.dataset.type;
                     const value = btn.dataset.value;
-                    
-                    // 移除同类型其他按钮的选中状态
-                    dialog.querySelectorAll(`.option-btn[data-type="${type}"]`).forEach(b => {
+                    dialog.querySelectorAll('.option-btn[data-type="difficulty"]').forEach(b => {
                         b.style.background = 'white';
                         b.style.borderColor = '#e0e0e0';
                         b.style.color = '#333';
                     });
-                    
-                    // 设置当前按钮为选中状态
                     btn.style.background = '#007bff';
                     btn.style.color = 'white';
                     btn.style.borderColor = '#007bff';
-                    
-                    if (type === 'length') {
-                        selectedLength = value;
-                        // 如果选择自定义，显示输入框
-                        const customContainer = dialog.querySelector('#custom-length-input-container');
-                        if (value === 'custom') {
-                            customContainer.style.display = 'block';
-                        } else {
-                            customContainer.style.display = 'none';
-                        }
-                    } else if (type === 'difficulty') {
-                        selectedDifficulty = value;
-                    }
-                });
-                
-                // 鼠标悬停效果
-                btn.addEventListener('mouseenter', () => {
-                    if (btn.style.background !== 'rgb(0, 123, 255)') {
-                        btn.style.borderColor = '#007bff';
-                        btn.style.background = '#f0f7ff';
-                    }
-                });
-                
-                btn.addEventListener('mouseleave', () => {
-                    if (btn.style.background !== 'rgb(0, 123, 255)') {
-                        btn.style.borderColor = '#e0e0e0';
-                        btn.style.background = 'white';
-                    }
+                    selectedDifficulty = value;
+                    dialog.querySelector('#confirm-dialog').disabled = false;
+                    dialog.querySelector('#confirm-dialog').style.background = '#007bff';
                 });
             });
-            
-            // 确认按钮
             dialog.querySelector('#confirm-dialog').addEventListener('click', () => {
-                // 验证长度是否已选择
-                if (!selectedLength) {
-                    showError('请先选择对话长度');
+                if (!selectedDifficulty) {
+                    showError('请先选择难度');
                     return;
                 }
-                
-                let customSentenceCount = null;
-                if (selectedLength === 'custom') {
-                    const dialogInput = dialog.querySelector('#dialog-custom-length-input');
-                    const rawValue = dialogInput ? parseInt(dialogInput.value, 10) : getCustomSentenceCount();
-                    if (Number.isNaN(rawValue) || rawValue < 2 || rawValue > 30) {
-                        showError('自定义句数必须在 2-30 之间');
-                        return;
-                    }
-                    customSentenceCount = rawValue;
-                    localStorage.setItem(CUSTOM_LENGTH_KEY, String(rawValue));
-                    // 同步更新设置面板中的输入框（如果存在）
-                    if (customLengthInput) {
-                        customLengthInput.value = rawValue;
-                    }
-                }
-                
-                document.body.removeChild(dialog);
-                resolve({
-                    length: selectedLength,
-                    difficulty: selectedDifficulty === "auto" ? null : selectedDifficulty,
-                    custom_sentence_count: customSentenceCount
-                });
+                if (dialog.parentNode) dialog.parentNode.removeChild(dialog);
+                resolve({ difficulty: selectedDifficulty });
             });
-            
-            // 取消按钮
             dialog.querySelector('#cancel-dialog').addEventListener('click', () => {
-                document.body.removeChild(dialog);
+                if (dialog.parentNode) dialog.parentNode.removeChild(dialog);
                 resolve(null);
             });
-            
             document.body.appendChild(dialog);
         });
     }
@@ -1156,30 +1271,66 @@ document.addEventListener("DOMContentLoaded", function() {
                 const result = await response.json();
                 
                 if (result.status === 'success') {
-                    // 显示记忆保存成功
                     if (result.summary) {
                         addAIMessage(`记忆已保存。\n\n摘要：${result.summary}`);
                     } else {
                         addAIMessage('记忆已保存');
                     }
                     
-                    // 总是显示对话选项选择对话框（即使没有今天的摘要，也可以基于历史记忆生成）
-                    const options = await showDialogueOptionsDialog();
+                    // 第一步：选择练习场景（界面先出现，再选长度和难度）
+                    console.log('[开始英语学习] 步骤1：准备场景选择', { 
+                        hasSuggested: !!(result.suggested_scenes && result.suggested_scenes.length > 0),
+                        hasAvailable: !!(result.available_scenes && result.available_scenes.length > 0),
+                        suggestedCount: (result.suggested_scenes || []).length,
+                        availableCount: (result.available_scenes || []).length
+                    });
+                    // 口语训练库：suggested_scene 为单条，available_scenes 为 [{scene, label}]，available_difficulties 为难度列表
+                    let suggestedScenes = result.suggested_scene ? [{ scene: result.suggested_scene, label: 'recommended' }] : [];
+                    let availableScenes = result.available_scenes || [];
+                    let availableDifficulties = result.available_difficulties || ['Simple', 'Intermediate', 'Difficult'];
+                    if (availableScenes.length === 0) {
+                        console.log('[开始英语学习] 步骤1.1：available_scenes 为空，尝试从 API 获取');
+                        try {
+                            const scenesRes = await fetch('/api/knowledge/available-scenes');
+                            const scenesData = await scenesRes.json();
+                            if (scenesData.available_scenes && scenesData.available_scenes.length > 0) {
+                                availableScenes = scenesData.available_scenes;
+                            }
+                            if (scenesData.available_difficulties && scenesData.available_difficulties.length > 0) {
+                                availableDifficulties = scenesData.available_difficulties;
+                            }
+                        } catch (e) {
+                            console.warn('[开始英语学习] 获取可选场景失败', e);
+                        }
+                    }
+                    if (typeof showSceneSelectionDialog !== 'function') {
+                        showError('场景选择功能未加载，请刷新页面重试');
+                        return;
+                    }
+                    const defaultScene = availableScenes[0] || null;
+                    const selectedScene = await showSceneSelectionDialog(suggestedScenes, availableScenes, defaultScene);
+                    if (!selectedScene) {
+                        return;
+                    }
+                    const sceneVal = selectedScene.scene != null ? selectedScene.scene : (selectedScene.scene_primary != null ? selectedScene.scene_primary : selectedScene['场景一级']);
+                    const difficultyVal = null;
+                    try {
+                        await fetch('/api/knowledge/select-scene', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ scene: sceneVal })
+                        });
+                    } catch (e) {
+                        console.warn('记录场景选择失败', e);
+                    }
+                    const options = await showDialogueOptionsDialog(availableDifficulties);
                     if (options) {
-                        // 生成英文对话
                         try {
                             addAIMessage('正在生成英文学习对话...');
-                            
                             const englishResponse = await fetch('/api/english/generate', {
                                 method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({ 
-                                    dialogue_length: options.length,
-                                    difficulty_level: options.difficulty,
-                                    custom_sentence_count: options.custom_sentence_count
-                                })
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ scene: sceneVal, difficulty: options.difficulty })
                             });
                             
                             const englishResult = await englishResponse.json();
@@ -2126,7 +2277,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 margin-top: 16px;
                 transition: all 0.3s ease;
             ">
-                📝 生成复习笔记和场景拓展
+                📝 生成复习笔记
             </button>
         `;
         
@@ -2144,7 +2295,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     
-    // 生成复习笔记和场景拓展
+    // 生成复习笔记（三部分：纠错 + 核心句型语块 + Review 对话，仅纠错用 AI，后两者来自数据库）
     async function generateReviewNotes() {
         if (!practiceState.sessionData) {
             showError('练习会话数据不可用');
@@ -2160,7 +2311,6 @@ document.addEventListener("DOMContentLoaded", function() {
         try {
             const sessionData = practiceState.sessionData;
             
-            // 1. 生成复习笔记
             const reviewResponse = await fetch('/api/practice/generate-review', {
                 method: 'POST',
                 headers: {
@@ -2168,38 +2318,19 @@ document.addEventListener("DOMContentLoaded", function() {
                 },
                 body: JSON.stringify({
                     user_inputs: sessionData.user_inputs,
-                    dialogue_topic: sessionData.dialogue_topic
+                    dialogue_topic: sessionData.dialogue_topic,
+                    dialogue_id: sessionData.dialogue_id || null
                 })
             });
             
             const reviewResult = await reviewResponse.json();
             
-            // 2. 生成场景拓展资料
-            const expansionResponse = await fetch('/api/practice/generate-expansion', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    dialogue_topic: sessionData.dialogue_topic,
-                    user_inputs: sessionData.user_inputs,  // 传递用户实际练习内容
-                    user_level: 'beginner'  // 可以从用户配置获取
-                })
-            });
-            
-            const expansionResult = await expansionResponse.json();
-            
-            if (reviewResult.status === 'success' && expansionResult.status === 'success') {
-                // 3. 保存练习记忆
-                await savePracticeMemory(reviewResult.review_notes, expansionResult.expansion_materials);
-                
-                // 4. 显示复习笔记和场景拓展
-                displayReviewNotes(reviewResult.review_notes);
-                displayExpansionMaterials(expansionResult.expansion_materials);
-                
-                showSuccess('复习笔记和场景拓展已生成！');
+            if (reviewResult.status === 'success') {
+                await savePracticeMemory(reviewResult.review_notes);
+                displayReviewNotes(reviewResult.review_notes, sessionData.dialogue_id || null);
+                showSuccess('复习笔记已生成！');
             } else {
-                showError('生成失败：' + (reviewResult.message || expansionResult.message || '未知错误'));
+                showError('生成失败：' + (reviewResult.message || '未知错误'));
             }
         } catch (error) {
             console.error('Error generating review notes:', error);
@@ -2207,19 +2338,18 @@ document.addEventListener("DOMContentLoaded", function() {
         } finally {
             if (generateBtn) {
                 generateBtn.disabled = false;
-                generateBtn.textContent = '📝 生成复习笔记和场景拓展';
+                generateBtn.textContent = '📝 生成复习笔记';
             }
         }
     }
     
-    // 保存练习记忆（创建新记录）
-    async function savePracticeMemory(reviewNotes, expansionMaterials) {
+    // 保存练习进度（仅更新 unit_practice，不存复习内容）
+    async function savePracticeMemory(reviewNotes) {
         if (!practiceState.sessionData) return;
         
         try {
             const sessionData = practiceState.sessionData;
             
-            // 生成新的ID
             const practiceId = `practice_${Date.now()}`;
             
             const practiceMemory = {
@@ -2227,9 +2357,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 date: sessionData.date || new Date().toISOString().split('T')[0],
                 timestamp: sessionData.timestamp || new Date().toISOString(),
                 dialogue_topic: sessionData.dialogue_topic,
-                // 移除 user_inputs，只保存复习资料
-                review_notes: reviewNotes,
-                expansion_materials: expansionMaterials
+                dialogue_id: sessionData.dialogue_id || null,
+                review_notes: reviewNotes
             };
             
             const response = await fetch('/api/practice/save-memory', {
@@ -2251,13 +2380,22 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
     
-    // 显示复习笔记
-    function displayReviewNotes(reviewNotes) {
+    // 显示复习笔记（可选 dialogueId：有则显示「掌握了/还没掌握」自评按钮）
+    function displayReviewNotes(reviewNotes, dialogueId) {
         const messagesList = document.getElementById('messages-list');
         if (!messagesList) return;
         
         const card = document.createElement('div');
         card.className = 'review-notes-card';
+        const masteryFooter = dialogueId ? `
+            <div class="review-mastery-footer">
+                <span class="review-mastery-label">本单元你掌握了吗？</span>
+                <div class="review-mastery-buttons">
+                    <button type="button" class="review-mastery-btn mastered-btn">掌握了</button>
+                    <button type="button" class="review-mastery-btn not-mastered-btn">还没掌握</button>
+                </div>
+            </div>
+        ` : '';
         card.innerHTML = `
             <div class="review-card-header">
                 <h3>📝 复习笔记</h3>
@@ -2265,50 +2403,55 @@ document.addEventListener("DOMContentLoaded", function() {
             <div class="review-card-content">
                 ${generateReviewNotesHTML(reviewNotes)}
             </div>
+            ${masteryFooter}
         `;
+        
+        if (dialogueId) {
+            const masteredBtn = card.querySelector('.mastered-btn');
+            const notMasteredBtn = card.querySelector('.not-mastered-btn');
+            const buttonsWrap = card.querySelector('.review-mastery-buttons');
+            const hideButtons = () => {
+                if (buttonsWrap) buttonsWrap.style.display = 'none';
+            };
+            masteredBtn.addEventListener('click', async () => {
+                masteredBtn.disabled = true;
+                notMasteredBtn.disabled = true;
+                try {
+                    const res = await fetch('/api/practice/mark-unit-mastered', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ dialogue_id: dialogueId })
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        hideButtons();
+                    } else {
+                        masteredBtn.disabled = false;
+                        notMasteredBtn.disabled = false;
+                    }
+                } catch (e) {
+                    masteredBtn.disabled = false;
+                    notMasteredBtn.disabled = false;
+                }
+            });
+            notMasteredBtn.addEventListener('click', () => {
+                hideButtons();
+            });
+        }
         
         messagesList.appendChild(card);
         scrollToBottom();
     }
     
-    // 生成复习笔记HTML
+    // 生成复习笔记HTML（三部分：AI纠错、核心句型与语块、Review短对话）
     function generateReviewNotesHTML(reviewNotes) {
         let html = '';
-        
-        // 词汇部分
-        if (reviewNotes.vocabulary) {
-            html += `
-                <div class="review-section">
-                    <h4>📚 词汇</h4>
-                    ${reviewNotes.vocabulary.key_words ? `<div class="vocab-category"><strong>重点词汇：</strong>${reviewNotes.vocabulary.key_words.join(', ')}</div>` : ''}
-                    ${reviewNotes.vocabulary.new_words ? `<div class="vocab-category"><strong>新词汇：</strong>${reviewNotes.vocabulary.new_words.join(', ')}</div>` : ''}
-                    ${reviewNotes.vocabulary.difficult_words ? `<div class="vocab-category"><strong>易错词汇：</strong>${reviewNotes.vocabulary.difficult_words.join(', ')}</div>` : ''}
-                </div>
-            `;
-        }
-        
-        // 语法部分
-        if (reviewNotes.grammar && reviewNotes.grammar.length > 0) {
-            html += `
-                <div class="review-section">
-                    <h4>📖 语法点</h4>
-                    ${reviewNotes.grammar.map(g => `
-                        <div class="grammar-item">
-                            <strong>${g.point}</strong>
-                            ${g.user_usage ? `<div class="error-usage">❌ 你的用法：${g.user_usage}</div>` : ''}
-                            <div class="correct-usage">✅ 正确用法：${g.correct_usage}</div>
-                            ${g.explanation ? `<div class="explanation">💡 ${g.explanation}</div>` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-        
-        // 错误纠正
+
+        // 第一部分：AI 纠错
         if (reviewNotes.corrections && reviewNotes.corrections.length > 0) {
             html += `
                 <div class="review-section">
-                    <h4>🔧 错误纠正</h4>
+                    <h4>🔧 纠错</h4>
                     ${reviewNotes.corrections.map(c => `
                         <div class="correction-item">
                             <div class="error-text">❌ ${c.user_said}</div>
@@ -2319,87 +2462,42 @@ document.addEventListener("DOMContentLoaded", function() {
                 </div>
             `;
         }
-        
-        // 改进建议
-        if (reviewNotes.suggestions && reviewNotes.suggestions.length > 0) {
+
+        // 第二部分：核心句型与语块（来自数据库对应 Review）
+        const hasCore = (reviewNotes.core_sentences && reviewNotes.core_sentences.trim()) ||
+            (reviewNotes.core_chunks && reviewNotes.core_chunks.trim());
+        if (hasCore) {
+            html += `<div class="review-section"><h4>📌 核心句型与语块</h4>`;
+            if (reviewNotes.core_sentences && reviewNotes.core_sentences.trim()) {
+                const sentences = reviewNotes.core_sentences.split('/').map(s => s.trim()).filter(Boolean);
+                html += `<div class="vocab-category"><strong>核心句型：</strong>${sentences.join(' / ')}</div>`;
+            }
+            if (reviewNotes.core_chunks && reviewNotes.core_chunks.trim()) {
+                const chunks = reviewNotes.core_chunks.split('/').map(c => c.trim()).filter(Boolean);
+                html += `<div class="vocab-category"><strong>核心语块：</strong>${chunks.join(' / ')}</div>`;
+            }
+            html += `</div>`;
+        }
+
+        // 第三部分：Review 短对话（来自数据库对应 Review）
+        if (reviewNotes.review_dialogue && reviewNotes.review_dialogue.length > 0) {
             html += `
                 <div class="review-section">
-                    <h4>💡 改进建议</h4>
-                    <ul class="suggestions-list">
-                        ${reviewNotes.suggestions.map(s => `<li>${s}</li>`).join('')}
-                    </ul>
-                </div>
-            `;
-        }
-        
-        return html;
-    }
-    
-    // 显示场景拓展资料
-    function displayExpansionMaterials(expansionMaterials) {
-        const messagesList = document.getElementById('messages-list');
-        if (!messagesList) return;
-        
-        const card = document.createElement('div');
-        card.className = 'expansion-materials-card';
-        card.innerHTML = `
-            <div class="expansion-card-header">
-                <h3>🌟 场景拓展资料</h3>
-            </div>
-            <div class="expansion-card-content">
-                ${generateExpansionMaterialsHTML(expansionMaterials)}
-            </div>
-        `;
-        
-        messagesList.appendChild(card);
-        scrollToBottom();
-    }
-    
-    // 生成场景拓展资料HTML
-    function generateExpansionMaterialsHTML(expansionMaterials) {
-        let html = '';
-        
-        // 对话示例
-        if (expansionMaterials.dialogues && expansionMaterials.dialogues.length > 0) {
-            html += `
-                <div class="expansion-section">
-                    <h4>💬 对话示例</h4>
-                    ${expansionMaterials.dialogues.map((dialogue, idx) => `
-                        <div class="dialogue-example">
-                            <div class="dialogue-scene">场景 ${idx + 1}: ${dialogue.scene}</div>
-                            <div class="dialogue-content">
-                                ${dialogue.dialogue.map(line => `
-                                    <div class="dialogue-line ${line.speaker === 'A' ? 'speaker-a' : 'speaker-b'}">
-                                        <span class="speaker-label">${line.speaker}:</span>
-                                        <span class="dialogue-text">${line.text}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-        
-        // 常用表达
-        if (expansionMaterials.expressions && expansionMaterials.expressions.length > 0) {
-            html += `
-                <div class="expansion-section">
-                    <h4>📝 常用表达</h4>
-                    <div class="expressions-list">
-                        ${expansionMaterials.expressions.map(expr => `
-                            <div class="expression-item">
-                                <div class="expression-phrase"><strong>${expr.phrase}</strong></div>
-                                <div class="expression-meaning">${expr.meaning}</div>
-                                ${expr.example ? `<div class="expression-example">💬 示例：${expr.example}</div>` : ''}
+                    <h4>💬 Review 短对话</h4>
+                    <div class="review-dialogue-content">
+                        ${reviewNotes.review_dialogue.map(line => `
+                            <div class="dialogue-line ${line.speaker === 'A' ? 'speaker-a' : 'speaker-b'}">
+                                <span class="speaker-label">${line.speaker}:</span>
+                                <span class="dialogue-text">${line.text}</span>
+                                ${line.hint ? `<span class="dialogue-hint">（${line.hint}）</span>` : ''}
                             </div>
                         `).join('')}
                     </div>
                 </div>
             `;
         }
-        
-        return html;
+
+        return html || '<div class="review-section">暂无复习内容</div>';
     }
     
     // 结束练习模式

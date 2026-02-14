@@ -1,0 +1,157 @@
+---
+description: 口语训练数据库生成与完善规则；扩展或修改 data/oral_training_db 时必须严格遵循
+alwaysApply: false
+---
+
+# 口语训练数据库规则（Oral Training DB Spec v1.1）
+
+> 目标：在不破坏原有工程结构与业务逻辑的前提下，提升**可生成性、自然口语度与长期维护成本可控性**。
+
+扩展或修改 `data/oral_training_db.json`、`data/oral_training_db.md` 或相关学习/复习资料时，**必须**严格按以下规则执行。
+
+---
+
+## 一、程序用数据格式
+
+- **主数据文件**：`data/oral_training_db.json`
+- **每条记录字段**（英文键名，便于程序使用）：
+  - `scene`：场景
+  - `difficulty`：难度（Simple / Intermediate / Difficult）
+  - `unit`：单元（如 U1-Daily Routine）
+  - `batch`：批次（A / B / C / Review）
+  - `dialogue_id`：对话ID（如 DL-S-U1-A）
+  - `content`：对话内容，**必须是数组**，每项为 `{"role":"A"|"B", "content":"...", "hint":"..."}`
+  - `core_sentences`：核心句型，用 `/` 分隔
+  - `core_chunks`：核心语块，用 `/` 分隔
+- 若需导出为表格给人看或复制到 Excel，可生成/更新 `data/oral_training_db.md`（标准 Markdown 表格），列名：场景 | 难度 | 单元 | 批次 | 对话ID | 完整内容(JSON) | 核心句型 | 核心语块；单元格内禁止换行，JSON 写在一行。
+
+---
+
+## 二、数据库结构模型
+
+- **场景**：如 Daily Life、Eating Out、Shopping（可扩展，需在「对话ID规则」中约定缩写）。**原有场景**每难度 5 个 Unit；**新增场景**每难度 3 个 Unit（U1、U2、U3）。
+- **难度**：仅允许 **Simple**、**Intermediate**、**Difficult** 三种。
+- **Unit 数量**：**原有场景**（Daily Life、Eating Out、Shopping）每个难度下 **5 个 Unit**（U1–U5）；**新增场景**每个难度下 **3 个 Unit**（U1、U2、U3）。每个 Unit 有主题。
+- 每个 Unit 包含批次：**A**、**B**、**C**、**Review**。
+
+---
+
+## 三、对话 content（JSON）格式、长度与逻辑性
+
+- 必须为**数组**，每句为对象。
+- 每句**必须**包含：`role`（"A" 或 "B"）、`content`（完整句子）、`hint`（提示）。
+- **每条记录的 content 长度（按难度）**：
+  - **Simple**：4 轮对话，共 **8 条**（4 问 4 答）。
+  - **Intermediate**：8 轮对话，共 **16 条**（8 问 8 答）。
+  - **Difficult**：12 轮对话，共 **24 条**（12 问 12 答）。
+  - **Review** 批次：与同难度一致（8 / 16 / 24 条）
+- **对话逻辑性（必须满足）**：
+  - 整段对话是**一段完整、连贯的对话**，有明确话题或交际目标（如「商量周末计划」「问日常习惯」）。
+  - 轮与轮之间可有追问、补充、转折、换小话题，但**不跳题**；后句可引用前文（如 "Me too." / "What about Saturday?"）。
+  - **禁止**：同一问一答简单重复多遍、无上下文关系的拼凑。生成时**先按轮数设计多轮内容，再写每句 content 和 hint**。
+- **Hint 生成规则**：
+  - **生成顺序**：每句的 hint 在该句 content 确定之后写，用于提示该句要用到的**结构或关键词**，不是整句翻译。
+  - **形式**：以「结构提示」为主（如 `I + verb + place`、`because + reason`），可带 1～2 个关键词（如 `ask about routine / after work`）。禁止完整句子、过长短语。
+  - **多轮一致**：同一 Unit 下 A/B/C，**同一轮次**的句型/功能一致，hint 的「结构部分」一致，仅随 A/B/C 用词差异微调关键词。
+  - **与句型/语块对应**：hint 中的关键表达必须出现在该条记录的 `core_sentences` 或 `core_chunks` 中（生成完 content 与 hint 后从整段归纳句型/语块，再检查 hint 覆盖）。
+
+---
+
+## 四、难度分层规则（v1.2）
+
+**目标**：像真实聊天，而非句型操练；结构覆盖与自然度并重。
+
+| 难度 | 要求 |
+|------|------|
+| **Simple** | **目标**：像小白真实聊天，而不是「英语句型操练」。以简单句为主；**because ≤1 次**（仅限 because + 简短原因）；不允许 if 条件句、宾语从句；句长 ≤12 词（允许 +2 容错）；只使用基础时态。**允许 1～2 句「弱信息句」**（纯回应、不承担教学结构），如：Sure. / Okay. / Sounds good. / Really? → 对话不必每句都有教学任务，更像真实初学者对话。 |
+| **Intermediate** | **目标**：像「能聊天的普通人」，不是「语法展示会」。**同一 Unit 的 A/B/C 整体覆盖 2 种结构**：because / if / I think (that)（不再要求单条对话必须覆盖 2 种）；单条对话至少 1 个从句；允许现在完成时；句长 ≤18 词（允许 +2 容错）。**允许 2～3 句「功能性废话」**（维持真实感），如：I see. / That makes sense. / Yeah, maybe. → 结构覆盖仍在，但不每条都硬塞结构。 |
+| **Difficult** | **目标**：像真实成年人讨论问题，而不是「复杂句型拼盘」。**同一 Unit 内整体覆盖（A/B/C 合计）**：although / even though；if + would；至少 1 个抽象表达；**单条对话最多强制 2 类结构点**（不为了复杂而复杂）；句长 ≤25 词（允许 +2 容错）。**允许自然插话 1～2 次**，如：To be honest, / You know, / The thing is, → 复杂度仍在，句子更自然。 |
+
+---
+
+## 五、Unit 差异规则（非常重要）
+
+不同 Unit 必须满足：
+- 话题功能不同
+- 核心句型不同
+- 核心语块不同
+- 交际目标不同  
+**不能**只是名词替换。  
+不同 Unit 的整段对话应有**不同的话题与交际目标**，归纳出的核心句型与核心语块也须不同。  
+示例（Daily Life）：U1 描述日常活动，U2 表达计划，U3 表达习惯，U4 表达感受，U5 可扩展其他交际功能；每个难度下共 5 个 Unit（U1–U5）。
+
+---
+
+## 六、批次规则（A / B / C）
+
+同一 Unit 下 A、B、C 之间：
+- 语法结构完全一致
+- 核心句型完全一致（**核心知识点相同**）
+- 对话轮数一致
+- hint 结构一致  
+仅替换细节词汇。
+
+**业务逻辑**（见 `docs/ORAL_TRAINING_INTEGRATION.md`）：同一 unit 下掌握 A 即视为 unit 掌握，不需再练 B/C；未掌握 A 则下次同 unit 推 B，再推 C；学完 A/B/C 则 unit 一定掌握。用户只选 scene 与 difficulty，unit 与批次由系统根据学习记录判断。
+
+---
+
+## 七、Review 生成逻辑（v1.1 收紧）
+
+- **轮数（统一标准）**：Simple 4 轮（8 条）、Intermediate 8 轮（16 条）、Difficult 12 轮（24 条）。**不再提供「精简 30%」选项**，Review 统一与同难度 A/B/C 轮数一致。
+- **来源与逻辑**：Review 为同 Unit A/B/C 的「关键轮次压缩重组版」；不引入新句型 / 新语块；hint 与 core_sentences/core_chunks 与 A/B/C 一致或为其子集。
+- **与 A/B/C 关系**：同一 Unit 下 A/B/C **共用一套** Review（一条 Review 记录），不按 A/B/C 各做一条 Review。
+
+---
+
+## 八、核心句型规则（生成顺序与归纳）
+
+- **生成顺序**：在**整条记录的 content 全部写完后**，再从该条对话中归纳 `core_sentences`。禁止在未写满整段 content 前就定死核心句型。
+- **内容**：从对话中提炼**语法框架/句型**（如 "What do you do after…?"、"I will + verb"），覆盖本 Unit 的语法重点；必须能覆盖**所有 hint 中的结构提示**。同一 Unit 下 A/B/C 的 core_sentences **列表一致**。
+- 用 `/` 分隔，写在一行。
+
+---
+
+## 九、核心语块规则（生成顺序与归纳）
+
+- **生成顺序**：在整条记录的 content 全部写完后，从该条对话中归纳 `core_chunks`。
+- **内容**：提炼**搭配、功能表达、场景词组**（如 "after work"、"go to the gym"、"because I need rest"）；困难可含抽象表达。同一 Unit 下 A/B/C 的 core_chunks 可因用词不同有少量差异，但**功能/类型一致**。
+- **检查**：每个 hint 中的关键表达都应在 core_sentences 或 core_chunks 中有对应。用 `/` 分隔，写在一行。
+
+---
+
+## 十、对话ID规则
+
+- **场景缩写**：Daily Life → DL；Eating Out → EO；Shopping → SH。**新增场景**：Travel → TR；Health → HL；Transport → TP；Work → WK；Education → ED；Weather → WH；Hobbies → HB；Family → FM；Technology → TC；Entertainment → ET。
+- **难度缩写**：Simple → S；Intermediate → I；Difficult → D。
+- **格式**：`场景缩写-难度缩写-Unit编号-批次`  
+  例：DL-S-U1-A、DL-I-U2-C、SH-D-U3-Review。
+
+---
+
+## 十（补充）、扩充场景与新增内容规则
+
+- **新场景必须使用全新对话内容**：每次扩充数据库（新增场景或新增 Unit）时，必须为新场景/新 Unit **全新编写**对话内容（ROUNDS 与 VOCAB 或等价数据），**不得**复用、复制或 fallback 到已有场景的对话。
+- **之后每次扩充均须遵守**：凡由 AI 或人工扩展口语库时，新增条目一律使用**新写的对话**，不得用「复用某场景同难度 U1」等占位逻辑；生成脚本中新增场景须显式定义 ROUNDS/VOCAB 并写入数据库。
+
+---
+
+## 十一、完善数据库时的检查清单
+
+新增或修改任一条目时，请自检：
+1. `dialogue_id` 符合「场景-难度-Unit-批次」格式。
+2. `content` 为数组，每句含 `role`、`content`、`hint`；hint 非完整句，且与核心句型/语块对应。
+3. **content 条数**：Simple 共 8 条（4 轮）、Intermediate 共 16 条（8 轮）、Difficult 共 24 条（12 轮）；Review 与同难度一致（8/16/24）。
+4. **对话逻辑性**：整段为完整连贯对话，有明确话题，轮与轮有上下文。
+5. Simple/Intermediate/Difficult 句长与结构符合「难度分层规则」（v1.2）。
+6. 同 Unit 下 A/B/C 结构一致，仅词汇不同；Review 与 A/B/C 同逻辑线、无新结构、共用一套。
+7. 不同 Unit 之间话题、句型、语块有明确差异。
+8. **口语自然度自检**：是否存在明显书面腔或中式直译；是否允许 1～2 处自然承接用语（Yeah / Right / Sure / That works. 等）；在不违反难度规则前提下，优先保证「像真实对话」。
+
+---
+
+## 十二、口语自然度原则（v1.1 补充）
+
+- 优先使用真实口语中**高频表达**。
+- 允许自然省略（如 Sure. / Sounds good. / That works.）。
+- 允许 1～2 处自然重复或口头承接（Yeah / Right / I see.）。
+- 在不违反难度规则前提下，**优先自然度而非模板对齐**。

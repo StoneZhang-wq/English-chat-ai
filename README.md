@@ -135,6 +135,14 @@ For detailed setup instructions, requirements, and troubleshooting, see [Spark-T
 
 > Note: The sample `.wav` files in the characters folder are used for voice cloning. You can provide your own high-quality samples to improve voice quality.
 
+### English learning (chunk / scene data)
+
+**English card generation** (语块/句型) uses the **file backend by default** (no database):
+
+- Data lives in `data/scenes.json`, `data/chunks.json`, `data/chunk_scene_mapping.json`. User progress is in `memory/accounts/<user>/`.
+- Run `python test_chunk_flow.py` to verify. See [docs/CHUNK_DB.md](docs/CHUNK_DB.md) for details.
+- Optional: set `CHUNK_BACKEND=mysql` and configure MySQL + schema if you prefer a database.
+
 ### Kokoro TTS for local voices - Optional
 
 [Kokoro TTS](https://github.com/remsky/Kokoro-FastAPI) is an open-source neural text-to-speech system based on the Kokoro-82M model, offering high-quality voice synthesis with various male and female voices.

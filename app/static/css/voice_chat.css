@@ -1591,6 +1591,54 @@ body {
     gap: 20px;
 }
 
+.review-mastery-footer {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.review-mastery-label {
+    display: block;
+    margin-bottom: 12px;
+    color: #555;
+    font-size: 14px;
+}
+
+.review-mastery-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.review-mastery-btn {
+    padding: 8px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.review-mastery-btn.mastered-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+}
+
+.review-mastery-btn.mastered-btn:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.review-mastery-btn.not-mastered-btn {
+    background: rgba(102, 126, 234, 0.15);
+    color: #667eea;
+    border: 1px solid rgba(102, 126, 234, 0.4);
+}
+
+.review-mastery-btn.not-mastered-btn:hover:not(:disabled) {
+    background: rgba(102, 126, 234, 0.25);
+}
+
 .review-section {
     background: rgba(255, 255, 255, 0.8);
     border-radius: 12px;
