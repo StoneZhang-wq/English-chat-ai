@@ -470,10 +470,12 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             };
             
-                   mediaRecorder.start();
-                   isRecording = true;
-                   recordBtn.classList.add('recording');
-                   showRecordingIndicator();
+            mediaRecorder.start();
+            isRecording = true;
+            recordBtn.classList.add('recording');
+            const sceneRecordBtn = document.getElementById('practice-scene-record-btn');
+            if (sceneRecordBtn) sceneRecordBtn.classList.add('recording');
+            showRecordingIndicator();
             
             // 开始波形动画
             animateWaveform();
@@ -493,9 +495,11 @@ document.addEventListener("DOMContentLoaded", function() {
     function stopRecording() {
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
-                   isRecording = false;
-                   recordBtn.classList.remove('recording');
-                   hideRecordingIndicator();
+            isRecording = false;
+            recordBtn.classList.remove('recording');
+            const sceneRecordBtn = document.getElementById('practice-scene-record-btn');
+            if (sceneRecordBtn) sceneRecordBtn.classList.remove('recording');
+            hideRecordingIndicator();
             
             // 通知服务器停止录音
             if (websocket && websocket.readyState === WebSocket.OPEN) {
@@ -632,17 +636,16 @@ document.addEventListener("DOMContentLoaded", function() {
     // 添加用户消息
     function addUserMessage(text) {
         console.log('addUserMessage called with text:', text);
-        // 重新获取 messagesList，确保元素可用
-        const messagesList = document.getElementById('messages-list');
-        if (!messagesList) {
-            console.error('Messages list not found in addUserMessage');
+        // 场景练习时追加到 practice-dialogue-area
+        const target = (typeof practiceState !== 'undefined' && practiceState && practiceState.messageTarget) || document.getElementById('messages-list');
+        if (!target) {
+            console.error('Message target not found in addUserMessage');
             return;
         }
         
         // 防止重复显示相同的消息
-        // 检查最后一条消息是否已经是这条用户消息
-        if (messagesList.lastElementChild) {
-            const lastMsg = messagesList.lastElementChild;
+        if (target.lastElementChild) {
+            const lastMsg = target.lastElementChild;
             const lastMsgText = lastMsg.querySelector('.text-message')?.textContent;
             if (lastMsgText === text && lastMsg.classList.contains('user')) {
                 console.log('Duplicate user message detected, skipping:', text);
@@ -650,7 +653,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
         
-        console.log('Creating user message element');
         lastUserMessage = text;
         isProcessingAudio = false;
         const message = createMessageElement('user', text, 'text');
@@ -659,10 +661,12 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
         
-        console.log('Appending user message to messages list');
-        messagesList.appendChild(message);
-        scrollToBottom();
-        console.log('User message added successfully');
+        target.appendChild(message);
+        if (target.id === 'practice-dialogue-area') {
+            target.scrollTop = target.scrollHeight;
+        } else {
+            scrollToBottom();
+        }
     }
 
     // 添加AI消息
@@ -676,21 +680,12 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
         
-        // 重新获取 messagesList，确保元素可用
-        const messagesList = document.getElementById('messages-list');
-        if (!messagesList) {
-            console.error('❌ [addAIMessage] Messages list not found');
-            console.error('❌ [addAIMessage] 尝试查找 messages-list 元素...');
-            const allElements = document.querySelectorAll('[id*="message"]');
-            console.error('❌ [addAIMessage] 找到的相关元素:', allElements);
+        // 场景练习时追加到 practice-dialogue-area
+        const target = (typeof practiceState !== 'undefined' && practiceState && practiceState.messageTarget) || document.getElementById('messages-list');
+        if (!target) {
+            console.error('❌ [addAIMessage] 消息目标容器未找到');
             return;
         }
-        
-        console.log('🔵 [addAIMessage] messagesList found:', messagesList);
-        console.log('🔵 [addAIMessage] messagesList style:', window.getComputedStyle(messagesList));
-        console.log('🔵 [addAIMessage] messagesList display:', window.getComputedStyle(messagesList).display);
-        console.log('🔵 [addAIMessage] messagesList visibility:', window.getComputedStyle(messagesList).visibility);
-        console.log('🔵 [addAIMessage] messagesList opacity:', window.getComputedStyle(messagesList).opacity);
         
         console.log('🔵 [addAIMessage] Creating message element for AI message');
         const message = createMessageElement('ai', text, 'text');
@@ -698,10 +693,6 @@ document.addEventListener("DOMContentLoaded", function() {
             console.error('❌ [addAIMessage] Failed to create message element');
             return;
         }
-        
-        console.log('🔵 [addAIMessage] Message element created:', message);
-        console.log('🔵 [addAIMessage] Message element innerHTML:', message.innerHTML);
-        console.log('🔵 [addAIMessage] Message element style:', window.getComputedStyle(message));
         
         // 强制设置样式，确保消息可见
         message.style.display = 'flex';
@@ -716,24 +707,23 @@ document.addEventListener("DOMContentLoaded", function() {
             textMessage.style.visibility = 'visible';
             textMessage.style.opacity = '1';
             textMessage.style.display = 'block';
-            console.log('🔵 [addAIMessage] text-message 元素样式已强制设置');
         }
         
-        console.log('🔵 [addAIMessage] Appending message to messages list');
-        messagesList.appendChild(message);
-        console.log('🔵 [addAIMessage] Message appended, current children count:', messagesList.children.length);
+        target.appendChild(message);
         
-        // 强制滚动到底部
-        scrollToBottom();
-        setTimeout(() => {
+        // 滚动到底部（场景模式滚动 dialogue-area，否则滚动主容器）
+        if (target.id === 'practice-dialogue-area') {
+            target.scrollTop = target.scrollHeight;
+        } else {
             scrollToBottom();
-        }, 100);
+            setTimeout(() => scrollToBottom(), 100);
+        }
         
         console.log('✅ [addAIMessage] AI message added successfully');
         
         // 验证消息是否真的添加了
         setTimeout(() => {
-            const lastChild = messagesList.lastElementChild;
+            const lastChild = target.lastElementChild;
             if (lastChild && lastChild.classList.contains('ai')) {
                 const textContent = lastChild.querySelector('.text-message')?.textContent;
                 console.log('✅ [addAIMessage] 验证成功: AI消息已添加到DOM');
@@ -762,6 +752,14 @@ document.addEventListener("DOMContentLoaded", function() {
     window.scrollToBottom = scrollToBottom;
     window.showSuccess = showSuccess;
     window.showError = showError;
+    window.toggleRecording = function() {
+        if ((isProcessing || isProcessingAudio) && !isRecording) {
+            showError('系统正在处理中，请等待回复完成后再录音');
+            return;
+        }
+        if (!isRecording) startRecording();
+        else stopRecording();
+    };
     window.initWebSocket = initWebSocket;
     window.loadCharacters = loadCharacters;
     window.initializeEnglishLearningCard = initializeEnglishLearningCard;
@@ -1941,8 +1939,13 @@ document.addEventListener("DOMContentLoaded", function() {
         userInputs: []  // 收集用户输入：[{turn, user_said, reference, timestamp}, ...]
     };
     
-    // 开始练习模式
-    async function startPracticeMode(dialogue, cardElement) {
+    // 开始练习模式（cardElement 可为 null，如从场景体验进入）
+    async function startPracticeMode(dialogue, cardElement, opts = {}) {
+        const isFromScene = !cardElement && opts.dialogueLines != null;
+        const dialogueLines = isFromScene ? opts.dialogueLines : JSON.parse((cardElement && cardElement.dataset.dialogueLines) || '[]');
+        const dialogueId = isFromScene ? (opts.dialogueId || '') : ((cardElement && cardElement.dataset.dialogueId) || '');
+        const smallSceneId = isFromScene ? (opts.smallSceneId || '') : ((cardElement && cardElement.dataset.smallSceneId) || '');
+        const npcId = isFromScene ? (opts.npcId || '') : ((cardElement && cardElement.dataset.npcId) || '');
         try {
             console.log('Starting practice mode, dialogue:', dialogue);
             
@@ -1952,17 +1955,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 return;
             }
             
-            // 显示加载状态
-            const practiceBtn = cardElement.querySelector('.practice-btn');
-            const originalHTML = practiceBtn.innerHTML;
-            practiceBtn.disabled = true;
-            practiceBtn.innerHTML = '<span>准备中...</span>';
-            
-            // 获取对话行数据（包含音频URL）
-            const dialogueLines = JSON.parse(cardElement.dataset.dialogueLines || '[]');
-            const dialogueId = cardElement.dataset.dialogueId || '';
-            const smallSceneId = cardElement.dataset.smallSceneId || '';
-            const npcId = cardElement.dataset.npcId || '';
+            // 显示加载状态（仅当有卡片时）
+            const practiceBtn = cardElement ? cardElement.querySelector('.practice-btn') : null;
+            const originalHTML = practiceBtn ? practiceBtn.innerHTML : '';
+            if (practiceBtn) {
+                practiceBtn.disabled = true;
+                practiceBtn.innerHTML = '<span>准备中...</span>';
+            }
             
             // 调用API开始练习
             const response = await fetch('/api/practice/start', {
@@ -2007,54 +2006,75 @@ document.addEventListener("DOMContentLoaded", function() {
                     currentHints: result.b_hints,
                     totalTurns: result.total_turns,
                     userInputs: [],  // 初始化用户输入列表
-                    sessionData: null  // 完整的会话数据
+                    sessionData: null,  // 完整的会话数据
+                    fromScene: isFromScene  // 来自场景体验则不显示生成复习笔记
                 };
                 
-                // 折叠并禁用英语卡片
-                const collapseBtn = cardElement.querySelector('.collapse-btn');
-                const content = cardElement.querySelector('.dialogue-content');
-                const practiceBtn = cardElement.querySelector('.practice-btn');
-                
-                if (content) {
-                    content.style.display = 'none';
-                }
-                if (collapseBtn) {
-                    collapseBtn.disabled = true;
-                    collapseBtn.style.opacity = '0.5';
-                    collapseBtn.style.cursor = 'not-allowed';
-                }
-                if (practiceBtn) {
-                    practiceBtn.style.display = 'none';
+                // 折叠并禁用英语卡片（仅当来自卡片时）
+                if (cardElement) {
+                    const collapseBtn = cardElement.querySelector('.collapse-btn');
+                    const content = cardElement.querySelector('.dialogue-content');
+                    const practiceBtnEl = cardElement.querySelector('.practice-btn');
+                    if (content) content.style.display = 'none';
+                    if (collapseBtn) {
+                        collapseBtn.disabled = true;
+                        collapseBtn.style.opacity = '0.5';
+                        collapseBtn.style.cursor = 'not-allowed';
+                    }
+                    if (practiceBtnEl) practiceBtnEl.style.display = 'none';
                 }
                 
-                // 创建练习模式UI
-                createPracticeUI(result.a_text, result.a_audio_url, result.b_hints, result.total_turns);
+                // 创建练习模式UI（场景模式时插入到 targetContainer）
+                createPracticeUI(result.a_text, result.a_audio_url, result.b_hints, result.total_turns, opts.targetContainer || null);
                 
-                // 显示AI的第一句话（使用音频气泡）
-                if (result.a_audio_url) {
-                    createAudioBubble(result.a_text, result.a_audio_url, 'ai');
-                } else {
-                    addAIMessage(`A: ${result.a_text}`);
+                // 场景模式：练习 UI 就绪后启用输入区
+                if (opts.targetContainer && typeof opts.onReady === 'function') {
+                    opts.onReady();
+                }
+                
+                // 显示AI的第一句话（使用音频气泡）。若以B开始则无第一句A
+                if (result.a_text != null || result.a_audio_url) {
+                    if (result.a_audio_url) {
+                        createAudioBubble(result.a_text || '', result.a_audio_url, 'ai');
+                    } else {
+                        addAIMessage(`A: ${result.a_text || ''}`);
+                    }
                 }
                 
                 showSuccess('练习模式已开始！你是角色B，请回复A的话。');
             } else {
                 showError(result.message || '开始练习失败');
-                practiceBtn.disabled = false;
-                practiceBtn.innerHTML = originalHTML;
+                if (practiceBtn) {
+                    practiceBtn.disabled = false;
+                    practiceBtn.innerHTML = originalHTML;
+                }
             }
         } catch (error) {
             console.error('Error starting practice:', error);
             showError('开始练习失败：' + error.message);
-            const practiceBtn = cardElement.querySelector('.practice-btn');
-            if (practiceBtn) {
-                practiceBtn.disabled = false;
-            }
+            if (practiceBtn) practiceBtn.disabled = false;
         }
     }
     
-    // 创建练习模式UI
-    function createPracticeUI(aText, aAudioUrl, hints, totalTurns) {
+    // 从场景体验进入练习模式（供 scene_modal 调用）
+    window.startScenePractice = async function(params) {
+        const { dialogue, dialogue_lines, dialogue_id, small_scene_id, npc_id, targetContainer, onReady } = params;
+        if (!dialogue || !dialogue_lines || dialogue_lines.length === 0) {
+            if (typeof showError === 'function') showError('对话内容无效');
+            return;
+        }
+        await startPracticeMode(dialogue, null, {
+            dialogueLines: dialogue_lines,
+            dialogueId: dialogue_id || '',
+            smallSceneId: small_scene_id || '',
+            npcId: npc_id || '',
+            targetContainer: targetContainer || null,
+            onReady: onReady || null
+        });
+    };
+    
+    // 创建练习模式UI（targetContainer 可选：场景模式下将 UI 插入到指定容器）
+    function createPracticeUI(aText, aAudioUrl, hints, totalTurns, targetContainer) {
         // 移除旧的练习UI（如果存在）
         const oldPracticeUI = document.getElementById('practice-mode-ui');
         if (oldPracticeUI) {
@@ -2097,16 +2117,35 @@ document.addEventListener("DOMContentLoaded", function() {
                     transition: all 0.3s ease;
                 ">结束练习</button>
             </div>
+            ${targetContainer ? `
+            <div class="practice-scene-input-row" style="display:flex;gap:8px;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,0,0,0.1);">
+                <input type="text" id="practice-scene-text-input" class="practice-scene-text-input" placeholder="输入或按住录音..." style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;" />
+                <button type="button" id="practice-scene-send-btn" class="practice-scene-send-btn" title="发送" style="padding:10px 16px;background:#6b5344;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">发送</button>
+                <button type="button" id="practice-scene-record-btn" class="practice-scene-record-btn" title="按住录音" style="padding:10px 16px;background:#c62828;color:#fff;border:none;border-radius:8px;cursor:pointer;">🎤</button>
+            </div>
+            ` : ''}
         `;
         
-        // 插入到消息列表
-        const messagesList = document.getElementById('messages-list');
-        if (!messagesList) {
-            console.error('Messages list element not found');
-            showError('无法找到消息列表，请刷新页面重试');
+        // 插入到目标容器（场景模式）或消息列表（默认）
+        const appendTo = targetContainer || document.getElementById('messages-list');
+        if (!appendTo) {
+            console.error('Practice UI target container not found');
+            showError('无法找到练习容器，请刷新页面重试');
             return;
         }
-        messagesList.appendChild(practiceUI);
+        // 场景模式：先清空载入提示
+        if (targetContainer) {
+            appendTo.innerHTML = '';
+        }
+        appendTo.appendChild(practiceUI);
+        
+        // 场景模式下，对话气泡追加到 practice-dialogue-area
+        if (targetContainer && practiceState) {
+            const dialogueArea = practiceUI.querySelector('#practice-dialogue-area');
+            practiceState.messageTarget = dialogueArea || practiceUI;
+        } else if (practiceState) {
+            practiceState.messageTarget = null;
+        }
         
         // 更新进度
         updatePracticeProgress(1, totalTurns);
@@ -2150,6 +2189,47 @@ document.addEventListener("DOMContentLoaded", function() {
         // 初始化按钮状态
         updateToggleButton();
         
+        // 场景模式：绑定嵌入的输入框和录音按钮
+        if (targetContainer) {
+            const sceneInput = practiceUI.querySelector('#practice-scene-text-input');
+            const sceneSendBtn = practiceUI.querySelector('#practice-scene-send-btn');
+            const sceneRecordBtn = practiceUI.querySelector('#practice-scene-record-btn');
+            const mainRecordBtn = document.getElementById('record-btn');
+            if (sceneInput && sceneSendBtn) {
+                const doSend = async () => {
+                    const text = sceneInput.value.trim();
+                    if (!text) return;
+                    if (isProcessing || isProcessingAudio) {
+                        showError('系统正在处理中，请稍候');
+                        return;
+                    }
+                    if (typeof handlePracticeInput === 'function' && practiceState && practiceState.isActive) {
+                        sceneInput.value = '';
+                        sceneInput.disabled = true;
+                        sceneSendBtn.disabled = true;
+                        try {
+                            await handlePracticeInput(text);
+                        } finally {
+                            sceneInput.disabled = false;
+                            sceneSendBtn.disabled = false;
+                        }
+                    }
+                };
+                sceneSendBtn.addEventListener('click', doSend);
+                sceneInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        doSend();
+                    }
+                });
+            }
+            if (sceneRecordBtn) {
+                sceneRecordBtn.addEventListener('click', () => {
+                    if (typeof window.toggleRecording === 'function') window.toggleRecording();
+                });
+            }
+        }
+        
         scrollToBottom();
     }
     
@@ -2180,8 +2260,8 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // 创建音频气泡（Instagram风格）
     function createAudioBubble(text, audioUrl, type = 'ai') {
-        const messagesList = document.getElementById('messages-list');
-        if (!messagesList) return;
+        const target = (typeof practiceState !== 'undefined' && practiceState && practiceState.messageTarget) || document.getElementById('messages-list');
+        if (!target) return;
         
         // 创建消息容器
         const message = document.createElement('div');
@@ -2283,8 +2363,12 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
         
-        messagesList.appendChild(message);
-        scrollToBottom();
+        target.appendChild(message);
+        if (target.id === 'practice-dialogue-area') {
+            target.scrollTop = target.scrollHeight;
+        } else {
+            scrollToBottom();
+        }
         
         // 存储audio对象到message
         message.dataset.audioId = audioId;
@@ -2317,7 +2401,8 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         
         // 确认对话框
-        const confirmed = confirm('确定要结束练习并生成复习资料吗？');
+        const msg = practiceState.fromScene ? '确定要结束练习吗？' : '确定要结束练习并生成复习资料吗？';
+        const confirmed = confirm(msg);
         if (!confirmed) {
             return;
         }
@@ -2354,19 +2439,29 @@ document.addEventListener("DOMContentLoaded", function() {
                 
                 // 显示完成消息
                 showSuccess('练习已结束！');
-                addAIMessage('练习已结束，你可以生成复习资料了。');
-                
-                // 隐藏练习UI
-                const practiceUI = document.getElementById('practice-mode-ui');
-                if (practiceUI) {
-                    practiceUI.style.opacity = '0.7';
+                const wasFromScene = practiceState.fromScene;
+                if (!wasFromScene) {
+                    addAIMessage('练习已结束，你可以生成复习资料了。');
                 }
                 
-                // 恢复英语卡片
+                // 场景模式：隐藏叠加层，恢复场景视图，用户可继续选择其他 NPC
+                if (wasFromScene && typeof window.hideScenePracticeOverlay === 'function') {
+                    window.hideScenePracticeOverlay();
+                }
+                
+                // 非场景模式：淡化练习UI（hideScenePracticeOverlay 已清除场景容器内容）
+                if (!wasFromScene) {
+                    const practiceUI = document.getElementById('practice-mode-ui');
+                    if (practiceUI) practiceUI.style.opacity = '0.7';
+                }
+                
+                if (practiceState) practiceState.messageTarget = null;
                 endPracticeMode();
                 
-                // 显示生成复习笔记按钮
-                showGenerateReviewButton();
+                // 仅非场景入口时显示生成复习笔记按钮
+                if (!wasFromScene) {
+                    showGenerateReviewButton();
+                }
             } else {
                 console.error('Failed to end practice session:', result.message);
                 showError('结束练习失败：' + (result.message || '未知错误'));
@@ -2773,8 +2868,12 @@ document.addEventListener("DOMContentLoaded", function() {
                         }
                     }
                 } else {
-                    // 意思不一致
-                    showError('意思不太一致，请再试试。你可以点击"显示提示"查看提示。');
+                    // 意思不一致，显示完整参考答案
+                    const hint = referenceText
+                        ? `意思不太一致，请再试试。参考答案：${referenceText}`
+                        : '意思不太一致，请再试试。你可以点击"显示提示"查看提示。';
+                    showError(hint);
+                    addAIMessage(hint);
                 }
             } else {
                 showError(result.message || '验证失败');
@@ -2853,13 +2952,156 @@ document.addEventListener("DOMContentLoaded", function() {
 // ========== 账号系统相关函数 ==========
 let currentAccountName = null;
 
+// 开口即启 Say Hello 状态
+let sayHelloRecognition = null;
+let sayHelloStream = null;
+let sayHelloAudioContext = null;
+let sayHelloAnalyser = null;
+let sayHelloDataArray = null;
+let sayHelloRafId = null;
+let sayHelloDone = false;
+
+function showSayHelloScreen() {
+    const sayHelloOverlay = document.getElementById('say-hello-overlay');
+    const loginOverlay = document.getElementById('login-overlay');
+    const chatContainer = document.getElementById('chat-container');
+    const statusText = document.getElementById('status-text');
+    if (sayHelloOverlay) {
+        sayHelloOverlay.classList.remove('hidden');
+        sayHelloOverlay.style.display = 'flex';
+        sayHelloOverlay.classList.remove('success-mode');
+    }
+    if (statusText) statusText.textContent = '点击下方按钮或说 Hello 开始...';
+    if (loginOverlay) {
+        loginOverlay.classList.add('hidden');
+        loginOverlay.style.display = 'none';
+    }
+    if (chatContainer) chatContainer.style.display = 'none';
+    sayHelloDone = false;
+    initSayHello();
+}
+
+function stopSayHello() {
+    if (sayHelloRafId != null) {
+        cancelAnimationFrame(sayHelloRafId);
+        sayHelloRafId = null;
+    }
+    if (sayHelloRecognition) {
+        try { sayHelloRecognition.stop(); } catch (e) {}
+        sayHelloRecognition = null;
+    }
+    if (sayHelloStream) {
+        sayHelloStream.getTracks().forEach(t => t.stop());
+        sayHelloStream = null;
+    }
+    if (sayHelloAudioContext) {
+        sayHelloAudioContext.close().catch(() => {});
+        sayHelloAudioContext = null;
+    }
+    sayHelloAnalyser = null;
+    sayHelloDataArray = null;
+}
+
+function triggerSuccessAnimation() {
+    if (sayHelloDone) return;
+    sayHelloDone = true;
+    stopSayHello();
+    const sayHelloOverlay = document.getElementById('say-hello-overlay');
+    if (sayHelloOverlay) {
+        sayHelloOverlay.classList.add('success-mode');
+        setTimeout(() => {
+            sayHelloOverlay.classList.add('hidden');
+            sayHelloOverlay.style.display = 'none';
+            showLoginInterface();
+        }, 1000);
+    } else {
+        showLoginInterface();
+    }
+}
+
+function initSayHello() {
+    const sayHelloOverlay = document.getElementById('say-hello-overlay');
+    const micCore = document.getElementById('mic-core');
+    const manualBtn = document.getElementById('say-hello-manual-btn');
+    const statusText = document.getElementById('status-text');
+    const rippleEls = document.querySelectorAll('.say-hello-overlay [data-ripple]');
+    if (!sayHelloOverlay || !micCore) return;
+
+    if (manualBtn) {
+        manualBtn.addEventListener('click', () => {
+            stopSayHello();
+            sayHelloOverlay.classList.add('hidden');
+            sayHelloOverlay.style.display = 'none';
+            showLoginInterface();
+        });
+    }
+
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognitionAPI) {
+        if (manualBtn) manualBtn.textContent = '点击进入';
+        if (statusText) statusText.textContent = '当前浏览器不支持语音，请点击下方按钮进入';
+        return;
+    }
+
+    const SILENCE_THRESHOLD = 0.04;
+    function runVolumeLoop() {
+        if (!sayHelloAnalyser || !sayHelloDataArray || !micCore) return;
+        sayHelloAnalyser.getByteFrequencyData(sayHelloDataArray);
+        let sum = 0;
+        for (let i = 0; i < sayHelloDataArray.length; i++) sum += sayHelloDataArray[i];
+        const avg = sum / sayHelloDataArray.length;
+        const normalized = Math.min(1, (avg / 255) * 2.5);
+        if (normalized < SILENCE_THRESHOLD) {
+            micCore.style.removeProperty('transform');
+            rippleEls.forEach(el => el.classList.remove('active-ripple'));
+        } else {
+            const scale = 1 + normalized * 0.5;
+            micCore.style.transform = `scale(${scale})`;
+            rippleEls.forEach(el => el.classList.add('active-ripple'));
+        }
+        sayHelloRafId = requestAnimationFrame(runVolumeLoop);
+    }
+
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        sayHelloStream = stream;
+        if (statusText) statusText.textContent = 'Listening...';
+        sayHelloAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+        sayHelloAnalyser = sayHelloAudioContext.createAnalyser();
+        sayHelloAnalyser.smoothingTimeConstant = 0.8;
+        sayHelloAnalyser.fftSize = 1024;
+        const source = sayHelloAudioContext.createMediaStreamSource(stream);
+        source.connect(sayHelloAnalyser);
+        sayHelloDataArray = new Uint8Array(sayHelloAnalyser.frequencyBinCount);
+        runVolumeLoop();
+    }).catch(() => {
+        if (statusText) statusText.textContent = '无法访问麦克风，请点击下方按钮进入';
+    });
+
+    sayHelloRecognition = new SpeechRecognitionAPI();
+    sayHelloRecognition.lang = 'en-US';
+    sayHelloRecognition.continuous = true;
+    sayHelloRecognition.interimResults = true;
+    sayHelloRecognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+        }
+        transcript = transcript.toLowerCase().trim();
+        if (/hello|hi\b|hey\b|start/.test(transcript)) {
+            triggerSuccessAnimation();
+        }
+    };
+    sayHelloRecognition.onerror = () => {};
+    try {
+        sayHelloRecognition.start();
+    } catch (e) {}
+}
+
 async function initializeAccountSystem() {
-    // 每次启动都显示登录界面，不自动登录
-    // 检查是否有已保存的账号，用于在输入框中显示提示（可选）
+    // 每次启动先显示「开口即启」Say Hello 欢迎屏，完成后再显示登录界面
     const savedAccount = localStorage.getItem('current_account');
     
-    // 显示登录界面
-    showLoginInterface();
+    showSayHelloScreen();
     
     // 绑定登录按钮事件
     const loginBtn = document.getElementById('login-btn');

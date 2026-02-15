@@ -5,11 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>语音对话 - Voice Chat AI</title>
     <link rel="stylesheet" href="/app/static/css/voice_chat.css">
+    <link rel="stylesheet" href="/app/static/css/scene.css">
     <link rel="icon" href="/app/static/favicon.ico" type="image/x-icon">
+    <style>
+      /* 场景入口浮动按钮 */
+      .enter-scenes-btn {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 18px;
+        z-index: 999;
+        background: #ff8a00;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 24px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .enter-scenes-btn:hover { opacity: 0.95; }
+    </style>
 </head>
 <body>
+    <!-- 开口即启：Say Hello 欢迎屏 (Orb + 涟漪) -->
+    <div class="say-hello-overlay" id="say-hello-overlay">
+        <div class="say-hello-content">
+            <div class="orb-container">
+                <div class="ripple" style="animation-delay: 0s" data-ripple></div>
+                <div class="ripple" style="animation-delay: 0.5s" data-ripple></div>
+                <div class="ripple" style="animation-delay: 1s" data-ripple></div>
+                <div class="core-circle" id="mic-core">
+                    <span class="mic-icon">🎙️</span>
+                </div>
+            </div>
+            <h1 class="say-hello-heading">Say "<span class="highlight">Hello</span>" to Start</h1>
+            <div id="status-text" class="say-hello-status">点击下方按钮或说 Hello 开始...</div>
+            <button type="button" class="manual-btn" id="say-hello-manual-btn">Tap to enter manually</button>
+        </div>
+    </div>
+
     <!-- 账号登录界面 -->
-    <div class="login-overlay" id="login-overlay">
+    <div class="login-overlay hidden" id="login-overlay">
         <div class="login-container">
             <div class="login-header">
                 <h1>🎯 欢迎使用英语学习助手</h1>
@@ -133,6 +169,46 @@
         </div>
 
         <!-- 输入区域 -->
+        <!-- 场景入口（固定底部按钮，modal 关闭时可见） -->
+        <a id="enter-scenes-btn" class="enter-scenes-btn" href="#" title="进入沉浸式场景">进入场景体验 ☕</a>
+    <!-- 场景 Modal（内嵌）- 两屏切换：列表 / 场景视图 -->
+    <div id="scenesModal" class="scenes-modal-overlay" style="display:none;">
+      <div class="scenes-modal-box">
+        <div class="scenes-modal-header">
+          <span id="scenesModalTitle">场景体验</span>
+          <div class="scenes-modal-actions">
+            <button id="scenesBackBtn" class="scenes-btn secondary" style="display:none;">← 返回列表</button>
+            <button id="scenesCloseBtn" class="scenes-btn primary">关闭</button>
+          </div>
+        </div>
+        <div class="scenes-modal-body">
+          <div id="scenesListPane" class="scenes-pane">
+            <div id="scenesList" class="scenes-list"></div>
+          </div>
+          <div id="sceneViewPane" class="scenes-pane scene-view-pane" style="display:none;">
+            <div id="sceneView" class="scene-view-inner"></div>
+            <!-- 场景内练习面板（叠加在场景之上，保持沉浸感） -->
+            <div id="scene-practice-overlay" class="scene-practice-overlay" style="display:none;">
+              <div id="scene-practice-container" class="scene-practice-container"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 场景内聊天弹窗（右下角） -->
+      <div id="sceneChatModal" class="scene-chat-floating" style="display:none;">
+        <div class="scene-chat-window">
+          <div class="scene-chat-header">
+            <span id="sceneChatTitle">NPC</span>
+            <button id="sceneChatClose" class="scene-chat-close">×</button>
+          </div>
+          <div id="sceneChatBody" class="scene-chat-body"></div>
+          <div class="scene-chat-input-row">
+            <input id="sceneChatInput" placeholder="输入英文与 NPC 对话..." />
+            <button id="sceneChatSend">发送</button>
+          </div>
+        </div>
+      </div>
+    </div>
         <div class="input-area">
             <div class="input-container">
                 <!-- 文字输入框 -->
@@ -190,6 +266,7 @@
     </div>
 
     <script src="/app/static/js/voice_chat.js"></script>
+    <script src="/app/static/js/scene_modal.js"></script>
 </body>
 </html>
 
