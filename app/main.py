@@ -52,6 +52,22 @@ display_banner()
 
 app = FastAPI()
 
+
+@app.on_event("startup")
+async def startup_validate_dialogues():
+    """启动时预加载 dialogues.json，便于及早发现路径问题"""
+    try:
+        from .scene_npc_db import get_dialogues, _dialogues_path
+        path = _dialogues_path()
+        data = get_dialogues()
+        if data:
+            logger.info("启动: dialogues.json 已加载，路径=%s，条数=%d", path, len(data))
+        else:
+            logger.warning("启动: dialogues.json 为空或未找到，路径=%s。可设置环境变量 VOICE_CHAT_PROJECT_ROOT 指定项目根目录", path)
+    except Exception as e:
+        logger.warning("启动: 预加载 dialogues 失败: %s", e)
+
+
 # Mount static files and templates
 app.mount("/app/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
@@ -257,6 +273,172 @@ async def get_elevenlabs_voices():
 @app.get("/enhanced", response_class=HTMLResponse)
 async def get_enhanced(request: Request):
     return templates.TemplateResponse("enhanced.html", {"request": request})
+
+@app.get("/scenes", response_class=HTMLResponse)
+async def list_scenes(request: Request):
+    """展示可进入的沉浸式场景列表（简单实现）"""
+    # 简单示例场景清单，后续可基于用户记忆/已掌握场景动态生成
+    scenes = [
+        {
+            "id": "cafe",
+            "title": "咖啡馆",
+            "image": "https://placehold.co/1200x800?text=Coffee+Shop"
+        }
+    ]
+    return templates.TemplateResponse("scene_list.html", {"request": request, "scenes": scenes})
+
+
+@app.get("/scene/{scene_id}", response_class=HTMLResponse)
+async def get_scene(request: Request, scene_id: str):
+    """渲染单个场景页面（背景 + NPC 按钮 + 简单对话弹窗）"""
+    # 简单配置：针对 scene_id 返回背景图与 NPC 列表
+    scenes_config = {
+        "cafe": {
+            "title": "咖啡馆",
+            # 使用外部占位图，用户可以替换为本地文件：/app/static/images/cafe.jpg
+            "image": "https://placehold.co/1200x800?text=Coffee+Shop",
+            "npcs": [
+                {"id": "waiter", "label": "服务员", "hint": "点我用英语点单", "character": "cafe_waiter"},
+                {"id": "customer_a", "label": "顾客 A", "hint": "点我和陌生人聊天", "character": "cafe_customer_a"},
+                {"id": "customer_b", "label": "顾客 B", "hint": "点我和陌生人聊天", "character": "cafe_customer_b"}
+            ]
+        }
+    }
+    scene = scenes_config.get(scene_id, scenes_config["cafe"])
+    return templates.TemplateResponse("scene.html", {"request": request, "scene": scene})
+
+
+@app.get("/api/scene-list")
+async def api_list_scenes(request: Request):
+    """Return immersive scenes (unlocked only) for modal"""
+    from .scene_npc_db import get_immersive_scene_list
+    account_name = get_current_account() or ""
+    scenes = get_immersive_scene_list(account_name)
+    return JSONResponse({"scenes": scenes})
+
+
+@app.get("/api/scenes/{scene_id}")
+async def api_get_scene(request: Request, scene_id: str):
+    """Return immersive scene detail with NPCs"""
+    from .scene_npc_db import get_immersive_scene_detail
+    account_name = get_current_account() or ""
+    scene = get_immersive_scene_detail(scene_id, account_name)
+    if not scene:
+        return JSONResponse({"error": "scene not found or not unlocked"}, status_code=404)
+    return JSONResponse({"scene": scene})
+
+
+# --- 场景-NPC 学习 API ---
+
+@app.get("/api/scene-npc/check")
+async def api_scene_npc_check():
+    """检查 dialogues.json 是否加载成功（用于排查「暂无可用场景」）"""
+    from .scene_npc_db import get_dialogues, _dialogues_path
+    path = _dialogues_path()
+    dialogues = get_dialogues()
+    return JSONResponse({
+        "ok": len(dialogues) > 0,
+        "count": len(dialogues),
+        "path": str(path),
+        "path_exists": path.exists(),
+    })
+
+@app.get("/api/scene-npc/big-scenes")
+async def api_big_scenes():
+    from .scene_npc_db import get_big_scenes_with_immersive, get_dialogues, _dialogues_path
+    # 仅返回其下至少有一个 immersive 小场景的大场景（严格贴合 dialogues.json）
+    big_scenes = get_big_scenes_with_immersive()
+    path = _dialogues_path()
+    dialogues = get_dialogues()
+    if not big_scenes:
+        logger.warning("big-scenes 为空，path=%s exists=%s count=%d",
+                       path, path.exists(), len(dialogues))
+        return JSONResponse({
+            "big_scenes": [],
+            "_debug": {"path": str(path), "path_exists": path.exists(), "loaded_count": len(dialogues)}
+        })
+    return JSONResponse({"big_scenes": big_scenes})
+
+
+@app.get("/api/scene-npc/small-scenes")
+async def api_small_scenes(big_scene_id: str):
+    from .scene_npc_db import get_small_scenes_by_big
+    scenes = get_small_scenes_by_big(big_scene_id)
+    return JSONResponse({"small_scenes": scenes})
+
+
+@app.get("/api/scene-npc/immersive-small-scenes")
+async def api_immersive_small_scenes(big_scene_id: str):
+    """返回某大场景下、有沉浸式内容的小场景列表（用于场景体验的两级选择）"""
+    from .scene_npc_db import get_immersive_small_scenes_by_big
+    account_name = get_current_account() or ""
+    scenes = get_immersive_small_scenes_by_big(big_scene_id, account_name)
+    return JSONResponse({"scenes": scenes})
+
+
+@app.get("/api/scene-npc/npcs")
+async def api_npcs(request: Request, small_scene_id: str, account_name: str = None):
+    """返回小场景下的 NPC 列表，含 learned 状态。account 优先从 X-Account-Name 头或 account_name 查询参数获取。"""
+    from .scene_npc_db import get_npcs_by_small_scene, get_npc_progress, get_learn_dialogue
+    npcs = get_npcs_by_small_scene(small_scene_id)
+    header_acc = (request.headers.get("X-Account-Name") or "").strip()
+    query_acc = (account_name or "").strip()
+    account = header_acc or query_acc or get_current_account() or ""
+    progress_data = get_npc_progress(account)
+    progress = set(progress_data.get(small_scene_id, []))
+    result = []
+    for n in npcs:
+        has_learn = get_learn_dialogue(small_scene_id, n["id"]) is not None
+        result.append({
+            **n,
+            "learned": n["id"] in progress,
+            "has_content": has_learn
+        })
+    return JSONResponse({
+        "npcs": result,
+        "_debug": {"account": account or "(empty)", "small_scene_id": small_scene_id, "progress_list": list(progress)}
+    })
+
+
+@app.get("/api/scene-npc/dialogue/learn")
+async def api_dialogue_learn(small_scene_id: str, npc_id: str):
+    from .scene_npc_db import get_learn_dialogue
+    d = get_learn_dialogue(small_scene_id, npc_id)
+    if not d:
+        return JSONResponse({"error": "dialogue not found"}, status_code=404)
+    return JSONResponse({"dialogue": d})
+
+
+@app.get("/api/scene-npc/dialogue/review")
+async def api_dialogue_review(small_scene_id: str, npc_id: str):
+    from .scene_npc_db import get_review_dialogue
+    d = get_review_dialogue(small_scene_id, npc_id)
+    if not d:
+        return JSONResponse({"error": "dialogue not found"}, status_code=404)
+    return JSONResponse({"dialogue": d})
+
+
+@app.get("/api/scene-npc/dialogue/immersive")
+async def api_dialogue_immersive(small_scene_id: str, npc_id: str):
+    from .scene_npc_db import get_immersive_dialogue
+    d = get_immersive_dialogue(small_scene_id, npc_id)
+    if not d:
+        return JSONResponse({"error": "dialogue not found"}, status_code=404)
+    return JSONResponse({"dialogue": d})
+
+
+@app.post("/api/scene-npc/mark-learned")
+async def api_mark_learned(request: Request):
+    from .scene_npc_db import mark_npc_learned, check_and_unlock_scene
+    data = await request.json()
+    small_scene_id = (data.get("small_scene_id") or "").strip()
+    npc_id = (data.get("npc_id") or "").strip()
+    if not small_scene_id or not npc_id:
+        return JSONResponse({"status": "error", "message": "missing small_scene_id or npc_id"}, status_code=400)
+    account_name = get_current_account() or ""
+    mark_npc_learned(account_name, small_scene_id, npc_id)
+    newly_unlocked = check_and_unlock_scene(account_name, small_scene_id)
+    return JSONResponse({"status": "success", "newly_unlocked": newly_unlocked})
 
 @app.get("/enhanced_defaults")
 async def get_enhanced_defaults():
@@ -854,7 +1036,11 @@ async def send_text_message(request: Request):
                 "message": "消息内容不能为空"
             }, status_code=400)
         
-        # 设置角色
+        # 场景 NPC 角色（cafe_waiter 等）若不存在则回退到 english_tutor
+        characters_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "characters")
+        char_path = os.path.join(characters_dir, character)
+        if not os.path.isdir(char_path) or not os.path.exists(os.path.join(char_path, f"{character}.txt")):
+            character = "english_tutor"
         set_current_character(character)
         
         # 首次使用时加载记忆和历史
@@ -936,24 +1122,18 @@ async def end_conversation(request: Request):
         # 清空临时会话文件
         memory_system.clear_session_temp()
         
-        # 口语训练库：摘要推荐场景 + 场景列表（recommended / frequent / new）
-        from . import oral_training_db as otd
-        suggested_scene = otd.suggested_scene_from_summary(today_summary) if today_summary else None
+        # 场景-NPC：大场景→小场景→NPC
+        from .scene_npc_db import get_big_scenes
         account_name = get_current_account() or ""
-        scene_options = otd.get_scene_options_for_user(account_name, suggested_scene) if account_name else {"suggested_scene": None, "options": [{"scene": s, "label": "new"} for s in otd.get_unique_scenes()]}
-        available_scenes = scene_options.get("options", [])
-        if not available_scenes:
-            available_scenes = [{"scene": s, "label": "new"} for s in otd.get_unique_scenes()]
+        big_scenes = get_big_scenes()
         
         response_data = {
             "status": "success",
-            "message": "对话已结束，记忆已保存。请选择场景与难度后生成英语卡片",
+            "message": "对话已结束，记忆已保存。请选择场景后生成英语卡片",
             "summary": today_summary,
             "timestamp": entry.get("timestamp", "") if entry else "",
             "should_generate_english": True,
-            "suggested_scene": scene_options.get("suggested_scene"),
-            "available_scenes": available_scenes,
-            "available_difficulties": otd.get_unique_difficulties(),
+            "big_scenes": big_scenes,
         }
         return JSONResponse(response_data)
             
@@ -968,59 +1148,54 @@ async def end_conversation(request: Request):
 
 @app.post("/api/english/generate")
 async def generate_english_dialogue(request: Request):
-    """生成英文教学对话（从口语训练库取一条记录 + TTS）"""
+    """生成英文教学对话（从 dialogues.json 取 learn 对话，含 TTS 音频）"""
     try:
-        from .shared import get_memory_system, get_learning_stage, set_learning_stage
-        from . import oral_training_db as otd
-        
+        from .shared import set_learning_stage
+        from .scene_npc_db import get_learn_dialogue
+
         data = await request.json()
-        scene = (data.get("scene") or data.get("scene_primary") or "").strip()
-        difficulty = (data.get("difficulty") or data.get("difficulty_level") or "").strip()
-        
-        if not scene or not difficulty:
+        small_scene_id = (data.get("small_scene_id") or data.get("scene") or "").strip()
+        npc_id = (data.get("npc_id") or "").strip()
+
+        if not small_scene_id or not npc_id:
             return JSONResponse({
                 "status": "error",
-                "message": "请提供 scene（场景）与 difficulty（难度，如 Simple / Intermediate / Difficult）"
+                "message": "请提供 small_scene_id 与 npc_id"
             }, status_code=400)
-        
-        difficulties = otd.get_unique_difficulties()
-        if difficulty not in difficulties:
+
+        dialogue = get_learn_dialogue(small_scene_id, npc_id)
+        if not dialogue:
             return JSONResponse({
                 "status": "error",
-                "message": f"难度无效，可选: {', '.join(difficulties)}"
-            }, status_code=400)
-        
-        memory_system = get_memory_system()
-        if not memory_system:
-            return JSONResponse({
-                "status": "error",
-                "message": "记忆系统未初始化"
-            }, status_code=500)
-        
-        english_dialogue_result = await memory_system.generate_english_dialogue_from_oral_db(scene, difficulty)
-        
-        if isinstance(english_dialogue_result, dict) and english_dialogue_result.get("error"):
-            return JSONResponse({
-                "status": "error",
-                "message": english_dialogue_result.get("message", "生成失败")
-            }, status_code=400)
-        
-        if english_dialogue_result:
-            set_learning_stage("english_learning")
-            return JSONResponse({
-                "status": "success",
-                "message": "英文对话已生成",
-                "dialogue": english_dialogue_result.get("dialogue_text", ""),
-                "dialogue_lines": english_dialogue_result.get("dialogue_lines", []),
-                "dialogue_id": english_dialogue_result.get("dialogue_id", ""),
-                "unit": english_dialogue_result.get("unit"),
-                "batch": english_dialogue_result.get("batch"),
-            })
+                "message": "未找到该场景的对话内容"
+            }, status_code=404)
+
+        content = dialogue.get("content", [])
+        dialogue_parts = []
+        dialogue_lines = []
+        for item in content:
+            role = item.get("role", "B")
+            text = item.get("content", "")
+            hint = item.get("hint", "")
+            dialogue_parts.append(f"{role}: {text}")
+            dialogue_lines.append({"speaker": role, "text": text, "hint": hint, "audio_url": None})
+
+        dialogue_id = dialogue.get("dialogue_id", f"{small_scene_id}-{npc_id}-learn")
+        from .memory_system import generate_tts_for_dialogue_lines
+        await generate_tts_for_dialogue_lines(dialogue_lines, dialogue_id)
+
+        dialogue_text = "\n".join(dialogue_parts)
+        set_learning_stage("english_learning")
         return JSONResponse({
-            "status": "error",
-            "message": "生成英文对话失败"
-        }, status_code=500)
-            
+            "status": "success",
+            "message": "英文对话已生成",
+            "dialogue": dialogue_text,
+            "dialogue_lines": dialogue_lines,
+            "dialogue_id": dialogue_id,
+            "small_scene_id": small_scene_id,
+            "npc_id": npc_id,
+        })
+
     except Exception as e:
         logger.error(f"Error generating english dialogue: {e}")
         import traceback
@@ -1106,6 +1281,8 @@ async def start_practice(request: Request):
         dialogue = data.get("dialogue", "").strip()
         dialogue_lines_from_card = data.get("dialogue_lines", [])  # 从英语卡片获取的对话行（包含音频URL）
         dialogue_id_from_card = data.get("dialogue_id", "")  # 从英语卡片获取的对话ID
+        small_scene_id = (data.get("small_scene_id") or "").strip()
+        npc_id = (data.get("npc_id") or "").strip()
         
         if not dialogue:
             return JSONResponse({
@@ -1141,11 +1318,11 @@ async def start_practice(request: Request):
                 "message": "无法解析对话内容"
             }, status_code=400)
         
-        # 确保对话以A开始
-        if dialogue_lines[0]["speaker"] != "A":
+        # 规则：A=NPC（对方），B=用户（学习者）。允许以A或B开始
+        if dialogue_lines[0]["speaker"] not in ("A", "B"):
             return JSONResponse({
                 "status": "error",
-                "message": "对话必须以A（AI）开始"
+                "message": "对话角色必须为A（NPC）或B（用户）"
             }, status_code=400)
         
         # 使用卡片提供的对话ID，或生成新的
@@ -1183,22 +1360,32 @@ async def start_practice(request: Request):
         practice_sessions[session_id] = {
             "dialogue_id": dialogue_id,
             "dialogue_lines": dialogue_lines,
-            "user_inputs": [],  # 存储对话上下文（ai_said, user_said）
+            "user_inputs": [],
             "dialogue_topic": dialogue_topic,
-            "start_time": datetime.now().isoformat()
+            "start_time": datetime.now().isoformat(),
+            "small_scene_id": small_scene_id,
+            "npc_id": npc_id,
         }
         
-        # 获取第一句A的台词和对应的B的提示
-        first_a_text = dialogue_lines[0]["text"]
-        first_a_audio_url = dialogue_lines[0].get("audio_url")  # 获取音频URL
+        # 获取第一句台词。规则：A=NPC，B=用户。可能以A或B开始
+        first_a_text = None
+        first_a_audio_url = None
         first_b_text = None
-        if len(dialogue_lines) > 1 and dialogue_lines[1]["speaker"] == "B":
-            first_b_text = dialogue_lines[1]["text"]
+        first_b_line = {}
+        if dialogue_lines[0]["speaker"] == "A":
+            first_a_text = dialogue_lines[0]["text"]
+            first_a_audio_url = dialogue_lines[0].get("audio_url")
+            if len(dialogue_lines) > 1 and dialogue_lines[1]["speaker"] == "B":
+                first_b_text = dialogue_lines[1]["text"]
+                first_b_line = dialogue_lines[1]
+        else:
+            # 以B开始：用户先说第一句
+            first_b_text = dialogue_lines[0]["text"]
+            first_b_line = dialogue_lines[0]
         
         # 如果有B的台词，取提示：优先用口语库的 hint，否则 AI 抽取
         hints = None
         if first_b_text:
-            first_b_line = dialogue_lines[1] if len(dialogue_lines) > 1 else {}
             if first_b_line.get("hint"):
                 h = first_b_line["hint"]
                 hints = {"phrases": [x.strip() for x in h.split("/") if x.strip()], "pattern": "", "words": [], "grammar": ""}
@@ -1478,9 +1665,11 @@ async def generate_review_notes(request: Request):
         import json
 
         data = await request.json()
-        user_inputs = data.get("user_inputs", [])  # [{turn, ai_said, user_said}, ...]
+        user_inputs = data.get("user_inputs", [])
         dialogue_topic = data.get("dialogue_topic", "日常对话")
         dialogue_id = data.get("dialogue_id", "")
+        small_scene_id = (data.get("small_scene_id") or "").strip()
+        npc_id = (data.get("npc_id") or "").strip()
 
         if not user_inputs:
             return JSONResponse({
@@ -1495,6 +1684,12 @@ async def generate_review_notes(request: Request):
         ])
         prompt = f"""基于以下练习会话，仅对用户说的内容进行纠错，输出 JSON。
 
+【重要】用户输入来自语音转写（ASR），不要纠书写类错误（大小写、标点、拼写等），只从口语角度纠错：
+- 纠发音导致的用词错误（如 homophone 听写错）
+- 纠语法错误（时态、主谓一致、词序等）
+- 纠表达不当或不符合口语习惯的用法
+- 忽略：大小写、句号逗号、标点符号、拼写变体（如 gonna vs going to）
+
 对话主题：{dialogue_topic}
 
 会话内容：
@@ -1506,17 +1701,17 @@ async def generate_review_notes(request: Request):
     {{
       "user_said": "用户说的原句",
       "correct": "正确表达",
-      "explanation": "简要纠错说明"
+      "explanation": "简要纠错说明（侧重发音或语法）"
     }}
   ]
 }}
 
-要求：只对有明显错误或可改进的句子给出纠错；若某句没问题可省略。只返回 JSON。
+要求：只对有明显发音或语法错误的句子给出纠错；若某句没问题可省略。只返回 JSON。
 """
 
         response = await chatgpt_streamed_async(
             prompt,
-            "你是英语纠错助手，根据用户练习内容只做纠错并返回指定 JSON。",
+            "你是英语口语纠错助手。用户输入来自语音转写，只纠发音和语法错误，不纠书写、标点、大小写。",
             "neutral",
             []
         )
@@ -1540,11 +1735,27 @@ async def generate_review_notes(request: Request):
 
         corrections = ai_part.get("corrections") or []
 
-        # 第二、三部分：从数据库中对应 Review 记录取核心句型、语块与短对话
+        # 第二、三部分：从 scene_npc 的 review 对话取核心句型、语块与短对话
         core_sentences = ""
         core_chunks = ""
         review_dialogue = []
-        if dialogue_id:
+        if small_scene_id and npc_id:
+            try:
+                from .scene_npc_db import get_review_dialogue
+                rev = get_review_dialogue(small_scene_id, npc_id)
+                if rev:
+                    core_sentences = rev.get("core_sentences", "") or ""
+                    core_chunks = rev.get("core_chunks", "") or ""
+                    for item in rev.get("content", []):
+                        review_dialogue.append({
+                            "speaker": item.get("role", "A"),
+                            "text": item.get("content", ""),
+                            "hint": item.get("hint", ""),
+                            "audio_url": None
+                        })
+            except Exception as e:
+                logger.warning(f"Scene NPC review failed: {e}")
+        elif dialogue_id:
             try:
                 from . import oral_training_db as otd
                 rec = otd.get_record_by_dialogue_id(dialogue_id)
@@ -1555,11 +1766,17 @@ async def generate_review_notes(request: Request):
                         core_chunks = review_row.get("core_chunks", "") or ""
                         if review_row.get("content"):
                             review_dialogue = [
-                                {"speaker": item.get("role", "A"), "text": item.get("content", ""), "hint": item.get("hint", "")}
+                                {"speaker": item.get("role", "A"), "text": item.get("content", ""), "hint": item.get("hint", ""), "audio_url": None}
                                 for item in review_row["content"]
                             ]
             except Exception as e:
                 logger.warning(f"Oral DB review attachment failed: {e}")
+
+        # 为复习对话生成 TTS 音频
+        if review_dialogue:
+            from .memory_system import generate_tts_for_dialogue_lines
+            review_audio_id = f"review_{(small_scene_id or npc_id or dialogue_id or 'x').replace('/', '_')}_{uuid.uuid4().hex[:8]}"
+            await generate_tts_for_dialogue_lines(review_dialogue, review_audio_id)
 
         review_notes = {
             "corrections": corrections,
@@ -1707,8 +1924,17 @@ async def save_practice_memory(request: Request):
     """保存练习记忆到文件"""
     try:
         from .shared import get_memory_system
+        from .scene_npc_db import mark_npc_learned, check_and_unlock_scene
         
         data = await request.json()
+        small_scene_id = (data.get("small_scene_id") or "").strip()
+        npc_id = (data.get("npc_id") or "").strip()
+        if small_scene_id and npc_id:
+            account_name = get_current_account() or ""
+            if account_name:
+                mark_npc_learned(account_name, small_scene_id, npc_id)
+                check_and_unlock_scene(account_name, small_scene_id)
+        
         memory_system = get_memory_system()
         
         if not memory_system:
@@ -1743,10 +1969,14 @@ async def save_practice_memory(request: Request):
 
 @app.post("/api/practice/mark-unit-mastered")
 async def mark_unit_mastered_api(request: Request):
-    """用户自评「掌握了」当前 unit 时调用，该 unit 不再推送 B/C 批次。"""
+    """用户自评「掌握了」时调用。支持两种来源：
+    1) 口语训练库：dialogue_id → oral_training_db.mark_unit_mastered
+    2) 场景 NPC：small_scene_id + npc_id → scene_npc_db.mark_npc_learned（记录为已学会）
+    """
     try:
         from .shared import get_current_account
         from . import oral_training_db as otd
+        from .scene_npc_db import mark_npc_learned, check_and_unlock_scene
 
         account_name = get_current_account() or ""
         if not account_name:
@@ -1756,10 +1986,23 @@ async def mark_unit_mastered_api(request: Request):
             }, status_code=401)
         data = await request.json()
         dialogue_id = (data.get("dialogue_id") or "").strip()
+        small_scene_id = (data.get("small_scene_id") or "").strip()
+        npc_id = (data.get("npc_id") or "").strip()
+
+        # 优先处理场景 NPC 来源（复习资料来自大场景→小场景→NPC 流程）
+        if small_scene_id and npc_id:
+            mark_npc_learned(account_name, small_scene_id, npc_id)
+            check_and_unlock_scene(account_name, small_scene_id)
+            return JSONResponse({
+                "status": "success",
+                "message": "已标记为已掌握，下次选择时将显示已完成"
+            })
+
+        # 口语训练库来源
         if not dialogue_id:
             return JSONResponse({
                 "status": "error",
-                "message": "缺少 dialogue_id"
+                "message": "缺少 dialogue_id 或 small_scene_id + npc_id"
             }, status_code=400)
         rec = otd.get_record_by_dialogue_id(dialogue_id)
         if not rec:

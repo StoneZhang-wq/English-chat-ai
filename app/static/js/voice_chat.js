@@ -4,6 +4,11 @@
 let websocket = null;
 
 document.addEventListener("DOMContentLoaded", function() {
+    // 移除可能残留的遮罩层，确保登录界面可交互
+    document.querySelectorAll('.scene-npc-selection-overlay, .scene-selection-overlay').forEach(el => {
+        if (el.parentNode) el.parentNode.removeChild(el);
+    });
+    document.body.classList.remove('scenes-modal-open');
     // 元素引用
     const messagesList = document.getElementById('messages-list');
     const recordBtn = document.getElementById('record-btn');
@@ -196,11 +201,18 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             
             // 在练习模式下，不显示AI的正常回复（因为AI应该按卡片内容回复）
+            // 当场景聊天窗打开时，不在主界面显示（避免重复，由场景 modal 显示）
+            const sceneChat = document.getElementById('sceneChatModal');
+            const sceneChatOpen = sceneChat && sceneChat.style.display === 'block';
             if (!practiceState || !practiceState.isActive) {
-                console.log('✅ [handleWebSocketMessage] 准备调用 addAIMessage, text:', data.text);
-                console.log('✅ [handleWebSocketMessage] messagesList element:', messagesList);
-                addAIMessage(data.text);
-                console.log('✅ [handleWebSocketMessage] addAIMessage 调用完成');
+                try {
+                    window.dispatchEvent(new CustomEvent('ai_message_broadcast', { detail: data }));
+                } catch (e) {
+                    console.warn('Could not dispatch ai_message_broadcast', e);
+                }
+                if (!sceneChatOpen) {
+                    addAIMessage(data.text);
+                }
             } else {
                 console.log('⚠️ [handleWebSocketMessage] Practice mode: ignoring AI message from normal flow');
             }
@@ -216,6 +228,11 @@ document.addEventListener("DOMContentLoaded", function() {
                     console.log('User message already displayed, skipping WebSocket message');
                     return;
                 }
+            }
+            try {
+                window.dispatchEvent(new CustomEvent('user_message_broadcast', { detail: data }));
+            } catch (e) {
+                console.warn('Could not dispatch user_message_broadcast', e);
             }
             
             // 在练习模式下，用户消息已经在handlePracticeInput中显示
@@ -945,6 +962,136 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     
+    // 场景-NPC 选择：大场景 → 小场景 → NPC（无难度）
+    async function showSceneNpcSelectionDialog(bigScenes) {
+        if (!bigScenes || bigScenes.length === 0) {
+            showError('暂无可用场景，请确认 data/dialogues.json 已正确配置');
+            return null;
+        }
+        const overlay = document.createElement('div');
+        overlay.className = 'scene-npc-selection-overlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2147483647;display:flex;align-items:center;justify-content:center;';
+        const dialog = document.createElement('div');
+        dialog.className = 'scene-npc-dialog';
+        dialog.style.cssText = 'background:white;padding:24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.2);min-width:440px;max-width:90vw;max-height:85vh;overflow-y:auto;';
+        
+        let step = 1;
+        let selectedBig = null;
+        let selectedSmall = null;
+        let selectedNpc = null;
+        let smallScenes = [];
+        let npcs = [];
+        let resolvePromise = null;
+        function closeDialog(value) {
+            if (overlay.parentNode) document.body.removeChild(overlay);
+            if (resolvePromise) resolvePromise(value);
+        }
+        
+        function render() {
+            if (step === 1) {
+                dialog.innerHTML = `
+                    <h3 style="margin:0 0 20px;font-size:18px;text-align:center;">选择大场景</h3>
+                    <div id="step1-btns" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+                    <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
+                        <button id="cancel-btn" style="padding:10px 20px;background:#f0f0f0;border:none;border-radius:6px;cursor:pointer;">取消</button>
+                    </div>
+                `;
+                const c = dialog.querySelector('#step1-btns');
+                bigScenes.forEach(b => {
+                    const btn = document.createElement('button');
+                    btn.textContent = b.name;
+                    btn.style.cssText = 'padding:12px 18px;border:2px solid #e0e0e0;border-radius:8px;background:white;cursor:pointer;font-size:14px;';
+                    btn.addEventListener('click', async () => {
+                        selectedBig = b;
+                        const res = await fetch('/api/scene-npc/small-scenes?big_scene_id=' + encodeURIComponent(b.id));
+                        const d = await res.json();
+                        smallScenes = (d.small_scenes || []).filter(s => s.id);
+                        step = 2;
+                        render();
+                    });
+                    c.appendChild(btn);
+                });
+            } else if (step === 2) {
+                dialog.innerHTML = `
+                    <h3 style="margin:0 0 20px;font-size:18px;text-align:center;">选择小场景 - ${selectedBig ? selectedBig.name : ''}</h3>
+                    <div id="step2-btns" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+                    <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
+                        <button id="back-btn" style="padding:10px 20px;background:#f0f0f0;border:none;border-radius:6px;cursor:pointer;">← 返回</button>
+                        <button id="cancel-btn" style="padding:10px 20px;background:#f0f0f0;border:none;border-radius:6px;cursor:pointer;">取消</button>
+                    </div>
+                `;
+                const c = dialog.querySelector('#step2-btns');
+                smallScenes.forEach(s => {
+                    const btn = document.createElement('button');
+                    btn.textContent = s.name;
+                    btn.style.cssText = 'padding:12px 18px;border:2px solid #e0e0e0;border-radius:8px;background:white;cursor:pointer;font-size:14px;';
+                    btn.addEventListener('click', async () => {
+                        selectedSmall = s;
+                        const acc = (typeof currentAccountName !== 'undefined' ? currentAccountName : null) || (typeof localStorage !== 'undefined' ? localStorage.getItem('current_account') : null) || '';
+                        const url = '/api/scene-npc/npcs?small_scene_id=' + encodeURIComponent(s.id) + (acc ? '&account_name=' + encodeURIComponent(acc) : '');
+                        const res = await fetch(url);
+                        const d = await res.json();
+                        if (d._debug) console.log('[NPC learned]', d._debug);
+                        const raw = d.npcs || [];
+                        const withContent = raw.filter(n => n.has_content);
+                        npcs = withContent.length > 0 ? withContent : raw;
+                        step = 3;
+                        render();
+                    });
+                    c.appendChild(btn);
+                });
+                dialog.querySelector('#back-btn').addEventListener('click', () => { step = 1; render(); });
+            } else if (step === 3) {
+                dialog.innerHTML = `
+                    <h3 style="margin:0 0 20px;font-size:18px;text-align:center;">选择对话角色 - ${selectedSmall ? selectedSmall.name : ''}</h3>
+                    <div id="step3-btns" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+                    <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
+                        <button id="back-btn" style="padding:10px 20px;background:#f0f0f0;border:none;border-radius:6px;cursor:pointer;">← 返回</button>
+                        <button id="cancel-btn" style="padding:10px 20px;background:#f0f0f0;border:none;border-radius:6px;cursor:pointer;">取消</button>
+                        <button id="confirm-btn" disabled style="padding:10px 24px;background:#ccc;color:white;border:none;border-radius:6px;cursor:pointer;">确认</button>
+                    </div>
+                `;
+                const c = dialog.querySelector('#step3-btns');
+                const confirmBtn = dialog.querySelector('#confirm-btn');
+                npcs.forEach(n => {
+                    const btn = document.createElement('button');
+                    btn.textContent = n.learned ? '✓ ' + n.name : n.name;
+                    btn.style.cssText = 'padding:12px 18px;border:2px solid #e0e0e0;border-radius:8px;background:' + (n.learned ? '#e8f5e9' : 'white') + ';cursor:pointer;font-size:14px;';
+                    btn.addEventListener('click', () => {
+                        selectedNpc = n;
+                        dialog.querySelectorAll('#step3-btns button').forEach(b => {
+                            b.style.background = b.dataset.learned === '1' ? '#e8f5e9' : 'white';
+                            b.style.color = '#333';
+                            b.style.borderColor = '#e0e0e0';
+                        });
+                        btn.style.background = '#007bff';
+                        btn.style.color = 'white';
+                        btn.style.borderColor = '#007bff';
+                        confirmBtn.disabled = false;
+                        confirmBtn.style.background = '#007bff';
+                    });
+                    if (n.learned) btn.dataset.learned = '1';
+                    c.appendChild(btn);
+                });
+                dialog.querySelector('#back-btn').addEventListener('click', () => { step = 2; render(); });
+                confirmBtn.addEventListener('click', () => {
+                    if (selectedNpc && selectedSmall) {
+                        closeDialog({ small_scene_id: selectedSmall.id, npc_id: selectedNpc.id });
+                    }
+                });
+            }
+            dialog.querySelector('#cancel-btn').addEventListener('click', () => closeDialog(null));
+        }
+        
+        return new Promise((resolve) => {
+            resolvePromise = resolve;
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDialog(null); });
+            render();
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+        });
+    }
+
     // 显示场景选择对话框（点击「开始英语学习」后先出现，选完场景再选长度和难度）
     function showSceneSelectionDialog(suggestedScenes, availableScenes, defaultScene) {
         console.log('[场景选择] 函数被调用', { 
@@ -1277,75 +1424,53 @@ document.addEventListener("DOMContentLoaded", function() {
                         addAIMessage('记忆已保存');
                     }
                     
-                    // 第一步：选择练习场景（界面先出现，再选长度和难度）
-                    console.log('[开始英语学习] 步骤1：准备场景选择', { 
-                        hasSuggested: !!(result.suggested_scenes && result.suggested_scenes.length > 0),
-                        hasAvailable: !!(result.available_scenes && result.available_scenes.length > 0),
-                        suggestedCount: (result.suggested_scenes || []).length,
-                        availableCount: (result.available_scenes || []).length
-                    });
-                    // 口语训练库：suggested_scene 为单条，available_scenes 为 [{scene, label}]，available_difficulties 为难度列表
-                    let suggestedScenes = result.suggested_scene ? [{ scene: result.suggested_scene, label: 'recommended' }] : [];
-                    let availableScenes = result.available_scenes || [];
-                    let availableDifficulties = result.available_difficulties || ['Simple', 'Intermediate', 'Difficult'];
-                    if (availableScenes.length === 0) {
-                        console.log('[开始英语学习] 步骤1.1：available_scenes 为空，尝试从 API 获取');
-                        try {
-                            const scenesRes = await fetch('/api/knowledge/available-scenes');
-                            const scenesData = await scenesRes.json();
-                            if (scenesData.available_scenes && scenesData.available_scenes.length > 0) {
-                                availableScenes = scenesData.available_scenes;
-                            }
-                            if (scenesData.available_difficulties && scenesData.available_difficulties.length > 0) {
-                                availableDifficulties = scenesData.available_difficulties;
-                            }
-                        } catch (e) {
-                            console.warn('[开始英语学习] 获取可选场景失败', e);
+                    // 场景-NPC：仅从数据库（dialogues.json）获取大场景，不使用硬编码
+                    let bigScenes = [];
+                    try {
+                        const res = await fetch('/api/scene-npc/big-scenes');
+                        if (res.ok) {
+                            const d = await res.json();
+                            bigScenes = d.big_scenes || [];
                         }
+                    } catch (e) {
+                        console.warn('获取大场景失败', e);
                     }
-                    if (typeof showSceneSelectionDialog !== 'function') {
+                    if (bigScenes.length === 0) {
+                        showError('暂无可用场景，请确认 data/dialogues.json 已正确配置');
+                        return;
+                    }
+                    if (typeof showSceneNpcSelectionDialog !== 'function') {
                         showError('场景选择功能未加载，请刷新页面重试');
                         return;
                     }
-                    const defaultScene = availableScenes[0] || null;
-                    const selectedScene = await showSceneSelectionDialog(suggestedScenes, availableScenes, defaultScene);
-                    if (!selectedScene) {
+                    const selected = await showSceneNpcSelectionDialog(bigScenes);
+                    if (!selected || !selected.small_scene_id || !selected.npc_id) {
                         return;
                     }
-                    const sceneVal = selectedScene.scene != null ? selectedScene.scene : (selectedScene.scene_primary != null ? selectedScene.scene_primary : selectedScene['场景一级']);
-                    const difficultyVal = null;
                     try {
-                        await fetch('/api/knowledge/select-scene', {
+                        addAIMessage('正在生成英文学习对话...');
+                        const englishResponse = await fetch('/api/english/generate', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ scene: sceneVal })
+                            body: JSON.stringify({
+                                small_scene_id: selected.small_scene_id,
+                                npc_id: selected.npc_id
+                            })
                         });
-                    } catch (e) {
-                        console.warn('记录场景选择失败', e);
-                    }
-                    const options = await showDialogueOptionsDialog(availableDifficulties);
-                    if (options) {
-                        try {
-                            addAIMessage('正在生成英文学习对话...');
-                            const englishResponse = await fetch('/api/english/generate', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ scene: sceneVal, difficulty: options.difficulty })
-                            });
-                            
-                            const englishResult = await englishResponse.json();
-                            
-                            if (englishResult.status === 'success' && englishResult.dialogue) {
-                                // 使用卡片式展示英文对话
-                                displayEnglishDialogue(
-                                    englishResult.dialogue, 
-                                    englishResult.dialogue_lines || [],
-                                    englishResult.dialogue_id || ''
-                                );
+                        
+                        const englishResult = await englishResponse.json();
+                        
+                        if (englishResult.status === 'success' && englishResult.dialogue) {
+                            displayEnglishDialogue(
+                                englishResult.dialogue, 
+                                englishResult.dialogue_lines || [],
+                                englishResult.dialogue_id || '',
+                                selected.small_scene_id,
+                                selected.npc_id
+                            );
                                 addAIMessage('已切换到英文学习模式！现在我会用英文和你交流。');
                                 showSuccess('英文对话已生成，已切换到英文学习模式！');
                                 
-                                // 成功后隐藏卡片
                                 if (englishLearningCard) {
                                     englishLearningCard.style.transition = 'opacity 0.3s, transform 0.3s';
                                     englishLearningCard.style.opacity = '0';
@@ -1355,20 +1480,14 @@ document.addEventListener("DOMContentLoaded", function() {
                                     }, 300);
                                 }
                             } else {
-                                // 即使生成失败，也切换到英文学习阶段
                                 await switchToEnglishLearning();
-                                showError(englishResult.message || '生成英文对话失败，但已切换到英文学习模式');
+                                showError(englishResult.message || '生成英文对话失败');
                             }
                         } catch (error) {
                             console.error('Error generating english dialogue:', error);
-                            // 即使生成失败，也切换到英文学习阶段
                             await switchToEnglishLearning();
-                            showError('生成英文对话失败，但已切换到英文学习模式：' + error.message);
+                            showError('生成英文对话失败：' + error.message);
                         }
-                    } else {
-                        // 用户取消了长度选择，但还是要切换到英文学习阶段
-                        await switchToEnglishLearning();
-                    }
                 } else {
                     showError(result.message || '保存记忆失败');
                 }
@@ -1519,11 +1638,13 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     
     // 创建英文学习卡片
-    function displayEnglishDialogue(dialogue, dialogueLines = [], dialogueId = '') {
+    function displayEnglishDialogue(dialogue, dialogueLines = [], dialogueId = '', smallSceneId = '', npcId = '') {
         const card = document.createElement('div');
         card.className = 'english-dialogue-card';
         card.dataset.dialogueId = dialogueId;
         card.dataset.dialogueLines = JSON.stringify(dialogueLines);
+        card.dataset.smallSceneId = smallSceneId || '';
+        card.dataset.npcId = npcId || '';
         
         let isCollapsed = false;
         let currentPlayingAudio = null;
@@ -1840,6 +1961,8 @@ document.addEventListener("DOMContentLoaded", function() {
             // 获取对话行数据（包含音频URL）
             const dialogueLines = JSON.parse(cardElement.dataset.dialogueLines || '[]');
             const dialogueId = cardElement.dataset.dialogueId || '';
+            const smallSceneId = cardElement.dataset.smallSceneId || '';
+            const npcId = cardElement.dataset.npcId || '';
             
             // 调用API开始练习
             const response = await fetch('/api/practice/start', {
@@ -1850,7 +1973,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 body: JSON.stringify({ 
                     dialogue: dialogue,
                     dialogue_lines: dialogueLines,
-                    dialogue_id: dialogueId
+                    dialogue_id: dialogueId,
+                    small_scene_id: smallSceneId,
+                    npc_id: npcId
                 })
             });
             
@@ -2319,7 +2444,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 body: JSON.stringify({
                     user_inputs: sessionData.user_inputs,
                     dialogue_topic: sessionData.dialogue_topic,
-                    dialogue_id: sessionData.dialogue_id || null
+                    dialogue_id: sessionData.dialogue_id || null,
+                    small_scene_id: sessionData.small_scene_id || null,
+                    npc_id: sessionData.npc_id || null
                 })
             });
             
@@ -2327,7 +2454,11 @@ document.addEventListener("DOMContentLoaded", function() {
             
             if (reviewResult.status === 'success') {
                 await savePracticeMemory(reviewResult.review_notes);
-                displayReviewNotes(reviewResult.review_notes, sessionData.dialogue_id || null);
+                displayReviewNotes(reviewResult.review_notes, {
+                    dialogue_id: sessionData.dialogue_id || null,
+                    small_scene_id: sessionData.small_scene_id || null,
+                    npc_id: sessionData.npc_id || null
+                });
                 showSuccess('复习笔记已生成！');
             } else {
                 showError('生成失败：' + (reviewResult.message || '未知错误'));
@@ -2358,6 +2489,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 timestamp: sessionData.timestamp || new Date().toISOString(),
                 dialogue_topic: sessionData.dialogue_topic,
                 dialogue_id: sessionData.dialogue_id || null,
+                small_scene_id: sessionData.small_scene_id || null,
+                npc_id: sessionData.npc_id || null,
                 review_notes: reviewNotes
             };
             
@@ -2380,14 +2513,16 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
     
-    // 显示复习笔记（可选 dialogueId：有则显示「掌握了/还没掌握」自评按钮）
-    function displayReviewNotes(reviewNotes, dialogueId) {
+    // 显示复习笔记（可选 masteryContext：{dialogue_id, small_scene_id, npc_id}，有则显示「掌握了/还没掌握」自评按钮）
+    function displayReviewNotes(reviewNotes, masteryContext) {
         const messagesList = document.getElementById('messages-list');
         if (!messagesList) return;
         
         const card = document.createElement('div');
         card.className = 'review-notes-card';
-        const masteryFooter = dialogueId ? `
+        const ctx = typeof masteryContext === 'string' ? { dialogue_id: masteryContext } : (masteryContext || {});
+        const hasMastery = !!(ctx.dialogue_id || (ctx.small_scene_id && ctx.npc_id));
+        const masteryFooter = hasMastery ? `
             <div class="review-mastery-footer">
                 <span class="review-mastery-label">本单元你掌握了吗？</span>
                 <div class="review-mastery-buttons">
@@ -2406,7 +2541,7 @@ document.addEventListener("DOMContentLoaded", function() {
             ${masteryFooter}
         `;
         
-        if (dialogueId) {
+        if (hasMastery) {
             const masteredBtn = card.querySelector('.mastered-btn');
             const notMasteredBtn = card.querySelector('.not-mastered-btn');
             const buttonsWrap = card.querySelector('.review-mastery-buttons');
@@ -2420,18 +2555,25 @@ document.addEventListener("DOMContentLoaded", function() {
                     const res = await fetch('/api/practice/mark-unit-mastered', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ dialogue_id: dialogueId })
+                        body: JSON.stringify({
+                            dialogue_id: ctx.dialogue_id || null,
+                            small_scene_id: ctx.small_scene_id || null,
+                            npc_id: ctx.npc_id || null
+                        })
                     });
                     const data = await res.json();
                     if (data.status === 'success') {
                         hideButtons();
+                        showSuccess(data.message || '已标记为已掌握');
                     } else {
                         masteredBtn.disabled = false;
                         notMasteredBtn.disabled = false;
+                        showError(data.message || '标记失败');
                     }
                 } catch (e) {
                     masteredBtn.disabled = false;
                     notMasteredBtn.disabled = false;
+                    showError('标记失败：' + (e.message || '网络错误'));
                 }
             });
             notMasteredBtn.addEventListener('click', () => {
@@ -2439,6 +2581,13 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         }
         
+        card.addEventListener('click', (e) => {
+            const btn = e.target.closest('.review-audio-btn');
+            if (btn && btn.dataset.audioUrl) {
+                const audio = new Audio(btn.dataset.audioUrl);
+                audio.play().catch(err => console.warn('播放复习音频失败', err));
+            }
+        });
         messagesList.appendChild(card);
         scrollToBottom();
     }
@@ -2479,14 +2628,15 @@ document.addEventListener("DOMContentLoaded", function() {
             html += `</div>`;
         }
 
-        // 第三部分：Review 短对话（来自数据库对应 Review）
+        // 第三部分：Review 短对话（来自数据库对应 Review，含音频）
         if (reviewNotes.review_dialogue && reviewNotes.review_dialogue.length > 0) {
             html += `
                 <div class="review-section">
                     <h4>💬 Review 短对话</h4>
                     <div class="review-dialogue-content">
-                        ${reviewNotes.review_dialogue.map(line => `
+                        ${reviewNotes.review_dialogue.map((line, idx) => `
                             <div class="dialogue-line ${line.speaker === 'A' ? 'speaker-a' : 'speaker-b'}">
+                                ${line.audio_url ? `<button class="review-audio-btn" data-audio-url="${line.audio_url}" title="播放" style="margin-right:6px;cursor:pointer;border:none;background:transparent;font-size:14px;">▶</button>` : ''}
                                 <span class="speaker-label">${line.speaker}:</span>
                                 <span class="dialogue-text">${line.text}</span>
                                 ${line.hint ? `<span class="dialogue-hint">（${line.hint}）</span>` : ''}
@@ -2749,20 +2899,29 @@ function showLoginInterface() {
     const loginOverlay = document.getElementById('login-overlay');
     const chatContainer = document.getElementById('chat-container');
     
+    // 移除可能残留的高层级遮罩（场景选择等），避免阻挡登录输入
+    document.querySelectorAll('.scene-npc-selection-overlay, .scene-selection-overlay').forEach(el => {
+        if (el.parentNode) el.parentNode.removeChild(el);
+    });
+    document.body.classList.remove('scenes-modal-open');
+    
     // 确保对话界面隐藏
     if (chatContainer) {
         chatContainer.style.display = 'none';
     }
     
-    // 确保登录界面显示
+    // 确保登录界面显示并可交互
     if (loginOverlay) {
         loginOverlay.classList.remove('hidden');
         loginOverlay.style.display = 'flex';
+        loginOverlay.style.pointerEvents = 'auto';
     }
     
     // 聚焦输入框
     const usernameInput = document.getElementById('username-input');
     if (usernameInput) {
+        usernameInput.disabled = false;
+        usernameInput.readOnly = false;
         setTimeout(() => usernameInput.focus(), 100);
     }
 }
