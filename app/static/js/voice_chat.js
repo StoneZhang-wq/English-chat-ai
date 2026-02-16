@@ -59,8 +59,42 @@ document.addEventListener("DOMContentLoaded", function() {
     function getReviewPageContent() {
         return document.getElementById('review-page-content');
     }
+    /** 统一 10 秒倒计时全屏遮罩。title: 主文案，sec: 秒数。返回 closeCountdown 函数。 */
+    function showCountdownOverlay(title, sec) {
+        if (sec == null) sec = 10;
+        const overlay = document.createElement('div');
+        overlay.className = 'countdown-overlay';
+        overlay.setAttribute('aria-live', 'polite');
+        overlay.innerHTML = `
+            <div class="countdown-overlay-box">
+                <p class="countdown-overlay-text">${title}</p>
+                <p class="countdown-overlay-num"><span class="countdown-overlay-value">${sec}</span> 秒</p>
+            </div>
+        `;
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;';
+        const box = overlay.querySelector('.countdown-overlay-box');
+        if (box) box.style.cssText = 'background:#2d2d2d;color:#fff;padding:24px 32px;border-radius:12px;text-align:center;min-width:200px;';
+        const textEl = overlay.querySelector('.countdown-overlay-text');
+        if (textEl) textEl.style.cssText = 'margin:0 0 8px 0;font-size:16px;';
+        const numEl = overlay.querySelector('.countdown-overlay-num');
+        if (numEl) numEl.style.cssText = 'margin:0;font-size:20px;font-weight:bold;';
+        document.body.appendChild(overlay);
+        let left = sec;
+        const valueEl = overlay.querySelector('.countdown-overlay-value');
+        const timer = setInterval(() => {
+            left -= 1;
+            if (valueEl) valueEl.textContent = left > 0 ? left : 0;
+            if (left <= 0) clearInterval(timer);
+        }, 1000);
+        return function closeCountdown() {
+            clearInterval(timer);
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        };
+    }
+    window.showCountdownOverlay = showCountdownOverlay;
+
     function showPracticeLoadingTip(container) {
-        if (!container) return;
+        if (!container) return function noop() {};
         let count = 10;
         container.innerHTML = `
             <div class="practice-loading-tip" style="text-align:center;padding:48px 24px;">
@@ -75,34 +109,17 @@ document.addEventListener("DOMContentLoaded", function() {
             if (countEl) countEl.textContent = count > 0 ? count : 0;
             if (count <= 0) clearInterval(timer);
         }, 1000);
+        return function closePracticeLoadingTip() {
+            clearInterval(timer);
+        };
     }
 
-    /** 显示英语卡片生成中的全屏提示（5 秒倒计时），返回 overlay 元素，请求完成后调用 hideEnglishCardLoadingTip(overlay) 移除 */
+    /** 显示英语卡片生成中的全屏提示（10 秒倒计时），返回 closeCountdown 函数 */
     function showEnglishCardLoadingTip() {
-        const existing = document.getElementById('english-card-loading-overlay');
-        if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
-        let count = 5;
-        const overlay = document.createElement('div');
-        overlay.id = 'english-card-loading-overlay';
-        overlay.className = 'english-card-loading-overlay';
-        overlay.innerHTML = `
-            <div class="english-card-loading-tip">
-                <div class="practice-loading-spinner" style="width:48px;height:48px;margin:0 auto 20px;border:4px solid var(--border);border-top-color:var(--primary,#5c6bc0);border-radius:50%;animation:practice-spin 0.9s linear infinite;"></div>
-                <p style="margin:0 0 8px;font-size:18px;font-weight:600;color:var(--text);">正在生成英语卡片</p>
-                <p style="margin:0;font-size:14px;color:var(--text-muted);">约 <span id="english-card-loading-countdown">${count}</span> 秒</p>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-        const countEl = overlay.querySelector('#english-card-loading-countdown');
-        const timer = setInterval(() => {
-            count--;
-            if (countEl) countEl.textContent = count > 0 ? count : 0;
-            if (count <= 0) clearInterval(timer);
-        }, 1000);
-        return overlay;
+        return showCountdownOverlay('正在生成英语卡片', 10);
     }
-    function hideEnglishCardLoadingTip(overlay) {
-        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    function hideEnglishCardLoadingTip(closeCountdown) {
+        if (typeof closeCountdown === 'function') closeCountdown();
     }
     function showPracticePage() {
         const main = document.querySelector('.main-content');
@@ -1625,6 +1642,9 @@ document.addEventListener("DOMContentLoaded", function() {
                         addAIMessage('记忆已保存');
                     }
 
+                    const closeOptionsCountdown = showCountdownOverlay('正在准备学习选项', 10);
+                    const optionsShownAt = Date.now();
+                    const MIN_OPTIONS_MS = 2000;
                     let bigScenes = [];
                     try {
                         const res = await fetch('/api/scene-npc/big-scenes');
@@ -1635,6 +1655,11 @@ document.addEventListener("DOMContentLoaded", function() {
                     } catch (e) {
                         console.warn('获取大场景失败', e);
                     }
+                    const elapsedOpts = Date.now() - optionsShownAt;
+                    const delayCloseOpts = Math.max(0, MIN_OPTIONS_MS - elapsedOpts);
+                    await new Promise(r => setTimeout(r, delayCloseOpts));
+                    closeOptionsCountdown();
+
                     if (bigScenes.length === 0) {
                         showError('暂无可用场景，请确认 data/dialogues.json 已正确配置');
                         return;
@@ -1649,9 +1674,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     if (!selected || !selected.small_scene_id || !selected.npc_id) {
                         return;
                     }
-                    let englishLoadingOverlay = null;
+                    let closeEnglishCardCountdown = null;
                     try {
-                        englishLoadingOverlay = showEnglishCardLoadingTip();
+                        closeEnglishCardCountdown = showEnglishCardLoadingTip();
                         addAIMessage('正在生成英文学习对话...');
                         const englishResponse = await fetch('/api/english/generate', {
                             method: 'POST',
@@ -1665,8 +1690,8 @@ document.addEventListener("DOMContentLoaded", function() {
                         const englishResult = await englishResponse.json();
                         
                         if (englishResult.status === 'success' && englishResult.dialogue) {
-                            hideEnglishCardLoadingTip(englishLoadingOverlay);
-                            englishLoadingOverlay = null;
+                            hideEnglishCardLoadingTip(closeEnglishCardCountdown);
+                            closeEnglishCardCountdown = null;
                             displayEnglishDialogue(
                                 englishResult.dialogue,
                                 englishResult.dialogue_lines || [],
@@ -1686,13 +1711,13 @@ document.addEventListener("DOMContentLoaded", function() {
                                 }, 300);
                             }
                         } else {
-                            hideEnglishCardLoadingTip(englishLoadingOverlay);
+                            hideEnglishCardLoadingTip(closeEnglishCardCountdown);
                             await switchToEnglishLearning();
                             showError(englishResult.message || '生成英文对话失败');
                         }
                     } catch (error) {
                         console.error('Error generating english dialogue:', error);
-                        hideEnglishCardLoadingTip(englishLoadingOverlay);
+                        hideEnglishCardLoadingTip(closeEnglishCardCountdown);
                         await switchToEnglishLearning();
                         showError('生成英文对话失败：' + error.message);
                     }
@@ -2132,8 +2157,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 const container = getPracticePageContent();
                 if (container) {
                     showPracticePage();
-                    showPracticeLoadingTip(container);
-                    startPracticeMode(dialogue, card, { targetContainer: container });
+                    const closePracticeLoadingTip = showPracticeLoadingTip(container);
+                    startPracticeMode(dialogue, card, { targetContainer: container, closePracticeLoadingTip });
                 } else {
                     startPracticeMode(dialogue, card);
                 }
@@ -2229,7 +2254,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     sessionData: null,  // 完整的会话数据
                     fromScene: isFromScene  // 来自场景体验则不显示生成复习笔记
                 };
-                
+                if (opts.closePracticeLoadingTip) opts.closePracticeLoadingTip();
                 // 折叠并禁用英语卡片（仅当来自卡片时）
                 if (cardElement) {
                     const collapseBtn = cardElement.querySelector('.collapse-btn');
@@ -2735,39 +2760,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     
-    // 显示「正在生成复习资料」10 秒倒计时遮罩，返回关闭函数
-    function showGenerateReviewCountdown() {
-        const overlay = document.createElement('div');
-        overlay.className = 'generate-review-countdown-overlay';
-        overlay.setAttribute('aria-live', 'polite');
-        const sec = 10;
-        overlay.innerHTML = `
-            <div class="generate-review-countdown-box">
-                <p class="generate-review-countdown-text">正在生成复习资料</p>
-                <p class="generate-review-countdown-num"><span id="generate-review-countdown-value">${sec}</span> 秒</p>
-            </div>
-        `;
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;';
-        const box = overlay.querySelector('.generate-review-countdown-box');
-        if (box) box.style.cssText = 'background:#2d2d2d;color:#fff;padding:24px 32px;border-radius:12px;text-align:center;min-width:200px;';
-        const textEl = overlay.querySelector('.generate-review-countdown-text');
-        if (textEl) textEl.style.cssText = 'margin:0 0 8px 0;font-size:16px;';
-        const numEl = overlay.querySelector('.generate-review-countdown-num');
-        if (numEl) numEl.style.cssText = 'margin:0;font-size:20px;font-weight:bold;';
-        document.body.appendChild(overlay);
-        let left = sec;
-        const valueSpan = document.getElementById('generate-review-countdown-value');
-        const timer = setInterval(() => {
-            left -= 1;
-            if (valueSpan) valueSpan.textContent = left > 0 ? left : 0;
-            if (left <= 0) clearInterval(timer);
-        }, 1000);
-        return function closeCountdown() {
-            clearInterval(timer);
-            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-        };
-    }
-
     // 生成复习笔记（三部分：纠错 + 核心句型语块 + Review 对话，仅纠错用 AI，后两者来自数据库）
     async function generateReviewNotes() {
         if (!practiceState.sessionData) {
@@ -2780,7 +2772,9 @@ document.addEventListener("DOMContentLoaded", function() {
             generateBtn.disabled = true;
             generateBtn.textContent = '正在生成...';
         }
-        const closeCountdown = showGenerateReviewCountdown();
+        const closeCountdown = showCountdownOverlay('正在生成复习资料', 10);
+        const overlayShownAt = Date.now();
+        const MIN_OVERLAY_MS = 2000; // 至少显示 2 秒，避免接口很快时遮罩一闪而过
         
         try {
             const sessionData = practiceState.sessionData;
@@ -2818,11 +2812,17 @@ document.addEventListener("DOMContentLoaded", function() {
             console.error('Error generating review notes:', error);
             showError('生成失败：' + error.message);
         } finally {
-            closeCountdown();
-            if (generateBtn) {
-                generateBtn.disabled = false;
-                generateBtn.textContent = '📝 生成复习笔记';
+            const elapsed = Date.now() - overlayShownAt;
+            const delayClose = Math.max(0, MIN_OVERLAY_MS - elapsed);
+            function restoreAndClose() {
+                closeCountdown();
+                if (generateBtn) {
+                    generateBtn.disabled = false;
+                    generateBtn.textContent = '📝 生成复习笔记';
+                }
             }
+            if (delayClose > 0) setTimeout(restoreAndClose, delayClose);
+            else restoreAndClose();
         }
     }
     

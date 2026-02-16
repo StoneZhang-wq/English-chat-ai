@@ -160,7 +160,7 @@
   }
 
   // 从场景 NPC 进入练习模式（与英语练习相同体验：TTS 播放 + 用户语音输入）
-  // 练习 UI 显示在场景内叠加层，保持沉浸式体验
+  // 练习 UI 显示在场景内叠加层，保持沉浸式体验；进入前显示 10 秒倒计时
   async function openScenePractice(label, smallSceneId, npcId) {
     const sceneChatModal = q('#sceneChatModal');
     if (sceneChatModal) sceneChatModal.style.display = 'none';
@@ -170,17 +170,29 @@
       alert('场景练习容器未就绪，请刷新页面');
       return;
     }
+    const closeCountdown = typeof window.showCountdownOverlay === 'function'
+      ? window.showCountdownOverlay('正在准备场景对话', 10)
+      : function noop() {};
+    const sceneStartAt = Date.now();
+    const MIN_SCENE_MS = 2000;
     try {
       const res = await fetch(`/api/scene-npc/dialogue/immersive?small_scene_id=${encodeURIComponent(smallSceneId)}&npc_id=${encodeURIComponent(npcId)}`);
       const data = await res.json().catch(() => ({}));
       if (res.status === 403) {
+        closeCountdown();
         showSceneToast(data.message || data.error || '该角色未解锁，请先在学习页完成该NPC的对话学习');
         return;
       }
       if (!data.dialogue || !data.dialogue.content || !Array.isArray(data.dialogue.content)) {
+        closeCountdown();
         alert('暂无对话内容');
         return;
       }
+      const elapsed = Date.now() - sceneStartAt;
+      const delayClose = Math.max(0, MIN_SCENE_MS - elapsed);
+      await new Promise(function (r) { setTimeout(r, delayClose); });
+      closeCountdown();
+
       const content = data.dialogue.content;
       const dialogueLines = content.map(item => ({
         speaker: item.role === 'A' ? 'A' : 'B',
@@ -190,10 +202,8 @@
       }));
       const dialogue = dialogueLines.map(l => `${l.speaker}: ${l.text}`).join('\n');
       const dialogueId = data.dialogue.dialogue_id || `scene-${smallSceneId}-${npcId}`;
-      // 显示练习叠加层，先展示载入提示（此时不允许发消息）
       overlay.style.display = 'flex';
       container.innerHTML = '<div class="scene-practice-loading">正在载入对话，请稍候...</div>';
-      // 暂不添加 scene-practice-active，输入区保持不可用
       if (typeof window.startScenePractice === 'function') {
         await window.startScenePractice({
           dialogue,
@@ -202,11 +212,8 @@
           small_scene_id: smallSceneId,
           npc_id: npcId,
           targetContainer: container,
-          onReady: () => {
-            // 输入框已嵌入练习界面，无需提升主页面输入区
-          }
+          onReady: function () {}
         });
-        // 若练习未成功启动（如参数无效），清理载入状态
         if (!container.querySelector('#practice-mode-ui')) {
           hideScenePracticeOverlay();
         }
@@ -216,6 +223,7 @@
       }
     } catch (e) {
       console.error('启动场景练习失败:', e);
+      closeCountdown();
       hideScenePracticeOverlay();
       alert('加载失败：' + (e.message || '请稍后重试'));
     }
