@@ -2735,6 +2735,39 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     
+    // 显示「正在生成复习资料」10 秒倒计时遮罩，返回关闭函数
+    function showGenerateReviewCountdown() {
+        const overlay = document.createElement('div');
+        overlay.className = 'generate-review-countdown-overlay';
+        overlay.setAttribute('aria-live', 'polite');
+        const sec = 10;
+        overlay.innerHTML = `
+            <div class="generate-review-countdown-box">
+                <p class="generate-review-countdown-text">正在生成复习资料</p>
+                <p class="generate-review-countdown-num"><span id="generate-review-countdown-value">${sec}</span> 秒</p>
+            </div>
+        `;
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;';
+        const box = overlay.querySelector('.generate-review-countdown-box');
+        if (box) box.style.cssText = 'background:#2d2d2d;color:#fff;padding:24px 32px;border-radius:12px;text-align:center;min-width:200px;';
+        const textEl = overlay.querySelector('.generate-review-countdown-text');
+        if (textEl) textEl.style.cssText = 'margin:0 0 8px 0;font-size:16px;';
+        const numEl = overlay.querySelector('.generate-review-countdown-num');
+        if (numEl) numEl.style.cssText = 'margin:0;font-size:20px;font-weight:bold;';
+        document.body.appendChild(overlay);
+        let left = sec;
+        const valueSpan = document.getElementById('generate-review-countdown-value');
+        const timer = setInterval(() => {
+            left -= 1;
+            if (valueSpan) valueSpan.textContent = left > 0 ? left : 0;
+            if (left <= 0) clearInterval(timer);
+        }, 1000);
+        return function closeCountdown() {
+            clearInterval(timer);
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        };
+    }
+
     // 生成复习笔记（三部分：纠错 + 核心句型语块 + Review 对话，仅纠错用 AI，后两者来自数据库）
     async function generateReviewNotes() {
         if (!practiceState.sessionData) {
@@ -2747,6 +2780,7 @@ document.addEventListener("DOMContentLoaded", function() {
             generateBtn.disabled = true;
             generateBtn.textContent = '正在生成...';
         }
+        const closeCountdown = showGenerateReviewCountdown();
         
         try {
             const sessionData = practiceState.sessionData;
@@ -2784,6 +2818,7 @@ document.addEventListener("DOMContentLoaded", function() {
             console.error('Error generating review notes:', error);
             showError('生成失败：' + error.message);
         } finally {
+            closeCountdown();
             if (generateBtn) {
                 generateBtn.disabled = false;
                 generateBtn.textContent = '📝 生成复习笔记';
