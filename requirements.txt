@@ -1,38 +1,12 @@
-# Voice Chat AI - Core Dependencies
-# Python 3.11+ required
-#
-# NOTE: Install PyTorch FIRST based on your hardware:
-#
-# CPU only:
-#   pip install torch torchaudio torchvision --index-url https://download.pytorch.org/whl/cpu
-#
-# CUDA 12.1:
-#   pip install torch torchaudio torchvision --index-url https://download.pytorch.org/whl/cu121
-#
-# CUDA 12.4:
-#   pip install torch torchaudio torchvision --index-url https://download.pytorch.org/whl/cu124
-#
-# Then install this file:
-#   pip install -r requirements.txt
+# Voice Chat AI - 瘦身依赖（豆包/OpenAI API，无本地 Whisper/Spark-TTS）
+# Python 3.11+，本地与 Railway 共用此文件
+# 环境变量: FASTER_WHISPER_LOCAL=false, API_PROVIDER=doubao 或 openai
 
-# Audio processing
-PyAudio==0.2.14
-numpy>=1.21.6,<1.28.0
-soundfile==0.12.1
-librosa==0.10.2.post1
-scipy==1.11.4
-pydub==0.25.1
-
-# Speech recognition (Faster Whisper for local transcription)
-faster-whisper==1.1.1
-
-# NLP and language
-transformers==4.53.0
-langid==1.1.6
-textblob==0.18.0.post0
-spacy==3.7.5
-spacy-legacy==3.0.12
-spacy-loggers==1.0.5
+# Web framework
+fastapi==0.115.11
+uvicorn==0.30.1
+websockets==15.0.1
+python-multipart>=0.0.6
 
 # API clients
 openai==1.68.2
@@ -41,24 +15,23 @@ aiohttp==3.12.14
 httpx==0.28.1
 requests==2.32.4
 
-# Web framework
-fastapi==0.115.11
-uvicorn==0.30.1
-websockets==15.0.1
-python-multipart>=0.0.6
+# Config & validation
+pydantic==2.7.4
+python-dotenv==1.0.1
 
-# WebRTC (for OpenAI Realtime)
+# Audio (处理上传/API 音频)
+numpy>=1.21.6,<1.28.0
+soundfile==0.12.1
+pydub==0.25.1
+
+# WebRTC (OpenAI Realtime)
 aiortc>=1.14.0
 av>=14.0.0
 
-# Configuration
-pydantic==2.7.4
-python-dotenv==1.0.1
+# UI / text
 pillow==10.3.0
+textblob==0.18.0.post0
 
-# Excel processing
+# Excel (可选)
 pandas==2.2.2
 openpyxl==3.1.5
-
-# 语块/句型数据库（可选，启用 MySQL 语块库时安装）
-# pymysql>=1.1.0
