@@ -179,6 +179,14 @@ def check_and_unlock_scene(account_name: str, small_scene_id: str) -> bool:
         return not was_unlocked
     return False
 
+
+def scene_can_enter(account_name: str, small_scene_id: str) -> bool:
+    """该场景下是否至少有一个 NPC 已学完 learn 对话（满足则可进入沉浸场景）"""
+    progress = get_npc_progress(account_name)
+    learned = set(progress.get(small_scene_id, []))
+    npcs_in_scene = _get_npc_ids_with_learn_in_scene(small_scene_id)
+    return bool(learned & set(npcs_in_scene))
+
 # --- 对话查询 ---
 
 def get_dialogue(small_scene_id: str, npc_id: str, usage: str) -> Optional[Dict]:
@@ -196,6 +204,151 @@ def get_review_dialogue(small_scene_id: str, npc_id: str) -> Optional[Dict]:
 
 def get_immersive_dialogue(small_scene_id: str, npc_id: str) -> Optional[Dict]:
     return get_dialogue(small_scene_id, npc_id, "immersive")
+
+
+def build_card_title(dialogue: Dict) -> str:
+    """根据对话记录生成卡片标题：在{小场景名}跟{NPC名}沟通。对 small_scene_name 做简单清洗。"""
+    if not dialogue:
+        return "英文学习对话"
+    name_scene = (dialogue.get("small_scene_name") or "").strip()
+    name_npc = (dialogue.get("npc_name") or "").strip()
+    if not name_npc:
+        return "英文学习对话"
+    # 清洗：去掉 " / " 等，便于显示为「小区楼下」
+    if name_scene:
+        name_scene = name_scene.replace(" / ", "").replace("/", " ").strip()
+    if not name_scene:
+        name_scene = "该场景"
+    return f"在{name_scene}跟{name_npc}沟通"
+
+
+def get_big_scene_for_small_scene(small_scene_id: str) -> Optional[str]:
+    """根据 small_scene_id 反查所属 big_scene_id（从 dialogues 取第一条匹配）"""
+    for d in get_dialogues():
+        if d.get("small_scene") == small_scene_id:
+            return d.get("big_scene")
+    return None
+
+
+def infer_theme_scene_from_conversation(text: str) -> tuple:
+    """从对话摘要/文本推断一个推荐的主题+场景 (big_scene_id, small_scene_id)。无法推断时返回 (None, None)。"""
+    if not text or not text.strip():
+        return (None, None)
+    t = text.strip().lower()
+    # 日常生活
+    if any(k in t for k in ["家", "居家", "家人", "室友", "晚饭", "早餐"]):
+        return ("daily", "home")
+    if any(k in t for k in ["小区", "楼下", "快递", "外卖", "邻居", "保安"]):
+        return ("daily", "community")
+    if any(k in t for k in ["公园", "户外", "晨练", "路人"]):
+        return ("daily", "park")
+    if any(k in t for k in ["医院", "诊所", "医生", "护士", "挂号"]):
+        return ("daily", "hospital")
+    if any(k in t for k in ["银行", "柜员", "取钱", "办卡"]):
+        return ("daily", "bank")
+    # 餐饮
+    if any(k in t for k in ["咖啡", "咖啡馆", "奶茶"]):
+        return ("food", "cafe")
+    if any(k in t for k in ["餐厅", "饭店", "点菜", "迎宾", "收银"]):
+        return ("food", "restaurant")
+    if any(k in t for k in ["快餐", "点餐"]):
+        return ("food", "fast_food")
+    if any(k in t for k in ["小吃", "奶茶店"]):
+        return ("food", "snack_shop")
+    # 出行、购物、工作、社交等若 dialogues 中暂无对应 small_scene 可后续扩展
+    return (None, None)
+
+
+def get_recommended_anchor_from_history(account_name: str) -> tuple:
+    """从用户练习记录中选一个 (big_scene_id, small_scene_id) 作为推荐锚点。无记录时返回 (None, None)。"""
+    progress = get_npc_progress(account_name)
+    if not progress:
+        return (None, None)
+    import random
+    small_scene_ids = [sid for sid in progress if progress.get(sid)]
+    if not small_scene_ids:
+        return (None, None)
+    sid = random.choice(small_scene_ids)
+    bid = get_big_scene_for_small_scene(sid)
+    return (bid, sid) if bid else (None, None)
+
+
+def get_learning_recommendations(
+    account_name: str,
+    conversation_summary: Optional[str] = None,
+    count: int = 4,
+) -> List[Dict]:
+    """
+    获取学习推荐列表：优先从对话推断 1 个主题+场景，否则从练习记忆选 1 个；其余随机。
+    每项包含 big_scene_id, small_scene_id, npc_id, title（卡片标题）。
+    """
+    import random
+    acc = _safe_account(account_name)
+    progress = get_npc_progress(acc)
+    big_scenes = _derive_big_scenes()
+    # 收集所有 (big_id, small_id) 且有 learn 对话的小场景
+    scene_pairs: List[tuple] = []
+    for b in big_scenes:
+        bid = b.get("id")
+        if not bid:
+            continue
+        for s in _derive_small_scenes_by_big(bid):
+            sid = s.get("id")
+            if sid:
+                scene_pairs.append((bid, sid))
+    if not scene_pairs:
+        return []
+
+    # 1) 锚点：对话推断 或 练习记忆
+    anchor_big, anchor_small = (None, None)
+    if conversation_summary and conversation_summary.strip():
+        anchor_big, anchor_small = infer_theme_scene_from_conversation(conversation_summary)
+    if not anchor_big or not anchor_small:
+        anchor_big, anchor_small = get_recommended_anchor_from_history(acc)
+    # 若锚点不在当前场景列表中，清空
+    if (anchor_big, anchor_small) not in scene_pairs:
+        anchor_big, anchor_small = (None, None)
+
+    # 2) 为锚点选一个 NPC（优先未掌握）
+    result: List[Dict] = []
+    used_pairs: set = set()
+
+    def pick_npc_for_scene(bid: str, sid: str) -> Optional[str]:
+        npcs = _derive_npcs_by_small_scene(sid)
+        if not npcs:
+            return None
+        learned = set(progress.get(sid, []))
+        unlearned = [n["id"] for n in npcs if n["id"] not in learned]
+        pool = unlearned if unlearned else [n["id"] for n in npcs]
+        return random.choice(pool) if pool else None
+
+    def add_item(bid: str, sid: str) -> bool:
+        nid = pick_npc_for_scene(bid, sid)
+        if not nid:
+            return False
+        d = get_learn_dialogue(sid, nid)
+        title = build_card_title(d) if d else "英文学习对话"
+        result.append({
+            "big_scene_id": bid,
+            "small_scene_id": sid,
+            "npc_id": nid,
+            "title": title,
+        })
+        used_pairs.add((bid, sid))
+        return True
+
+    if anchor_big and anchor_small:
+        add_item(anchor_big, anchor_small)
+
+    # 3) 其余随机
+    remaining = [(b, s) for (b, s) in scene_pairs if (b, s) not in used_pairs]
+    random.shuffle(remaining)
+    for (bid, sid) in remaining:
+        if len(result) >= count:
+            break
+        add_item(bid, sid)
+
+    return result[:count]
 
 # --- 场景列表（从 dialogues 推导）---
 
@@ -282,9 +435,10 @@ def get_big_scenes_with_immersive() -> List[Dict]:
 # --- 沉浸式场景列表 ---
 
 def get_immersive_small_scenes_by_big(big_scene_id: str, account_name: Optional[str] = None) -> List[Dict]:
-    """返回某大场景下、有沉浸式对话的小场景列表"""
+    """返回某大场景下、有沉浸式对话的小场景列表；每项含 can_enter（该账号是否至少学完该场景下一个 NPC）"""
     has_immersive = _get_scenes_with_immersive_dialogues()
     small_scenes = _derive_small_scenes_by_big(big_scene_id)
+    acc = _safe_account(account_name or "")
     result = []
     for s in small_scenes:
         sid = s.get("id")
@@ -293,15 +447,16 @@ def get_immersive_small_scenes_by_big(big_scene_id: str, account_name: Optional[
                 "id": s.get("immersive_scene_id", _to_immersive_scene_id(sid)),
                 "small_scene_id": sid,
                 "title": s.get("name", sid),
-                "image": f"https://placehold.co/1200x800?text={s.get('name', sid).replace(' ', '+')}"
+                "image": f"https://placehold.co/1200x800?text={s.get('name', sid).replace(' ', '+')}",
+                "can_enter": scene_can_enter(acc, sid),
             })
     return result
 
 
 def get_immersive_scene_list(account_name: Optional[str] = None) -> List[Dict]:
-    """返回可进入的沉浸式场景：从 dialogues 中有 immersive 的小场景推导"""
+    """返回所有沉浸式场景（全展示）；每项含 can_enter（该账号是否至少学完该场景下一个 NPC）"""
     has_immersive = _get_scenes_with_immersive_dialogues()
-    # 需要 small_scene 的 name 和 immersive_scene_id
+    acc = _safe_account(account_name or "")
     scene_info = {}
     for d in get_dialogues():
         sid = d.get("small_scene")
@@ -318,18 +473,17 @@ def get_immersive_scene_list(account_name: Optional[str] = None) -> List[Dict]:
             "id": info["immersive_scene_id"],
             "small_scene_id": sid,
             "title": info["name"],
-            "image": f"https://placehold.co/1200x800?text={info['name'].replace(' ', '+')}"
+            "image": f"https://placehold.co/1200x800?text={info['name'].replace(' ', '+')}",
+            "can_enter": scene_can_enter(acc, sid),
         })
     return result
 
 def get_immersive_scene_detail(immersive_scene_id: str, account_name: Optional[str] = None) -> Optional[Dict]:
-    """返回沉浸式场景详情：从 dialogues 推导"""
-    # 反查 small_scene：immersive_scene_id 可能等于 small_scene 或 override
+    """返回沉浸式场景详情：从 dialogues 推导；每个 NPC 带 learned（是否已学完该 NPC 的 learn 对话）"""
     rev = {_to_immersive_scene_id(k): k for k in _get_scenes_with_immersive_dialogues()}
     small_scene_id = rev.get(immersive_scene_id) or immersive_scene_id
     if small_scene_id not in _get_scenes_with_immersive_dialogues():
         return None
-    # 获取场景名称
     title = small_scene_id
     immersive_id = _to_immersive_scene_id(small_scene_id)
     for d in get_dialogues():
@@ -337,6 +491,8 @@ def get_immersive_scene_detail(immersive_scene_id: str, account_name: Optional[s
             title = d.get("small_scene_name", small_scene_id)
             immersive_id = d.get("immersive_scene_id", immersive_id)
             break
+    progress = get_npc_progress(_safe_account(account_name or ""))
+    learned_set = set(progress.get(small_scene_id, []))
     npcs = _derive_npcs_by_small_scene(small_scene_id)
     valid_npcs = []
     for n in npcs:
@@ -345,7 +501,8 @@ def get_immersive_scene_detail(immersive_scene_id: str, account_name: Optional[s
                 "id": n["id"],
                 "label": n.get("name", n["id"]),
                 "hint": f"点我与{n.get('name', n['id'])}对话",
-                "character": f"{small_scene_id}_{n['id']}"
+                "character": f"{small_scene_id}_{n['id']}",
+                "learned": n["id"] in learned_set,
             })
     if not valid_npcs:
         return None
@@ -353,5 +510,6 @@ def get_immersive_scene_detail(immersive_scene_id: str, account_name: Optional[s
         "title": title,
         "image": f"https://placehold.co/1200x800?text={title.replace(' ', '+')}",
         "small_scene_id": small_scene_id,
+        "can_enter": scene_can_enter(_safe_account(account_name or ""), small_scene_id),
         "npcs": valid_npcs
     }

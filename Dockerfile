@@ -55,6 +55,7 @@ RUN mkdir -p /usr/share/alsa/alsa.conf.d && \
 COPY requirements.txt /app/requirements.txt
 COPY app /app/app
 COPY characters /app/characters
+COPY data /app/data
 COPY outputs /app/outputs
 COPY cli.py /app/cli.py
 COPY elevenlabs_voices.json.example /app/elevenlabs_voices.json.example

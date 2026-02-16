@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ scene.title }} - 沉浸式场景</title>
+  <link rel="stylesheet" href="/app/static/css/scene.css" />
+</head>
+<body>
+  <div class="scene-container" id="scene" style="background-image: url('{{ scene.image }}')">
+    <div class="scene-header">
+      <h1>{{ scene.title }}</h1>
+      <a class="back-link" href="/scenes">← 返回场景列表</a>
+    </div>
+
+    <div class="npc-layer">
+      {% for npc in scene.npcs %}
+      <div class="npc" data-character="{{ npc.character }}" id="{{ npc.id }}">
+        <div class="npc-avatar"></div>
+        <div class="npc-label">{{ npc.label }}</div>
+        <div class="npc-hint">{{ npc.hint }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- 聊天弹窗 -->
+  <div id="chatModal" class="chat-modal" aria-hidden="true">
+    <div class="chat-window">
+      <div class="chat-header">
+        <span id="chatTitle">Chat</span>
+        <button id="closeChat">×</button>
+      </div>
+      <div id="chatBody" class="chat-body"></div>
+      <div class="chat-input">
+        <input id="chatInput" type="text" placeholder="Type in English or click 语音..." />
+        <button id="sendBtn">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app/static/js/scene.js"></script>
+</body>
+</html>
+

@@ -52,6 +52,124 @@ document.addEventListener("DOMContentLoaded", function() {
     let englishLearningCard = null; // 英语学习卡片元素
     let startEnglishCardBtn = null; // 卡片上的按钮元素
 
+    // ---------- 子页面：练习页 / 复习笔记页（与主页面切换） ----------
+    function getPracticePageContent() {
+        return document.getElementById('practice-page-content');
+    }
+    function getReviewPageContent() {
+        return document.getElementById('review-page-content');
+    }
+    function showPracticeLoadingTip(container) {
+        if (!container) return;
+        let count = 10;
+        container.innerHTML = `
+            <div class="practice-loading-tip" style="text-align:center;padding:48px 24px;">
+                <div class="practice-loading-spinner" style="width:48px;height:48px;margin:0 auto 20px;border:4px solid var(--border);border-top-color:var(--primary,#5c6bc0);border-radius:50%;animation:practice-spin 0.9s linear infinite;"></div>
+                <p style="margin:0 0 8px;font-size:18px;font-weight:600;color:var(--text);">正在准备练习资料</p>
+                <p style="margin:0;font-size:14px;color:var(--text-muted);">约 <span id="practice-loading-countdown">${count}</span> 秒就能准备好</p>
+            </div>
+        `;
+        const countEl = container.querySelector('#practice-loading-countdown');
+        const timer = setInterval(() => {
+            count--;
+            if (countEl) countEl.textContent = count > 0 ? count : 0;
+            if (count <= 0) clearInterval(timer);
+        }, 1000);
+    }
+
+    /** 显示英语卡片生成中的全屏提示（5 秒倒计时），返回 overlay 元素，请求完成后调用 hideEnglishCardLoadingTip(overlay) 移除 */
+    function showEnglishCardLoadingTip() {
+        const existing = document.getElementById('english-card-loading-overlay');
+        if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+        let count = 5;
+        const overlay = document.createElement('div');
+        overlay.id = 'english-card-loading-overlay';
+        overlay.className = 'english-card-loading-overlay';
+        overlay.innerHTML = `
+            <div class="english-card-loading-tip">
+                <div class="practice-loading-spinner" style="width:48px;height:48px;margin:0 auto 20px;border:4px solid var(--border);border-top-color:var(--primary,#5c6bc0);border-radius:50%;animation:practice-spin 0.9s linear infinite;"></div>
+                <p style="margin:0 0 8px;font-size:18px;font-weight:600;color:var(--text);">正在生成英语卡片</p>
+                <p style="margin:0;font-size:14px;color:var(--text-muted);">约 <span id="english-card-loading-countdown">${count}</span> 秒</p>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        const countEl = overlay.querySelector('#english-card-loading-countdown');
+        const timer = setInterval(() => {
+            count--;
+            if (countEl) countEl.textContent = count > 0 ? count : 0;
+            if (count <= 0) clearInterval(timer);
+        }, 1000);
+        return overlay;
+    }
+    function hideEnglishCardLoadingTip(overlay) {
+        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }
+    function showPracticePage() {
+        const main = document.querySelector('.main-content');
+        const practicePage = document.getElementById('practice-page');
+        const reviewPage = document.getElementById('review-page');
+        const inputArea = document.querySelector('.input-area');
+        if (main) main.style.display = 'none';
+        if (reviewPage) reviewPage.style.display = 'none';
+        if (practicePage) {
+            practicePage.style.display = 'flex';
+            practicePage.setAttribute('aria-hidden', 'false');
+        }
+        if (inputArea) inputArea.style.display = 'none';
+        if (location.hash !== '#/practice') location.hash = '#/practice';
+    }
+    function showReviewPage() {
+        const main = document.querySelector('.main-content');
+        const practicePage = document.getElementById('practice-page');
+        const reviewPage = document.getElementById('review-page');
+        const inputArea = document.querySelector('.input-area');
+        if (main) main.style.display = 'none';
+        if (practicePage) {
+            practicePage.style.display = 'none';
+            practicePage.setAttribute('aria-hidden', 'true');
+        }
+        if (reviewPage) {
+            reviewPage.style.display = 'flex';
+            reviewPage.setAttribute('aria-hidden', 'false');
+        }
+        if (inputArea) inputArea.style.display = 'none';
+        if (location.hash !== '#/review') location.hash = '#/review';
+    }
+    function showMainPage() {
+        const main = document.querySelector('.main-content');
+        const practicePage = document.getElementById('practice-page');
+        const reviewPage = document.getElementById('review-page');
+        const inputArea = document.querySelector('.input-area');
+        if (practicePage) {
+            practicePage.style.display = 'none';
+            practicePage.setAttribute('aria-hidden', 'true');
+            const content = getPracticePageContent();
+            if (content) {
+                const oldUI = document.getElementById('practice-mode-ui');
+                if (oldUI) oldUI.remove();
+            }
+        }
+        if (reviewPage) {
+            reviewPage.style.display = 'none';
+            reviewPage.setAttribute('aria-hidden', 'true');
+        }
+        if (main) main.style.display = 'flex';
+        if (inputArea) inputArea.style.display = '';
+        if (location.hash !== '#/' && location.hash !== '') location.hash = '#/';
+        // 确保回到主页面后 AI 消息和卡片都显示在对话区，不继续往练习页追加
+        if (typeof practiceState !== 'undefined' && practiceState) practiceState.messageTarget = null;
+    }
+    function applyPageFromHash() {
+        const hash = location.hash || '#/';
+        if (hash === '#/practice') showPracticePage();
+        else if (hash === '#/review') showReviewPage();
+        else showMainPage();
+    }
+    window.applyPageFromHash = applyPageFromHash;
+    window.showMainPage = showMainPage;
+    window.showPracticePage = showPracticePage;
+    window.showReviewPage = showReviewPage;
+
     // 初始化WebSocket连接
     function initWebSocket() {
         console.log('initWebSocket function called');
@@ -474,7 +592,11 @@ document.addEventListener("DOMContentLoaded", function() {
             isRecording = true;
             recordBtn.classList.add('recording');
             const sceneRecordBtn = document.getElementById('practice-scene-record-btn');
-            if (sceneRecordBtn) sceneRecordBtn.classList.add('recording');
+            if (sceneRecordBtn) {
+                sceneRecordBtn.classList.add('recording');
+                sceneRecordBtn.textContent = '录音中';
+                sceneRecordBtn.title = '正在录音（再次点击停止）';
+            }
             showRecordingIndicator();
             
             // 开始波形动画
@@ -498,7 +620,11 @@ document.addEventListener("DOMContentLoaded", function() {
             isRecording = false;
             recordBtn.classList.remove('recording');
             const sceneRecordBtn = document.getElementById('practice-scene-record-btn');
-            if (sceneRecordBtn) sceneRecordBtn.classList.remove('recording');
+            if (sceneRecordBtn) {
+                sceneRecordBtn.classList.remove('recording');
+                sceneRecordBtn.textContent = '🎤';
+                sceneRecordBtn.title = '按住录音';
+            }
             hideRecordingIndicator();
             
             // 通知服务器停止录音
@@ -960,6 +1086,79 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
     
+    // 推荐学习对话框：先请求推荐接口，展示推荐项（标题 + 开始学习）+ 自选场景
+    async function showRecommendedLearningDialog(bigScenes, conversationSummary) {
+        let recommendations = [];
+        try {
+            const res = await fetch('/api/learning/recommend', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    conversation_summary: conversationSummary || '',
+                    count: 4
+                })
+            });
+            const data = await res.json();
+            recommendations = data.recommendations || [];
+        } catch (e) {
+            console.warn('获取学习推荐失败', e);
+        }
+
+        const overlay = document.createElement('div');
+        overlay.className = 'scene-npc-selection-overlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2147483647;display:flex;align-items:center;justify-content:center;';
+        const dialog = document.createElement('div');
+        dialog.className = 'scene-npc-dialog';
+        dialog.style.cssText = 'background:var(--surface);color:var(--text);padding:24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.4);min-width:440px;max-width:90vw;max-height:85vh;overflow-y:auto;border:1px solid var(--border);';
+
+        const recommendListHtml = recommendations.length > 0
+            ? recommendations.map(r => `
+                <div class="recommend-item" data-small="${r.small_scene_id}" data-npc="${r.npc_id}" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;margin-bottom:8px;background:var(--surface-2);border-radius:8px;border:1px solid var(--border);">
+                    <span style="font-size:14px;color:var(--text);">${(r.title || '英文学习').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+                    <button type="button" class="btn-start-recommend" style="padding:8px 16px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">开始学习</button>
+                </div>
+            `).join('')
+            : '<p style="margin:0 0 12px;font-size:13px;color:var(--text-muted);">暂无推荐，请自选场景。</p>';
+
+        dialog.innerHTML = `
+            <h3 style="margin:0 0 16px;font-size:18px;text-align:center;">选择学习内容</h3>
+            ${recommendations.length > 0 ? '<p style="margin:0 0 12px;font-size:13px;color:var(--text-muted);">根据你的对话或练习记录推荐，点击「开始学习」生成对话卡片。</p>' : ''}
+            <div id="recommend-list" style="margin-bottom:16px;">${recommendListHtml}</div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+                <button id="btn-pick-scene" style="padding:10px 18px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:14px;">自选场景</button>
+                <button id="cancel-btn" style="padding:10px 20px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;">取消</button>
+            </div>
+        `;
+
+        return new Promise((resolve) => {
+            function done(value) {
+                if (overlay.parentNode) document.body.removeChild(overlay);
+                resolve(value);
+            }
+            dialog.querySelectorAll('.btn-start-recommend').forEach(btn => {
+                const item = btn.closest('.recommend-item');
+                if (!item) return;
+                btn.addEventListener('click', () => {
+                    done({
+                        small_scene_id: item.dataset.small,
+                        npc_id: item.dataset.npc
+                    });
+                });
+            });
+            dialog.querySelector('#btn-pick-scene').addEventListener('click', async () => {
+                if (overlay.parentNode) document.body.removeChild(overlay);
+                const selected = await showSceneNpcSelectionDialog(bigScenes);
+                resolve(selected);
+            });
+            dialog.querySelector('#cancel-btn').addEventListener('click', () => done(null));
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) done(null);
+            });
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+        });
+    }
+
     // 场景-NPC 选择：大场景 → 小场景 → NPC（无难度）
     async function showSceneNpcSelectionDialog(bigScenes) {
         if (!bigScenes || bigScenes.length === 0) {
@@ -971,7 +1170,7 @@ document.addEventListener("DOMContentLoaded", function() {
         overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2147483647;display:flex;align-items:center;justify-content:center;';
         const dialog = document.createElement('div');
         dialog.className = 'scene-npc-dialog';
-        dialog.style.cssText = 'background:white;padding:24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.2);min-width:440px;max-width:90vw;max-height:85vh;overflow-y:auto;';
+        dialog.style.cssText = 'background:var(--surface);color:var(--text);padding:24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.4);min-width:440px;max-width:90vw;max-height:85vh;overflow-y:auto;border:1px solid var(--border);';
         
         let step = 1;
         let selectedBig = null;
@@ -991,14 +1190,14 @@ document.addEventListener("DOMContentLoaded", function() {
                     <h3 style="margin:0 0 20px;font-size:18px;text-align:center;">选择大场景</h3>
                     <div id="step1-btns" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
                     <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
-                        <button id="cancel-btn" style="padding:10px 20px;background:#f0f0f0;border:none;border-radius:6px;cursor:pointer;">取消</button>
+                        <button id="cancel-btn" style="padding:10px 20px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;">取消</button>
                     </div>
                 `;
                 const c = dialog.querySelector('#step1-btns');
                 bigScenes.forEach(b => {
                     const btn = document.createElement('button');
                     btn.textContent = b.name;
-                    btn.style.cssText = 'padding:12px 18px;border:2px solid #e0e0e0;border-radius:8px;background:white;cursor:pointer;font-size:14px;';
+                    btn.style.cssText = 'padding:12px 18px;border:2px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);cursor:pointer;font-size:14px;';
                     btn.addEventListener('click', async () => {
                         selectedBig = b;
                         const res = await fetch('/api/scene-npc/small-scenes?big_scene_id=' + encodeURIComponent(b.id));
@@ -1014,15 +1213,15 @@ document.addEventListener("DOMContentLoaded", function() {
                     <h3 style="margin:0 0 20px;font-size:18px;text-align:center;">选择小场景 - ${selectedBig ? selectedBig.name : ''}</h3>
                     <div id="step2-btns" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
                     <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
-                        <button id="back-btn" style="padding:10px 20px;background:#f0f0f0;border:none;border-radius:6px;cursor:pointer;">← 返回</button>
-                        <button id="cancel-btn" style="padding:10px 20px;background:#f0f0f0;border:none;border-radius:6px;cursor:pointer;">取消</button>
+                        <button id="back-btn" style="padding:10px 20px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;">← 返回</button>
+                        <button id="cancel-btn" style="padding:10px 20px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;">取消</button>
                     </div>
                 `;
                 const c = dialog.querySelector('#step2-btns');
                 smallScenes.forEach(s => {
                     const btn = document.createElement('button');
                     btn.textContent = s.name;
-                    btn.style.cssText = 'padding:12px 18px;border:2px solid #e0e0e0;border-radius:8px;background:white;cursor:pointer;font-size:14px;';
+                    btn.style.cssText = 'padding:12px 18px;border:2px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);cursor:pointer;font-size:14px;';
                     btn.addEventListener('click', async () => {
                         selectedSmall = s;
                         const acc = (typeof currentAccountName !== 'undefined' ? currentAccountName : null) || (typeof localStorage !== 'undefined' ? localStorage.getItem('current_account') : null) || '';
@@ -1044,9 +1243,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     <h3 style="margin:0 0 20px;font-size:18px;text-align:center;">选择对话角色 - ${selectedSmall ? selectedSmall.name : ''}</h3>
                     <div id="step3-btns" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
                     <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">
-                        <button id="back-btn" style="padding:10px 20px;background:#f0f0f0;border:none;border-radius:6px;cursor:pointer;">← 返回</button>
-                        <button id="cancel-btn" style="padding:10px 20px;background:#f0f0f0;border:none;border-radius:6px;cursor:pointer;">取消</button>
-                        <button id="confirm-btn" disabled style="padding:10px 24px;background:#ccc;color:white;border:none;border-radius:6px;cursor:pointer;">确认</button>
+                        <button id="back-btn" style="padding:10px 20px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;">← 返回</button>
+                        <button id="cancel-btn" style="padding:10px 20px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;">取消</button>
+                        <button id="confirm-btn" disabled style="padding:10px 24px;background:#475569;color:#94a3b8;border:none;border-radius:6px;cursor:pointer;">确认</button>
                     </div>
                 `;
                 const c = dialog.querySelector('#step3-btns');
@@ -1054,19 +1253,19 @@ document.addEventListener("DOMContentLoaded", function() {
                 npcs.forEach(n => {
                     const btn = document.createElement('button');
                     btn.textContent = n.learned ? '✓ ' + n.name : n.name;
-                    btn.style.cssText = 'padding:12px 18px;border:2px solid #e0e0e0;border-radius:8px;background:' + (n.learned ? '#e8f5e9' : 'white') + ';cursor:pointer;font-size:14px;';
+                    btn.style.cssText = 'padding:12px 18px;border:2px solid var(--border);border-radius:8px;background:' + (n.learned ? 'rgba(16,185,129,0.2)' : 'var(--surface-2)') + ';color:var(--text);cursor:pointer;font-size:14px;';
                     btn.addEventListener('click', () => {
                         selectedNpc = n;
                         dialog.querySelectorAll('#step3-btns button').forEach(b => {
-                            b.style.background = b.dataset.learned === '1' ? '#e8f5e9' : 'white';
-                            b.style.color = '#333';
-                            b.style.borderColor = '#e0e0e0';
+                            b.style.background = b.dataset.learned === '1' ? 'rgba(16,185,129,0.2)' : 'var(--surface-2)';
+                            b.style.color = 'var(--text)';
+                            b.style.borderColor = 'var(--border)';
                         });
                         btn.style.background = '#007bff';
                         btn.style.color = 'white';
                         btn.style.borderColor = '#007bff';
                         confirmBtn.disabled = false;
-                        confirmBtn.style.background = '#007bff';
+                        confirmBtn.style.background = 'var(--primary)';
                     });
                     if (n.learned) btn.dataset.learned = '1';
                     c.appendChild(btn);
@@ -1126,10 +1325,12 @@ document.addEventListener("DOMContentLoaded", function() {
             dialog.style.cssText = `
                 position: relative;
                 z-index: 2147483647;
-                background: white;
+                background: var(--surface);
+                color: var(--text);
                 padding: 24px;
                 border-radius: 12px;
-                box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+                box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+                border: 1px solid var(--border);
                 min-width: 440px;
                 max-width: 90vw;
                 max-height: 85vh;
@@ -1137,32 +1338,32 @@ document.addEventListener("DOMContentLoaded", function() {
             `;
 
             const suggestedBlock = (suggestedScenes && suggestedScenes.length > 0) ? `
-                <div style="margin-bottom: 16px; padding: 12px; background: #e8f4fd; border-radius: 8px; border: 1px solid #b8daff;">
-                    <div style="font-weight: 600; color: #004085; margin-bottom: 8px; font-size: 14px;">根据你的对话推荐</div>
+                <div style="margin-bottom: 16px; padding: 12px; background: rgba(99,102,241,0.15); border-radius: 8px; border: 1px solid rgba(99,102,241,0.3);">
+                    <div style="font-weight: 600; color: var(--primary); margin-bottom: 8px; font-size: 14px;">根据你的对话推荐</div>
                     <div id="suggested-scene-btns" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
                 </div>
             ` : '';
 
             const contentWhenNoScenes = `
-                <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #333; text-align: center;">选择练习场景</h3>
-                <p style="margin: 0 0 16px 0; font-size: 14px; color: #666; text-align: center;">暂无可用场景。</p>
-                <p style="margin: 0 0 20px 0; font-size: 13px; color: #888; text-align: center;">请先配置语块库（确认 data/ 下 scenes.json、chunks.json 已就绪）。</p>
+                <h3 style="margin: 0 0 20px 0; font-size: 18px; color: var(--text); text-align: center;">选择练习场景</h3>
+                <p style="margin: 0 0 16px 0; font-size: 14px; color: var(--text-muted); text-align: center;">暂无可用场景。</p>
+                <p style="margin: 0 0 20px 0; font-size: 13px; color: var(--text-muted); text-align: center;">请先配置语块库（确认 data/ 下 scenes.json、chunks.json 已就绪）。</p>
                 <div style="display: flex; justify-content: center;">
-                    <button id="close-no-scenes" style="padding: 10px 24px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">确定</button>
+                    <button id="close-no-scenes" style="padding: 10px 24px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">确定</button>
                 </div>
             `;
 
             const contentWhenHasScenes = `
-                <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #333; text-align: center;">选择练习场景</h3>
-                <p style="margin: 0 0 16px 0; font-size: 13px; color: #666;">选择后将在你的学习偏好中记录，下一步将选择对话长度和难度。</p>
+                <h3 style="margin: 0 0 20px 0; font-size: 18px; color: var(--text); text-align: center;">选择练习场景</h3>
+                <p style="margin: 0 0 16px 0; font-size: 13px; color: var(--text-muted);">选择后将在你的学习偏好中记录，下一步将选择对话长度和难度。</p>
                 ${suggestedBlock}
                 <div style="margin-bottom: 20px;">
-                    <div style="font-weight: 600; color: #333; margin-bottom: 8px; font-size: 14px;">全部场景</div>
+                    <div style="font-weight: 600; color: var(--text); margin-bottom: 8px; font-size: 14px;">全部场景</div>
                     <div id="available-scene-btns" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 240px; overflow-y: auto;"></div>
                 </div>
-                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e9ecef;">
-                    <button id="cancel-scene-dialog" style="padding: 10px 20px; background: #f0f0f0; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; color: #333;">取消</button>
-                    <button id="confirm-scene-dialog" disabled style="padding: 10px 20px; background: #ccc; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">确认选择</button>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
+                    <button id="cancel-scene-dialog" style="padding: 10px 20px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 14px;">取消</button>
+                    <button id="confirm-scene-dialog" disabled style="padding: 10px 20px; background: #475569; color: #94a3b8; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">确认选择</button>
                 </div>
             `;
 
@@ -1191,12 +1392,12 @@ document.addEventListener("DOMContentLoaded", function() {
                 dialog.querySelectorAll('.scene-option-btn').forEach(btn => {
                     const secEq = (btn.dataset.secondary || '') === (q != null && q !== '' ? q : '');
                 const active = lid && btn.dataset.labelId ? btn.dataset.labelId === lid : (btn.dataset.primary === p && secEq);
-                    btn.style.background = active ? '#007bff' : 'white';
-                    btn.style.color = active ? 'white' : '#333';
+                    btn.style.background = active ? 'var(--primary)' : 'var(--surface-2)';
+                    btn.style.color = active ? 'white' : 'var(--text)';
                 });
                 if (confirmBtn) {
                     confirmBtn.disabled = !s;
-                    confirmBtn.style.background = s ? '#007bff' : '#ccc';
+                    confirmBtn.style.background = s ? 'var(--primary)' : '#475569';
                 }
             }
             function scenePrimary(s) { return s.scene != null ? s.scene : (s.scene_primary != null ? s.scene_primary : s['场景一级']); }
@@ -1213,7 +1414,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 btn.dataset.secondary = secondary || '';
                 if (scene.label_id != null) btn.dataset.labelId = String(scene.label_id);
                 btn.textContent = scene.scene != null ? scene.scene : ((primary && secondary) ? (tertiary ? `${primary} - ${secondary} - ${tertiary}` : `${primary} - ${secondary}`) : primary || '未知场景');
-                btn.style.cssText = 'padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; transition: all 0.2s; white-space: nowrap;';
+                btn.style.cssText = 'padding: 10px 14px; border: 2px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text); cursor: pointer; font-size: 13px; transition: all 0.2s; white-space: nowrap;';
                 btn.addEventListener('click', () => setSelected(scene));
                 container.appendChild(btn);
             }
@@ -1224,7 +1425,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const availableContainer = dialog.querySelector('#available-scene-btns');
             if (availableScenes.length === 0) {
                 const hint = document.createElement('p');
-                hint.style.cssText = 'margin: 0; font-size: 13px; color: #888; padding: 8px 0;';
+                hint.style.cssText = 'margin: 0; font-size: 13px; color: var(--text-muted); padding: 8px 0;';
                 hint.textContent = '暂无可用场景，请先配置语块库（确认 data/ 下 scenes.json、chunks.json 已就绪）。';
                 availableContainer.appendChild(hint);
             } else {
@@ -1237,7 +1438,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             if (defaultScene && confirmBtn) {
                 confirmBtn.disabled = false;
-                confirmBtn.style.background = '#007bff';
+                confirmBtn.style.background = 'var(--primary)';
             }
 
             dialog.querySelector('#confirm-scene-dialog').addEventListener('click', () => closeDialog(selectedScene || defaultScene || null));
@@ -1267,15 +1468,15 @@ document.addEventListener("DOMContentLoaded", function() {
             overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2147483647; display: flex; align-items: center; justify-content: center;';
             const dialog = document.createElement('div');
             dialog.className = 'second-level-choice-dialog';
-            dialog.style.cssText = 'position: relative; z-index: 2147483647; background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); min-width: 380px; max-width: 90vw;';
+            dialog.style.cssText = 'position: relative; z-index: 2147483647; background: var(--surface); color: var(--text); padding: 24px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); border: 1px solid var(--border); min-width: 380px; max-width: 90vw;';
             dialog.innerHTML = `
-                <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #333; text-align: center;">选择练习场景</h3>
-                <p style="margin: 0 0 12px 0; font-size: 14px; color: #666;">已根据对话确定一级：<strong>${firstScene || '—'}</strong></p>
-                <p style="margin: 0 0 16px 0; font-size: 13px; color: #888;">请从下列三个二级中选一个，将使用该二级下所有三级的语块与句型生成英语卡片。</p>
+                <h3 style="margin: 0 0 16px 0; font-size: 18px; color: var(--text); text-align: center;">选择练习场景</h3>
+                <p style="margin: 0 0 12px 0; font-size: 14px; color: var(--text-muted);">已根据对话确定一级：<strong>${firstScene || '—'}</strong></p>
+                <p style="margin: 0 0 16px 0; font-size: 13px; color: var(--text-muted);">请从下列三个二级中选一个，将使用该二级下所有三级的语块与句型生成英语卡片。</p>
                 <div id="second-level-btns" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;"></div>
-                <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid #e9ecef;">
-                    <button id="cancel-second-level" style="padding: 10px 20px; background: #f0f0f0; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; color: #333;">取消</button>
-                    <button id="confirm-second-level" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">确认选择</button>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--border);">
+                    <button id="cancel-second-level" style="padding: 10px 20px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 14px;">取消</button>
+                    <button id="confirm-second-level" style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">确认选择</button>
                 </div>
             `;
             let selectedOption = defaultOption || null;
@@ -1286,11 +1487,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 btn.type = 'button';
                 btn.className = 'second-level-option-btn';
                 btn.textContent = opt.second_scene || opt.scene_secondary || '—';
-                btn.style.cssText = 'padding: 12px 18px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; transition: all 0.2s;';
+                btn.style.cssText = 'padding: 12px 18px; border: 2px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text); cursor: pointer; font-size: 14px; transition: all 0.2s;';
                 btn.addEventListener('click', () => {
                     selectedOption = opt;
-                    dialog.querySelectorAll('.second-level-option-btn').forEach(b => { b.style.background = 'white'; b.style.color = '#333'; b.style.borderColor = '#e0e0e0'; });
-                    btn.style.background = '#007bff'; btn.style.color = 'white'; btn.style.borderColor = '#007bff';
+                    dialog.querySelectorAll('.second-level-option-btn').forEach(b => { b.style.background = 'var(--surface-2)'; b.style.color = 'var(--text)'; b.style.borderColor = 'var(--border)'; });
+                    btn.style.background = 'var(--primary)'; btn.style.color = 'white'; btn.style.borderColor = 'var(--primary)';
                     confirmBtn.disabled = false;
                 });
                 btnContainer.appendChild(btn);
@@ -1331,26 +1532,28 @@ document.addEventListener("DOMContentLoaded", function() {
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                background: white;
+                background: var(--surface);
+                color: var(--text);
                 padding: 24px;
                 border-radius: 12px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+                border: 1px solid var(--border);
                 z-index: 10000;
                 min-width: 380px;
                 max-width: 90%;
             `;
             const difficultyBtns = difficulties.map(d => `
-                <button class="option-btn" data-type="difficulty" data-value="${d}" style="padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s;">${d}</button>
+                <button class="option-btn" data-type="difficulty" data-value="${d}" style="padding: 12px; border: 2px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text); cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s;">${d}</button>
             `).join('');
             dialog.innerHTML = `
-                <h3 style="margin: 0 0 24px 0; font-size: 20px; color: #333; text-align: center;">生成英语对话卡片</h3>
-                <div style="margin-bottom: 24px; padding: 16px; background: #f8f9fa; border-radius: 10px; border: 2px solid #e9ecef;">
-                    <label style="display: block; margin-bottom: 12px; font-weight: 700; color: #333; font-size: 15px;">🎯 难度</label>
+                <h3 style="margin: 0 0 24px 0; font-size: 20px; color: var(--text); text-align: center;">生成英语对话卡片</h3>
+                <div style="margin-bottom: 24px; padding: 16px; background: var(--surface-2); border-radius: 10px; border: 2px solid var(--border);">
+                    <label style="display: block; margin-bottom: 12px; font-weight: 700; color: var(--text); font-size: 15px;">🎯 难度</label>
                     <div style="display: flex; flex-wrap: wrap; gap: 10px;">${difficultyBtns}</div>
                 </div>
-                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; padding-top: 20px; border-top: 1px solid #e9ecef;">
-                    <button id="cancel-dialog" style="padding: 12px 24px; background: #f0f0f0; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; color: #333;">取消</button>
-                    <button id="confirm-dialog" disabled style="padding: 12px 24px; background: #ccc; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">确认生成</button>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border);">
+                    <button id="cancel-dialog" style="padding: 12px 24px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">取消</button>
+                    <button id="confirm-dialog" disabled style="padding: 12px 24px; background: #475569; color: #94a3b8; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">确认生成</button>
                 </div>
             `;
             let selectedDifficulty = null;
@@ -1359,16 +1562,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 btn.addEventListener('click', () => {
                     const value = btn.dataset.value;
                     dialog.querySelectorAll('.option-btn[data-type="difficulty"]').forEach(b => {
-                        b.style.background = 'white';
-                        b.style.borderColor = '#e0e0e0';
-                        b.style.color = '#333';
+                        b.style.background = 'var(--surface-2)';
+                        b.style.borderColor = 'var(--border)';
+                        b.style.color = 'var(--text)';
                     });
-                    btn.style.background = '#007bff';
+                    btn.style.background = 'var(--primary)';
                     btn.style.color = 'white';
-                    btn.style.borderColor = '#007bff';
+                    btn.style.borderColor = 'var(--primary)';
                     selectedDifficulty = value;
                     dialog.querySelector('#confirm-dialog').disabled = false;
-                    dialog.querySelector('#confirm-dialog').style.background = '#007bff';
+                    dialog.querySelector('#confirm-dialog').style.background = 'var(--primary)';
                 });
             });
             dialog.querySelector('#confirm-dialog').addEventListener('click', () => {
@@ -1405,7 +1608,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 originalHTML = startEnglishBtn.innerHTML;
                 startEnglishBtn.innerHTML = '<span style="font-size: 12px;">保存中...</span>';
                 
-                // 第一步：保存当前对话记忆
+                // 第一步：保存当前对话记忆（接口内会做 LLM 摘要+提取用户信息，可能较慢）
                 const response = await fetch('/api/conversation/end', {
                     method: 'POST',
                     headers: {
@@ -1421,8 +1624,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     } else {
                         addAIMessage('记忆已保存');
                     }
-                    
-                    // 场景-NPC：仅从数据库（dialogues.json）获取大场景，不使用硬编码
+
                     let bigScenes = [];
                     try {
                         const res = await fetch('/api/scene-npc/big-scenes');
@@ -1441,11 +1643,15 @@ document.addEventListener("DOMContentLoaded", function() {
                         showError('场景选择功能未加载，请刷新页面重试');
                         return;
                     }
-                    const selected = await showSceneNpcSelectionDialog(bigScenes);
+
+                    const summary = result.summary || '';
+                    const selected = await showRecommendedLearningDialog(bigScenes, summary);
                     if (!selected || !selected.small_scene_id || !selected.npc_id) {
                         return;
                     }
+                    let englishLoadingOverlay = null;
                     try {
+                        englishLoadingOverlay = showEnglishCardLoadingTip();
                         addAIMessage('正在生成英文学习对话...');
                         const englishResponse = await fetch('/api/english/generate', {
                             method: 'POST',
@@ -1459,33 +1665,37 @@ document.addEventListener("DOMContentLoaded", function() {
                         const englishResult = await englishResponse.json();
                         
                         if (englishResult.status === 'success' && englishResult.dialogue) {
+                            hideEnglishCardLoadingTip(englishLoadingOverlay);
+                            englishLoadingOverlay = null;
                             displayEnglishDialogue(
-                                englishResult.dialogue, 
+                                englishResult.dialogue,
                                 englishResult.dialogue_lines || [],
                                 englishResult.dialogue_id || '',
                                 selected.small_scene_id,
-                                selected.npc_id
+                                selected.npc_id,
+                                englishResult.card_title || ''
                             );
-                                addAIMessage('已切换到英文学习模式！现在我会用英文和你交流。');
-                                showSuccess('英文对话已生成，已切换到英文学习模式！');
-                                
-                                if (englishLearningCard) {
-                                    englishLearningCard.style.transition = 'opacity 0.3s, transform 0.3s';
-                                    englishLearningCard.style.opacity = '0';
-                                    englishLearningCard.style.transform = 'translateY(-20px)';
-                                    setTimeout(() => {
-                                        englishLearningCard.classList.add('hidden');
-                                    }, 300);
-                                }
-                            } else {
-                                await switchToEnglishLearning();
-                                showError(englishResult.message || '生成英文对话失败');
+                            addAIMessage('已切换到英文学习模式！现在我会用英文和你交流。');
+                            showSuccess('英文对话已生成，已切换到英文学习模式！');
+                            if (englishLearningCard) {
+                                englishLearningCard.style.transition = 'opacity 0.3s, transform 0.3s';
+                                englishLearningCard.style.opacity = '0';
+                                englishLearningCard.style.transform = 'translateY(-20px)';
+                                setTimeout(() => {
+                                    englishLearningCard.classList.add('hidden');
+                                }, 300);
                             }
-                        } catch (error) {
-                            console.error('Error generating english dialogue:', error);
+                        } else {
+                            hideEnglishCardLoadingTip(englishLoadingOverlay);
                             await switchToEnglishLearning();
-                            showError('生成英文对话失败：' + error.message);
+                            showError(englishResult.message || '生成英文对话失败');
                         }
+                    } catch (error) {
+                        console.error('Error generating english dialogue:', error);
+                        hideEnglishCardLoadingTip(englishLoadingOverlay);
+                        await switchToEnglishLearning();
+                        showError('生成英文对话失败：' + error.message);
+                    }
                 } else {
                     showError(result.message || '保存记忆失败');
                 }
@@ -1635,10 +1845,10 @@ document.addEventListener("DOMContentLoaded", function() {
         }).join('');
     }
     
-    // 创建英文学习卡片
-    function displayEnglishDialogue(dialogue, dialogueLines = [], dialogueId = '', smallSceneId = '', npcId = '') {
+    // 创建英文学习卡片（cardTitle 可选，如「在小区楼下跟快递员沟通」）
+    function displayEnglishDialogue(dialogue, dialogueLines = [], dialogueId = '', smallSceneId = '', npcId = '', cardTitle = '') {
         const card = document.createElement('div');
-        card.className = 'english-dialogue-card';
+        card.className = 'english-dialogue-card modern-card';
         card.dataset.dialogueId = dialogueId;
         card.dataset.dialogueLines = JSON.stringify(dialogueLines);
         card.dataset.smallSceneId = smallSceneId || '';
@@ -1648,11 +1858,12 @@ document.addEventListener("DOMContentLoaded", function() {
         let currentPlayingAudio = null;
         let currentPlayingElement = null;
         
+        const titleText = (cardTitle && cardTitle.trim()) ? cardTitle.trim() : '英文学习对话';
         card.innerHTML = `
             <div class="dialogue-header">
                 <div class="dialogue-title">
                     <span class="dialogue-icon">📚</span>
-                    <h3>英文学习对话</h3>
+                    <h3></h3>
                 </div>
                 <button class="collapse-btn" title="展开/折叠">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1686,7 +1897,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 </button>
             </div>
         `;
-        
+        const titleEl = card.querySelector('.dialogue-title h3');
+        if (titleEl) titleEl.textContent = titleText;
+
         // 展开/折叠功能
         const collapseBtn = card.querySelector('.collapse-btn');
         const content = card.querySelector('.dialogue-content');
@@ -1912,11 +2125,18 @@ document.addEventListener("DOMContentLoaded", function() {
             playNextAudio();
         });
         
-        // 开始练习功能
+        // 开始练习功能：进入练习子页面，先显示「准备练习资料」提示，再请求 API 并创建 UI
         const practiceBtn = card.querySelector('.practice-btn');
         if (practiceBtn) {
             practiceBtn.addEventListener('click', () => {
-                startPracticeMode(dialogue, card);
+                const container = getPracticePageContent();
+                if (container) {
+                    showPracticePage();
+                    showPracticeLoadingTip(container);
+                    startPracticeMode(dialogue, card, { targetContainer: container });
+                } else {
+                    startPracticeMode(dialogue, card);
+                }
             });
         }
         
@@ -2549,11 +2769,13 @@ document.addEventListener("DOMContentLoaded", function() {
             
             if (reviewResult.status === 'success') {
                 await savePracticeMemory(reviewResult.review_notes);
+                const reviewContent = getReviewPageContent();
                 displayReviewNotes(reviewResult.review_notes, {
                     dialogue_id: sessionData.dialogue_id || null,
                     small_scene_id: sessionData.small_scene_id || null,
                     npc_id: sessionData.npc_id || null
-                });
+                }, reviewContent);
+                showReviewPage();
                 showSuccess('复习笔记已生成！');
             } else {
                 showError('生成失败：' + (reviewResult.message || '未知错误'));
@@ -2608,10 +2830,11 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
     
-    // 显示复习笔记（可选 masteryContext：{dialogue_id, small_scene_id, npc_id}，有则显示「掌握了/还没掌握」自评按钮）
-    function displayReviewNotes(reviewNotes, masteryContext) {
-        const messagesList = document.getElementById('messages-list');
-        if (!messagesList) return;
+    // 显示复习笔记（可选 masteryContext；可选 targetEl：渲染到该元素则进入复习子页面展示）
+    function displayReviewNotes(reviewNotes, masteryContext, targetEl) {
+        const container = targetEl || document.getElementById('messages-list');
+        if (!container) return;
+        if (targetEl && targetEl.id === 'review-page-content') targetEl.innerHTML = '';
         
         const card = document.createElement('div');
         card.className = 'review-notes-card';
@@ -2683,29 +2906,28 @@ document.addEventListener("DOMContentLoaded", function() {
                 audio.play().catch(err => console.warn('播放复习音频失败', err));
             }
         });
-        messagesList.appendChild(card);
-        scrollToBottom();
+        container.appendChild(card);
+        if (!targetEl) scrollToBottom();
     }
     
     // 生成复习笔记HTML（三部分：AI纠错、核心句型与语块、Review短对话）
     function generateReviewNotesHTML(reviewNotes) {
         let html = '';
 
-        // 第一部分：AI 纠错
-        if (reviewNotes.corrections && reviewNotes.corrections.length > 0) {
-            html += `
-                <div class="review-section">
-                    <h4>🔧 纠错</h4>
-                    ${reviewNotes.corrections.map(c => `
-                        <div class="correction-item">
-                            <div class="error-text">❌ ${c.user_said}</div>
-                            <div class="correct-text">✅ ${c.correct}</div>
-                            ${c.explanation ? `<div class="correction-explanation">💡 ${c.explanation}</div>` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
+        // 第一部分：AI 纠错（始终显示该区块，无纠错时提示“未检测到需要纠错的内容”）
+        const correctionList = reviewNotes.corrections && Array.isArray(reviewNotes.corrections) ? reviewNotes.corrections : [];
+        html += `
+            <div class="review-section">
+                <h4>🔧 纠错</h4>
+                ${correctionList.length > 0 ? correctionList.map(c => `
+                    <div class="correction-item">
+                        <div class="error-text">❌ ${(c.user_said || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                        <div class="correct-text">✅ ${(c.correct || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                        ${(c.explanation || '') ? `<div class="correction-explanation">💡 ${String(c.explanation).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : ''}
+                    </div>
+                `).join('') : '<p class="review-no-corrections">本次练习未检测到需要纠错的内容。</p>'}
+            </div>
+        `;
 
         // 第二部分：核心句型与语块（来自数据库对应 Review）
         const hasCore = (reviewNotes.core_sentences && reviewNotes.core_sentences.trim()) ||
@@ -2952,7 +3174,7 @@ document.addEventListener("DOMContentLoaded", function() {
 // ========== 账号系统相关函数 ==========
 let currentAccountName = null;
 
-// 开口即启 Say Hello 状态
+// 开口即启 Say Hello 状态 (Cyber Mode)
 let sayHelloRecognition = null;
 let sayHelloStream = null;
 let sayHelloAudioContext = null;
@@ -2960,28 +3182,45 @@ let sayHelloAnalyser = null;
 let sayHelloDataArray = null;
 let sayHelloRafId = null;
 let sayHelloDone = false;
+let isEntering = false;
+let sayHelloCanvasRunning = false;
+let sayHelloWaveTime = 0;
+const SAY_HELLO_CONFIG = {
+    waveSpeed: 0.05,
+    waveCount: 3,
+    baseAmplitude: 20,
+    boostSensitivity: 3
+};
 
 function showSayHelloScreen() {
     const sayHelloOverlay = document.getElementById('say-hello-overlay');
     const loginOverlay = document.getElementById('login-overlay');
     const chatContainer = document.getElementById('chat-container');
-    const statusText = document.getElementById('status-text');
+    const instruction = document.getElementById('say-hello-instruction');
+    const hint = document.getElementById('say-hello-hint');
+    const dot = document.getElementById('say-hello-dot');
     if (sayHelloOverlay) {
         sayHelloOverlay.classList.remove('hidden');
         sayHelloOverlay.style.display = 'flex';
         sayHelloOverlay.classList.remove('success-mode');
     }
-    if (statusText) statusText.textContent = '点击下方按钮或说 Hello 开始...';
+    if (instruction) instruction.style.display = 'none';
+    if (hint) hint.textContent = "Say 'Hello' to Start";
+    if (dot) dot.classList.remove('active');
     if (loginOverlay) {
         loginOverlay.classList.add('hidden');
         loginOverlay.style.display = 'none';
+        loginOverlay.classList.remove('entry-ready', 'active-mode');
     }
     if (chatContainer) chatContainer.style.display = 'none';
     sayHelloDone = false;
+    isEntering = false;
+    sayHelloWaveTime = 0;
     initSayHello();
 }
 
 function stopSayHello() {
+    sayHelloCanvasRunning = false;
     if (sayHelloRafId != null) {
         cancelAnimationFrame(sayHelloRafId);
         sayHelloRafId = null;
@@ -3002,107 +3241,172 @@ function stopSayHello() {
     sayHelloDataArray = null;
 }
 
+/** 统一入场：Say Hello 退场（白光+飞出） + 登录界面弹性浮现 */
+function triggerAppEntry() {
+    if (isEntering) return;
+    isEntering = true;
+    stopSayHello();
+    const sayHelloOverlay = document.getElementById('say-hello-overlay');
+    const loginOverlay = document.getElementById('login-overlay');
+    if (sayHelloOverlay) {
+        sayHelloOverlay.classList.remove('success-mode');
+        sayHelloOverlay.classList.add('exit-mode');
+    }
+    if (loginOverlay) {
+        loginOverlay.classList.remove('hidden');
+        loginOverlay.classList.add('entry-ready');
+        void loginOverlay.offsetWidth;
+        loginOverlay.classList.add('active-mode');
+    }
+    setTimeout(() => {
+        if (sayHelloOverlay) {
+            sayHelloOverlay.style.display = 'none';
+            sayHelloOverlay.classList.remove('exit-mode');
+        }
+    }, 1000);
+}
+
 function triggerSuccessAnimation() {
     if (sayHelloDone) return;
     sayHelloDone = true;
-    stopSayHello();
-    const sayHelloOverlay = document.getElementById('say-hello-overlay');
-    if (sayHelloOverlay) {
-        sayHelloOverlay.classList.add('success-mode');
-        setTimeout(() => {
-            sayHelloOverlay.classList.add('hidden');
-            sayHelloOverlay.style.display = 'none';
-            showLoginInterface();
-        }, 1000);
-    } else {
-        showLoginInterface();
-    }
+    triggerAppEntry();
+}
+
+function createRipple(x, y) {
+    const ripple = document.createElement('div');
+    ripple.classList.add('click-ripple');
+    const size = Math.max(window.innerWidth, window.innerHeight) * 2;
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (x - size / 2) + 'px';
+    ripple.style.top = (y - size / 2) + 'px';
+    document.body.appendChild(ripple);
+    setTimeout(() => { if (ripple.parentNode) ripple.parentNode.removeChild(ripple); }, 600);
 }
 
 function initSayHello() {
     const sayHelloOverlay = document.getElementById('say-hello-overlay');
-    const micCore = document.getElementById('mic-core');
+    const canvas = document.getElementById('say-hello-visualizer');
     const manualBtn = document.getElementById('say-hello-manual-btn');
-    const statusText = document.getElementById('status-text');
-    const rippleEls = document.querySelectorAll('.say-hello-overlay [data-ripple]');
-    if (!sayHelloOverlay || !micCore) return;
+    const dot = document.getElementById('say-hello-dot');
+    const hint = document.getElementById('say-hello-hint');
+    const instruction = document.getElementById('say-hello-instruction');
+    if (!sayHelloOverlay || !canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+        canvas.width = sayHelloOverlay.offsetWidth || window.innerWidth;
+        canvas.height = sayHelloOverlay.offsetHeight || window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
     if (manualBtn) {
-        manualBtn.addEventListener('click', () => {
-            stopSayHello();
-            sayHelloOverlay.classList.add('hidden');
-            sayHelloOverlay.style.display = 'none';
-            showLoginInterface();
+        manualBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            triggerAppEntry();
         });
     }
 
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognitionAPI) {
-        if (manualBtn) manualBtn.textContent = '点击进入';
-        if (statusText) statusText.textContent = '当前浏览器不支持语音，请点击下方按钮进入';
+        if (hint) hint.textContent = '当前浏览器不支持语音，请点击下方按钮进入';
         return;
     }
 
-    const SILENCE_THRESHOLD = 0.04;
-    function runVolumeLoop() {
-        if (!sayHelloAnalyser || !sayHelloDataArray || !micCore) return;
+    function drawWaves(boost) {
+        const w = canvas.width;
+        const h = canvas.height;
+        const centerY = h / 2;
+        ctx.globalCompositeOperation = 'screen';
+        for (let i = 0; i < SAY_HELLO_CONFIG.waveCount; i++) {
+            ctx.beginPath();
+            ctx.lineWidth = 2 + (boost * 0.1);
+            const hue = (sayHelloWaveTime * 50 + i * 60) % 360;
+            ctx.strokeStyle = 'hsl(' + hue + ', 70%, 60%)';
+            for (let x = 0; x < w; x += 5) {
+                const yOffset = Math.sin(x * 0.005 + sayHelloWaveTime + i) * (SAY_HELLO_CONFIG.baseAmplitude + boost * 5) * Math.sin(x * 0.01 + sayHelloWaveTime * 2);
+                const envelope = 1 - Math.abs((x / w) * 2 - 1);
+                ctx.lineTo(x, centerY + yOffset * envelope * envelope);
+            }
+            ctx.stroke();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function renderFrame() {
+        if (!sayHelloCanvasRunning || !sayHelloAnalyser || !sayHelloDataArray) return;
         sayHelloAnalyser.getByteFrequencyData(sayHelloDataArray);
         let sum = 0;
         for (let i = 0; i < sayHelloDataArray.length; i++) sum += sayHelloDataArray[i];
-        const avg = sum / sayHelloDataArray.length;
-        const normalized = Math.min(1, (avg / 255) * 2.5);
-        if (normalized < SILENCE_THRESHOLD) {
-            micCore.style.removeProperty('transform');
-            rippleEls.forEach(el => el.classList.remove('active-ripple'));
-        } else {
-            const scale = 1 + normalized * 0.5;
-            micCore.style.transform = `scale(${scale})`;
-            rippleEls.forEach(el => el.classList.add('active-ripple'));
-        }
-        sayHelloRafId = requestAnimationFrame(runVolumeLoop);
+        const averageVolume = sum / sayHelloDataArray.length;
+        const boost = (averageVolume / 255) * 50;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        drawWaves(boost);
+        sayHelloWaveTime += SAY_HELLO_CONFIG.waveSpeed;
+        sayHelloRafId = requestAnimationFrame(renderFrame);
     }
 
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        sayHelloStream = stream;
-        if (statusText) statusText.textContent = 'Listening...';
-        sayHelloAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-        sayHelloAnalyser = sayHelloAudioContext.createAnalyser();
-        sayHelloAnalyser.smoothingTimeConstant = 0.8;
-        sayHelloAnalyser.fftSize = 1024;
-        const source = sayHelloAudioContext.createMediaStreamSource(stream);
-        source.connect(sayHelloAnalyser);
-        sayHelloDataArray = new Uint8Array(sayHelloAnalyser.frequencyBinCount);
-        runVolumeLoop();
-    }).catch(() => {
-        if (statusText) statusText.textContent = '无法访问麦克风，请点击下方按钮进入';
-    });
+    function startExperience() {
+        if (sayHelloCanvasRunning) return;
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+            sayHelloStream = stream;
+            sayHelloAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            sayHelloAnalyser = sayHelloAudioContext.createAnalyser();
+            sayHelloAnalyser.smoothingTimeConstant = 0.8;
+            sayHelloAnalyser.fftSize = 2048;
+            const source = sayHelloAudioContext.createMediaStreamSource(stream);
+            source.connect(sayHelloAnalyser);
+            sayHelloDataArray = new Uint8Array(sayHelloAnalyser.frequencyBinCount);
+            sayHelloCanvasRunning = true;
+            if (dot) dot.classList.add('active');
+            if (hint) hint.textContent = "Say 'Hello' / 'Start'";
+            if (instruction) instruction.style.display = 'none';
+            renderFrame();
+            sayHelloRecognition = new SpeechRecognitionAPI();
+            sayHelloRecognition.lang = 'en-US';
+            sayHelloRecognition.continuous = true;
+            sayHelloRecognition.interimResults = true;
+            sayHelloRecognition.onresult = function(event) {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                transcript = transcript.toLowerCase().trim();
+                if (/hello|hi\b|hey\b|start/.test(transcript)) {
+                    triggerSuccessAnimation();
+                }
+            };
+            sayHelloRecognition.onerror = function() {};
+            try {
+                sayHelloRecognition.start();
+            } catch (err) {}
+        }).catch(function() {
+            if (hint) hint.textContent = 'Microphone access denied. Tap button below.';
+        });
+    }
 
-    sayHelloRecognition = new SpeechRecognitionAPI();
-    sayHelloRecognition.lang = 'en-US';
-    sayHelloRecognition.continuous = true;
-    sayHelloRecognition.interimResults = true;
-    sayHelloRecognition.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            transcript += event.results[i][0].transcript;
-        }
-        transcript = transcript.toLowerCase().trim();
-        if (/hello|hi\b|hey\b|start/.test(transcript)) {
-            triggerSuccessAnimation();
-        }
-    };
-    sayHelloRecognition.onerror = () => {};
-    try {
-        sayHelloRecognition.start();
-    } catch (e) {}
+    startExperience();
 }
 
 async function initializeAccountSystem() {
     // 每次启动先显示「开口即启」Say Hello 欢迎屏，完成后再显示登录界面
     const savedAccount = localStorage.getItem('current_account');
-    
+
     showSayHelloScreen();
-    
+
+    document.addEventListener('click', function(e) {
+        const sayHelloOverlay = document.getElementById('say-hello-overlay');
+        if (!sayHelloOverlay || sayHelloOverlay.style.display === 'none') return;
+        if (sayHelloOverlay.classList.contains('exit-mode') || isEntering) return;
+        createRipple(e.clientX, e.clientY);
+        if (typeof initAudio === 'function') {
+            initAudio().then(() => triggerAppEntry()).catch(() => triggerAppEntry());
+        } else {
+            triggerAppEntry();
+        }
+    }, true);
+
     // 绑定登录按钮事件
     const loginBtn = document.getElementById('login-btn');
     const usernameInput = document.getElementById('username-input');
@@ -3172,10 +3476,11 @@ function showChatInterface() {
     const loginOverlay = document.getElementById('login-overlay');
     const chatContainer = document.getElementById('chat-container');
     
-    // 确保登录界面完全隐藏
+    // 确保登录界面完全隐藏（移除转场类，否则 entry-ready 的 display:flex !important 会盖过 hidden）
     if (loginOverlay) {
+        loginOverlay.classList.remove('entry-ready', 'active-mode');
         loginOverlay.classList.add('hidden');
-        loginOverlay.style.display = 'none'; // 双重保险
+        loginOverlay.style.display = 'none';
     }
     
     // 确保对话界面显示
@@ -3223,7 +3528,20 @@ async function handleLogin() {
             body: JSON.stringify({ account_name: username })
         });
         
-        const result = await response.json();
+        let result;
+        try {
+            result = await response.json();
+        } catch (parseErr) {
+            console.error('Login response not JSON:', parseErr);
+            if (typeof window.showError === 'function') {
+                window.showError('登录失败：服务器返回异常，请检查后端是否正常运行（' + (response.status || '') + '）');
+            }
+            if (loginBtn) {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<span>开始使用</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+            }
+            return;
+        }
         
         if (result.status === 'success') {
             currentAccountName = username;
@@ -3392,5 +3710,29 @@ function updateUserInfo(username) {
     if (userInfo) {
         userInfo.style.display = 'flex';
     }
+
+    // 子页面：返回按钮与 hash 路由
+    const practicePageBackBtn = document.getElementById('practice-page-back-btn');
+    const reviewPageBackBtn = document.getElementById('review-page-back-btn');
+    if (practicePageBackBtn) {
+        practicePageBackBtn.addEventListener('click', () => {
+            if (typeof practiceState !== 'undefined' && practiceState && practiceState.isActive) {
+                if (!confirm('结束当前练习并返回主页？')) return;
+            }
+            if (typeof window.showMainPage === 'function') window.showMainPage();
+        });
+    }
+    if (reviewPageBackBtn) {
+        reviewPageBackBtn.addEventListener('click', () => {
+            if (typeof window.showMainPage === 'function') window.showMainPage();
+        });
+    }
+    if (typeof window.applyPageFromHash === 'function') {
+        window.removeEventListener('hashchange', window.applyPageFromHash);
+        window.addEventListener('hashchange', window.applyPageFromHash);
+    }
+    // 登录后确保显示主页面（对话+卡片）
+    if (typeof window.showMainPage === 'function') window.showMainPage();
 }
 
+// 分栏（Tabs）已取消：对话、学习卡片、复习笔记在同一页顺序展示，无需切换逻辑

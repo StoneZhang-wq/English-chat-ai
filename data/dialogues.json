@@ -1,0 +1,3207 @@
+[
+  {
+    "big_scene": "daily",
+    "small_scene": "home",
+    "npc": "family",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "DL-HOME-FAMILY-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "What's for dinner tonight?",
+        "hint": "ask about dinner"
+      },
+      {
+        "role": "A",
+        "content": "We're having pasta.",
+        "hint": "We're having + food"
+      },
+      {
+        "role": "B",
+        "content": "Can I help?",
+        "hint": "offer help"
+      },
+      {
+        "role": "A",
+        "content": "Sure, set the table.",
+        "hint": "simple request"
+      },
+      {
+        "role": "B",
+        "content": "Where are the plates?",
+        "hint": "ask location"
+      },
+      {
+        "role": "A",
+        "content": "In the cabinet.",
+        "hint": "location reply"
+      },
+      {
+        "role": "B",
+        "content": "Got it. Thanks!",
+        "hint": "acknowledge"
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "What's for...? / We're having + food / Can I help?",
+    "core_chunks": "for dinner / set the table / in the cabinet / you're welcome",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "家 / 居家",
+    "npc_name": "家人"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "home",
+    "npc": "family",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "DL-HOME-FAMILY-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "What's for breakfast?",
+        "hint": "ask about meal"
+      },
+      {
+        "role": "A",
+        "content": "We're having eggs and toast.",
+        "hint": "We're having + food"
+      },
+      {
+        "role": "B",
+        "content": "Can I help?",
+        "hint": "offer help"
+      },
+      {
+        "role": "A",
+        "content": "Sure, make the coffee.",
+        "hint": "simple request"
+      },
+      {
+        "role": "B",
+        "content": "Where's the sugar?",
+        "hint": "ask location"
+      },
+      {
+        "role": "A",
+        "content": "On the counter.",
+        "hint": "location reply"
+      },
+      {
+        "role": "B",
+        "content": "Got it. Thanks!",
+        "hint": "acknowledge"
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "What's for...? / We're having + food / Can I help?",
+    "core_chunks": "for breakfast / make the coffee / on the counter / no problem",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "家 / 居家",
+    "npc_name": "家人"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "home",
+    "npc": "family",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "DL-HOME-FAMILY-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "What's for lunch?",
+        "hint": "ask about meal"
+      },
+      {
+        "role": "A",
+        "content": "We're having sandwiches.",
+        "hint": "We're having + food"
+      },
+      {
+        "role": "B",
+        "content": "Can I help?",
+        "hint": "offer help"
+      },
+      {
+        "role": "A",
+        "content": "Sure, wash the vegetables.",
+        "hint": "simple request"
+      },
+      {
+        "role": "B",
+        "content": "Where's the cutting board?",
+        "hint": "ask location"
+      },
+      {
+        "role": "A",
+        "content": "In the drawer.",
+        "hint": "location reply"
+      },
+      {
+        "role": "B",
+        "content": "Got it. Thanks!",
+        "hint": "acknowledge"
+      },
+      {
+        "role": "A",
+        "content": "Anytime.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "What's for...? / We're having + food / Can I help?",
+    "core_chunks": "for lunch / wash the vegetables / in the drawer / anytime",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "家 / 居家",
+    "npc_name": "家人"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "home",
+    "npc": "roommate",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "DL-HOME-ROOMMATE-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Are you using the bathroom?",
+        "hint": "ask if in use"
+      },
+      {
+        "role": "A",
+        "content": "I'll be out in five minutes.",
+        "hint": "I'll be out in + time"
+      },
+      {
+        "role": "B",
+        "content": "No rush. I can wait.",
+        "hint": "no rush"
+      },
+      {
+        "role": "A",
+        "content": "Thanks for waiting.",
+        "hint": "thank"
+      },
+      {
+        "role": "B",
+        "content": "Did you see my keys?",
+        "hint": "ask about lost item"
+      },
+      {
+        "role": "A",
+        "content": "They're on the table.",
+        "hint": "They're + location"
+      },
+      {
+        "role": "B",
+        "content": "Found them. Thanks!",
+        "hint": "acknowledge"
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Are you using...? / I'll be out in + time / They're + location",
+    "core_chunks": "no rush / thanks for waiting / on the table",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "家 / 居家",
+    "npc_name": "室友"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "home",
+    "npc": "roommate",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "DL-HOME-ROOMMATE-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Are you using the washing machine?",
+        "hint": "ask if in use"
+      },
+      {
+        "role": "A",
+        "content": "I'll be done in ten minutes.",
+        "hint": "I'll be done in + time"
+      },
+      {
+        "role": "B",
+        "content": "No rush. I can wait.",
+        "hint": "no rush"
+      },
+      {
+        "role": "A",
+        "content": "Thanks for waiting.",
+        "hint": "thank"
+      },
+      {
+        "role": "B",
+        "content": "Did you see my charger?",
+        "hint": "ask about lost item"
+      },
+      {
+        "role": "A",
+        "content": "It's on the sofa.",
+        "hint": "It's + location"
+      },
+      {
+        "role": "B",
+        "content": "Found it. Thanks!",
+        "hint": "acknowledge"
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Are you using...? / I'll be done in + time / It's + location",
+    "core_chunks": "no rush / thanks for waiting / on the sofa",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "家 / 居家",
+    "npc_name": "室友"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "home",
+    "npc": "roommate",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "DL-HOME-ROOMMATE-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Are you using the kitchen?",
+        "hint": "ask if in use"
+      },
+      {
+        "role": "A",
+        "content": "I'll be done in a minute.",
+        "hint": "I'll be done in + time"
+      },
+      {
+        "role": "B",
+        "content": "No rush. I can wait.",
+        "hint": "no rush"
+      },
+      {
+        "role": "A",
+        "content": "Thanks for waiting.",
+        "hint": "thank"
+      },
+      {
+        "role": "B",
+        "content": "Did you see my phone?",
+        "hint": "ask about lost item"
+      },
+      {
+        "role": "A",
+        "content": "It's by the window.",
+        "hint": "It's + location"
+      },
+      {
+        "role": "B",
+        "content": "Found it. Thanks!",
+        "hint": "acknowledge"
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Are you using...? / I'll be done in + time / It's + location",
+    "core_chunks": "no rush / thanks for waiting / by the window",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "家 / 居家",
+    "npc_name": "室友"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "community",
+    "npc": "neighbor",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "DL-COMM-NEIGHBOR-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi! Nice day, isn't it?",
+        "hint": "greeting / weather"
+      },
+      {
+        "role": "A",
+        "content": "Yeah, it's lovely.",
+        "hint": "agree"
+      },
+      {
+        "role": "B",
+        "content": "Are you heading out?",
+        "hint": "ask about plans"
+      },
+      {
+        "role": "A",
+        "content": "Just going to the store.",
+        "hint": "Just + activity"
+      },
+      {
+        "role": "B",
+        "content": "Okay. See you later!",
+        "hint": "goodbye"
+      },
+      {
+        "role": "A",
+        "content": "See you!",
+        "hint": "goodbye"
+      }
+    ],
+    "core_sentences": "Nice day, isn't it? / Just + activity / See you later",
+    "core_chunks": "nice day / heading out / see you later",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "小区 / 楼下",
+    "npc_name": "邻居"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "community",
+    "npc": "neighbor",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "DL-COMM-NEIGHBOR-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi! How are you?",
+        "hint": "greeting"
+      },
+      {
+        "role": "A",
+        "content": "I'm good, thanks. And you?",
+        "hint": "return question"
+      },
+      {
+        "role": "B",
+        "content": "I'm fine. Busy day?",
+        "hint": "ask about day"
+      },
+      {
+        "role": "A",
+        "content": "Just walking the dog.",
+        "hint": "Just + activity"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Have a good one!",
+        "hint": "goodbye"
+      },
+      {
+        "role": "A",
+        "content": "You too!",
+        "hint": "goodbye"
+      }
+    ],
+    "core_sentences": "How are you? / Just + activity / Have a good one",
+    "core_chunks": "how are you / walking the dog / you too",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "小区 / 楼下",
+    "npc_name": "邻居"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "community",
+    "npc": "neighbor",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "DL-COMM-NEIGHBOR-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi! Going somewhere?",
+        "hint": "greeting / ask"
+      },
+      {
+        "role": "A",
+        "content": "Yeah, just picking up a package.",
+        "hint": "Just + activity"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Take care!",
+        "hint": "goodbye"
+      },
+      {
+        "role": "A",
+        "content": "Thanks, you too!",
+        "hint": "goodbye"
+      }
+    ],
+    "core_sentences": "Going somewhere? / Just + activity / Take care",
+    "core_chunks": "picking up / take care / you too",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "小区 / 楼下",
+    "npc_name": "邻居"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "community",
+    "npc": "security",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "DL-COMM-SECURITY-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Excuse me, where is Building 3?",
+        "hint": "ask for directions"
+      },
+      {
+        "role": "A",
+        "content": "It's straight ahead, on your left.",
+        "hint": "give directions"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Is there parking nearby?",
+        "hint": "ask about parking"
+      },
+      {
+        "role": "A",
+        "content": "Yes, the lot is behind that building.",
+        "hint": "location"
+      },
+      {
+        "role": "B",
+        "content": "Got it. Thank you!",
+        "hint": "thank"
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Where is...? / It's + direction / Is there + noun",
+    "core_chunks": "excuse me / straight ahead / parking nearby",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "小区 / 楼下",
+    "npc_name": "保安"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "community",
+    "npc": "security",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "DL-COMM-SECURITY-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Excuse me, where is the main gate?",
+        "hint": "ask for directions"
+      },
+      {
+        "role": "A",
+        "content": "Go straight, then turn right.",
+        "hint": "give directions"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Is the gym open now?",
+        "hint": "ask about facility"
+      },
+      {
+        "role": "A",
+        "content": "Yes, it opens at 6 a.m.",
+        "hint": "time info"
+      },
+      {
+        "role": "B",
+        "content": "Got it. Thank you!",
+        "hint": "thank"
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Where is...? / Go straight / Is + place + open",
+    "core_chunks": "excuse me / turn right / no problem",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "小区 / 楼下",
+    "npc_name": "保安"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "community",
+    "npc": "security",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "DL-COMM-SECURITY-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Excuse me, where can I find the elevator?",
+        "hint": "ask for directions"
+      },
+      {
+        "role": "A",
+        "content": "It's in the lobby, on your right.",
+        "hint": "give directions"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Do I need a pass?",
+        "hint": "ask about access"
+      },
+      {
+        "role": "A",
+        "content": "No, visitors can use it.",
+        "hint": "clarify"
+      },
+      {
+        "role": "B",
+        "content": "Got it. Thank you!",
+        "hint": "thank"
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Where can I find...? / Do I need...?",
+    "core_chunks": "excuse me / in the lobby / you're welcome",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "小区 / 楼下",
+    "npc_name": "保安"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "community",
+    "npc": "courier",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "DL-COMM-COURIER-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, I have a package for you.",
+        "hint": "announce delivery"
+      },
+      {
+        "role": "A",
+        "content": "Oh, thanks! Is it from Amazon?",
+        "hint": "ask about sender"
+      },
+      {
+        "role": "B",
+        "content": "Yes. Can you sign here?",
+        "hint": "ask for signature"
+      },
+      {
+        "role": "A",
+        "content": "Sure. Here you go.",
+        "hint": "comply"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Have a good day!",
+        "hint": "closing"
+      },
+      {
+        "role": "A",
+        "content": "You too!",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I have a package for you / Can you sign here?",
+    "core_chunks": "have a package / sign here / have a good day",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "小区 / 楼下",
+    "npc_name": "快递员"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "community",
+    "npc": "courier",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "DL-COMM-COURIER-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, delivery for Room 502.",
+        "hint": "announce delivery"
+      },
+      {
+        "role": "A",
+        "content": "That's me. What is it?",
+        "hint": "confirm / ask"
+      },
+      {
+        "role": "B",
+        "content": "A parcel. Please sign here.",
+        "hint": "request signature"
+      },
+      {
+        "role": "A",
+        "content": "Okay. Done.",
+        "hint": "comply"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Bye!",
+        "hint": "closing"
+      },
+      {
+        "role": "A",
+        "content": "Bye!",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Delivery for + place / Please sign here",
+    "core_chunks": "that's me / sign here",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "小区 / 楼下",
+    "npc_name": "快递员"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "community",
+    "npc": "courier",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "DL-COMM-COURIER-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, I'm looking for Zhang San.",
+        "hint": "announce recipient"
+      },
+      {
+        "role": "A",
+        "content": "That's me. I have a package?",
+        "hint": "confirm"
+      },
+      {
+        "role": "B",
+        "content": "Yes. Sign here, please.",
+        "hint": "request signature"
+      },
+      {
+        "role": "A",
+        "content": "Sure. Thank you!",
+        "hint": "comply"
+      },
+      {
+        "role": "B",
+        "content": "You're welcome. Take care!",
+        "hint": "closing"
+      },
+      {
+        "role": "A",
+        "content": "You too!",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I'm looking for + name / Sign here, please",
+    "core_chunks": "looking for / sign here / take care",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "小区 / 楼下",
+    "npc_name": "快递员"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "community",
+    "npc": "delivery",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "DL-COMM-DELIVERY-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, your order is here.",
+        "hint": "announce delivery"
+      },
+      {
+        "role": "A",
+        "content": "Great! How much is it?",
+        "hint": "ask price"
+      },
+      {
+        "role": "B",
+        "content": "Forty-five yuan.",
+        "hint": "state price"
+      },
+      {
+        "role": "A",
+        "content": "Here you go. Keep the change.",
+        "hint": "pay / tip"
+      },
+      {
+        "role": "B",
+        "content": "Thanks! Enjoy your meal.",
+        "hint": "closing"
+      },
+      {
+        "role": "A",
+        "content": "Thanks!",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Your order is here / How much is it?",
+    "core_chunks": "your order / how much / keep the change",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "小区 / 楼下",
+    "npc_name": "外卖员"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "community",
+    "npc": "delivery",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "DL-COMM-DELIVERY-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, food delivery for Li Si.",
+        "hint": "announce delivery"
+      },
+      {
+        "role": "A",
+        "content": "That's me. Thanks!",
+        "hint": "confirm"
+      },
+      {
+        "role": "B",
+        "content": "The total is thirty yuan.",
+        "hint": "state price"
+      },
+      {
+        "role": "A",
+        "content": "Here. Thank you!",
+        "hint": "pay"
+      },
+      {
+        "role": "B",
+        "content": "Enjoy! Bye!",
+        "hint": "closing"
+      },
+      {
+        "role": "A",
+        "content": "Bye!",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Food delivery for + name / The total is + amount",
+    "core_chunks": "food delivery / the total / enjoy",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "小区 / 楼下",
+    "npc_name": "外卖员"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "community",
+    "npc": "delivery",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "DL-COMM-DELIVERY-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, delivery. Is this Room 301?",
+        "hint": "confirm address"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Come in.",
+        "hint": "confirm"
+      },
+      {
+        "role": "B",
+        "content": "That'll be fifty yuan.",
+        "hint": "state price"
+      },
+      {
+        "role": "A",
+        "content": "Okay. Here's fifty.",
+        "hint": "pay"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Enjoy!",
+        "hint": "closing"
+      },
+      {
+        "role": "A",
+        "content": "Thanks!",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Is this + place? / That'll be + amount",
+    "core_chunks": "come in / that'll be / enjoy",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "小区 / 楼下",
+    "npc_name": "外卖员"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "park",
+    "npc": "passerby",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "DL-PARK-PASSERBY-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Excuse me, what time is it?",
+        "hint": "ask time"
+      },
+      {
+        "role": "A",
+        "content": "It's about three o'clock.",
+        "hint": "It's about + time"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Do you know where the exit is?",
+        "hint": "ask directions"
+      },
+      {
+        "role": "A",
+        "content": "Yes, it's that way.",
+        "hint": "point direction"
+      },
+      {
+        "role": "B",
+        "content": "Got it. Thank you!",
+        "hint": "thank"
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "What time is it? / Do you know where...?",
+    "core_chunks": "excuse me / about three / that way",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "公园 / 户外",
+    "npc_name": "路人"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "park",
+    "npc": "passerby",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "DL-PARK-PASSERBY-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Excuse me, is there a restroom nearby?",
+        "hint": "ask location"
+      },
+      {
+        "role": "A",
+        "content": "Yes, over there by the trees.",
+        "hint": "give location"
+      },
+      {
+        "role": "B",
+        "content": "Thanks a lot!",
+        "hint": "thank"
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Is there a + place nearby?",
+    "core_chunks": "excuse me / over there",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "公园 / 户外",
+    "npc_name": "路人"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "park",
+    "npc": "passerby",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "DL-PARK-PASSERBY-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, is this seat taken?",
+        "hint": "ask about seat"
+      },
+      {
+        "role": "A",
+        "content": "No, go ahead.",
+        "hint": "invite"
+      },
+      {
+        "role": "B",
+        "content": "Thanks!",
+        "hint": "thank"
+      },
+      {
+        "role": "A",
+        "content": "Sure.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Is this seat taken?",
+    "core_chunks": "go ahead",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "公园 / 户外",
+    "npc_name": "路人"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "park",
+    "npc": "elder",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "DL-PARK-ELDER-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Good morning! Nice weather today.",
+        "hint": "greeting / weather"
+      },
+      {
+        "role": "A",
+        "content": "Yes, perfect for a walk.",
+        "hint": "agree"
+      },
+      {
+        "role": "B",
+        "content": "Do you come here often?",
+        "hint": "ask habit"
+      },
+      {
+        "role": "A",
+        "content": "Every morning. It's good for my health.",
+        "hint": "frequency + reason"
+      },
+      {
+        "role": "B",
+        "content": "That's great. Have a nice day!",
+        "hint": "closing"
+      },
+      {
+        "role": "A",
+        "content": "You too!",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Do you come here often? / Every + time",
+    "core_chunks": "good morning / nice weather / good for health",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "公园 / 户外",
+    "npc_name": "晨练老人"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "park",
+    "npc": "elder",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "DL-PARK-ELDER-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi! Are you doing tai chi?",
+        "hint": "ask activity"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Want to join?",
+        "hint": "invite"
+      },
+      {
+        "role": "B",
+        "content": "Maybe another time. Thanks!",
+        "hint": "decline politely"
+      },
+      {
+        "role": "A",
+        "content": "Anytime. Take care!",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Are you doing...? / Want to join?",
+    "core_chunks": "another time / anytime",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "公园 / 户外",
+    "npc_name": "晨练老人"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "park",
+    "npc": "elder",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "DL-PARK-ELDER-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Good morning! Beautiful day.",
+        "hint": "greeting"
+      },
+      {
+        "role": "A",
+        "content": "It is. Enjoy your walk.",
+        "hint": "response"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. You too!",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "Beautiful day / Enjoy your + activity",
+    "core_chunks": "beautiful day / enjoy",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "公园 / 户外",
+    "npc_name": "晨练老人"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "hospital",
+    "npc": "doctor",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "DL-HOSP-DOCTOR-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "What brings you here today?",
+        "hint": "ask reason"
+      },
+      {
+        "role": "A",
+        "content": "I have a headache and a fever.",
+        "hint": "I have + symptoms"
+      },
+      {
+        "role": "B",
+        "content": "How long have you had it?",
+        "hint": "ask duration"
+      },
+      {
+        "role": "A",
+        "content": "About two days.",
+        "hint": "duration"
+      },
+      {
+        "role": "B",
+        "content": "Okay. I'll prescribe some medicine. Rest well.",
+        "hint": "diagnosis / advice"
+      },
+      {
+        "role": "A",
+        "content": "Thank you, doctor.",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "What brings you here? / I have + symptoms / How long...?",
+    "core_chunks": "have a headache / how long / rest well",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "医院 / 诊所",
+    "npc_name": "医生"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "hospital",
+    "npc": "doctor",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "DL-HOSP-DOCTOR-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "What seems to be the problem?",
+        "hint": "ask reason"
+      },
+      {
+        "role": "A",
+        "content": "I have a sore throat.",
+        "hint": "I have + symptom"
+      },
+      {
+        "role": "B",
+        "content": "When did it start?",
+        "hint": "ask when"
+      },
+      {
+        "role": "A",
+        "content": "Yesterday morning.",
+        "hint": "time"
+      },
+      {
+        "role": "B",
+        "content": "Take this medicine twice a day. Drink lots of water.",
+        "hint": "advice"
+      },
+      {
+        "role": "A",
+        "content": "Thank you.",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "What seems to be the problem? / I have + symptom",
+    "core_chunks": "sore throat / twice a day",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "医院 / 诊所",
+    "npc_name": "医生"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "hospital",
+    "npc": "doctor",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "DL-HOSP-DOCTOR-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "How can I help you?",
+        "hint": "ask reason"
+      },
+      {
+        "role": "A",
+        "content": "I have a stomachache.",
+        "hint": "I have + symptom"
+      },
+      {
+        "role": "B",
+        "content": "Did you eat anything unusual?",
+        "hint": "ask cause"
+      },
+      {
+        "role": "A",
+        "content": "Maybe. I had seafood last night.",
+        "hint": "answer"
+      },
+      {
+        "role": "B",
+        "content": "Rest today. Avoid oily food.",
+        "hint": "advice"
+      },
+      {
+        "role": "A",
+        "content": "Okay. Thanks, doctor.",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "How can I help you? / I have + symptom",
+    "core_chunks": "stomachache / avoid oily food",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "医院 / 诊所",
+    "npc_name": "医生"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "hospital",
+    "npc": "nurse",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "DL-HOSP-NURSE-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, I have an appointment at 10.",
+        "hint": "announce appointment"
+      },
+      {
+        "role": "A",
+        "content": "Name, please?",
+        "hint": "ask for name"
+      },
+      {
+        "role": "B",
+        "content": "Zhang San.",
+        "hint": "give name"
+      },
+      {
+        "role": "A",
+        "content": "Please wait. The doctor will call you soon.",
+        "hint": "ask to wait"
+      },
+      {
+        "role": "B",
+        "content": "Thank you.",
+        "hint": "thank"
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I have an appointment at + time / Please wait",
+    "core_chunks": "have an appointment / call you soon",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "医院 / 诊所",
+    "npc_name": "护士"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "hospital",
+    "npc": "nurse",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "DL-HOSP-NURSE-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Where is the blood test room?",
+        "hint": "ask location"
+      },
+      {
+        "role": "A",
+        "content": "Room 205, second floor.",
+        "hint": "give location"
+      },
+      {
+        "role": "B",
+        "content": "Do I need to make an appointment?",
+        "hint": "ask procedure"
+      },
+      {
+        "role": "A",
+        "content": "No, just go there and take a number.",
+        "hint": "explain"
+      },
+      {
+        "role": "B",
+        "content": "Thanks!",
+        "hint": "thank"
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Where is...? / Do I need to...?",
+    "core_chunks": "blood test / take a number",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "医院 / 诊所",
+    "npc_name": "护士"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "hospital",
+    "npc": "nurse",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "DL-HOSP-NURSE-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "I need to pick up my prescription.",
+        "hint": "state need"
+      },
+      {
+        "role": "A",
+        "content": "The pharmacy is on the first floor.",
+        "hint": "give location"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Which way?",
+        "hint": "ask direction"
+      },
+      {
+        "role": "A",
+        "content": "Turn left, then straight ahead.",
+        "hint": "give direction"
+      },
+      {
+        "role": "B",
+        "content": "Got it. Thank you!",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "I need to + verb / Which way?",
+    "core_chunks": "pick up / prescription / turn left",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "医院 / 诊所",
+    "npc_name": "护士"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "hospital",
+    "npc": "reception",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "DL-HOSP-RECEPTION-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "I'd like to see a doctor.",
+        "hint": "state request"
+      },
+      {
+        "role": "A",
+        "content": "Do you have insurance?",
+        "hint": "ask about insurance"
+      },
+      {
+        "role": "B",
+        "content": "Yes, here's my card.",
+        "hint": "provide card"
+      },
+      {
+        "role": "A",
+        "content": "That'll be fifty yuan. Pay at the window.",
+        "hint": "state fee"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Thank you.",
+        "hint": "thank"
+      },
+      {
+        "role": "A",
+        "content": "Next, please.",
+        "hint": "call next"
+      }
+    ],
+    "core_sentences": "I'd like to see a doctor / Do you have insurance?",
+    "core_chunks": "see a doctor / pay at the window",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "医院 / 诊所",
+    "npc_name": "挂号收费员"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "hospital",
+    "npc": "reception",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "DL-HOSP-RECEPTION-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "I need to register.",
+        "hint": "state need"
+      },
+      {
+        "role": "A",
+        "content": "Which department?",
+        "hint": "ask department"
+      },
+      {
+        "role": "B",
+        "content": "General practice.",
+        "hint": "answer"
+      },
+      {
+        "role": "A",
+        "content": "Thirty yuan. Cash or card?",
+        "hint": "ask payment"
+      },
+      {
+        "role": "B",
+        "content": "Card, please.",
+        "hint": "choose"
+      },
+      {
+        "role": "A",
+        "content": "Here's your number. Wait over there.",
+        "hint": "hand over / instruct"
+      }
+    ],
+    "core_sentences": "I need to register / Which department?",
+    "core_chunks": "general practice / cash or card",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "医院 / 诊所",
+    "npc_name": "挂号收费员"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "hospital",
+    "npc": "reception",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "DL-HOSP-RECEPTION-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "How much for a check-up?",
+        "hint": "ask price"
+      },
+      {
+        "role": "A",
+        "content": "Basic check-up is one hundred yuan.",
+        "hint": "state price"
+      },
+      {
+        "role": "B",
+        "content": "Okay. I'll take it.",
+        "hint": "agree"
+      },
+      {
+        "role": "A",
+        "content": "Fill out this form first.",
+        "hint": "give form"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "How much for...? / Fill out this form",
+    "core_chunks": "check-up / fill out",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "医院 / 诊所",
+    "npc_name": "挂号收费员"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "bank",
+    "npc": "teller",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "DL-BANK-TELLER-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "I'd like to withdraw some money.",
+        "hint": "state request"
+      },
+      {
+        "role": "A",
+        "content": "How much would you like?",
+        "hint": "ask amount"
+      },
+      {
+        "role": "B",
+        "content": "Five hundred yuan, please.",
+        "hint": "state amount"
+      },
+      {
+        "role": "A",
+        "content": "May I see your ID?",
+        "hint": "ask for ID"
+      },
+      {
+        "role": "B",
+        "content": "Here you go.",
+        "hint": "provide"
+      },
+      {
+        "role": "A",
+        "content": "Here's your cash. Anything else?",
+        "hint": "hand over / ask"
+      },
+      {
+        "role": "B",
+        "content": "No, that's all. Thanks!",
+        "hint": "decline / thank"
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I'd like to withdraw / How much would you like?",
+    "core_chunks": "withdraw money / may I see / here you go",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "银行",
+    "npc_name": "柜员"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "bank",
+    "npc": "teller",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "DL-BANK-TELLER-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "I want to deposit this check.",
+        "hint": "state request"
+      },
+      {
+        "role": "A",
+        "content": "Into which account?",
+        "hint": "ask account"
+      },
+      {
+        "role": "B",
+        "content": "My savings account.",
+        "hint": "answer"
+      },
+      {
+        "role": "A",
+        "content": "Sign here, please.",
+        "hint": "request signature"
+      },
+      {
+        "role": "B",
+        "content": "Done. Thank you!",
+        "hint": "comply / thank"
+      },
+      {
+        "role": "A",
+        "content": "All set. Have a good day!",
+        "hint": "closing"
+      }
+    ],
+    "core_sentences": "I want to deposit / Into which account?",
+    "core_chunks": "deposit / savings account / sign here",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "银行",
+    "npc_name": "柜员"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "bank",
+    "npc": "teller",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "DL-BANK-TELLER-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "I need to transfer money.",
+        "hint": "state request"
+      },
+      {
+        "role": "A",
+        "content": "Domestic or international?",
+        "hint": "ask type"
+      },
+      {
+        "role": "B",
+        "content": "Domestic.",
+        "hint": "answer"
+      },
+      {
+        "role": "A",
+        "content": "Please fill out this form.",
+        "hint": "give form"
+      },
+      {
+        "role": "B",
+        "content": "Okay. How long does it take?",
+        "hint": "ask time"
+      },
+      {
+        "role": "A",
+        "content": "Usually same day.",
+        "hint": "answer"
+      },
+      {
+        "role": "B",
+        "content": "Thanks!",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "I need to transfer / How long does it take?",
+    "core_chunks": "transfer money / fill out / same day",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "银行",
+    "npc_name": "柜员"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "bank",
+    "npc": "manager",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "DL-BANK-MANAGER-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "I'd like to open a new account.",
+        "hint": "state request"
+      },
+      {
+        "role": "A",
+        "content": "Sure. What type? Savings or checking?",
+        "hint": "ask type"
+      },
+      {
+        "role": "B",
+        "content": "Savings, please.",
+        "hint": "choose"
+      },
+      {
+        "role": "A",
+        "content": "You'll need your ID and proof of address.",
+        "hint": "list requirements"
+      },
+      {
+        "role": "B",
+        "content": "I have both. Here.",
+        "hint": "provide"
+      },
+      {
+        "role": "A",
+        "content": "Great. Follow me. We'll set it up.",
+        "hint": "invite / explain"
+      }
+    ],
+    "core_sentences": "I'd like to open / What type?",
+    "core_chunks": "open an account / savings or checking / proof of address",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "银行",
+    "npc_name": "大堂经理"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "bank",
+    "npc": "manager",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "DL-BANK-MANAGER-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "I lost my card. What should I do?",
+        "hint": "state problem"
+      },
+      {
+        "role": "A",
+        "content": "We'll cancel it and order a new one.",
+        "hint": "explain procedure"
+      },
+      {
+        "role": "B",
+        "content": "How long for the new card?",
+        "hint": "ask time"
+      },
+      {
+        "role": "A",
+        "content": "About a week. We can give you a temp card now.",
+        "hint": "answer"
+      },
+      {
+        "role": "B",
+        "content": "That would be great. Thanks!",
+        "hint": "thank"
+      },
+      {
+        "role": "A",
+        "content": "Fill out this form first.",
+        "hint": "give form"
+      }
+    ],
+    "core_sentences": "I lost my... / What should I do?",
+    "core_chunks": "lost my card / cancel / temp card",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "银行",
+    "npc_name": "大堂经理"
+  },
+  {
+    "big_scene": "daily",
+    "small_scene": "bank",
+    "npc": "manager",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "DL-BANK-MANAGER-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "I want to apply for a loan.",
+        "hint": "state request"
+      },
+      {
+        "role": "A",
+        "content": "What for? And how much?",
+        "hint": "ask details"
+      },
+      {
+        "role": "B",
+        "content": "For a car. About fifty thousand.",
+        "hint": "answer"
+      },
+      {
+        "role": "A",
+        "content": "We have several options. Let me explain.",
+        "hint": "offer help"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Thank you.",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "I want to apply for / What for?",
+    "core_chunks": "apply for a loan / several options",
+    "big_scene_name": "日常生活",
+    "small_scene_name": "银行",
+    "npc_name": "大堂经理"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "cafe",
+    "npc": "waiter",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CY-CAFE-WAITER-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, what can I get you?",
+        "hint": "offer service"
+      },
+      {
+        "role": "A",
+        "content": "I'd like a latte, please.",
+        "hint": "I'd like + drink"
+      },
+      {
+        "role": "B",
+        "content": "Small, medium, or large?",
+        "hint": "ask size"
+      },
+      {
+        "role": "A",
+        "content": "Medium, please.",
+        "hint": "choose size"
+      },
+      {
+        "role": "B",
+        "content": "For here or to go?",
+        "hint": "ask stay or takeaway"
+      },
+      {
+        "role": "A",
+        "content": "For here.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "That'll be thirty-five yuan.",
+        "hint": "state price"
+      },
+      {
+        "role": "A",
+        "content": "Here you go.",
+        "hint": "pay"
+      }
+    ],
+    "core_sentences": "What can I get you? / I'd like + drink / For here or to go?",
+    "core_chunks": "a latte / small medium large / for here or to go",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "咖啡馆",
+    "npc_name": "服务员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "cafe",
+    "npc": "waiter",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CY-CAFE-WAITER-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, ready to order?",
+        "hint": "offer service"
+      },
+      {
+        "role": "A",
+        "content": "I'd like a cappuccino.",
+        "hint": "I'd like + drink"
+      },
+      {
+        "role": "B",
+        "content": "What size?",
+        "hint": "ask size"
+      },
+      {
+        "role": "A",
+        "content": "Large, please.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "To stay or take away?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "To go.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Forty yuan.",
+        "hint": "state price"
+      },
+      {
+        "role": "A",
+        "content": "Here.",
+        "hint": "pay"
+      }
+    ],
+    "core_sentences": "Ready to order? / I'd like + drink",
+    "core_chunks": "cappuccino / to stay or take away",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "咖啡馆",
+    "npc_name": "服务员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "cafe",
+    "npc": "waiter",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CY-CAFE-WAITER-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "What would you like?",
+        "hint": "offer"
+      },
+      {
+        "role": "A",
+        "content": "An americano, please.",
+        "hint": "I'd like"
+      },
+      {
+        "role": "B",
+        "content": "Small, medium, or large?",
+        "hint": "ask size"
+      },
+      {
+        "role": "A",
+        "content": "Small.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "For here or to go?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "To go.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Twenty-eight yuan.",
+        "hint": "price"
+      },
+      {
+        "role": "A",
+        "content": "Thanks.",
+        "hint": "pay"
+      }
+    ],
+    "core_sentences": "What would you like? / For here or to go?",
+    "core_chunks": "americano",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "咖啡馆",
+    "npc_name": "服务员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "cafe",
+    "npc": "barista",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CY-CAFE-BARISTA-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Your name for the order?",
+        "hint": "ask for name"
+      },
+      {
+        "role": "A",
+        "content": "Lisa.",
+        "hint": "give name"
+      },
+      {
+        "role": "B",
+        "content": "Your latte will be ready in a minute.",
+        "hint": "inform wait time"
+      },
+      {
+        "role": "A",
+        "content": "Thanks. Do you have Wi-Fi?",
+        "hint": "ask about Wi-Fi"
+      },
+      {
+        "role": "B",
+        "content": "Yes. Password is on the wall.",
+        "hint": "give info"
+      },
+      {
+        "role": "A",
+        "content": "Got it. Thanks!",
+        "hint": "acknowledge"
+      }
+    ],
+    "core_sentences": "Your name for the order? / Will be ready in + time",
+    "core_chunks": "for the order / in a minute / on the wall",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "咖啡馆",
+    "npc_name": "咖啡师"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "cafe",
+    "npc": "barista",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CY-CAFE-BARISTA-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Can I have a name for your cup?",
+        "hint": "ask name"
+      },
+      {
+        "role": "A",
+        "content": "Tom.",
+        "hint": "give name"
+      },
+      {
+        "role": "B",
+        "content": "Okay. About two minutes.",
+        "hint": "wait time"
+      },
+      {
+        "role": "A",
+        "content": "No problem. Where's the bathroom?",
+        "hint": "ask location"
+      },
+      {
+        "role": "B",
+        "content": "Back there, on the left.",
+        "hint": "directions"
+      },
+      {
+        "role": "A",
+        "content": "Thanks.",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "Can I have a name? / Where's the bathroom?",
+    "core_chunks": "for your cup / on the left",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "咖啡馆",
+    "npc_name": "咖啡师"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "cafe",
+    "npc": "barista",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CY-CAFE-BARISTA-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Name please?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Mike.",
+        "hint": "give"
+      },
+      {
+        "role": "B",
+        "content": "We'll call you when it's ready.",
+        "hint": "inform"
+      },
+      {
+        "role": "A",
+        "content": "Do you have outlets for charging?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Yes, by the window.",
+        "hint": "answer"
+      },
+      {
+        "role": "A",
+        "content": "Great. Thanks!",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "We'll call you when / Do you have...?",
+    "core_chunks": "when it's ready / outlets",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "咖啡馆",
+    "npc_name": "咖啡师"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "cafe",
+    "npc": "customer",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CY-CAFE-CUSTOMER-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, is this seat taken?",
+        "hint": "ask about seat"
+      },
+      {
+        "role": "A",
+        "content": "No, it's free. Go ahead.",
+        "hint": "invite"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Nice place, isn't it?",
+        "hint": "small talk"
+      },
+      {
+        "role": "A",
+        "content": "Yeah, I come here often.",
+        "hint": "I come here + frequency"
+      },
+      {
+        "role": "B",
+        "content": "What do you recommend?",
+        "hint": "ask recommendation"
+      },
+      {
+        "role": "A",
+        "content": "The latte is really good.",
+        "hint": "recommend"
+      },
+      {
+        "role": "B",
+        "content": "I'll try that. Thanks!",
+        "hint": "decide / thank"
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Is this seat taken? / What do you recommend?",
+    "core_chunks": "go ahead / come here often / really good",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "咖啡馆",
+    "npc_name": "顾客"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "cafe",
+    "npc": "customer",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CY-CAFE-CUSTOMER-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Mind if I sit here?",
+        "hint": "ask permission"
+      },
+      {
+        "role": "A",
+        "content": "Not at all. Sit down.",
+        "hint": "allow"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. First time here.",
+        "hint": "small talk"
+      },
+      {
+        "role": "A",
+        "content": "Oh, the cold brew is great.",
+        "hint": "recommend"
+      },
+      {
+        "role": "B",
+        "content": "I'll get that. Thanks!",
+        "hint": "decide"
+      },
+      {
+        "role": "A",
+        "content": "Enjoy!",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Mind if I sit here? / First time here",
+    "core_chunks": "mind if / cold brew",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "咖啡馆",
+    "npc_name": "顾客"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "cafe",
+    "npc": "customer",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CY-CAFE-CUSTOMER-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Can I share this table?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Sure, no problem.",
+        "hint": "allow"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Busy today.",
+        "hint": "comment"
+      },
+      {
+        "role": "A",
+        "content": "Yeah. The matcha is good here.",
+        "hint": "recommend"
+      },
+      {
+        "role": "B",
+        "content": "I'll try it. Thanks!",
+        "hint": "decide"
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Can I share...? / The + drink + is good",
+    "core_chunks": "share the table / matcha",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "咖啡馆",
+    "npc_name": "顾客"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "restaurant",
+    "npc": "host",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CY-REST-HOST-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Good evening. Table for how many?",
+        "hint": "greet / ask"
+      },
+      {
+        "role": "A",
+        "content": "Two, please.",
+        "hint": "state number"
+      },
+      {
+        "role": "B",
+        "content": "Smoking or non-smoking?",
+        "hint": "ask preference"
+      },
+      {
+        "role": "A",
+        "content": "Non-smoking, please.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Follow me, please.",
+        "hint": "lead"
+      },
+      {
+        "role": "A",
+        "content": "Thank you.",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "Table for how many? / Smoking or non-smoking?",
+    "core_chunks": "table for two / follow me",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "餐厅 / 饭店",
+    "npc_name": "迎宾"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "restaurant",
+    "npc": "host",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CY-REST-HOST-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, do you have a reservation?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "No. Table for four?",
+        "hint": "answer / request"
+      },
+      {
+        "role": "B",
+        "content": "Window or inside?",
+        "hint": "ask preference"
+      },
+      {
+        "role": "A",
+        "content": "Window, if possible.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "This way, please.",
+        "hint": "lead"
+      },
+      {
+        "role": "A",
+        "content": "Thanks.",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "Do you have a reservation? / Window or inside?",
+    "core_chunks": "have a reservation / this way",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "餐厅 / 饭店",
+    "npc_name": "迎宾"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "restaurant",
+    "npc": "host",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CY-REST-HOST-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Welcome. How many in your party?",
+        "hint": "greet / ask"
+      },
+      {
+        "role": "A",
+        "content": "Three.",
+        "hint": "answer"
+      },
+      {
+        "role": "B",
+        "content": "Booth or table?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Booth, please.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Right this way.",
+        "hint": "lead"
+      },
+      {
+        "role": "A",
+        "content": "Thank you.",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "How many in your party? / Booth or table?",
+    "core_chunks": "in your party / right this way",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "餐厅 / 饭店",
+    "npc_name": "迎宾"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "restaurant",
+    "npc": "waiter",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CY-REST-WAITER-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Are you ready to order?",
+        "hint": "ask if ready"
+      },
+      {
+        "role": "A",
+        "content": "Yes. I'll have the steak, please.",
+        "hint": "I'll have + dish"
+      },
+      {
+        "role": "B",
+        "content": "How would you like it cooked?",
+        "hint": "ask preference"
+      },
+      {
+        "role": "A",
+        "content": "Medium, please.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "And to drink?",
+        "hint": "ask drink"
+      },
+      {
+        "role": "A",
+        "content": "Water is fine.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Got it. I'll bring it soon.",
+        "hint": "confirm"
+      }
+    ],
+    "core_sentences": "Are you ready to order? / I'll have + dish",
+    "core_chunks": "ready to order / how would you like / to drink",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "餐厅 / 饭店",
+    "npc_name": "服务员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "restaurant",
+    "npc": "waiter",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CY-REST-WAITER-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Can I take your order?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "I'll have the chicken salad.",
+        "hint": "order"
+      },
+      {
+        "role": "B",
+        "content": "Any dressing?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Ranch, please.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Anything to drink?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Iced tea.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Coming right up.",
+        "hint": "confirm"
+      }
+    ],
+    "core_sentences": "Can I take your order? / I'll have + dish",
+    "core_chunks": "take your order / dressing / coming right up",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "餐厅 / 饭店",
+    "npc_name": "服务员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "restaurant",
+    "npc": "waiter",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CY-REST-WAITER-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "What would you like?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "The seafood pasta, please.",
+        "hint": "order"
+      },
+      {
+        "role": "B",
+        "content": "Spicy or mild?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Mild, please.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "And for drinks?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Just water.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Okay. One moment.",
+        "hint": "confirm"
+      }
+    ],
+    "core_sentences": "What would you like? / Spicy or mild?",
+    "core_chunks": "seafood pasta / one moment",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "餐厅 / 饭店",
+    "npc_name": "服务员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "restaurant",
+    "npc": "cashier",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CY-REST-CASHIER-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "That'll be one hundred twenty yuan.",
+        "hint": "state total"
+      },
+      {
+        "role": "A",
+        "content": "Can I pay by card?",
+        "hint": "ask payment"
+      },
+      {
+        "role": "B",
+        "content": "Sure. Insert or tap.",
+        "hint": "instruct"
+      },
+      {
+        "role": "A",
+        "content": "Done. Can I get a receipt?",
+        "hint": "request"
+      },
+      {
+        "role": "B",
+        "content": "Here you go. Thank you!",
+        "hint": "hand over / thank"
+      },
+      {
+        "role": "A",
+        "content": "Thanks. Bye!",
+        "hint": "thank / goodbye"
+      }
+    ],
+    "core_sentences": "That'll be + amount / Can I pay by card?",
+    "core_chunks": "pay by card / insert or tap / receipt",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "餐厅 / 饭店",
+    "npc_name": "收银员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "restaurant",
+    "npc": "cashier",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CY-REST-CASHIER-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Your total is ninety-five yuan.",
+        "hint": "state"
+      },
+      {
+        "role": "A",
+        "content": "Do you take WeChat Pay?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Yes. Scan here.",
+        "hint": "instruct"
+      },
+      {
+        "role": "A",
+        "content": "Got it. Thanks!",
+        "hint": "done"
+      },
+      {
+        "role": "B",
+        "content": "Thank you. Come again!",
+        "hint": "closing"
+      }
+    ],
+    "core_sentences": "Your total is / Do you take...?",
+    "core_chunks": "WeChat Pay / scan here",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "餐厅 / 饭店",
+    "npc_name": "收银员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "restaurant",
+    "npc": "cashier",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CY-REST-CASHIER-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Eighty yuan, please.",
+        "hint": "state"
+      },
+      {
+        "role": "A",
+        "content": "Cash okay?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Sure. Exact change?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Here's one hundred.",
+        "hint": "pay"
+      },
+      {
+        "role": "B",
+        "content": "Twenty back. Thank you!",
+        "hint": "change / thank"
+      }
+    ],
+    "core_sentences": "Cash okay? / Exact change?",
+    "core_chunks": "exact change",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "餐厅 / 饭店",
+    "npc_name": "收银员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "fast_food",
+    "npc": "order_staff",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CY-FAST-ORDER-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, what can I get you?",
+        "hint": "offer"
+      },
+      {
+        "role": "A",
+        "content": "A burger and fries, please.",
+        "hint": "order combo"
+      },
+      {
+        "role": "B",
+        "content": "Combo or a la carte?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Combo, please.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "What drink?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Coke, medium.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "For here or to go?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "To go.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Forty-five yuan.",
+        "hint": "price"
+      },
+      {
+        "role": "A",
+        "content": "Here.",
+        "hint": "pay"
+      }
+    ],
+    "core_sentences": "What can I get you? / Combo or a la carte?",
+    "core_chunks": "burger and fries / for here or to go",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "快餐店",
+    "npc_name": "点餐员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "fast_food",
+    "npc": "order_staff",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CY-FAST-ORDER-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Next! What would you like?",
+        "hint": "call / ask"
+      },
+      {
+        "role": "A",
+        "content": "Two chicken wraps and a salad.",
+        "hint": "order"
+      },
+      {
+        "role": "B",
+        "content": "Any drinks?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Two waters.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Eat in or take away?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Take away.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Fifty yuan.",
+        "hint": "price"
+      }
+    ],
+    "core_sentences": "What would you like? / Eat in or take away?",
+    "core_chunks": "chicken wrap / take away",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "快餐店",
+    "npc_name": "点餐员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "fast_food",
+    "npc": "order_staff",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CY-FAST-ORDER-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Ready to order?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "A number three meal, please.",
+        "hint": "order by number"
+      },
+      {
+        "role": "B",
+        "content": "Small, medium, or large?",
+        "hint": "ask size"
+      },
+      {
+        "role": "A",
+        "content": "Large.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "For here or to go?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "For here.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Thirty-eight yuan.",
+        "hint": "price"
+      }
+    ],
+    "core_sentences": "Ready to order? / Small, medium, or large?",
+    "core_chunks": "number three / for here",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "快餐店",
+    "npc_name": "点餐员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "fast_food",
+    "npc": "prep_staff",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CY-FAST-PREP-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Order 47!",
+        "hint": "call number"
+      },
+      {
+        "role": "A",
+        "content": "That's me. Here.",
+        "hint": "claim"
+      },
+      {
+        "role": "B",
+        "content": "One burger combo. Ketchup?",
+        "hint": "confirm / ask"
+      },
+      {
+        "role": "A",
+        "content": "Yes, please. And napkins.",
+        "hint": "request"
+      },
+      {
+        "role": "B",
+        "content": "Here you go. Enjoy!",
+        "hint": "hand over"
+      },
+      {
+        "role": "A",
+        "content": "Thanks!",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "Order + number! / Ketchup?",
+    "core_chunks": "that's me / here you go",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "快餐店",
+    "npc_name": "配餐员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "fast_food",
+    "npc": "prep_staff",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CY-FAST-PREP-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Number 52!",
+        "hint": "call"
+      },
+      {
+        "role": "A",
+        "content": "That's me.",
+        "hint": "claim"
+      },
+      {
+        "role": "B",
+        "content": "Chicken wrap. Need sauce?",
+        "hint": "confirm / ask"
+      },
+      {
+        "role": "A",
+        "content": "Extra mayo, please.",
+        "hint": "request"
+      },
+      {
+        "role": "B",
+        "content": "Here. Enjoy your meal.",
+        "hint": "hand"
+      },
+      {
+        "role": "A",
+        "content": "Thank you.",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "Need sauce? / Extra + item",
+    "core_chunks": "extra mayo",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "快餐店",
+    "npc_name": "配餐员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "fast_food",
+    "npc": "prep_staff",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CY-FAST-PREP-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Order 61!",
+        "hint": "call"
+      },
+      {
+        "role": "A",
+        "content": "Here.",
+        "hint": "claim"
+      },
+      {
+        "role": "B",
+        "content": "Two combos. Forks?",
+        "hint": "confirm / ask"
+      },
+      {
+        "role": "A",
+        "content": "Yes, and some straws.",
+        "hint": "request"
+      },
+      {
+        "role": "B",
+        "content": "Here you go. Have a good one!",
+        "hint": "hand"
+      },
+      {
+        "role": "A",
+        "content": "Thanks!",
+        "hint": "thank"
+      }
+    ],
+    "core_sentences": "Forks? / Some + item",
+    "core_chunks": "straws",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "快餐店",
+    "npc_name": "配餐员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "snack_shop",
+    "npc": "shop_staff",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CY-SNACK-SHOP-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, what would you like?",
+        "hint": "offer"
+      },
+      {
+        "role": "A",
+        "content": "One pearl milk tea, less sugar.",
+        "hint": "order + preference"
+      },
+      {
+        "role": "B",
+        "content": "Regular or large?",
+        "hint": "ask size"
+      },
+      {
+        "role": "A",
+        "content": "Large, please.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Ice level?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Less ice.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Fifteen yuan.",
+        "hint": "price"
+      },
+      {
+        "role": "A",
+        "content": "Here.",
+        "hint": "pay"
+      }
+    ],
+    "core_sentences": "What would you like? / Regular or large?",
+    "core_chunks": "pearl milk tea / less sugar / less ice",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "小吃店 / 奶茶店",
+    "npc_name": "店员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "snack_shop",
+    "npc": "shop_staff",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CY-SNACK-SHOP-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "What can I get you?",
+        "hint": "offer"
+      },
+      {
+        "role": "A",
+        "content": "Two bubble teas. One mango, one matcha.",
+        "hint": "order"
+      },
+      {
+        "role": "B",
+        "content": "Same size?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Both medium.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Sugar level? Normal okay?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "One normal, one half sugar.",
+        "hint": "specify"
+      },
+      {
+        "role": "B",
+        "content": "Thirty yuan.",
+        "hint": "price"
+      }
+    ],
+    "core_sentences": "What can I get you? / Sugar level?",
+    "core_chunks": "bubble tea / half sugar",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "小吃店 / 奶茶店",
+    "npc_name": "店员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "snack_shop",
+    "npc": "shop_staff",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CY-SNACK-SHOP-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi, ready to order?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "A taro milk tea, no sugar.",
+        "hint": "order"
+      },
+      {
+        "role": "B",
+        "content": "Large or regular?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "Regular.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "With or without ice?",
+        "hint": "ask"
+      },
+      {
+        "role": "A",
+        "content": "No ice.",
+        "hint": "choose"
+      },
+      {
+        "role": "B",
+        "content": "Twelve yuan.",
+        "hint": "price"
+      }
+    ],
+    "core_sentences": "Ready to order? / With or without ice?",
+    "core_chunks": "taro milk tea / no sugar / no ice",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "小吃店 / 奶茶店",
+    "npc_name": "店员"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "snack_shop",
+    "npc": "owner",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CY-SNACK-OWNER-1",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi! First time here?",
+        "hint": "greet / ask"
+      },
+      {
+        "role": "A",
+        "content": "Yes. What's popular?",
+        "hint": "ask recommendation"
+      },
+      {
+        "role": "B",
+        "content": "Our cheese tea is the bestseller.",
+        "hint": "recommend"
+      },
+      {
+        "role": "A",
+        "content": "I'll try that. One, please.",
+        "hint": "order"
+      },
+      {
+        "role": "B",
+        "content": "Good choice. Eighteen yuan.",
+        "hint": "approve / price"
+      },
+      {
+        "role": "A",
+        "content": "Here. Thanks!",
+        "hint": "pay"
+      }
+    ],
+    "core_sentences": "First time here? / What's popular?",
+    "core_chunks": "first time / bestseller / good choice",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "小吃店 / 奶茶店",
+    "npc_name": "老板"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "snack_shop",
+    "npc": "owner",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CY-SNACK-OWNER-2",
+    "content": [
+      {
+        "role": "B",
+        "content": "Welcome! Want to try our new flavor?",
+        "hint": "greet / suggest"
+      },
+      {
+        "role": "A",
+        "content": "What is it?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Brown sugar with fresh milk. It's great.",
+        "hint": "explain"
+      },
+      {
+        "role": "A",
+        "content": "Sounds good. One, please.",
+        "hint": "order"
+      },
+      {
+        "role": "B",
+        "content": "Twenty yuan.",
+        "hint": "price"
+      },
+      {
+        "role": "A",
+        "content": "Here you go.",
+        "hint": "pay"
+      }
+    ],
+    "core_sentences": "Want to try...? / What is it?",
+    "core_chunks": "new flavor / brown sugar",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "小吃店 / 奶茶店",
+    "npc_name": "老板"
+  },
+  {
+    "big_scene": "food",
+    "small_scene": "snack_shop",
+    "npc": "owner",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CY-SNACK-OWNER-3",
+    "content": [
+      {
+        "role": "B",
+        "content": "Hi! Need a recommendation?",
+        "hint": "offer"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Something not too sweet.",
+        "hint": "state preference"
+      },
+      {
+        "role": "B",
+        "content": "Try our oolong milk tea. Half sugar.",
+        "hint": "recommend"
+      },
+      {
+        "role": "A",
+        "content": "Okay. One large.",
+        "hint": "order"
+      },
+      {
+        "role": "B",
+        "content": "Fourteen yuan.",
+        "hint": "price"
+      },
+      {
+        "role": "A",
+        "content": "Thanks.",
+        "hint": "pay"
+      }
+    ],
+    "core_sentences": "Need a recommendation? / Something not too sweet",
+    "core_chunks": "not too sweet / oolong",
+    "big_scene_name": "餐饮美食",
+    "small_scene_name": "小吃店 / 奶茶店",
+    "npc_name": "老板"
+  }
+]

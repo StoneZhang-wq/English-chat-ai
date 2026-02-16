@@ -25,6 +25,7 @@
     q('#sceneViewPane').style.display = 'none';
     q('#scenesListPane').style.display = 'block';
     q('#scenesBackBtn').style.display = 'none';
+    hideScenePracticeOverlay();
   }
 
   function renderBigScenesList(scenes) {
@@ -49,6 +50,18 @@
     });
   }
 
+  // SVG 锁图标（避免 emoji 在某些环境下不显示）
+  const lockIconSVG = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+
+  function showSceneToast(msg) {
+    const el = document.createElement('div');
+    el.className = 'scene-toast';
+    el.textContent = msg;
+    el.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:10002;max-width:90%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+    document.body.appendChild(el);
+    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 2500);
+  }
+
   function renderSmallScenesList(scenes, bigSceneName) {
     const container = q('#scenesList');
     container.innerHTML = '';
@@ -57,12 +70,22 @@
       return;
     }
     scenes.forEach(s => {
+      const canEnter = s.can_enter === true;
       const card = document.createElement('div');
-      card.className = 'scene-card';
-      card.innerHTML = `
+      card.className = 'scene-card' + (canEnter ? '' : ' scene-card-locked');
+      card.innerHTML = canEnter
+        ? `
         <img src="${s.image}" alt="${s.title}" />
         <h3>${s.title}</h3>
         <button class="enter-btn small" data-id="${s.id}" data-small="${s.small_scene_id}">进入</button>
+      `
+        : `
+        <div class="scene-card-img-wrap">
+          <img src="${s.image}" alt="${s.title}" />
+          <span class="scene-card-lock-overlay"><span class="scene-card-lock-svg">${lockIconSVG}</span> 未解锁</span>
+        </div>
+        <h3>${s.title}</h3>
+        <span class="scene-card-enter-disabled">需完成学习后进入</span>
       `;
       container.appendChild(card);
     });
@@ -106,14 +129,29 @@
     npcLayer.className = 'npc-layer';
     const smallSceneId = scene.small_scene_id || scene.id;
     scene.npcs.forEach(npc => {
+      const learned = npc.learned === true;
       const el = document.createElement('div');
-      el.className = 'npc';
+      el.className = 'npc' + (learned ? '' : ' npc-locked');
       el.dataset.character = npc.character;
       el.dataset.smallSceneId = smallSceneId;
       el.dataset.npcId = npc.id;
-      el.innerHTML = `<div class="npc-avatar"></div><div class="npc-label">${npc.label}</div><div class="npc-hint">${npc.hint}</div>`;
+      el.dataset.learned = learned ? '1' : '0';
+      el.innerHTML = learned
+        ? `
+        <span class="npc-badge npc-badge-unlocked">可对话</span>
+        <div class="npc-avatar"></div>
+        <div class="npc-label">${npc.label}</div>
+        <div class="npc-hint">${npc.hint}</div>
+      `
+        : `
+        <span class="npc-badge npc-badge-locked">未解锁</span>
+        <div class="npc-avatar npc-avatar-locked"><span class="npc-lock-icon">${lockIconSVG}</span></div>
+        <div class="npc-label">${npc.label}</div>
+        <div class="npc-hint npc-hint-locked">完成学习页对话后解锁</div>
+      `;
       el.addEventListener('click', () => {
-        openPrefabDialogue(npc.label, smallSceneId, npc.id);
+        if (el.dataset.learned !== '1') return;
+        openScenePractice(npc.label, smallSceneId, npc.id);
       });
       npcLayer.appendChild(el);
     });
@@ -121,55 +159,77 @@
     view.appendChild(container);
   }
 
-  async function openPrefabDialogue(label, smallSceneId, npcId) {
-    const chatModal = q('#sceneChatModal');
-    chatModal.style.display = 'block';
-    q('#sceneChatTitle').textContent = label;
-    const body = q('#sceneChatBody');
-    const inputRow = document.querySelector('.scene-chat-input-row');
-    if (inputRow) inputRow.style.display = 'none';
-    body.innerHTML = '<div class="prefab-loading">加载对话中...</div>';
+  // 从场景 NPC 进入练习模式（与英语练习相同体验：TTS 播放 + 用户语音输入）
+  // 练习 UI 显示在场景内叠加层，保持沉浸式体验
+  async function openScenePractice(label, smallSceneId, npcId) {
+    const sceneChatModal = q('#sceneChatModal');
+    if (sceneChatModal) sceneChatModal.style.display = 'none';
+    const overlay = q('#scene-practice-overlay');
+    const container = q('#scene-practice-container');
+    if (!overlay || !container) {
+      alert('场景练习容器未就绪，请刷新页面');
+      return;
+    }
     try {
       const res = await fetch(`/api/scene-npc/dialogue/immersive?small_scene_id=${encodeURIComponent(smallSceneId)}&npc_id=${encodeURIComponent(npcId)}`);
-      const data = await res.json();
-      if (!data.dialogue || !data.dialogue.content) {
-        body.innerHTML = '<div class="prefab-error">暂无对话内容</div>';
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 403) {
+        showSceneToast(data.message || data.error || '该角色未解锁，请先在学习页完成该NPC的对话学习');
         return;
       }
-      body.innerHTML = '';
-      const content = data.dialogue.content;
-      let idx = 0;
-      const msgWrap = document.createElement('div');
-      msgWrap.className = 'prefab-messages';
-      body.appendChild(msgWrap);
-      function showNext() {
-        if (idx >= content.length) {
-          msgWrap.innerHTML += '<div class="prefab-done" style="padding:12px;color:#4caf50;font-weight:600;">✓ 对话完成</div>';
-          if (nextBtn) nextBtn.style.display = 'none';
-          return;
-        }
-        const item = content[idx++];
-        const who = item.role === 'A' ? 'user' : 'ai';
-        const name = item.role === 'A' ? '我' : label;
-        const div = document.createElement('div');
-        div.className = `message ${who}`;
-        div.innerHTML = `<span class="prefab-name">${name}:</span> ${item.content}`;
-        if (item.hint) div.title = item.hint;
-        msgWrap.appendChild(div);
-        body.scrollTop = body.scrollHeight;
-        if (idx >= content.length && nextBtn) nextBtn.style.display = 'none';
+      if (!data.dialogue || !data.dialogue.content || !Array.isArray(data.dialogue.content)) {
+        alert('暂无对话内容');
+        return;
       }
-      const nextBtn = document.createElement('button');
-      nextBtn.className = 'prefab-next-btn';
-      nextBtn.textContent = '下一句';
-      nextBtn.style.cssText = 'margin-top:12px;padding:8px 16px;background:#007bff;color:white;border:none;border-radius:6px;cursor:pointer;';
-      nextBtn.addEventListener('click', showNext);
-      body.appendChild(nextBtn);
-      showNext();
+      const content = data.dialogue.content;
+      const dialogueLines = content.map(item => ({
+        speaker: item.role === 'A' ? 'A' : 'B',
+        text: item.content || '',
+        hint: item.hint || undefined,
+        audio_url: null
+      }));
+      const dialogue = dialogueLines.map(l => `${l.speaker}: ${l.text}`).join('\n');
+      const dialogueId = data.dialogue.dialogue_id || `scene-${smallSceneId}-${npcId}`;
+      // 显示练习叠加层，先展示载入提示（此时不允许发消息）
+      overlay.style.display = 'flex';
+      container.innerHTML = '<div class="scene-practice-loading">正在载入对话，请稍候...</div>';
+      // 暂不添加 scene-practice-active，输入区保持不可用
+      if (typeof window.startScenePractice === 'function') {
+        await window.startScenePractice({
+          dialogue,
+          dialogue_lines: dialogueLines,
+          dialogue_id: dialogueId,
+          small_scene_id: smallSceneId,
+          npc_id: npcId,
+          targetContainer: container,
+          onReady: () => {
+            // 输入框已嵌入练习界面，无需提升主页面输入区
+          }
+        });
+        // 若练习未成功启动（如参数无效），清理载入状态
+        if (!container.querySelector('#practice-mode-ui')) {
+          hideScenePracticeOverlay();
+        }
+      } else {
+        overlay.style.display = 'none';
+        alert('练习功能未加载，请刷新页面');
+      }
     } catch (e) {
-      body.innerHTML = '<div class="prefab-error">加载失败：' + e.message + '</div>';
+      console.error('启动场景练习失败:', e);
+      hideScenePracticeOverlay();
+      alert('加载失败：' + (e.message || '请稍后重试'));
     }
   }
+
+  // 练习结束后隐藏叠加层，恢复场景视图
+  function hideScenePracticeOverlay() {
+    const overlay = q('#scene-practice-overlay');
+    const container = q('#scene-practice-container');
+    if (overlay) overlay.style.display = 'none';
+    if (container) container.innerHTML = '';
+    document.body.classList.remove('scene-practice-active');
+  }
+  window.hideScenePracticeOverlay = hideScenePracticeOverlay;
   function closeSceneChat() {
     const chatModal = q('#sceneChatModal');
     chatModal.style.display = 'none';
@@ -280,6 +340,7 @@
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
     const backBtn = q('#scenesBackBtn');
     if (backBtn) backBtn.addEventListener('click', () => {
+      hideScenePracticeOverlay();
       const lvl = backBtn.dataset.level || 'big';
       if (lvl === 'scene') {
         // 从场景视图返回到小场景列表

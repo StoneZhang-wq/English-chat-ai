@@ -9,6 +9,53 @@ from dotenv import load_dotenv
 load_dotenv()
 logger = logging.getLogger(__name__)
 
+
+async def generate_tts_for_dialogue_lines(dialogue_lines: List[Dict], dialogue_id: str) -> None:
+    """为 dialogue_lines 每行生成 TTS 音频，填充 audio_url。供英语卡片、复习资料等共用。"""
+    from .app import API_PROVIDER, doubao_text_to_speech, openai_text_to_speech
+    current_file_dir = os.path.dirname(os.path.abspath(__file__))
+    project_dir = os.path.dirname(current_file_dir)
+    audio_dir = os.path.join(project_dir, "outputs", "english_dialogue", dialogue_id)
+    try:
+        os.makedirs(audio_dir, exist_ok=True)
+    except Exception as e:
+        logger.warning("创建音频目录失败: %s", e)
+        return
+    tts_encoding = os.getenv("TTS_ENCODING", "mp3")
+    for i, line in enumerate(dialogue_lines):
+        try:
+            if API_PROVIDER == "doubao" and tts_encoding == "mp3":
+                audio_filename = f"{line.get('speaker', 'A')}_{i}.mp3"
+            else:
+                audio_filename = f"{line.get('speaker', 'A')}_{i}.wav"
+            audio_path = os.path.join(audio_dir, audio_filename)
+            success = False
+            if API_PROVIDER == "doubao":
+                success = await doubao_text_to_speech(line["text"], audio_path)
+                if not success:
+                    line["audio_url"] = None
+                    continue
+            elif API_PROVIDER == "openai":
+                try:
+                    await openai_text_to_speech(line["text"], audio_path)
+                    success = True
+                except Exception as e:
+                    logger.warning("OpenAI TTS line %d 失败: %s", i, e)
+                    line["audio_url"] = None
+                    continue
+            else:
+                logger.warning("不支持的 TTS 供应商: %s", API_PROVIDER)
+                line["audio_url"] = None
+                continue
+            if success and os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+                line["audio_url"] = f"/audio/english_dialogue/{dialogue_id}/{audio_filename}"
+            else:
+                line["audio_url"] = None
+        except Exception as e:
+            logger.warning("生成音频 line %d 失败: %s", i, e)
+            line["audio_url"] = None
+
+
 # 英语水平配置
 ENGLISH_LEVELS = {
     "minimal": {
@@ -967,78 +1014,11 @@ B: (使用列表中的语块/句型)
         if not dialogue_lines:
             print("Warning: No dialogue lines parsed, returning raw text")
             return dialogue_text
-        
-        # 生成每句对话的音频
+
         import uuid
-        from .app import API_PROVIDER, doubao_text_to_speech, openai_text_to_speech
-        
-        # 创建音频存储目录
         dialogue_id = str(uuid.uuid4())[:8]
-        current_file_dir = os.path.dirname(os.path.abspath(__file__))
-        project_dir = os.path.dirname(current_file_dir)
-        audio_dir = os.path.join(project_dir, "outputs", "english_dialogue", dialogue_id)
-        
-        try:
-            os.makedirs(audio_dir, exist_ok=True)
-        except Exception as e:
-            print(f"Error creating audio directory: {e}")
-            import traceback
-            traceback.print_exc()
-            # 即使目录创建失败，也继续尝试生成音频
-        
-        # 为每句对话生成音频
-        audio_success_count = 0
-        for i, line in enumerate(dialogue_lines):
-            try:
-                # 根据TTS_ENCODING环境变量确定输出格式
-                tts_encoding = os.getenv('TTS_ENCODING', 'mp3')
-                if API_PROVIDER == 'doubao' and tts_encoding == 'mp3':
-                    audio_filename = f"{line['speaker']}_{i}.mp3"
-                else:
-                    audio_filename = f"{line['speaker']}_{i}.wav"
-                audio_path = os.path.join(audio_dir, audio_filename)
-                
-                # 只使用全局API_PROVIDER指定的TTS供应商
-                success = False
-                if API_PROVIDER == 'doubao':
-                    success = await doubao_text_to_speech(line['text'], audio_path)
-                    if not success:
-                        print(f"Error: 豆包TTS API调用失败 for line {i}")
-                        line['audio_url'] = None
-                        continue
-                elif API_PROVIDER == 'openai':
-                    try:
-                        await openai_text_to_speech(line['text'], audio_path)
-                        success = True
-                    except Exception as e:
-                        print(f"Error: OpenAI TTS API调用失败 for line {i}: {str(e)}")
-                        line['audio_url'] = None
-                        continue
-                else:
-                    error_msg = f"Error: 不支持的API供应商 '{API_PROVIDER}'，仅支持 'doubao' 或 'openai'"
-                    print(error_msg)
-                    line['audio_url'] = None
-                    continue
-                
-                # 检查文件是否成功创建
-                if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
-                    # 生成音频URL（相对路径，前端可以通过静态文件服务访问）
-                    audio_url = f"/audio/english_dialogue/{dialogue_id}/{audio_filename}"
-                    line['audio_url'] = audio_url
-                    line['audio_path'] = audio_path  # 保存完整路径供后端使用
-                    audio_success_count += 1
-                    print(f"Generated audio for {line['speaker']} line {i}: {audio_url}")
-                else:
-                    print(f"Warning: Audio file not created or empty for line {i}")
-                    line['audio_url'] = None
-            except Exception as e:
-                print(f"Error generating audio for line {i}: {e}")
-                import traceback
-                traceback.print_exc()
-                line['audio_url'] = None  # 如果生成失败，设置为None
-        
-        print(f"Audio generation complete: {audio_success_count}/{len(dialogue_lines)} successful")
-        
+        await generate_tts_for_dialogue_lines(dialogue_lines, dialogue_id)
+
         # 返回包含音频URL的对话数据（即使部分音频生成失败，也返回对话文本）
         return {
             "dialogue_text": dialogue_text,
@@ -1079,40 +1059,7 @@ B: (使用列表中的语块/句型)
         if not dialogue_id:
             import uuid
             dialogue_id = str(uuid.uuid4())[:8]
-        current_file_dir = os.path.dirname(os.path.abspath(__file__))
-        project_dir = os.path.dirname(current_file_dir)
-        audio_dir = os.path.join(project_dir, "outputs", "english_dialogue", dialogue_id)
-        try:
-            os.makedirs(audio_dir, exist_ok=True)
-        except Exception as e:
-            print(f"Error creating audio directory: {e}")
-        from .app import API_PROVIDER, doubao_text_to_speech, openai_text_to_speech
-        tts_encoding = os.getenv("TTS_ENCODING", "mp3")
-        for i, line in enumerate(dialogue_lines):
-            try:
-                if API_PROVIDER == "doubao" and tts_encoding == "mp3":
-                    audio_filename = f"{line['speaker']}_{i}.mp3"
-                else:
-                    audio_filename = f"{line['speaker']}_{i}.wav"
-                audio_path = os.path.join(audio_dir, audio_filename)
-                success = False
-                if API_PROVIDER == "doubao":
-                    success = await doubao_text_to_speech(line["text"], audio_path)
-                elif API_PROVIDER == "openai":
-                    try:
-                        await openai_text_to_speech(line["text"], audio_path)
-                        success = True
-                    except Exception as e:
-                        print(f"Error OpenAI TTS for line {i}: {e}")
-                else:
-                    print(f"Unsupported TTS provider: {API_PROVIDER}")
-                if success and os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
-                    line["audio_url"] = f"/audio/english_dialogue/{dialogue_id}/{audio_filename}"
-                else:
-                    line["audio_url"] = None
-            except Exception as e:
-                print(f"Error generating audio for line {i}: {e}")
-                line["audio_url"] = None
+        await generate_tts_for_dialogue_lines(dialogue_lines, dialogue_id)
         return {
             "dialogue_text": dialogue_text,
             "dialogue_lines": dialogue_lines,

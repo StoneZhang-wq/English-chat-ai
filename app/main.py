@@ -11,7 +11,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, JSONResponse
 from starlette.background import BackgroundTask
-from .shared import clients, set_current_character, conversation_history, add_client, remove_client, get_memory_system, set_current_account, get_current_account
+from .shared import clients, set_current_character, conversation_history, add_client, remove_client, get_memory_system, set_current_account, get_current_account, get_last_memory_init_error
 from .app_logic import start_conversation, stop_conversation, set_env_variable, characters_folder, set_transcription_model, fetch_ollama_models, load_character_prompt, load_character_specific_history
 from .enhanced_logic import start_enhanced_conversation, stop_enhanced_conversation
 from .app import send_message_to_clients
@@ -161,9 +161,10 @@ async def login_account(request: Request):
                 "account_name": account_name
             })
         else:
+            detail = get_last_memory_init_error() or "未知原因"
             return JSONResponse({
                 "status": "error",
-                "message": "初始化记忆系统失败"
+                "message": f"初始化记忆系统失败：{detail}"
             }, status_code=500)
             
     except Exception as e:
@@ -420,7 +421,15 @@ async def api_dialogue_review(small_scene_id: str, npc_id: str):
 
 @app.get("/api/scene-npc/dialogue/immersive")
 async def api_dialogue_immersive(small_scene_id: str, npc_id: str):
-    from .scene_npc_db import get_immersive_dialogue
+    from .scene_npc_db import get_immersive_dialogue, get_npc_progress, _safe_account
+    account_name = get_current_account() or ""
+    progress = get_npc_progress(_safe_account(account_name))
+    learned = set(progress.get(small_scene_id, []))
+    if npc_id not in learned:
+        return JSONResponse(
+            {"error": "未解锁", "message": "请先在学习页完成该角色的对话学习后再体验沉浸对话"},
+            status_code=403
+        )
     d = get_immersive_dialogue(small_scene_id, npc_id)
     if not d:
         return JSONResponse({"error": "dialogue not found"}, status_code=404)
@@ -1151,7 +1160,7 @@ async def generate_english_dialogue(request: Request):
     """生成英文教学对话（从 dialogues.json 取 learn 对话，含 TTS 音频）"""
     try:
         from .shared import set_learning_stage
-        from .scene_npc_db import get_learn_dialogue
+        from .scene_npc_db import get_learn_dialogue, build_card_title
 
         data = await request.json()
         small_scene_id = (data.get("small_scene_id") or data.get("scene") or "").strip()
@@ -1185,6 +1194,7 @@ async def generate_english_dialogue(request: Request):
         await generate_tts_for_dialogue_lines(dialogue_lines, dialogue_id)
 
         dialogue_text = "\n".join(dialogue_parts)
+        card_title = build_card_title(dialogue)
         set_learning_stage("english_learning")
         return JSONResponse({
             "status": "success",
@@ -1194,6 +1204,7 @@ async def generate_english_dialogue(request: Request):
             "dialogue_id": dialogue_id,
             "small_scene_id": small_scene_id,
             "npc_id": npc_id,
+            "card_title": card_title,
         })
 
     except Exception as e:
@@ -1205,12 +1216,36 @@ async def generate_english_dialogue(request: Request):
             "message": f"生成英文对话时出错: {str(e)}"
         }, status_code=500)
 
+@app.post("/api/learning/recommend")
+async def api_learning_recommend(request: Request):
+    """获取学习推荐：优先从对话摘要推断 1 个主题+场景，否则从练习记忆；其余随机。返回带 title 的推荐列表。"""
+    try:
+        from .shared import get_current_account
+        from .scene_npc_db import get_learning_recommendations
+
+        account_name = get_current_account() or ""
+        try:
+            body = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
+        except Exception:
+            body = {}
+        conversation_summary = (body.get("conversation_summary") or "").strip() or None
+        count = max(1, min(10, int(body.get("count", 4))))
+
+        recommendations = get_learning_recommendations(account_name, conversation_summary, count=count)
+        return JSONResponse({"recommendations": recommendations})
+    except Exception as e:
+        logger.error(f"Error in learning recommend: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({"recommendations": [], "error": str(e)}, status_code=500)
+
+
 @app.post("/api/learning/start_english")
 async def start_english_learning(request: Request):
     """手动切换到英文学习阶段"""
     try:
         from .shared import set_learning_stage, get_learning_stage
-        
+
         current_stage = get_learning_stage()
         if current_stage == "english_learning":
             return JSONResponse({
@@ -1270,7 +1305,8 @@ practice_sessions = {}  # {session_id: {user_inputs: [], dialogue_lines: [], dia
 # 练习模式相关API
 @app.post("/api/practice/start")
 async def start_practice(request: Request):
-    """开始练习阶段，解析对话卡片并初始化状态"""
+    """开始练习阶段，解析对话卡片并初始化状态。
+    耗时主要来自：1) LLM 提取对话主题 2) 若无音频则整段 TTS 3) 可选 LLM 抽取提示。前端会显示「正在准备练习资料」提示。"""
     try:
         from .shared import get_memory_system
         from .app import chatgpt_streamed_async
@@ -1355,6 +1391,19 @@ async def start_practice(request: Request):
         except Exception as e:
             logger.error(f"Error extracting dialogue topic: {e}")
             dialogue_topic = "日常对话"  # 失败时使用默认值
+        
+        # 若对话行无音频（如来自场景沉浸式），则生成 TTS
+        needs_tts = any(
+            line.get("speaker") == "A" and not line.get("audio_url")
+            for line in dialogue_lines
+        )
+        if needs_tts:
+            try:
+                from .memory_system import generate_tts_for_dialogue_lines
+                tts_id = (dialogue_id or f"scene_{small_scene_id}_{npc_id}").replace("/", "_")
+                await generate_tts_for_dialogue_lines(dialogue_lines, tts_id)
+            except Exception as e:
+                logger.warning(f"场景对话 TTS 生成失败: {e}")
         
         # 初始化练习会话记录
         practice_sessions[session_id] = {
@@ -1565,52 +1614,9 @@ async def end_practice(request: Request):
                 "message": "找不到对应的练习会话"
             }, status_code=404)
         
-        # 获取会话数据
+        # 获取会话数据，直接返回（不再调用 LLM 提取主题，使用开始练习时已有的 dialogue_topic）
         session_data = practice_sessions[session_id].copy()
         session_data["end_time"] = datetime.now().isoformat()
-        
-        # 从对话内容和用户实际练习内容中智能提取主题
-        dialogue_topic = session_data.get("dialogue_topic", "日常对话")
-        
-        # 如果之前没有提取主题，或者需要重新确认，从实际对话内容中提取
-        all_text = " ".join([line.get("text", "") for line in session_data.get("dialogue_lines", [])])
-        user_practice_text = " ".join([
-            item.get("ai_said", "") + " " + item.get("user_said", "") 
-            for item in session_data.get("user_inputs", [])
-        ])
-        
-        # 结合对话内容和用户实际练习内容来提取主题
-        combined_text = f"{all_text} {user_practice_text}".strip()
-        
-        if combined_text:
-            try:
-                from .app import chatgpt_streamed_async
-                topic_prompt = f"""分析以下英文对话和用户练习内容，提取出主要讨论的主题（1-2个中文关键词）：
-
-对话内容：
-{all_text}
-
-用户实际练习内容：
-{user_practice_text}
-
-只返回主题关键词，用中文，用逗号分隔，例如：电影,篮球。不要其他说明。"""
-                
-                topic_response = await chatgpt_streamed_async(
-                    topic_prompt,
-                    "你是一个专业的英语教学助手，能够准确分析对话主题。只返回主题关键词，不要其他说明。",
-                    "neutral",
-                    []
-                )
-                if topic_response:
-                    topics = [t.strip() for t in topic_response.strip().split(",") if t.strip()]
-                    dialogue_topic = ", ".join(topics[:2]) if topics else dialogue_topic
-            except Exception as e:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Error extracting dialogue topic in end_practice: {e}")
-                # 如果AI提取失败，保持原有主题
-        
-        session_data["dialogue_topic"] = dialogue_topic
         
         return JSONResponse({
             "status": "success",
@@ -1724,16 +1730,37 @@ async def generate_review_notes(request: Request):
 
         try:
             response_text = response.strip()
+            # 去掉 markdown 代码块包裹（如 ```json ... ```）
+            if "```" in response_text:
+                start_marker = "```json" if "```json" in response_text else "```"
+                start = response_text.find(start_marker) + len(start_marker)
+                end = response_text.find("```", start)
+                if end > start:
+                    response_text = response_text[start:end].strip()
             json_start = response_text.find('{')
             json_end = response_text.rfind('}') + 1
             if json_start >= 0 and json_end > json_start:
                 ai_part = json.loads(response_text[json_start:json_end])
             else:
                 ai_part = {"corrections": []}
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
+            logger.warning(f"generate_review: AI 返回非合法 JSON, {e}, 原始片段: {(response or '')[:200]}")
             ai_part = {"corrections": []}
 
-        corrections = ai_part.get("corrections") or []
+        raw_list = ai_part.get("corrections") or []
+        # 统一为 { user_said, correct, explanation }，兼容 LLM 用不同 key 的情况
+        corrections = []
+        for item in raw_list:
+            if not isinstance(item, dict):
+                continue
+            user_said = item.get("user_said") or item.get("original") or item.get("user_input") or ""
+            correct = item.get("correct") or item.get("corrected") or item.get("suggestion") or ""
+            if user_said or correct:
+                corrections.append({
+                    "user_said": user_said,
+                    "correct": correct,
+                    "explanation": item.get("explanation") or item.get("reason") or ""
+                })
 
         # 第二、三部分：从 scene_npc 的 review 对话取核心句型、语块与短对话
         core_sentences = ""

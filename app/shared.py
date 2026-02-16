@@ -66,10 +66,11 @@ def clear_conversation_history():
 # 记忆系统
 memory_system = None
 current_account = None  # 当前账号名称
+_last_memory_init_error = None  # 上次初始化失败时的异常信息，供登录接口返回给前端
 
 def get_memory_system(account_name=None):
     """获取记忆系统实例（单例模式，但基于账号）"""
-    global memory_system, current_account
+    global memory_system, current_account, _last_memory_init_error
     
     # 如果没有传入账号名称，使用当前账号
     if account_name is None:
@@ -81,18 +82,26 @@ def get_memory_system(account_name=None):
         current_account = account_name
     
     if memory_system is None:
+        _last_memory_init_error = None
         try:
             from .memory_system import DiaryMemorySystem
             memory_system = DiaryMemorySystem(account_name=account_name)
             current_account = account_name
             print(f"Memory system initialized successfully for account: {account_name or 'default'}")
         except Exception as e:
+            _last_memory_init_error = str(e)
             print(f"Error initializing memory system: {e}")
             import traceback
             traceback.print_exc()
             memory_system = None
             current_account = None
     return memory_system
+
+
+def get_last_memory_init_error():
+    """返回上次记忆系统初始化失败时的错误信息（供登录接口返回给用户）"""
+    global _last_memory_init_error
+    return _last_memory_init_error
 
 def get_current_account():
     """获取当前账号名称"""

@@ -4,44 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>语音对话 - Voice Chat AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/app/static/css/voice_chat.css">
     <link rel="stylesheet" href="/app/static/css/scene.css">
     <link rel="icon" href="/app/static/favicon.ico" type="image/x-icon">
-    <style>
-      /* 场景入口浮动按钮 */
-      .enter-scenes-btn {
-        position: fixed;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 18px;
-        z-index: 999;
-        background: #ff8a00;
-        color: #fff;
-        padding: 10px 16px;
-        border-radius: 24px;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-        font-weight: 600;
-        text-decoration: none;
-      }
-      .enter-scenes-btn:hover { opacity: 0.95; }
-    </style>
 </head>
 <body>
-    <!-- 开口即启：Say Hello 欢迎屏 (Orb + 涟漪) -->
+    <!-- 开口即启：Say Hello 欢迎屏 (Cyber Mode - Canvas 波形) -->
     <div class="say-hello-overlay" id="say-hello-overlay">
-        <div class="say-hello-content">
-            <div class="orb-container">
-                <div class="ripple" style="animation-delay: 0s" data-ripple></div>
-                <div class="ripple" style="animation-delay: 0.5s" data-ripple></div>
-                <div class="ripple" style="animation-delay: 1s" data-ripple></div>
-                <div class="core-circle" id="mic-core">
-                    <span class="mic-icon">🎙️</span>
-                </div>
-            </div>
-            <h1 class="say-hello-heading">Say "<span class="highlight">Hello</span>" to Start</h1>
-            <div id="status-text" class="say-hello-status">点击下方按钮或说 Hello 开始...</div>
-            <button type="button" class="manual-btn" id="say-hello-manual-btn">Tap to enter manually</button>
+        <div class="say-hello-ambient-light"></div>
+        <canvas id="say-hello-visualizer" class="say-hello-canvas"></canvas>
+        <div class="say-hello-ui-layer">
+            <h1 class="say-hello-cyber-title">Hello.</h1>
+            <p class="say-hello-subtitle"><span class="status-dot" id="say-hello-dot"></span>Listening System</p>
+            <div class="say-hello-instruction" id="say-hello-instruction" style="display: none;">Say &quot;Hello&quot; to start</div>
         </div>
+        <div class="say-hello-tap-hint" id="say-hello-hint">Waiting for user interaction...</div>
+        <button type="button" class="manual-btn" id="say-hello-manual-btn">Tap to enter manually</button>
     </div>
 
     <!-- 账号登录界面 -->
@@ -116,11 +97,68 @@
             </div>
         </header>
 
-        <!-- 消息区域 -->
-        <div class="messages-container" id="messages-container">
+        <!-- 主内容区：对话 + 学习卡片 + 复习笔记 同页顺序展示，不再分栏 -->
+        <div class="main-content">
+          <div class="messages-container" id="messages-container">
             <div class="messages-list" id="messages-list">
-                <!-- 消息将动态添加到这里 -->
+              <!-- 消息将动态添加到这里 -->
             </div>
+          </div>
+          <div id="cards-container" class="cards-section">
+            <div class="english-learning-card" id="english-learning-card">
+              <div class="english-card-badge">🎯 英语学习</div>
+              <div class="english-card-content">
+                <div class="english-card-left">
+                  <div class="english-card-icon-wrapper">
+                    <svg class="english-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                      <path d="M2 17l10 5 10-5"></path>
+                      <path d="M2 12l10 5 10-5"></path>
+                    </svg>
+                  </div>
+                  <div class="english-card-text">
+                    <h3>📚 开始英语学习</h3>
+                    <p class="english-card-desc">生成个性化英语对话卡片，开始口语练习</p>
+                    <div class="english-card-features">
+                      <span class="feature-tag">✨ 个性化</span>
+                      <span class="feature-tag">🎯 按你的水平</span>
+                      <span class="feature-tag">💬 真实对话</span>
+                    </div>
+                  </div>
+                </div>
+                <button id="start-english-card-btn" class="english-card-btn">
+                  <span class="btn-icon">🚀</span>
+                  <span class="btn-text">开始学习</span>
+                  <svg class="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <!-- 由 JS 动态生成的英语卡片会插入到 #cards-container 中 -->
+          </div>
+          <div id="review-container" class="review-section">
+            <!-- 复习笔记（displayReviewNotes 会将内容渲染到这里） -->
+          </div>
+        </div>
+
+        <!-- 练习页（新页面，从卡片点击「开始练习」后进入） -->
+        <div id="practice-page" class="sub-page" style="display: none;" aria-hidden="true">
+            <div class="sub-page-header">
+                <button type="button" id="practice-page-back-btn" class="sub-page-back-btn" title="返回">← 返回</button>
+                <h2 class="sub-page-title">🎯 练习</h2>
+            </div>
+            <div id="practice-page-content" class="sub-page-body"></div>
+        </div>
+
+        <!-- 复习笔记页（新页面，练习结束后「生成复习笔记」进入） -->
+        <div id="review-page" class="sub-page" style="display: none;" aria-hidden="true">
+            <div class="sub-page-header">
+                <button type="button" id="review-page-back-btn" class="sub-page-back-btn" title="返回主页">← 返回主页</button>
+                <h2 class="sub-page-title">📝 复习笔记</h2>
+            </div>
+            <div id="review-page-content" class="sub-page-body"></div>
         </div>
 
         <!-- 录音状态指示器 -->
@@ -135,41 +173,6 @@
             <span class="recording-text">正在录音...</span>
         </div>
 
-        <!-- 英语学习入口卡片 - 显眼且直观 -->
-        <div class="english-learning-card" id="english-learning-card">
-            <div class="english-card-badge">🎯 英语学习</div>
-            <div class="english-card-content">
-                <div class="english-card-left">
-                    <div class="english-card-icon-wrapper">
-                        <svg class="english-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                            <path d="M2 17l10 5 10-5"></path>
-                            <path d="M2 12l10 5 10-5"></path>
-                        </svg>
-                    </div>
-                    <div class="english-card-text">
-                        <h3>📚 开始英语学习</h3>
-                        <p class="english-card-desc">生成个性化英语对话卡片，开始口语练习</p>
-                        <div class="english-card-features">
-                            <span class="feature-tag">✨ 个性化</span>
-                            <span class="feature-tag">🎯 按你的水平</span>
-                            <span class="feature-tag">💬 真实对话</span>
-                        </div>
-                    </div>
-                </div>
-                <button id="start-english-card-btn" class="english-card-btn">
-                    <span class="btn-icon">🚀</span>
-                    <span class="btn-text">开始学习</span>
-                    <svg class="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <!-- 输入区域 -->
-        <!-- 场景入口（固定底部按钮，modal 关闭时可见） -->
         <a id="enter-scenes-btn" class="enter-scenes-btn" href="#" title="进入沉浸式场景">进入场景体验 ☕</a>
     <!-- 场景 Modal（内嵌）- 两屏切换：列表 / 场景视图 -->
     <div id="scenesModal" class="scenes-modal-overlay" style="display:none;">

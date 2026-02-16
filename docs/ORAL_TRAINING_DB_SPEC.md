@@ -1,5 +1,7 @@
-# 口语训练数据库规范（ORAL_TRAINING_DB_SPEC v1.1）
+# 口语训练数据库规范（ORAL_TRAINING_DB_SPEC v1.1）[已 superseded]
 
+> ⚠️ **新规范**：本项目已采用 `SCENE_NPC_DB_SPEC.md`（大场景→小场景→NPC→预制对话），原 Unit 等价于新 NPC。本文件保留作历史参考。
+>
 > 目标：在不破坏原有工程结构与业务逻辑的前提下，提升**可生成性、自然口语度与长期维护成本可控性**。
 
 本文档为口语训练数据库的权威规范，用于生成与完善 `data/oral_training_db.json`。程序读取、人工扩展或 AI 完善数据库时，均应严格遵循本规范。

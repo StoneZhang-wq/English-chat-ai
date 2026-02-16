@@ -266,7 +266,8 @@ async def process_text(user_input):
     # 注意：直接传递字典，send_message_to_clients会自动处理JSON编码
     await send_message_to_clients({
         "action": "ai_message",
-        "text": chatbot_response
+        "text": chatbot_response,
+        "character": current_character
     })
     
     # 让出控制权，确保WebSocket消息已经真正发送到网络
