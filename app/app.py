@@ -1,7 +1,7 @@
 import os
 import asyncio
 import aiohttp
-import pyaudio
+# pyaudio 按需导入（服务端录音时使用，Railway 瘦身部署可不装）
 import wave
 import numpy as np
 import requests
@@ -10,7 +10,7 @@ import base64
 from PIL import ImageGrab
 from dotenv import load_dotenv
 from openai import OpenAI
-from faster_whisper import WhisperModel
+# faster_whisper 按需导入（仅本地 ASR 使用，豆包/OpenAI 路径不加载）
 import soundfile as sf
 from textblob import TextBlob
 from pathlib import Path
@@ -20,21 +20,45 @@ import io
 from pydub import AudioSegment
 from .shared import clients, get_current_character
 
-# Import Spark-TTS and torch (only needed for Spark-TTS)
-try:
-    import sys
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-    import torch
-    from cli.SparkTTS import SparkTTS
-    import logging
-    import warnings
-    logging.getLogger("transformers").setLevel(logging.ERROR)  # transformers 4.48+ warning
-    warnings.filterwarnings("ignore", category=FutureWarning, module="torch.nn.utils.weight_norm")
-    SPARKTTS_AVAILABLE = True
-except ImportError as e:
-    print(f"Spark-TTS import failed: {e}")
-    SPARKTTS_AVAILABLE = False
-    torch = None  # Set torch to None if not available
+# Spark-TTS / torch 按需导入（仅 TTS_PROVIDER=sparktts 时加载，豆包/OpenAI 路径不加载）
+SPARKTTS_AVAILABLE = False
+torch = None
+
+def _get_torch():
+    global torch
+    if torch is None:
+        try:
+            import torch as _t
+            torch = _t
+        except ImportError:
+            pass
+    return torch
+
+def _get_device():
+    t = _get_torch()
+    return "cuda" if (t and t.cuda.is_available()) else "cpu"
+
+def _load_sparktts_deps():
+    """按需加载 Spark-TTS 依赖，仅在选择 sparktts 时调用"""
+    global SPARKTTS_AVAILABLE, torch
+    if SPARKTTS_AVAILABLE:
+        return True
+    try:
+        import sys
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+        torch = _get_torch()
+        if torch is None:
+            raise ImportError("torch not installed")
+        from cli.SparkTTS import SparkTTS  # noqa: F401
+        import logging
+        import warnings
+        logging.getLogger("transformers").setLevel(logging.ERROR)
+        warnings.filterwarnings("ignore", category=FutureWarning, module="torch.nn.utils.weight_norm")
+        SPARKTTS_AVAILABLE = True
+        return True
+    except ImportError as e:
+        print(f"Spark-TTS import failed: {e}")
+        return False
 
 # Load environment variables
 load_dotenv()
@@ -126,10 +150,7 @@ else:
 # Capitalize the first letter of the character name
 character_display_name = CHARACTER_NAME.capitalize()
 
-# Check for CUDA availability (only if torch is available)
-device = "cuda" if (torch and torch.cuda.is_available()) else "cpu"
-
-# Check if Faster Whisper should be loaded at startup
+# Check if Faster Whisper should be loaded at startup（仅在此为 true 时按需导入）
 FASTER_WHISPER_LOCAL = os.getenv("FASTER_WHISPER_LOCAL", "true").lower() == "true"
 
 # Initialize whisper model as None to lazy load
@@ -140,18 +161,20 @@ model_size = "medium.en"
 
 if FASTER_WHISPER_LOCAL:
     try:
-        print(f"Attempting to load Faster-Whisper on {device}...")
-        whisper_model = WhisperModel(model_size, device=device, compute_type="float16" if device == "cuda" else "int8")
+        from faster_whisper import WhisperModel
+        _device = _get_device()
+        print(f"Attempting to load Faster-Whisper on {_device}...")
+        whisper_model = WhisperModel(model_size, device=_device, compute_type="float16" if _device == "cuda" else "int8")
         print("Faster-Whisper initialized successfully.")
     except Exception as e:
-        print(f"Error initializing Faster-Whisper on {device}: {e}")
+        print(f"Error initializing Faster-Whisper: {e}")
         print("Falling back to CPU mode...")
-
-        # Force CPU fallback
-        device = "cpu"
-        model_size = "tiny.en"  # Use a smaller model for CPU performance
-        whisper_model = WhisperModel(model_size, device="cpu", compute_type="int8")
-        print("Faster-Whisper initialized on CPU successfully.")
+        try:
+            from faster_whisper import WhisperModel
+            whisper_model = WhisperModel("tiny.en", device="cpu", compute_type="int8")
+            print("Faster-Whisper initialized on CPU successfully.")
+        except Exception as e2:
+            print(f"Faster-Whisper fallback failed: {e2}")
 else:
     print("Faster-Whisper initialization skipped. Using OpenAI for transcription or load on demand.")
 
@@ -164,15 +187,17 @@ character_audio_file = os.path.join(characters_folder, f"{CHARACTER_NAME}.wav")
 # Load Spark-TTS configuration
 sparktts_model = None
 
-# Initialize Spark-TTS model
+# Initialize Spark-TTS model（仅 TTS_PROVIDER=sparktts 时按需加载）
 if TTS_PROVIDER == 'sparktts':
-    if not SPARKTTS_AVAILABLE:
+    if not _load_sparktts_deps():
         print("Spark-TTS is not available. Please ensure it's properly installed.")
         TTS_PROVIDER = 'openai'
         print("Switched to default TTS provider: openai")
     else:
         print(f"Initializing Spark-TTS model from {SPARKTTS_MODEL_DIR}...")
         try:
+            from cli.SparkTTS import SparkTTS
+            device = _get_device()
             torch_device = torch.device(device)
             print(f"Using device: {torch_device} (CUDA available: {torch.cuda.is_available()})")
             sparktts_model = SparkTTS(model_dir=Path(SPARKTTS_MODEL_DIR), device=torch_device)
@@ -248,7 +273,7 @@ def init_set_tts(set_tts):
     """已废弃：请使用init_set_api_provider设置全局供应商"""
     global TTS_PROVIDER, sparktts_model
     if set_tts == 'sparktts':
-        if not SPARKTTS_AVAILABLE:
+        if not _load_sparktts_deps():
             print("Spark-TTS is not available. Please ensure it's properly installed.")
             loop = asyncio.get_running_loop()
             loop.create_task(send_message_to_clients(json.dumps({
@@ -259,6 +284,8 @@ def init_set_tts(set_tts):
         
         print(f"Initializing Spark-TTS model from {SPARKTTS_MODEL_DIR}...")
         try:
+            from cli.SparkTTS import SparkTTS
+            device = _get_device()
             torch_device = torch.device(device)
             print(f"Using device: {torch_device} (CUDA available: {torch.cuda.is_available()})")
             sparktts_model = SparkTTS(model_dir=Path(SPARKTTS_MODEL_DIR), device=torch_device)
@@ -328,16 +355,17 @@ async def play_audio(file_path):
     await asyncio.to_thread(sync_play_audio, file_path)
 
 def sync_play_audio(file_path):
+    import pyaudio
     print("Starting audio playback")
     file_extension = Path(file_path).suffix.lstrip('.').lower()
-    
+
     temp_wav_path = os.path.join(output_dir, 'temp_output.wav')
-    
+
     if file_extension == 'mp3':
         audio = AudioSegment.from_mp3(file_path)
         audio.export(temp_wav_path, format="wav")
         file_path = temp_wav_path
-    
+
     wf = wave.open(file_path, 'rb')
     p = pyaudio.PyAudio()
     stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
@@ -358,7 +386,7 @@ def sync_play_audio(file_path):
 output_dir = os.path.join(project_dir, 'outputs')
 os.makedirs(output_dir, exist_ok=True)
 
-print(f"{NEON_GREEN}Using device: {device}{RESET_COLOR}")
+print(f"{NEON_GREEN}API provider: {API_PROVIDER}{RESET_COLOR}")
 print(f"{NEON_GREEN}全局API供应商: {API_PROVIDER} (LLM/TTS/ASR统一使用){RESET_COLOR}")
 if API_PROVIDER == 'openai':
     print(f"{NEON_GREEN}OpenAI Model: {OPENAI_MODEL}{RESET_COLOR}")
@@ -1019,17 +1047,14 @@ async def chatgpt_streamed_async(user_input, system_message, mood_prompt, conver
 # save_conversation_history 函数已移除（conversation_history.txt 功能已移除）
 
 def transcribe_with_whisper(audio_file):
-    """Transcribe audio using local Faster Whisper model"""
+    """Transcribe audio using local Faster Whisper model（仅 CLI 等路径调用，Web 豆包/OpenAI 不经过此函数）"""
     global whisper_model
     
     # Lazy load the model only when needed
     if whisper_model is None:
-        # Check for CUDA availability (use global device or check torch if available)
-        whisper_device = "cuda" if (torch and torch.cuda.is_available()) else "cpu"
-        
-        # Default model size (adjust as needed)
+        from faster_whisper import WhisperModel
+        whisper_device = _get_device()
         model_size = "medium.en" if whisper_device == "cuda" else "tiny.en"
-        
         try:
             print(f"Lazy-loading Faster-Whisper on {whisper_device}...")
             whisper_model = WhisperModel(model_size, device=whisper_device, compute_type="float16" if whisper_device == "cuda" else "int8")
@@ -1037,8 +1062,6 @@ def transcribe_with_whisper(audio_file):
         except Exception as e:
             print(f"Error initializing Faster-Whisper on {whisper_device}: {e}")
             print("Falling back to CPU mode...")
-            
-            # Force CPU fallback
             model_size = "tiny.en"
             whisper_model = WhisperModel(model_size, device="cpu", compute_type="int8")
             print("Faster-Whisper initialized on CPU successfully.")
@@ -1054,6 +1077,7 @@ def detect_silence(data, threshold=1000, chunk_size=1024):   # threshold is More
     return np.mean(np.abs(audio_data)) < threshold
 
 async def record_audio(file_path, silence_threshold=512, silence_duration=2.5, chunk_size=1024):  # 2.0 seconds of silence adjust as needed, if not picking up your voice increase to 4.0
+    import pyaudio
     p = pyaudio.PyAudio()
     stream = p.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=chunk_size)
     frames = []

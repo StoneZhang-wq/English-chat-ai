@@ -1,17 +1,11 @@
 import os
-import pyaudio
+# pyaudio 按需导入（服务端录音时使用）
 import wave
 import numpy as np
 import aiohttp
 import tempfile
-from faster_whisper import WhisperModel
+# faster_whisper / torch 按需导入（仅本地 ASR 使用，豆包/OpenAI 路径不加载）
 from dotenv import load_dotenv
-
-# Import torch only if available (needed for CUDA detection)
-try:
-    import torch
-except ImportError:
-    torch = None
 
 # ANSI escape codes for colors
 PINK = '\033[95m'
@@ -54,18 +48,20 @@ FASTER_WHISPER_LOCAL = os.getenv("FASTER_WHISPER_LOCAL", "true").lower() == "tru
 whisper_model = None
 
 def initialize_whisper_model():
-    """Initialize the Faster Whisper model - only called when needed"""
+    """Initialize the Faster Whisper model - only called when needed (e.g. CLI local ASR)"""
     global whisper_model
-    
+
     if whisper_model is not None:
         return whisper_model
-        
-    # Check for CUDA availability (only if torch is available)
-    device = "cuda" if (torch and torch.cuda.is_available()) else "cpu"
-    
-    # Default model size (adjust as needed)
+
+    from faster_whisper import WhisperModel
+    try:
+        import torch
+        device = "cuda" if (torch and torch.cuda.is_available()) else "cpu"
+    except ImportError:
+        device = "cpu"
+
     model_size = "medium.en"
-    
     try:
         print(f"Attempting to load Faster-Whisper on {device}...")
         whisper_model = WhisperModel(model_size, device=device, compute_type="float16" if device == "cuda" else "int8")
@@ -73,13 +69,10 @@ def initialize_whisper_model():
     except Exception as e:
         print(f"Error initializing Faster-Whisper on {device}: {e}")
         print("Falling back to CPU mode...")
-
-        # Force CPU fallback
-        device = "cpu"
-        model_size = "tiny.en"  # Use a smaller model for CPU performance
+        model_size = "tiny.en"
         whisper_model = WhisperModel(model_size, device="cpu", compute_type="int8")
         print("Faster-Whisper initialized on CPU successfully.")
-        
+
     return whisper_model
 
 def transcribe_with_whisper(audio_file):
@@ -194,7 +187,7 @@ def detect_silence(data, threshold=512, chunk_size=1024):
 
 async def record_audio(file_path, silence_threshold=512, silence_duration=2.5, chunk_size=1024, send_status_callback=None):
     """Record audio to a file path
-    
+
     Args:
         file_path: Path to save the recorded audio
         silence_threshold: Threshold for silence detection
@@ -202,6 +195,7 @@ async def record_audio(file_path, silence_threshold=512, silence_duration=2.5, c
         chunk_size: Size of audio chunks
         send_status_callback: Callback to send status updates (optional)
     """
+    import pyaudio
     p = pyaudio.PyAudio()
     stream = p.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=chunk_size)
     frames = []
@@ -248,20 +242,21 @@ async def record_audio(file_path, silence_threshold=512, silence_duration=2.5, c
 
 async def record_audio_enhanced(send_status_callback=None, silence_threshold=300, silence_duration=2.0):
     """Enhanced audio recording with waiting for speech detection
-    
+
     Args:
         send_status_callback: Callback to send status messages
         silence_threshold: Threshold for silence detection
         silence_duration: Duration of silence to stop recording
-    
+
     Returns:
         Path to the recorded audio file
     """
+    import pyaudio
     # Create temp file
     temp_file = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
     temp_filename = temp_file.name
     temp_file.close()
-    
+
     # Recording parameters
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
