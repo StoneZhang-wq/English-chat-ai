@@ -3580,6 +3580,7 @@ async function handleLogin() {
         
         if (result.status === 'success') {
             currentAccountName = username;
+            window.currentAccountName = username;
             localStorage.setItem('current_account', username);
             
             // 先隐藏登录界面，显示对话界面
@@ -3705,6 +3706,7 @@ async function handleLogout() {
         
         if (result.status === 'success') {
             currentAccountName = null;
+            window.currentAccountName = null;
             localStorage.removeItem('current_account');
             
             // 关闭WebSocket连接

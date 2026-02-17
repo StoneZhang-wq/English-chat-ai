@@ -75,6 +75,29 @@
   justify-content: center;
 }
 
+/* 列表加载中（减轻切换/回退时的等待感） */
+.scene-list-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: var(--text-muted, #94a3b8);
+  font-size: 14px;
+}
+.scene-list-loading p { margin: 16px 0 0; }
+.scene-list-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border, rgba(226, 232, 240, 0.2));
+  border-top-color: var(--primary, #6366f1);
+  border-radius: 50%;
+  animation: scene-spin 0.7s linear infinite;
+}
+@keyframes scene-spin {
+  to { transform: rotate(360deg); }
+}
+
 .scene-card {
   width: 280px;
   background: var(--surface, rgba(15, 15, 35, 0.9));

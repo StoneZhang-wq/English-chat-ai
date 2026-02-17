@@ -135,7 +135,12 @@ def _ensure_default_unlocks(account_name: str) -> None:
         _save_json(path, data)
 
 def get_unlocked_scenes(account_name: str) -> List[str]:
-    """返回已解锁的 small_scene_id 列表"""
+    """返回已解锁的 small_scene_id 列表。Supabase 时仅从 npc_learn_progress 推导，不读写本地 small_scene_unlock.json。"""
+    backend = _npc_progress_backend(account_name)
+    if backend is not None:
+        has_immersive = _get_scenes_with_immersive_dialogues()
+        progress = get_npc_progress(account_name)
+        return [sid for sid in has_immersive if progress.get(sid)]
     acc = _safe_account(account_name)
     _ensure_default_unlocks(acc)
     data = _load_json(_unlock_path(acc), {})
@@ -184,13 +189,15 @@ def _get_npc_ids_with_learn_in_scene(small_scene_id: str) -> List[str]:
     return list(seen)
 
 def check_and_unlock_scene(account_name: str, small_scene_id: str) -> bool:
-    """若该小场景下所有 NPC 都已学完，则解锁；返回是否新解锁"""
+    """若该小场景下所有 NPC 都已学完，则解锁；返回是否新解锁。Supabase 时不读写本地文件，仅按进度推导，返回 False（不区分是否「新」解锁）。"""
     npcs_in_scene = _get_npc_ids_with_learn_in_scene(small_scene_id)
     if not npcs_in_scene:
         return False
     progress = get_npc_progress(account_name)
     learned = set(progress.get(small_scene_id, []))
     if learned >= set(npcs_in_scene):
+        if _npc_progress_backend(account_name) is not None:
+            return False  # Supabase：不落盘解锁状态，无法得知是否「新解锁」
         unlock_data = _load_json(_unlock_path(account_name), {})
         was_unlocked = unlock_data.get(small_scene_id, False)
         unlock_data[small_scene_id] = True

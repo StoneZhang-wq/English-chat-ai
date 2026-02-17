@@ -8,6 +8,32 @@
     return await res.json();
   }
 
+  /** 当前账户名（与 voice_chat 一致），用于场景解锁状态从 Supabase/后端正确按用户拉取 */
+  function getSceneAccount() {
+    if (typeof window.currentAccountName !== 'undefined' && window.currentAccountName) return window.currentAccountName;
+    try {
+      if (typeof localStorage !== 'undefined') return localStorage.getItem('current_account') || '';
+    } catch (_) {}
+    return '';
+  }
+
+  function urlWithAccount(path, account) {
+    if (!account) return path;
+    const sep = path.indexOf('?') >= 0 ? '&' : '?';
+    return path + sep + 'account_name=' + encodeURIComponent(account);
+  }
+
+  // 缓存：避免切换大/小场景与回退时重复请求，减轻延时
+  let cacheBigScenes = null;
+  const cacheSmallByBig = {};
+  const cacheSceneDetail = {};
+
+  function showListLoading(msg) {
+    const container = q('#scenesList');
+    if (!container) return;
+    container.innerHTML = '<div class="scene-list-loading"><span class="scene-list-spinner"></span><p>' + (msg || '加载中…') + '</p></div>';
+  }
+
   // 注意：不使用前端硬编码回退，所有场景由后端 dialogues.json 驱动
 
   function openModal() {
@@ -98,11 +124,25 @@
   }
 
   async function loadSmallScenes(bigSceneId, bigSceneName) {
+    const cached = cacheSmallByBig[bigSceneId];
+    if (Array.isArray(cached)) {
+      renderSmallScenesList(cached, bigSceneName);
+      const backBtn = q('#scenesBackBtn');
+      if (backBtn) {
+        backBtn.style.display = 'inline-block';
+        backBtn.dataset.level = 'big';
+      }
+      q('#scenesModalTitle').textContent = bigSceneName || '小场景';
+      return;
+    }
+    showListLoading('加载小场景…');
     try {
-      const res = await fetchJSON('/api/scene-npc/immersive-small-scenes?big_scene_id=' + encodeURIComponent(bigSceneId));
+      const acc = getSceneAccount();
+      const url = urlWithAccount('/api/scene-npc/immersive-small-scenes?big_scene_id=' + encodeURIComponent(bigSceneId), acc);
+      const res = await fetchJSON(url);
       const scenes = res.scenes || [];
+      cacheSmallByBig[bigSceneId] = scenes;
       renderSmallScenesList(scenes, bigSceneName);
-      // 显示回退到大场景的按钮
       const backBtn = q('#scenesBackBtn');
       if (backBtn) {
         backBtn.style.display = 'inline-block';
@@ -257,14 +297,28 @@
   }
 
   async function loadScene(id) {
+    const cached = cacheSceneDetail[id];
+    if (cached) {
+      renderSceneView(cached);
+      q('#scenesListPane').style.display = 'none';
+      q('#sceneViewPane').style.display = 'block';
+      q('#scenesBackBtn').style.display = 'inline-block';
+      q('#scenesModalTitle').textContent = cached.title;
+      const backBtn = q('#scenesBackBtn');
+      if (backBtn) backBtn.dataset.level = 'scene';
+      return;
+    }
+    showListLoading('进入场景…');
     try {
       let scene;
       try {
-        const data = await fetchJSON(`/api/scenes/${id}`);
+        const acc = getSceneAccount();
+        const url = urlWithAccount('/api/scenes/' + encodeURIComponent(id), acc);
+        const data = await fetchJSON(url);
         scene = data.scene;
       } catch (e) {
-        // 不使用前端硬编码回退，严格依赖后端数据
         console.error('加载场景失败：', e);
+        q('#scenesList').innerHTML = '';
         alert('无法加载场景（后端未返回该场景或网络错误）');
         return;
       }
@@ -272,12 +326,12 @@
         alert('未知场景：' + id);
         return;
       }
+      cacheSceneDetail[id] = scene;
       renderSceneView(scene);
       q('#scenesListPane').style.display = 'none';
       q('#sceneViewPane').style.display = 'block';
       q('#scenesBackBtn').style.display = 'inline-block';
       q('#scenesModalTitle').textContent = scene.title;
-      // 标记返回按钮行为：从场景视图返回到小场景列表
       const backBtn = q('#scenesBackBtn');
       if (backBtn) backBtn.dataset.level = 'scene';
     } catch (e) {
@@ -287,10 +341,15 @@
   }
 
   async function initModal() {
-    // 加载后端推导出的大场景（仅包含下有 immersive 小场景的类目）
+    if (cacheBigScenes && cacheBigScenes.length > 0) {
+      renderBigScenesList(cacheBigScenes);
+      return;
+    }
+    showListLoading('加载场景列表…');
     try {
       const data = await fetchJSON('/api/scene-npc/big-scenes');
       const scenes = data.big_scenes || [];
+      cacheBigScenes = scenes;
       if (scenes && scenes.length) {
         renderBigScenesList(scenes);
       } else {
@@ -358,11 +417,14 @@
         q('#scenesModalTitle').textContent = '场景体验';
         backBtn.style.display = 'none';
       } else {
-        // 从小场景列表返回到大场景列表
+        // 从小场景列表返回到大场景列表：用缓存重新渲染大场景列表，避免再发请求
         q('#sceneViewPane').style.display = 'none';
         q('#scenesListPane').style.display = 'block';
         q('#scenesModalTitle').textContent = '场景体验';
         backBtn.style.display = 'none';
+        if (cacheBigScenes && cacheBigScenes.length > 0) {
+          renderBigScenesList(cacheBigScenes);
+        }
       }
     });
     // Scene chat controls

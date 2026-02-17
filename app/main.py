@@ -309,21 +309,28 @@ async def get_scene(request: Request, scene_id: str):
     return templates.TemplateResponse("scene.html", {"request": request, "scene": scene})
 
 
+def _scene_account(request: Request, account_name: str = None) -> str:
+    """解析场景相关 API 的当前账户：X-Account-Name 头 > account_name 查询 > get_current_account()。确保多进程/未建 WebSocket 时前端传参仍能命中 Supabase 进度。"""
+    header_acc = (request.headers.get("X-Account-Name") or "").strip()
+    query_acc = (account_name or "").strip()
+    return header_acc or query_acc or get_current_account() or ""
+
+
 @app.get("/api/scene-list")
-async def api_list_scenes(request: Request):
-    """Return immersive scenes (unlocked only) for modal"""
+async def api_list_scenes(request: Request, account_name: str = None):
+    """Return immersive scenes (unlocked only) for modal. 支持 account_name 查询或 X-Account-Name 头。"""
     from .scene_npc_db import get_immersive_scene_list
-    account_name = get_current_account() or ""
-    scenes = get_immersive_scene_list(account_name)
+    acc = _scene_account(request, account_name)
+    scenes = get_immersive_scene_list(acc)
     return JSONResponse({"scenes": scenes})
 
 
 @app.get("/api/scenes/{scene_id}")
-async def api_get_scene(request: Request, scene_id: str):
-    """Return immersive scene detail with NPCs"""
+async def api_get_scene(request: Request, scene_id: str, account_name: str = None):
+    """Return immersive scene detail with NPCs. 支持 account_name 查询或 X-Account-Name 头。"""
     from .scene_npc_db import get_immersive_scene_detail
-    account_name = get_current_account() or ""
-    scene = get_immersive_scene_detail(scene_id, account_name)
+    acc = _scene_account(request, account_name)
+    scene = get_immersive_scene_detail(scene_id, acc)
     if not scene:
         return JSONResponse({"error": "scene not found or not unlocked"}, status_code=404)
     return JSONResponse({"scene": scene})
@@ -369,11 +376,11 @@ async def api_small_scenes(big_scene_id: str):
 
 
 @app.get("/api/scene-npc/immersive-small-scenes")
-async def api_immersive_small_scenes(big_scene_id: str):
-    """返回某大场景下、有沉浸式内容的小场景列表（用于场景体验的两级选择）"""
+async def api_immersive_small_scenes(request: Request, big_scene_id: str, account_name: str = None):
+    """返回某大场景下、有沉浸式内容的小场景列表。支持 account_name 查询或 X-Account-Name 头。"""
     from .scene_npc_db import get_immersive_small_scenes_by_big
-    account_name = get_current_account() or ""
-    scenes = get_immersive_small_scenes_by_big(big_scene_id, account_name)
+    acc = _scene_account(request, account_name)
+    scenes = get_immersive_small_scenes_by_big(big_scene_id, acc)
     return JSONResponse({"scenes": scenes})
 
 
@@ -420,10 +427,10 @@ async def api_dialogue_review(small_scene_id: str, npc_id: str):
 
 
 @app.get("/api/scene-npc/dialogue/immersive")
-async def api_dialogue_immersive(small_scene_id: str, npc_id: str):
+async def api_dialogue_immersive(request: Request, small_scene_id: str, npc_id: str, account_name: str = None):
     from .scene_npc_db import get_immersive_dialogue, get_npc_progress, _safe_account
-    account_name = get_current_account() or ""
-    progress = get_npc_progress(_safe_account(account_name))
+    acc = _scene_account(request, account_name)
+    progress = get_npc_progress(_safe_account(acc))
     learned = set(progress.get(small_scene_id, []))
     if npc_id not in learned:
         return JSONResponse(

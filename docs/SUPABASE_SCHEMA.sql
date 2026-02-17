@@ -29,3 +29,9 @@ create table if not exists user_npc_learn_progress (
 -- ---------- 若你已有旧表，可执行以下升级（删除不再使用的表、确保新表存在）----------
 -- drop table if exists user_session_temp;
 -- 然后执行上面的 create table user_npc_learn_progress（若尚未创建）
+--
+-- ---------- 本地账户目录可删除 ----------
+-- 当 MEMORY_BACKEND=supabase 时，用户档案、日记、NPC 学习进度与场景解锁均从 Supabase 读写，
+-- 不再依赖 memory/accounts/<用户名>/ 下的 user_profile.json、diary.json、npc_learn_progress.json、small_scene_unlock.json。
+-- 可从本地删除 memory/accounts/<用户名>/ 目录，项目仍可完整使用该用户数据。
+-- 说明：口语训练库的 unit_practice.json 仍会写回本地，删除账户目录后若使用「口语练习」会重新生成该目录。
