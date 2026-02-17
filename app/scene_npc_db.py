@@ -141,12 +141,31 @@ def get_unlocked_scenes(account_name: str) -> List[str]:
     data = _load_json(_unlock_path(acc), {})
     return [k for k, v in data.items() if v]
 
+def _npc_progress_backend(account_name: str):
+    """MEMORY_BACKEND=supabase 时用适配器，否则用本地文件。"""
+    if os.getenv("MEMORY_BACKEND", "").strip().lower() == "supabase":
+        from .adapters import get_memory_adapter
+        return get_memory_adapter(account_name=account_name, project_dir=_project_dir())
+    return None
+
 def get_npc_progress(account_name: str) -> Dict[str, List[str]]:
     """返回 {small_scene_id: [npc_id, ...]} 已完成 learn 的 NPC"""
+    backend = _npc_progress_backend(account_name)
+    if backend is not None:
+        return backend.load_npc_learn_progress()
     return _load_json(_npc_progress_path(account_name), {})
 
 def mark_npc_learned(account_name: str, small_scene_id: str, npc_id: str) -> None:
     """标记某 NPC 的 learn 已完成"""
+    backend = _npc_progress_backend(account_name)
+    if backend is not None:
+        data = backend.load_npc_learn_progress()
+        if small_scene_id not in data:
+            data[small_scene_id] = []
+        if npc_id not in data[small_scene_id]:
+            data[small_scene_id].append(npc_id)
+        backend.save_npc_learn_progress(data)
+        return
     data = get_npc_progress(account_name)
     if small_scene_id not in data:
         data[small_scene_id] = []

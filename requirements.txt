@@ -20,6 +20,9 @@ requests==2.32.4
 pydantic==2.7.4
 python-dotenv==1.0.1
 
+# Supabase (用户记忆持久化，MEMORY_BACKEND=supabase 时使用)
+supabase>=2.0.0
+
 # Audio (处理上传/API 音频)
 numpy>=1.21.6,<1.28.0
 soundfile==0.12.1

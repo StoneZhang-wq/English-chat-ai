@@ -194,7 +194,7 @@ ENGLISH_LEVELS = {
 }
 
 class DiaryMemorySystem:
-    """简化版日记式记忆系统，使用文本摘要存储对话内容"""
+    """简化版日记式记忆系统，使用文本摘要存储对话内容。支持 file（本地 JSON）或 supabase 后端。"""
     
     def __init__(self,
                  memory_file=None,
@@ -202,87 +202,44 @@ class DiaryMemorySystem:
                  account_name=None):
         # 获取项目根目录（app 的父目录）
         current_file_dir = os.path.dirname(os.path.abspath(__file__))
-        project_dir = os.path.dirname(current_file_dir)
+        project_dir = Path(os.path.dirname(current_file_dir))
         
         # 账号名称（用于创建独立的记忆文件夹）
         self.account_name = account_name
         
-        # 从环境变量读取配置，如果没有则使用默认值（相对于项目根目录）
-        if memory_file:
-            # 如果提供了路径，使用提供的路径
-            self.diary_file = Path(memory_file)
-        else:
-            # 从环境变量读取，或使用默认路径
-            env_memory_file = os.getenv("MEMORY_FILE")
-            if env_memory_file:
-                # 如果是绝对路径，直接使用；如果是相对路径，相对于项目根目录
-                if os.path.isabs(env_memory_file):
-                    self.diary_file = Path(env_memory_file)
-                else:
-                    self.diary_file = Path(project_dir) / env_memory_file
-            else:
-                # 如果有账号名称，使用账号专属文件夹；否则使用默认路径
-                if self.account_name:
-                    # 清理账号名称，移除不安全字符
-                    safe_account_name = "".join(c for c in self.account_name if c.isalnum() or c in (' ', '-', '_')).strip()
-                    safe_account_name = safe_account_name.replace(' ', '_')
-                    if not safe_account_name:
-                        safe_account_name = "default"
-                    # 账号专属路径：memory/accounts/{account_name}/diary.json
-                    self.diary_file = Path(project_dir) / "memory" / "accounts" / safe_account_name / "diary.json"
-                else:
-                    # 默认路径：项目根目录下的 memory/diary.json
-                    self.diary_file = Path(project_dir) / "memory" / "diary.json"
+        # 记忆存储适配器：MEMORY_BACKEND=supabase 时用 Supabase，否则用本地文件
+        from .adapters import get_memory_adapter
+        self._adapter = get_memory_adapter(account_name=account_name, project_dir=project_dir)
+        _user_id = self._adapter.get_user_id()
+        # 逻辑路径（用于日志与兼容引用，如 app_logic 中的 session_temp_file）
+        self.diary_file = Path("memory") / "accounts" / _user_id / "diary.json"
+        self.session_temp_file = Path("memory") / "accounts" / _user_id / "session_temp.json"
+        self.user_profile_file = Path("memory") / "accounts" / _user_id / "user_profile.json"
         
         self.max_entries = max_entries or int(os.getenv("MEMORY_MAX_ENTRIES", "50"))
         
-        # 确保目录存在
-        self.diary_file.parent.mkdir(parents=True, exist_ok=True)
-        self.session_temp_file = self.diary_file.parent / "session_temp.json"
-        self.user_profile_file = self.diary_file.parent / "user_profile.json"
+        # 文件后端时确保目录存在（SupabaseAdapter 无 base_dir）
+        if hasattr(self._adapter, "base_dir"):
+            self._adapter.base_dir.mkdir(parents=True, exist_ok=True)
         
         self.diary_data = self.load_diary()
         self.user_profile = self.load_user_profile()
         
         # 打印调试信息
-        print(f"Memory system initialized:")
-        print(f"  Diary file: {self.diary_file}")
+        backend = (os.getenv("MEMORY_BACKEND") or "file").strip().lower()
+        print(f"Memory system initialized (backend={backend}):")
+        print(f"  Diary: {self.diary_file}")
         print(f"  Session temp: {self.session_temp_file}")
         print(f"  User profile: {self.user_profile_file}")
         
     def load_diary(self) -> Dict:
-        """加载日记文件"""
-        if not self.diary_file.exists():
-            return {
-                "version": "1.0",
-                "last_updated": None,
-                "entries": []
-            }
-        
-        try:
-            with open(self.diary_file, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception as e:
-            print(f"Error loading diary: {e}")
-            return {
-                "version": "1.0",
-                "last_updated": None,
-                "entries": []
-            }
+        """加载日记（来自 adapter：文件或 Supabase）"""
+        return self._adapter.load_diary_data()
     
     def save_diary(self):
-        """保存日记到文件"""
+        """保存日记（写入 adapter）"""
         self.diary_data["last_updated"] = datetime.now().isoformat()
-        
-        try:
-            # 确保目录存在
-            self.diary_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.diary_file, "w", encoding="utf-8") as f:
-                json.dump(self.diary_data, f, ensure_ascii=False, indent=2)
-        except Exception as e:
-            print(f"Error saving diary: {e}")
-            import traceback
-            traceback.print_exc()
+        self._adapter.save_diary_data(self.diary_data)
     
     def get_memory_context(self) -> str:
         """获取记忆上下文，基于日记摘要和用户档案"""
@@ -373,63 +330,27 @@ class DiaryMemorySystem:
             return date_str
     
     def save_to_session_temp(self, message: Dict, character: str = ""):
-        """保存消息到临时会话文件"""
-        if not self.session_temp_file.exists():
+        """保存消息到临时会话（adapter）"""
+        session_data = self._adapter.load_session_temp()
+        if session_data is None:
             session_data = {
                 "session_start": datetime.now().isoformat(),
                 "character": character,
                 "messages": []
             }
-        else:
-            try:
-                with open(self.session_temp_file, "r", encoding="utf-8") as f:
-                    session_data = json.load(f)
-            except:
-                session_data = {
-                    "session_start": datetime.now().isoformat(),
-                    "character": character,
-                    "messages": []
-                }
-        
-        # 更新角色（如果提供了）
         if character:
             session_data["character"] = character
-        
-        # 添加消息
         session_data["messages"].append(message)
-        
-        # 保存到文件
-        try:
-            # 确保目录存在
-            self.session_temp_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.session_temp_file, "w", encoding="utf-8") as f:
-                json.dump(session_data, f, ensure_ascii=False, indent=2)
-            print(f"Saved message to session temp: {self.session_temp_file} (total messages: {len(session_data['messages'])})")
-        except Exception as e:
-            print(f"Error saving to session temp file: {e}")
-            print(f"  File path: {self.session_temp_file}")
-            import traceback
-            traceback.print_exc()
+        self._adapter.save_session_temp(session_data)
+        print(f"Saved message to session temp: {self.session_temp_file} (total messages: {len(session_data['messages'])})")
     
     def load_session_temp(self) -> Optional[Dict]:
-        """加载临时会话文件"""
-        if not self.session_temp_file.exists():
-            return None
-        
-        try:
-            with open(self.session_temp_file, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception as e:
-            print(f"Error loading session temp file: {e}")
-            return None
+        """加载临时会话（adapter）"""
+        return self._adapter.load_session_temp()
     
     def clear_session_temp(self):
-        """清空临时会话文件"""
-        if self.session_temp_file.exists():
-            try:
-                self.session_temp_file.unlink()
-            except Exception as e:
-                print(f"Error clearing session temp file: {e}")
+        """清空临时会话（adapter）"""
+        self._adapter.clear_session_temp()
     
     def is_error_response(self, response: str) -> bool:
         """检查响应是否为错误信息"""
@@ -536,69 +457,22 @@ class DiaryMemorySystem:
         self.save_diary()
     
     def load_user_profile(self) -> Dict:
-        """加载用户档案"""
-        if not self.user_profile_file.exists():
-            return {
-                "version": "1.0",
-                "created_at": datetime.now().isoformat(),
-                "last_updated": None,
-                "name": None,
-                "age": None,
-                "occupation": None,
-                "interests": [],
-                "preferences": {},
-                "goals": [],
-                "habits": [],
-                "english_level": "beginner",  # 新增：beginner/elementary/intermediate/advanced
-                "english_level_description": "",  # 新增：英文水平描述
-                "other_info": {}
-            }
-        
-        try:
-            with open(self.user_profile_file, "r", encoding="utf-8") as f:
-                profile = json.load(f)
-                # 确保所有必需字段存在
-                if "version" not in profile:
-                    profile["version"] = "1.0"
-                if "created_at" not in profile:
-                    profile["created_at"] = datetime.now().isoformat()
-                # 确保英文水平字段存在
-                if "english_level" not in profile:
-                    profile["english_level"] = "beginner"
-                if "english_level_description" not in profile:
-                    profile["english_level_description"] = ""
-                return profile
-        except Exception as e:
-            print(f"Error loading user profile: {e}")
-            return {
-                "version": "1.0",
-                "created_at": datetime.now().isoformat(),
-                "last_updated": None,
-                "name": None,
-                "age": None,
-                "occupation": None,
-                "interests": [],
-                "preferences": {},
-                "goals": [],
-                "habits": [],
-                "english_level": "beginner",
-                "english_level_description": "",
-                "other_info": {}
-            }
+        """加载用户档案（adapter）"""
+        profile = self._adapter.load_user_profile()
+        if "version" not in profile:
+            profile["version"] = "1.0"
+        if "created_at" not in profile:
+            profile["created_at"] = datetime.now().isoformat()
+        if "english_level" not in profile:
+            profile["english_level"] = "beginner"
+        if "english_level_description" not in profile:
+            profile["english_level_description"] = ""
+        return profile
     
     def save_user_profile(self):
-        """保存用户档案"""
+        """保存用户档案（adapter）"""
         self.user_profile["last_updated"] = datetime.now().isoformat()
-        
-        try:
-            # 确保目录存在
-            self.user_profile_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.user_profile_file, "w", encoding="utf-8") as f:
-                json.dump(self.user_profile, f, ensure_ascii=False, indent=2)
-        except Exception as e:
-            print(f"Error saving user profile: {e}")
-            import traceback
-            traceback.print_exc()
+        self._adapter.save_user_profile(self.user_profile)
     
     def get_user_profile_context(self) -> str:
         """获取用户档案上下文"""
