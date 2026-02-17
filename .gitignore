@@ -191,6 +191,9 @@ config.json
 
 # Ignore model folders
 models/
+# 但保留 varta 后端的 models（Mongoose 模型）
+!varta/server/models/
+!varta/server/models/**
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
