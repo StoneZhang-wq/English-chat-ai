@@ -10,7 +10,7 @@
       {
         "role": "B",
         "content": "What's for dinner tonight?",
-        "hint": "ask about dinner"
+        "hint": "What's for...? / What's for dinner tonight?"
       },
       {
         "role": "A",
@@ -20,7 +20,7 @@
       {
         "role": "B",
         "content": "Can I help?",
-        "hint": "offer help"
+        "hint": "Can I help?"
       },
       {
         "role": "A",
@@ -30,7 +30,7 @@
       {
         "role": "B",
         "content": "Where are the plates?",
-        "hint": "ask location"
+        "hint": "Where are...? / Where are the plates?"
       },
       {
         "role": "A",
@@ -40,7 +40,7 @@
       {
         "role": "B",
         "content": "Got it. Thanks!",
-        "hint": "acknowledge"
+        "hint": "Got it. Thanks!"
       },
       {
         "role": "A",
@@ -65,7 +65,7 @@
       {
         "role": "B",
         "content": "What's for breakfast?",
-        "hint": "ask about meal"
+        "hint": "What's for...? / What's for breakfast?"
       },
       {
         "role": "A",
@@ -75,7 +75,7 @@
       {
         "role": "B",
         "content": "Can I help?",
-        "hint": "offer help"
+        "hint": "Can I help?"
       },
       {
         "role": "A",
@@ -85,7 +85,7 @@
       {
         "role": "B",
         "content": "Where's the sugar?",
-        "hint": "ask location"
+        "hint": "Where is/Where's...? / Where's the sugar?"
       },
       {
         "role": "A",
@@ -95,7 +95,7 @@
       {
         "role": "B",
         "content": "Got it. Thanks!",
-        "hint": "acknowledge"
+        "hint": "Got it. Thanks!"
       },
       {
         "role": "A",
@@ -120,7 +120,7 @@
       {
         "role": "B",
         "content": "What's for lunch?",
-        "hint": "ask about meal"
+        "hint": "What's for...? / What's for lunch?"
       },
       {
         "role": "A",
@@ -130,7 +130,7 @@
       {
         "role": "B",
         "content": "Can I help?",
-        "hint": "offer help"
+        "hint": "Can I help?"
       },
       {
         "role": "A",
@@ -140,7 +140,7 @@
       {
         "role": "B",
         "content": "Where's the cutting board?",
-        "hint": "ask location"
+        "hint": "Where is/Where's...? / Where's the cutting board?"
       },
       {
         "role": "A",
@@ -150,7 +150,7 @@
       {
         "role": "B",
         "content": "Got it. Thanks!",
-        "hint": "acknowledge"
+        "hint": "Got it. Thanks!"
       },
       {
         "role": "A",
@@ -175,7 +175,7 @@
       {
         "role": "B",
         "content": "Are you using the bathroom?",
-        "hint": "ask if in use"
+        "hint": "Are you using...? / Are you using the bathroom?"
       },
       {
         "role": "A",
@@ -185,7 +185,7 @@
       {
         "role": "B",
         "content": "No rush. I can wait.",
-        "hint": "no rush"
+        "hint": "No rush. I can wait."
       },
       {
         "role": "A",
@@ -195,7 +195,7 @@
       {
         "role": "B",
         "content": "Did you see my keys?",
-        "hint": "ask about lost item"
+        "hint": "Did you see...? / Did you see my keys?"
       },
       {
         "role": "A",
@@ -205,7 +205,7 @@
       {
         "role": "B",
         "content": "Found them. Thanks!",
-        "hint": "acknowledge"
+        "hint": "Found them. Thanks!"
       },
       {
         "role": "A",
@@ -230,7 +230,7 @@
       {
         "role": "B",
         "content": "Are you using the washing machine?",
-        "hint": "ask if in use"
+        "hint": "Are you using...? / Are you using the washing machine?"
       },
       {
         "role": "A",
@@ -240,7 +240,7 @@
       {
         "role": "B",
         "content": "No rush. I can wait.",
-        "hint": "no rush"
+        "hint": "No rush. I can wait."
       },
       {
         "role": "A",
@@ -250,7 +250,7 @@
       {
         "role": "B",
         "content": "Did you see my charger?",
-        "hint": "ask about lost item"
+        "hint": "Did you see...? / Did you see my charger?"
       },
       {
         "role": "A",
@@ -260,7 +260,7 @@
       {
         "role": "B",
         "content": "Found it. Thanks!",
-        "hint": "acknowledge"
+        "hint": "Found it. Thanks!"
       },
       {
         "role": "A",
@@ -285,7 +285,7 @@
       {
         "role": "B",
         "content": "Are you using the kitchen?",
-        "hint": "ask if in use"
+        "hint": "Are you using...? / Are you using the kitchen?"
       },
       {
         "role": "A",
@@ -295,7 +295,7 @@
       {
         "role": "B",
         "content": "No rush. I can wait.",
-        "hint": "no rush"
+        "hint": "No rush. I can wait."
       },
       {
         "role": "A",
@@ -305,7 +305,7 @@
       {
         "role": "B",
         "content": "Did you see my phone?",
-        "hint": "ask about lost item"
+        "hint": "Did you see...? / Did you see my phone?"
       },
       {
         "role": "A",
@@ -315,7 +315,7 @@
       {
         "role": "B",
         "content": "Found it. Thanks!",
-        "hint": "acknowledge"
+        "hint": "Found it. Thanks!"
       },
       {
         "role": "A",
@@ -340,7 +340,7 @@
       {
         "role": "B",
         "content": "Hi! Nice day, isn't it?",
-        "hint": "greeting / weather"
+        "hint": "Hi!...? / Hi! Nice day, isn't it?"
       },
       {
         "role": "A",
@@ -350,7 +350,7 @@
       {
         "role": "B",
         "content": "Are you heading out?",
-        "hint": "ask about plans"
+        "hint": "Are you...? / Are you heading out?"
       },
       {
         "role": "A",
@@ -360,7 +360,7 @@
       {
         "role": "B",
         "content": "Okay. See you later!",
-        "hint": "goodbye"
+        "hint": "Okay. See you later!"
       },
       {
         "role": "A",
@@ -385,7 +385,7 @@
       {
         "role": "B",
         "content": "Hi! How are you?",
-        "hint": "greeting"
+        "hint": "Hi!...? / Hi! How are you?"
       },
       {
         "role": "A",
@@ -395,7 +395,7 @@
       {
         "role": "B",
         "content": "I'm fine. Busy day?",
-        "hint": "ask about day"
+        "hint": "I'm...? / I'm fine. Busy day?"
       },
       {
         "role": "A",
@@ -405,7 +405,7 @@
       {
         "role": "B",
         "content": "Okay. Have a good one!",
-        "hint": "goodbye"
+        "hint": "Okay. Have a good one!"
       },
       {
         "role": "A",
@@ -430,7 +430,7 @@
       {
         "role": "B",
         "content": "Hi! Going somewhere?",
-        "hint": "greeting / ask"
+        "hint": "Hi!...? / Hi! Going somewhere?"
       },
       {
         "role": "A",
@@ -440,7 +440,7 @@
       {
         "role": "B",
         "content": "Okay. Take care!",
-        "hint": "goodbye"
+        "hint": "Okay. Take care!"
       },
       {
         "role": "A",
@@ -465,7 +465,7 @@
       {
         "role": "B",
         "content": "Excuse me, where is Building 3?",
-        "hint": "ask for directions"
+        "hint": "Excuse...? / Excuse me, where is Building 3?"
       },
       {
         "role": "A",
@@ -475,7 +475,7 @@
       {
         "role": "B",
         "content": "Thanks. Is there parking nearby?",
-        "hint": "ask about parking"
+        "hint": "Thanks....? / Thanks. Is there parking nearby?"
       },
       {
         "role": "A",
@@ -485,7 +485,7 @@
       {
         "role": "B",
         "content": "Got it. Thank you!",
-        "hint": "thank"
+        "hint": "Got it. Thank you!"
       },
       {
         "role": "A",
@@ -510,7 +510,7 @@
       {
         "role": "B",
         "content": "Excuse me, where is the main gate?",
-        "hint": "ask for directions"
+        "hint": "Excuse...? / Excuse me, where is the main gate?"
       },
       {
         "role": "A",
@@ -520,7 +520,7 @@
       {
         "role": "B",
         "content": "Thanks. Is the gym open now?",
-        "hint": "ask about facility"
+        "hint": "Thanks....? / Thanks. Is the gym open now?"
       },
       {
         "role": "A",
@@ -530,7 +530,7 @@
       {
         "role": "B",
         "content": "Got it. Thank you!",
-        "hint": "thank"
+        "hint": "Got it. Thank you!"
       },
       {
         "role": "A",
@@ -555,7 +555,7 @@
       {
         "role": "B",
         "content": "Excuse me, where can I find the elevator?",
-        "hint": "ask for directions"
+        "hint": "Excuse...? / Excuse me, where can I find the elevator?"
       },
       {
         "role": "A",
@@ -565,7 +565,7 @@
       {
         "role": "B",
         "content": "Thanks. Do I need a pass?",
-        "hint": "ask about access"
+        "hint": "Thanks....? / Thanks. Do I need a pass?"
       },
       {
         "role": "A",
@@ -575,7 +575,7 @@
       {
         "role": "B",
         "content": "Got it. Thank you!",
-        "hint": "thank"
+        "hint": "Got it. Thank you!"
       },
       {
         "role": "A",
@@ -600,7 +600,7 @@
       {
         "role": "B",
         "content": "Hi, I have a package for you.",
-        "hint": "announce delivery"
+        "hint": "Hi, I have... / Hi, I have a package for you."
       },
       {
         "role": "A",
@@ -610,7 +610,7 @@
       {
         "role": "B",
         "content": "Yes. Can you sign here?",
-        "hint": "ask for signature"
+        "hint": "Yes....? / Yes. Can you sign here?"
       },
       {
         "role": "A",
@@ -620,7 +620,7 @@
       {
         "role": "B",
         "content": "Thanks. Have a good day!",
-        "hint": "closing"
+        "hint": "Thanks. Have a good day!"
       },
       {
         "role": "A",
@@ -645,7 +645,7 @@
       {
         "role": "B",
         "content": "Hi, delivery for Room 502.",
-        "hint": "announce delivery"
+        "hint": "Hi, delivery for... / Hi, delivery for Room 502."
       },
       {
         "role": "A",
@@ -655,7 +655,7 @@
       {
         "role": "B",
         "content": "A parcel. Please sign here.",
-        "hint": "request signature"
+        "hint": "A parcel. Please... / A parcel. Please sign here."
       },
       {
         "role": "A",
@@ -665,7 +665,7 @@
       {
         "role": "B",
         "content": "Thanks. Bye!",
-        "hint": "closing"
+        "hint": "Thanks. Bye!"
       },
       {
         "role": "A",
@@ -690,7 +690,7 @@
       {
         "role": "B",
         "content": "Hi, I'm looking for Zhang San.",
-        "hint": "announce recipient"
+        "hint": "Hi, I'm looking... / Hi, I'm looking for Zhang San."
       },
       {
         "role": "A",
@@ -700,7 +700,7 @@
       {
         "role": "B",
         "content": "Yes. Sign here, please.",
-        "hint": "request signature"
+        "hint": "Yes. Sign here, please."
       },
       {
         "role": "A",
@@ -710,7 +710,7 @@
       {
         "role": "B",
         "content": "You're welcome. Take care!",
-        "hint": "closing"
+        "hint": "You're welcome. Take care!"
       },
       {
         "role": "A",
@@ -735,7 +735,7 @@
       {
         "role": "B",
         "content": "Hi, your order is here.",
-        "hint": "announce delivery"
+        "hint": "Hi, your order is here."
       },
       {
         "role": "A",
@@ -745,7 +745,7 @@
       {
         "role": "B",
         "content": "Forty-five yuan.",
-        "hint": "state price"
+        "hint": "Forty-five yuan."
       },
       {
         "role": "A",
@@ -755,7 +755,7 @@
       {
         "role": "B",
         "content": "Thanks! Enjoy your meal.",
-        "hint": "closing"
+        "hint": "Thanks! Enjoy your meal."
       },
       {
         "role": "A",
@@ -780,7 +780,7 @@
       {
         "role": "B",
         "content": "Hi, food delivery for Li Si.",
-        "hint": "announce delivery"
+        "hint": "Hi, food delivery... / Hi, food delivery for Li Si."
       },
       {
         "role": "A",
@@ -790,7 +790,7 @@
       {
         "role": "B",
         "content": "The total is thirty yuan.",
-        "hint": "state price"
+        "hint": "The total is thirty yuan."
       },
       {
         "role": "A",
@@ -800,7 +800,7 @@
       {
         "role": "B",
         "content": "Enjoy! Bye!",
-        "hint": "closing"
+        "hint": "Enjoy! Bye!"
       },
       {
         "role": "A",
@@ -825,7 +825,7 @@
       {
         "role": "B",
         "content": "Hi, delivery. Is this Room 301?",
-        "hint": "confirm address"
+        "hint": "Hi,...? / Hi, delivery. Is this Room 301?"
       },
       {
         "role": "A",
@@ -835,7 +835,7 @@
       {
         "role": "B",
         "content": "That'll be fifty yuan.",
-        "hint": "state price"
+        "hint": "That'll be fifty yuan."
       },
       {
         "role": "A",
@@ -845,7 +845,7 @@
       {
         "role": "B",
         "content": "Thanks. Enjoy!",
-        "hint": "closing"
+        "hint": "Thanks. Enjoy!"
       },
       {
         "role": "A",
@@ -870,7 +870,7 @@
       {
         "role": "B",
         "content": "Excuse me, what time is it?",
-        "hint": "ask time"
+        "hint": "Excuse...? / Excuse me, what time is it?"
       },
       {
         "role": "A",
@@ -880,7 +880,7 @@
       {
         "role": "B",
         "content": "Thanks. Do you know where the exit is?",
-        "hint": "ask directions"
+        "hint": "Thanks....? / Thanks. Do you know where the exit is?"
       },
       {
         "role": "A",
@@ -890,7 +890,7 @@
       {
         "role": "B",
         "content": "Got it. Thank you!",
-        "hint": "thank"
+        "hint": "Got it. Thank you!"
       },
       {
         "role": "A",
@@ -915,7 +915,7 @@
       {
         "role": "B",
         "content": "Excuse me, is there a restroom nearby?",
-        "hint": "ask location"
+        "hint": "Excuse...? / Excuse me, is there a restroom nearby?"
       },
       {
         "role": "A",
@@ -925,7 +925,7 @@
       {
         "role": "B",
         "content": "Thanks a lot!",
-        "hint": "thank"
+        "hint": "Thanks a lot!"
       },
       {
         "role": "A",
@@ -950,7 +950,7 @@
       {
         "role": "B",
         "content": "Hi, is this seat taken?",
-        "hint": "ask about seat"
+        "hint": "Hi,...? / Hi, is this seat taken?"
       },
       {
         "role": "A",
@@ -960,7 +960,7 @@
       {
         "role": "B",
         "content": "Thanks!",
-        "hint": "thank"
+        "hint": "Thanks!"
       },
       {
         "role": "A",
@@ -985,7 +985,7 @@
       {
         "role": "B",
         "content": "Good morning! Nice weather today.",
-        "hint": "greeting / weather"
+        "hint": "Good morning! Nice... / Good morning! Nice weather today."
       },
       {
         "role": "A",
@@ -995,7 +995,7 @@
       {
         "role": "B",
         "content": "Do you come here often?",
-        "hint": "ask habit"
+        "hint": "Do...? / Do you come here often?"
       },
       {
         "role": "A",
@@ -1005,7 +1005,7 @@
       {
         "role": "B",
         "content": "That's great. Have a nice day!",
-        "hint": "closing"
+        "hint": "That's great. Have... / That's great. Have a nice day!"
       },
       {
         "role": "A",
@@ -1030,7 +1030,7 @@
       {
         "role": "B",
         "content": "Hi! Are you doing tai chi?",
-        "hint": "ask activity"
+        "hint": "Hi!...? / Hi! Are you doing tai chi?"
       },
       {
         "role": "A",
@@ -1040,7 +1040,7 @@
       {
         "role": "B",
         "content": "Maybe another time. Thanks!",
-        "hint": "decline politely"
+        "hint": "Maybe another time. Thanks!"
       },
       {
         "role": "A",
@@ -1065,7 +1065,7 @@
       {
         "role": "B",
         "content": "Good morning! Beautiful day.",
-        "hint": "greeting"
+        "hint": "Good morning! Beautiful day."
       },
       {
         "role": "A",
@@ -1075,7 +1075,7 @@
       {
         "role": "B",
         "content": "Thanks. You too!",
-        "hint": "thank"
+        "hint": "Thanks. You too!"
       }
     ],
     "core_sentences": "Beautiful day / Enjoy your + activity",
@@ -1095,7 +1095,7 @@
       {
         "role": "B",
         "content": "What brings you here today?",
-        "hint": "ask reason"
+        "hint": "What...? / What brings you here today?"
       },
       {
         "role": "A",
@@ -1105,7 +1105,7 @@
       {
         "role": "B",
         "content": "How long have you had it?",
-        "hint": "ask duration"
+        "hint": "How...? / How long have you had it?"
       },
       {
         "role": "A",
@@ -1115,7 +1115,7 @@
       {
         "role": "B",
         "content": "Okay. I'll prescribe some medicine. Rest well.",
-        "hint": "diagnosis / advice"
+        "hint": "Okay. I'll prescribe... / Okay. I'll prescribe some medicine. Rest well."
       },
       {
         "role": "A",
@@ -1140,7 +1140,7 @@
       {
         "role": "B",
         "content": "What seems to be the problem?",
-        "hint": "ask reason"
+        "hint": "What...? / What seems to be the problem?"
       },
       {
         "role": "A",
@@ -1150,7 +1150,7 @@
       {
         "role": "B",
         "content": "When did it start?",
-        "hint": "ask when"
+        "hint": "When...? / When did it start?"
       },
       {
         "role": "A",
@@ -1160,7 +1160,7 @@
       {
         "role": "B",
         "content": "Take this medicine twice a day. Drink lots of water.",
-        "hint": "advice"
+        "hint": "Take this medicine... / Take this medicine twice a day. Drink lots of water."
       },
       {
         "role": "A",
@@ -1185,7 +1185,7 @@
       {
         "role": "B",
         "content": "How can I help you?",
-        "hint": "ask reason"
+        "hint": "How...? / How can I help you?"
       },
       {
         "role": "A",
@@ -1195,7 +1195,7 @@
       {
         "role": "B",
         "content": "Did you eat anything unusual?",
-        "hint": "ask cause"
+        "hint": "Did...? / Did you eat anything unusual?"
       },
       {
         "role": "A",
@@ -1205,7 +1205,7 @@
       {
         "role": "B",
         "content": "Rest today. Avoid oily food.",
-        "hint": "advice"
+        "hint": "Rest today. Avoid... / Rest today. Avoid oily food."
       },
       {
         "role": "A",
@@ -1230,7 +1230,7 @@
       {
         "role": "B",
         "content": "Hi, I have an appointment at 10.",
-        "hint": "announce appointment"
+        "hint": "Hi, I have... / Hi, I have an appointment at 10."
       },
       {
         "role": "A",
@@ -1240,7 +1240,7 @@
       {
         "role": "B",
         "content": "Zhang San.",
-        "hint": "give name"
+        "hint": "Zhang San."
       },
       {
         "role": "A",
@@ -1250,7 +1250,7 @@
       {
         "role": "B",
         "content": "Thank you.",
-        "hint": "thank"
+        "hint": "Thank you."
       },
       {
         "role": "A",
@@ -1275,7 +1275,7 @@
       {
         "role": "B",
         "content": "Where is the blood test room?",
-        "hint": "ask location"
+        "hint": "Where is/Where's...? / Where is the blood test room?"
       },
       {
         "role": "A",
@@ -1285,7 +1285,7 @@
       {
         "role": "B",
         "content": "Do I need to make an appointment?",
-        "hint": "ask procedure"
+        "hint": "Do...? / Do I need to make an appointment?"
       },
       {
         "role": "A",
@@ -1295,7 +1295,7 @@
       {
         "role": "B",
         "content": "Thanks!",
-        "hint": "thank"
+        "hint": "Thanks!"
       },
       {
         "role": "A",
@@ -1320,7 +1320,7 @@
       {
         "role": "B",
         "content": "I need to pick up my prescription.",
-        "hint": "state need"
+        "hint": "I need to... / I need to pick up my prescription."
       },
       {
         "role": "A",
@@ -1330,7 +1330,7 @@
       {
         "role": "B",
         "content": "Thanks. Which way?",
-        "hint": "ask direction"
+        "hint": "Thanks....? / Thanks. Which way?"
       },
       {
         "role": "A",
@@ -1340,7 +1340,7 @@
       {
         "role": "B",
         "content": "Got it. Thank you!",
-        "hint": "thank"
+        "hint": "Got it. Thank you!"
       }
     ],
     "core_sentences": "I need to + verb / Which way?",
@@ -1360,7 +1360,7 @@
       {
         "role": "B",
         "content": "I'd like to see a doctor.",
-        "hint": "state request"
+        "hint": "I'd like to see a doctor."
       },
       {
         "role": "A",
@@ -1370,7 +1370,7 @@
       {
         "role": "B",
         "content": "Yes, here's my card.",
-        "hint": "provide card"
+        "hint": "Yes, here's my card."
       },
       {
         "role": "A",
@@ -1380,7 +1380,7 @@
       {
         "role": "B",
         "content": "Okay. Thank you.",
-        "hint": "thank"
+        "hint": "Okay. Thank you."
       },
       {
         "role": "A",
@@ -1405,7 +1405,7 @@
       {
         "role": "B",
         "content": "I need to register.",
-        "hint": "state need"
+        "hint": "I need to register."
       },
       {
         "role": "A",
@@ -1415,7 +1415,7 @@
       {
         "role": "B",
         "content": "General practice.",
-        "hint": "answer"
+        "hint": "General practice."
       },
       {
         "role": "A",
@@ -1425,7 +1425,7 @@
       {
         "role": "B",
         "content": "Card, please.",
-        "hint": "choose"
+        "hint": "Card, please."
       },
       {
         "role": "A",
@@ -1450,7 +1450,7 @@
       {
         "role": "B",
         "content": "How much for a check-up?",
-        "hint": "ask price"
+        "hint": "How much...? / How much for a check-up?"
       },
       {
         "role": "A",
@@ -1460,7 +1460,7 @@
       {
         "role": "B",
         "content": "Okay. I'll take it.",
-        "hint": "agree"
+        "hint": "Okay. I'll take it."
       },
       {
         "role": "A",
@@ -1470,7 +1470,7 @@
       {
         "role": "B",
         "content": "Thanks.",
-        "hint": "thank"
+        "hint": "Thanks."
       }
     ],
     "core_sentences": "How much for...? / Fill out this form",
@@ -1490,7 +1490,7 @@
       {
         "role": "B",
         "content": "I'd like to withdraw some money.",
-        "hint": "state request"
+        "hint": "I'd like to... / I'd like to withdraw some money."
       },
       {
         "role": "A",
@@ -1500,7 +1500,7 @@
       {
         "role": "B",
         "content": "Five hundred yuan, please.",
-        "hint": "state amount"
+        "hint": "Five hundred yuan, please."
       },
       {
         "role": "A",
@@ -1510,7 +1510,7 @@
       {
         "role": "B",
         "content": "Here you go.",
-        "hint": "provide"
+        "hint": "Here you go."
       },
       {
         "role": "A",
@@ -1520,7 +1520,7 @@
       {
         "role": "B",
         "content": "No, that's all. Thanks!",
-        "hint": "decline / thank"
+        "hint": "No, that's all. Thanks!"
       },
       {
         "role": "A",
@@ -1545,7 +1545,7 @@
       {
         "role": "B",
         "content": "I want to deposit this check.",
-        "hint": "state request"
+        "hint": "I want to... / I want to deposit this check."
       },
       {
         "role": "A",
@@ -1555,7 +1555,7 @@
       {
         "role": "B",
         "content": "My savings account.",
-        "hint": "answer"
+        "hint": "My savings account."
       },
       {
         "role": "A",
@@ -1565,7 +1565,7 @@
       {
         "role": "B",
         "content": "Done. Thank you!",
-        "hint": "comply / thank"
+        "hint": "Done. Thank you!"
       },
       {
         "role": "A",
@@ -1590,7 +1590,7 @@
       {
         "role": "B",
         "content": "I need to transfer money.",
-        "hint": "state request"
+        "hint": "I need to transfer money."
       },
       {
         "role": "A",
@@ -1600,7 +1600,7 @@
       {
         "role": "B",
         "content": "Domestic.",
-        "hint": "answer"
+        "hint": "Domestic."
       },
       {
         "role": "A",
@@ -1610,7 +1610,7 @@
       {
         "role": "B",
         "content": "Okay. How long does it take?",
-        "hint": "ask time"
+        "hint": "Okay....? / Okay. How long does it take?"
       },
       {
         "role": "A",
@@ -1620,7 +1620,7 @@
       {
         "role": "B",
         "content": "Thanks!",
-        "hint": "thank"
+        "hint": "Thanks!"
       }
     ],
     "core_sentences": "I need to transfer / How long does it take?",
@@ -1640,7 +1640,7 @@
       {
         "role": "B",
         "content": "I'd like to open a new account.",
-        "hint": "state request"
+        "hint": "I'd like to... / I'd like to open a new account."
       },
       {
         "role": "A",
@@ -1650,7 +1650,7 @@
       {
         "role": "B",
         "content": "Savings, please.",
-        "hint": "choose"
+        "hint": "Savings, please."
       },
       {
         "role": "A",
@@ -1660,7 +1660,7 @@
       {
         "role": "B",
         "content": "I have both. Here.",
-        "hint": "provide"
+        "hint": "I have both. Here."
       },
       {
         "role": "A",
@@ -1685,7 +1685,7 @@
       {
         "role": "B",
         "content": "I lost my card. What should I do?",
-        "hint": "state problem"
+        "hint": "I...? / I lost my card. What should I do?"
       },
       {
         "role": "A",
@@ -1695,7 +1695,7 @@
       {
         "role": "B",
         "content": "How long for the new card?",
-        "hint": "ask time"
+        "hint": "How...? / How long for the new card?"
       },
       {
         "role": "A",
@@ -1705,7 +1705,7 @@
       {
         "role": "B",
         "content": "That would be great. Thanks!",
-        "hint": "thank"
+        "hint": "That would be... / That would be great. Thanks!"
       },
       {
         "role": "A",
@@ -1730,7 +1730,7 @@
       {
         "role": "B",
         "content": "I want to apply for a loan.",
-        "hint": "state request"
+        "hint": "I want to... / I want to apply for a loan."
       },
       {
         "role": "A",
@@ -1740,7 +1740,7 @@
       {
         "role": "B",
         "content": "For a car. About fifty thousand.",
-        "hint": "answer"
+        "hint": "For a car.... / For a car. About fifty thousand."
       },
       {
         "role": "A",
@@ -1750,7 +1750,7 @@
       {
         "role": "B",
         "content": "Okay. Thank you.",
-        "hint": "thank"
+        "hint": "Okay. Thank you."
       }
     ],
     "core_sentences": "I want to apply for / What for?",
@@ -1770,7 +1770,7 @@
       {
         "role": "B",
         "content": "Hi, what can I get you?",
-        "hint": "offer service"
+        "hint": "Hi,...? / Hi, what can I get you?"
       },
       {
         "role": "A",
@@ -1780,7 +1780,7 @@
       {
         "role": "B",
         "content": "Small, medium, or large?",
-        "hint": "ask size"
+        "hint": "Small,...? / Small, medium, or large?"
       },
       {
         "role": "A",
@@ -1790,7 +1790,7 @@
       {
         "role": "B",
         "content": "For here or to go?",
-        "hint": "ask stay or takeaway"
+        "hint": "For...? / For here or to go?"
       },
       {
         "role": "A",
@@ -1800,7 +1800,7 @@
       {
         "role": "B",
         "content": "That'll be thirty-five yuan.",
-        "hint": "state price"
+        "hint": "That'll be thirty-five yuan."
       },
       {
         "role": "A",
@@ -1825,7 +1825,7 @@
       {
         "role": "B",
         "content": "Hi, ready to order?",
-        "hint": "offer service"
+        "hint": "Hi,...? / Hi, ready to order?"
       },
       {
         "role": "A",
@@ -1835,7 +1835,7 @@
       {
         "role": "B",
         "content": "What size?",
-        "hint": "ask size"
+        "hint": "What...? / What size?"
       },
       {
         "role": "A",
@@ -1845,7 +1845,7 @@
       {
         "role": "B",
         "content": "To stay or take away?",
-        "hint": "ask"
+        "hint": "To...? / To stay or take away?"
       },
       {
         "role": "A",
@@ -1855,7 +1855,7 @@
       {
         "role": "B",
         "content": "Forty yuan.",
-        "hint": "state price"
+        "hint": "Forty yuan."
       },
       {
         "role": "A",
@@ -1880,7 +1880,7 @@
       {
         "role": "B",
         "content": "What would you like?",
-        "hint": "offer"
+        "hint": "What...? / What would you like?"
       },
       {
         "role": "A",
@@ -1890,7 +1890,7 @@
       {
         "role": "B",
         "content": "Small, medium, or large?",
-        "hint": "ask size"
+        "hint": "Small,...? / Small, medium, or large?"
       },
       {
         "role": "A",
@@ -1900,7 +1900,7 @@
       {
         "role": "B",
         "content": "For here or to go?",
-        "hint": "ask"
+        "hint": "For...? / For here or to go?"
       },
       {
         "role": "A",
@@ -1910,7 +1910,7 @@
       {
         "role": "B",
         "content": "Twenty-eight yuan.",
-        "hint": "price"
+        "hint": "Twenty-eight yuan."
       },
       {
         "role": "A",
@@ -1935,7 +1935,7 @@
       {
         "role": "B",
         "content": "Your name for the order?",
-        "hint": "ask for name"
+        "hint": "Your...? / Your name for the order?"
       },
       {
         "role": "A",
@@ -1945,7 +1945,7 @@
       {
         "role": "B",
         "content": "Your latte will be ready in a minute.",
-        "hint": "inform wait time"
+        "hint": "Your latte will... / Your latte will be ready in a minute."
       },
       {
         "role": "A",
@@ -1955,7 +1955,7 @@
       {
         "role": "B",
         "content": "Yes. Password is on the wall.",
-        "hint": "give info"
+        "hint": "Yes. Password is... / Yes. Password is on the wall."
       },
       {
         "role": "A",
@@ -1980,7 +1980,7 @@
       {
         "role": "B",
         "content": "Can I have a name for your cup?",
-        "hint": "ask name"
+        "hint": "Can...? / Can I have a name for your cup?"
       },
       {
         "role": "A",
@@ -1990,7 +1990,7 @@
       {
         "role": "B",
         "content": "Okay. About two minutes.",
-        "hint": "wait time"
+        "hint": "Okay. About two minutes."
       },
       {
         "role": "A",
@@ -2000,7 +2000,7 @@
       {
         "role": "B",
         "content": "Back there, on the left.",
-        "hint": "directions"
+        "hint": "Back there, on the left."
       },
       {
         "role": "A",
@@ -2025,7 +2025,7 @@
       {
         "role": "B",
         "content": "Name please?",
-        "hint": "ask"
+        "hint": "Name...? / Name please?"
       },
       {
         "role": "A",
@@ -2035,7 +2035,7 @@
       {
         "role": "B",
         "content": "We'll call you when it's ready.",
-        "hint": "inform"
+        "hint": "We'll call you... / We'll call you when it's ready."
       },
       {
         "role": "A",
@@ -2045,7 +2045,7 @@
       {
         "role": "B",
         "content": "Yes, by the window.",
-        "hint": "answer"
+        "hint": "Yes, by the window."
       },
       {
         "role": "A",
@@ -2070,7 +2070,7 @@
       {
         "role": "B",
         "content": "Hi, is this seat taken?",
-        "hint": "ask about seat"
+        "hint": "Hi,...? / Hi, is this seat taken?"
       },
       {
         "role": "A",
@@ -2080,7 +2080,7 @@
       {
         "role": "B",
         "content": "Thanks. Nice place, isn't it?",
-        "hint": "small talk"
+        "hint": "Thanks....? / Thanks. Nice place, isn't it?"
       },
       {
         "role": "A",
@@ -2090,7 +2090,7 @@
       {
         "role": "B",
         "content": "What do you recommend?",
-        "hint": "ask recommendation"
+        "hint": "What...? / What do you recommend?"
       },
       {
         "role": "A",
@@ -2100,7 +2100,7 @@
       {
         "role": "B",
         "content": "I'll try that. Thanks!",
-        "hint": "decide / thank"
+        "hint": "I'll try that. Thanks!"
       },
       {
         "role": "A",
@@ -2125,7 +2125,7 @@
       {
         "role": "B",
         "content": "Mind if I sit here?",
-        "hint": "ask permission"
+        "hint": "Mind...? / Mind if I sit here?"
       },
       {
         "role": "A",
@@ -2135,7 +2135,7 @@
       {
         "role": "B",
         "content": "Thanks. First time here.",
-        "hint": "small talk"
+        "hint": "Thanks. First time here."
       },
       {
         "role": "A",
@@ -2145,7 +2145,7 @@
       {
         "role": "B",
         "content": "I'll get that. Thanks!",
-        "hint": "decide"
+        "hint": "I'll get that. Thanks!"
       },
       {
         "role": "A",
@@ -2170,7 +2170,7 @@
       {
         "role": "B",
         "content": "Can I share this table?",
-        "hint": "ask"
+        "hint": "Can...? / Can I share this table?"
       },
       {
         "role": "A",
@@ -2180,7 +2180,7 @@
       {
         "role": "B",
         "content": "Thanks. Busy today.",
-        "hint": "comment"
+        "hint": "Thanks. Busy today."
       },
       {
         "role": "A",
@@ -2190,7 +2190,7 @@
       {
         "role": "B",
         "content": "I'll try it. Thanks!",
-        "hint": "decide"
+        "hint": "I'll try it. Thanks!"
       },
       {
         "role": "A",
@@ -2215,7 +2215,7 @@
       {
         "role": "B",
         "content": "Good evening. Table for how many?",
-        "hint": "greet / ask"
+        "hint": "Good...? / Good evening. Table for how many?"
       },
       {
         "role": "A",
@@ -2225,7 +2225,7 @@
       {
         "role": "B",
         "content": "Smoking or non-smoking?",
-        "hint": "ask preference"
+        "hint": "Smoking...? / Smoking or non-smoking?"
       },
       {
         "role": "A",
@@ -2235,7 +2235,7 @@
       {
         "role": "B",
         "content": "Follow me, please.",
-        "hint": "lead"
+        "hint": "Follow me, please."
       },
       {
         "role": "A",
@@ -2260,7 +2260,7 @@
       {
         "role": "B",
         "content": "Hi, do you have a reservation?",
-        "hint": "ask"
+        "hint": "Hi,...? / Hi, do you have a reservation?"
       },
       {
         "role": "A",
@@ -2270,7 +2270,7 @@
       {
         "role": "B",
         "content": "Window or inside?",
-        "hint": "ask preference"
+        "hint": "Window...? / Window or inside?"
       },
       {
         "role": "A",
@@ -2280,7 +2280,7 @@
       {
         "role": "B",
         "content": "This way, please.",
-        "hint": "lead"
+        "hint": "This way, please."
       },
       {
         "role": "A",
@@ -2305,7 +2305,7 @@
       {
         "role": "B",
         "content": "Welcome. How many in your party?",
-        "hint": "greet / ask"
+        "hint": "Welcome....? / Welcome. How many in your party?"
       },
       {
         "role": "A",
@@ -2315,7 +2315,7 @@
       {
         "role": "B",
         "content": "Booth or table?",
-        "hint": "ask"
+        "hint": "Booth...? / Booth or table?"
       },
       {
         "role": "A",
@@ -2325,7 +2325,7 @@
       {
         "role": "B",
         "content": "Right this way.",
-        "hint": "lead"
+        "hint": "Right this way."
       },
       {
         "role": "A",
@@ -2350,7 +2350,7 @@
       {
         "role": "B",
         "content": "Are you ready to order?",
-        "hint": "ask if ready"
+        "hint": "Are you...? / Are you ready to order?"
       },
       {
         "role": "A",
@@ -2360,7 +2360,7 @@
       {
         "role": "B",
         "content": "How would you like it cooked?",
-        "hint": "ask preference"
+        "hint": "How...? / How would you like it cooked?"
       },
       {
         "role": "A",
@@ -2370,7 +2370,7 @@
       {
         "role": "B",
         "content": "And to drink?",
-        "hint": "ask drink"
+        "hint": "And...? / And to drink?"
       },
       {
         "role": "A",
@@ -2380,7 +2380,7 @@
       {
         "role": "B",
         "content": "Got it. I'll bring it soon.",
-        "hint": "confirm"
+        "hint": "Got it. I'll... / Got it. I'll bring it soon."
       }
     ],
     "core_sentences": "Are you ready to order? / I'll have + dish",
@@ -2400,7 +2400,7 @@
       {
         "role": "B",
         "content": "Can I take your order?",
-        "hint": "ask"
+        "hint": "Can...? / Can I take your order?"
       },
       {
         "role": "A",
@@ -2410,7 +2410,7 @@
       {
         "role": "B",
         "content": "Any dressing?",
-        "hint": "ask"
+        "hint": "Any...? / Any dressing?"
       },
       {
         "role": "A",
@@ -2420,7 +2420,7 @@
       {
         "role": "B",
         "content": "Anything to drink?",
-        "hint": "ask"
+        "hint": "Anything...? / Anything to drink?"
       },
       {
         "role": "A",
@@ -2430,7 +2430,7 @@
       {
         "role": "B",
         "content": "Coming right up.",
-        "hint": "confirm"
+        "hint": "Coming right up."
       }
     ],
     "core_sentences": "Can I take your order? / I'll have + dish",
@@ -2450,7 +2450,7 @@
       {
         "role": "B",
         "content": "What would you like?",
-        "hint": "ask"
+        "hint": "What...? / What would you like?"
       },
       {
         "role": "A",
@@ -2460,7 +2460,7 @@
       {
         "role": "B",
         "content": "Spicy or mild?",
-        "hint": "ask"
+        "hint": "Spicy...? / Spicy or mild?"
       },
       {
         "role": "A",
@@ -2470,7 +2470,7 @@
       {
         "role": "B",
         "content": "And for drinks?",
-        "hint": "ask"
+        "hint": "And...? / And for drinks?"
       },
       {
         "role": "A",
@@ -2480,7 +2480,7 @@
       {
         "role": "B",
         "content": "Okay. One moment.",
-        "hint": "confirm"
+        "hint": "Okay. One moment."
       }
     ],
     "core_sentences": "What would you like? / Spicy or mild?",
@@ -2500,7 +2500,7 @@
       {
         "role": "B",
         "content": "That'll be one hundred twenty yuan.",
-        "hint": "state total"
+        "hint": "That'll be one... / That'll be one hundred twenty yuan."
       },
       {
         "role": "A",
@@ -2510,7 +2510,7 @@
       {
         "role": "B",
         "content": "Sure. Insert or tap.",
-        "hint": "instruct"
+        "hint": "Sure. Insert or tap."
       },
       {
         "role": "A",
@@ -2520,7 +2520,7 @@
       {
         "role": "B",
         "content": "Here you go. Thank you!",
-        "hint": "hand over / thank"
+        "hint": "Here you go. Thank you!"
       },
       {
         "role": "A",
@@ -2545,7 +2545,7 @@
       {
         "role": "B",
         "content": "Your total is ninety-five yuan.",
-        "hint": "state"
+        "hint": "Your total is... / Your total is ninety-five yuan."
       },
       {
         "role": "A",
@@ -2555,7 +2555,7 @@
       {
         "role": "B",
         "content": "Yes. Scan here.",
-        "hint": "instruct"
+        "hint": "Yes. Scan here."
       },
       {
         "role": "A",
@@ -2565,7 +2565,7 @@
       {
         "role": "B",
         "content": "Thank you. Come again!",
-        "hint": "closing"
+        "hint": "Thank you. Come again!"
       }
     ],
     "core_sentences": "Your total is / Do you take...?",
@@ -2585,7 +2585,7 @@
       {
         "role": "B",
         "content": "Eighty yuan, please.",
-        "hint": "state"
+        "hint": "Eighty yuan, please."
       },
       {
         "role": "A",
@@ -2595,7 +2595,7 @@
       {
         "role": "B",
         "content": "Sure. Exact change?",
-        "hint": "ask"
+        "hint": "Sure....? / Sure. Exact change?"
       },
       {
         "role": "A",
@@ -2605,7 +2605,7 @@
       {
         "role": "B",
         "content": "Twenty back. Thank you!",
-        "hint": "change / thank"
+        "hint": "Twenty back. Thank you!"
       }
     ],
     "core_sentences": "Cash okay? / Exact change?",
@@ -2625,7 +2625,7 @@
       {
         "role": "B",
         "content": "Hi, what can I get you?",
-        "hint": "offer"
+        "hint": "Hi,...? / Hi, what can I get you?"
       },
       {
         "role": "A",
@@ -2635,7 +2635,7 @@
       {
         "role": "B",
         "content": "Combo or a la carte?",
-        "hint": "ask"
+        "hint": "Combo...? / Combo or a la carte?"
       },
       {
         "role": "A",
@@ -2645,7 +2645,7 @@
       {
         "role": "B",
         "content": "What drink?",
-        "hint": "ask"
+        "hint": "What...? / What drink?"
       },
       {
         "role": "A",
@@ -2655,7 +2655,7 @@
       {
         "role": "B",
         "content": "For here or to go?",
-        "hint": "ask"
+        "hint": "For...? / For here or to go?"
       },
       {
         "role": "A",
@@ -2665,7 +2665,7 @@
       {
         "role": "B",
         "content": "Forty-five yuan.",
-        "hint": "price"
+        "hint": "Forty-five yuan."
       },
       {
         "role": "A",
@@ -2690,7 +2690,7 @@
       {
         "role": "B",
         "content": "Next! What would you like?",
-        "hint": "call / ask"
+        "hint": "Next!...? / Next! What would you like?"
       },
       {
         "role": "A",
@@ -2700,7 +2700,7 @@
       {
         "role": "B",
         "content": "Any drinks?",
-        "hint": "ask"
+        "hint": "Any...? / Any drinks?"
       },
       {
         "role": "A",
@@ -2710,7 +2710,7 @@
       {
         "role": "B",
         "content": "Eat in or take away?",
-        "hint": "ask"
+        "hint": "Eat...? / Eat in or take away?"
       },
       {
         "role": "A",
@@ -2720,7 +2720,7 @@
       {
         "role": "B",
         "content": "Fifty yuan.",
-        "hint": "price"
+        "hint": "Fifty yuan."
       }
     ],
     "core_sentences": "What would you like? / Eat in or take away?",
@@ -2740,7 +2740,7 @@
       {
         "role": "B",
         "content": "Ready to order?",
-        "hint": "ask"
+        "hint": "Ready...? / Ready to order?"
       },
       {
         "role": "A",
@@ -2750,7 +2750,7 @@
       {
         "role": "B",
         "content": "Small, medium, or large?",
-        "hint": "ask size"
+        "hint": "Small,...? / Small, medium, or large?"
       },
       {
         "role": "A",
@@ -2760,7 +2760,7 @@
       {
         "role": "B",
         "content": "For here or to go?",
-        "hint": "ask"
+        "hint": "For...? / For here or to go?"
       },
       {
         "role": "A",
@@ -2770,7 +2770,7 @@
       {
         "role": "B",
         "content": "Thirty-eight yuan.",
-        "hint": "price"
+        "hint": "Thirty-eight yuan."
       }
     ],
     "core_sentences": "Ready to order? / Small, medium, or large?",
@@ -2790,7 +2790,7 @@
       {
         "role": "B",
         "content": "Order 47!",
-        "hint": "call number"
+        "hint": "Order 47!"
       },
       {
         "role": "A",
@@ -2800,7 +2800,7 @@
       {
         "role": "B",
         "content": "One burger combo. Ketchup?",
-        "hint": "confirm / ask"
+        "hint": "One...? / One burger combo. Ketchup?"
       },
       {
         "role": "A",
@@ -2810,7 +2810,7 @@
       {
         "role": "B",
         "content": "Here you go. Enjoy!",
-        "hint": "hand over"
+        "hint": "Here you go. Enjoy!"
       },
       {
         "role": "A",
@@ -2835,7 +2835,7 @@
       {
         "role": "B",
         "content": "Number 52!",
-        "hint": "call"
+        "hint": "Number 52!"
       },
       {
         "role": "A",
@@ -2845,7 +2845,7 @@
       {
         "role": "B",
         "content": "Chicken wrap. Need sauce?",
-        "hint": "confirm / ask"
+        "hint": "Chicken...? / Chicken wrap. Need sauce?"
       },
       {
         "role": "A",
@@ -2855,7 +2855,7 @@
       {
         "role": "B",
         "content": "Here. Enjoy your meal.",
-        "hint": "hand"
+        "hint": "Here. Enjoy your meal."
       },
       {
         "role": "A",
@@ -2880,7 +2880,7 @@
       {
         "role": "B",
         "content": "Order 61!",
-        "hint": "call"
+        "hint": "Order 61!"
       },
       {
         "role": "A",
@@ -2890,7 +2890,7 @@
       {
         "role": "B",
         "content": "Two combos. Forks?",
-        "hint": "confirm / ask"
+        "hint": "Two...? / Two combos. Forks?"
       },
       {
         "role": "A",
@@ -2900,7 +2900,7 @@
       {
         "role": "B",
         "content": "Here you go. Have a good one!",
-        "hint": "hand"
+        "hint": "Here you go.... / Here you go. Have a good one!"
       },
       {
         "role": "A",
@@ -2925,7 +2925,7 @@
       {
         "role": "B",
         "content": "Hi, what would you like?",
-        "hint": "offer"
+        "hint": "Hi,...? / Hi, what would you like?"
       },
       {
         "role": "A",
@@ -2935,7 +2935,7 @@
       {
         "role": "B",
         "content": "Regular or large?",
-        "hint": "ask size"
+        "hint": "Regular...? / Regular or large?"
       },
       {
         "role": "A",
@@ -2945,7 +2945,7 @@
       {
         "role": "B",
         "content": "Ice level?",
-        "hint": "ask"
+        "hint": "Ice...? / Ice level?"
       },
       {
         "role": "A",
@@ -2955,7 +2955,7 @@
       {
         "role": "B",
         "content": "Fifteen yuan.",
-        "hint": "price"
+        "hint": "Fifteen yuan."
       },
       {
         "role": "A",
@@ -2980,7 +2980,7 @@
       {
         "role": "B",
         "content": "What can I get you?",
-        "hint": "offer"
+        "hint": "What...? / What can I get you?"
       },
       {
         "role": "A",
@@ -2990,7 +2990,7 @@
       {
         "role": "B",
         "content": "Same size?",
-        "hint": "ask"
+        "hint": "Same...? / Same size?"
       },
       {
         "role": "A",
@@ -3000,7 +3000,7 @@
       {
         "role": "B",
         "content": "Sugar level? Normal okay?",
-        "hint": "ask"
+        "hint": "Sugar...? / Sugar level? Normal okay?"
       },
       {
         "role": "A",
@@ -3010,7 +3010,7 @@
       {
         "role": "B",
         "content": "Thirty yuan.",
-        "hint": "price"
+        "hint": "Thirty yuan."
       }
     ],
     "core_sentences": "What can I get you? / Sugar level?",
@@ -3030,7 +3030,7 @@
       {
         "role": "B",
         "content": "Hi, ready to order?",
-        "hint": "ask"
+        "hint": "Hi,...? / Hi, ready to order?"
       },
       {
         "role": "A",
@@ -3040,7 +3040,7 @@
       {
         "role": "B",
         "content": "Large or regular?",
-        "hint": "ask"
+        "hint": "Large...? / Large or regular?"
       },
       {
         "role": "A",
@@ -3050,7 +3050,7 @@
       {
         "role": "B",
         "content": "With or without ice?",
-        "hint": "ask"
+        "hint": "With...? / With or without ice?"
       },
       {
         "role": "A",
@@ -3060,7 +3060,7 @@
       {
         "role": "B",
         "content": "Twelve yuan.",
-        "hint": "price"
+        "hint": "Twelve yuan."
       }
     ],
     "core_sentences": "Ready to order? / With or without ice?",
@@ -3080,7 +3080,7 @@
       {
         "role": "B",
         "content": "Hi! First time here?",
-        "hint": "greet / ask"
+        "hint": "Hi!...? / Hi! First time here?"
       },
       {
         "role": "A",
@@ -3090,7 +3090,7 @@
       {
         "role": "B",
         "content": "Our cheese tea is the bestseller.",
-        "hint": "recommend"
+        "hint": "Our cheese tea... / Our cheese tea is the bestseller."
       },
       {
         "role": "A",
@@ -3100,7 +3100,7 @@
       {
         "role": "B",
         "content": "Good choice. Eighteen yuan.",
-        "hint": "approve / price"
+        "hint": "Good choice. Eighteen yuan."
       },
       {
         "role": "A",
@@ -3125,7 +3125,7 @@
       {
         "role": "B",
         "content": "Welcome! Want to try our new flavor?",
-        "hint": "greet / suggest"
+        "hint": "Welcome!...? / Welcome! Want to try our new flavor?"
       },
       {
         "role": "A",
@@ -3135,7 +3135,7 @@
       {
         "role": "B",
         "content": "Brown sugar with fresh milk. It's great.",
-        "hint": "explain"
+        "hint": "Brown sugar with... / Brown sugar with fresh milk. It's great."
       },
       {
         "role": "A",
@@ -3145,7 +3145,7 @@
       {
         "role": "B",
         "content": "Twenty yuan.",
-        "hint": "price"
+        "hint": "Twenty yuan."
       },
       {
         "role": "A",
@@ -3170,7 +3170,7 @@
       {
         "role": "B",
         "content": "Hi! Need a recommendation?",
-        "hint": "offer"
+        "hint": "Hi!...? / Hi! Need a recommendation?"
       },
       {
         "role": "A",
@@ -3180,7 +3180,7 @@
       {
         "role": "B",
         "content": "Try our oolong milk tea. Half sugar.",
-        "hint": "recommend"
+        "hint": "Try our oolong... / Try our oolong milk tea. Half sugar."
       },
       {
         "role": "A",
@@ -3190,7 +3190,7 @@
       {
         "role": "B",
         "content": "Fourteen yuan.",
-        "hint": "price"
+        "hint": "Fourteen yuan."
       },
       {
         "role": "A",
@@ -3203,5 +3203,5335 @@
     "big_scene_name": "餐饮美食",
     "small_scene_name": "小吃店 / 奶茶店",
     "npc_name": "老板"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "airport",
+    "npc": "ground_staff",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CX-AIRPORT-GROUND-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Good morning. Do you have your boarding pass?",
+        "hint": "greeting / ask"
+      },
+      {
+        "role": "B",
+        "content": "Yes, here it is.",
+        "hint": "Yes, here it is."
+      },
+      {
+        "role": "A",
+        "content": "Window or aisle?",
+        "hint": "Window or aisle?"
+      },
+      {
+        "role": "B",
+        "content": "Aisle, please.",
+        "hint": "Aisle, please."
+      },
+      {
+        "role": "A",
+        "content": "Your gate is B12. Boarding at 10:30.",
+        "hint": "gate / boarding time"
+      },
+      {
+        "role": "B",
+        "content": "Where is gate B12?",
+        "hint": "Where is gate B12?"
+      },
+      {
+        "role": "A",
+        "content": "Go straight, then turn left. You'll see the signs.",
+        "hint": "directions"
+      },
+      {
+        "role": "B",
+        "content": "Thank you very much.",
+        "hint": "Thank you very much."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome. Have a nice flight.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Do you have...? / Window or aisle? / Where is gate...?",
+    "core_chunks": "boarding pass / turn left / have a nice flight",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "机场",
+    "npc_name": "地勤"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "airport",
+    "npc": "ground_staff",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CX-AIRPORT-GROUND-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. May I see your passport and ticket?",
+        "hint": "ask documents"
+      },
+      {
+        "role": "B",
+        "content": "Sure. Here you go.",
+        "hint": "Sure. Here you go."
+      },
+      {
+        "role": "A",
+        "content": "Are you checking any bags?",
+        "hint": "Are you checking any bags?"
+      },
+      {
+        "role": "B",
+        "content": "Just this one. Carry-on.",
+        "hint": "Just this one. Carry-on."
+      },
+      {
+        "role": "A",
+        "content": "Your seat is 14A. Gate A5.",
+        "hint": "seat / gate"
+      },
+      {
+        "role": "B",
+        "content": "What time is boarding?",
+        "hint": "What time is boarding?"
+      },
+      {
+        "role": "A",
+        "content": "In about forty minutes.",
+        "hint": "time"
+      },
+      {
+        "role": "B",
+        "content": "Thanks for your help.",
+        "hint": "Thanks for your help."
+      },
+      {
+        "role": "A",
+        "content": "No problem. Safe travels.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "May I see...? / Are you checking...? / What time is boarding?",
+    "core_chunks": "passport and ticket / carry-on / safe travels",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "机场",
+    "npc_name": "地勤"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "airport",
+    "npc": "ground_staff",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CX-AIRPORT-GROUND-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hello. Flight to Shanghai?",
+        "hint": "confirm flight"
+      },
+      {
+        "role": "B",
+        "content": "Yes. Is it on time?",
+        "hint": "Yes. Is it on time?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. You can board in twenty minutes.",
+        "hint": "on time / board"
+      },
+      {
+        "role": "B",
+        "content": "Which gate?",
+        "hint": "Which gate?"
+      },
+      {
+        "role": "A",
+        "content": "Gate C8. Down the hall to your right.",
+        "hint": "gate / direction"
+      },
+      {
+        "role": "B",
+        "content": "Do I need to show my passport again?",
+        "hint": "Do I need to show my passport again?"
+      },
+      {
+        "role": "A",
+        "content": "Yes, at the gate. Have it ready.",
+        "hint": "remind"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Thank you.",
+        "hint": "Okay. Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Is it on time? / Which gate? / Do I need to show...?",
+    "core_chunks": "on time / have it ready",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "机场",
+    "npc_name": "地勤"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "airport",
+    "npc": "security_check",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CX-AIRPORT-SECURITY-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Next, please. Laptop and liquids out, please.",
+        "hint": "instruction"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Are water bottles allowed?",
+        "hint": "Okay. Are water bottles allowed?"
+      },
+      {
+        "role": "A",
+        "content": "Empty ones are. You can fill up after security.",
+        "hint": "rule"
+      },
+      {
+        "role": "B",
+        "content": "Do I put my bag here?",
+        "hint": "Do I put my bag here?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Step through when the light turns green.",
+        "hint": "yes / next step"
+      },
+      {
+        "role": "B",
+        "content": "Got it. Thank you.",
+        "hint": "Got it. Thank you."
+      },
+      {
+        "role": "A",
+        "content": "Have a good day.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Laptop and liquids out / Are...allowed? / Do I put...here?",
+    "core_chunks": "step through / after security",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "机场",
+    "npc_name": "安检员"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "airport",
+    "npc": "security_check",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CX-AIRPORT-SECURITY-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Please take off your belt and watch.",
+        "hint": "instruction"
+      },
+      {
+        "role": "B",
+        "content": "Sure. Phone too?",
+        "hint": "Sure. Phone too?"
+      },
+      {
+        "role": "A",
+        "content": "Yes, in the tray. Keys and coins as well.",
+        "hint": "yes / details"
+      },
+      {
+        "role": "B",
+        "content": "Is this lane for first class?",
+        "hint": "Is this lane for first class?"
+      },
+      {
+        "role": "A",
+        "content": "No, that's the next one. This is general.",
+        "hint": "clarify"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Take off.../ Phone too? / Is this lane for...?",
+    "core_chunks": "in the tray / first class",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "机场",
+    "npc_name": "安检员"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "airport",
+    "npc": "security_check",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CX-AIRPORT-SECURITY-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Any liquids in your bag?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Just a small hand sanitizer.",
+        "hint": "Just a small hand sanitizer."
+      },
+      {
+        "role": "A",
+        "content": "That's fine if it's under 100ml. Put it in the tray.",
+        "hint": "rule"
+      },
+      {
+        "role": "B",
+        "content": "Do I need to take my shoes off?",
+        "hint": "Do I need to take my shoes off?"
+      },
+      {
+        "role": "A",
+        "content": "No, not today. Just walk through.",
+        "hint": "no / instruction"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Thank you.",
+        "hint": "Okay. Thank you."
+      },
+      {
+        "role": "A",
+        "content": "Safe flight.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Any liquids...? / Do I need to take...off?",
+    "core_chunks": "under 100ml / walk through",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "机场",
+    "npc_name": "安检员"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "airport",
+    "npc": "flight_attendant",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CX-AIRPORT-FLIGHT-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Welcome aboard. Can I help you find your seat?",
+        "hint": "welcome"
+      },
+      {
+        "role": "B",
+        "content": "Yes, I'm in 22C.",
+        "hint": "Yes, I'm in 22C."
+      },
+      {
+        "role": "A",
+        "content": "Just a few rows back. On your right.",
+        "hint": "direction"
+      },
+      {
+        "role": "B",
+        "content": "Where can I put my bag?",
+        "hint": "Where can I put my bag?"
+      },
+      {
+        "role": "A",
+        "content": "In the overhead bin. I can help if it's heavy.",
+        "hint": "overhead / offer"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Can I have a blanket?",
+        "hint": "Thanks. Can I have a blanket?"
+      },
+      {
+        "role": "A",
+        "content": "Sure. I'll bring one after takeoff.",
+        "hint": "sure / timing"
+      },
+      {
+        "role": "B",
+        "content": "Thank you.",
+        "hint": "Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Can I help you find...? / Where can I put...? / Can I have...?",
+    "core_chunks": "welcome aboard / overhead bin / after takeoff",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "机场",
+    "npc_name": "空姐/空少"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "airport",
+    "npc": "flight_attendant",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CX-AIRPORT-FLIGHT-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Would you like something to drink?",
+        "hint": "offer"
+      },
+      {
+        "role": "B",
+        "content": "Water, please.",
+        "hint": "Water, please."
+      },
+      {
+        "role": "A",
+        "content": "Still or sparkling?",
+        "hint": "Still or sparkling?"
+      },
+      {
+        "role": "B",
+        "content": "Still, thanks.",
+        "hint": "Still, thanks."
+      },
+      {
+        "role": "A",
+        "content": "Here you go. We have tea and juice too.",
+        "hint": "hand / more options"
+      },
+      {
+        "role": "B",
+        "content": "I'm fine for now. When is lunch?",
+        "hint": "I'm fine for now. When is lunch?"
+      },
+      {
+        "role": "A",
+        "content": "In about an hour.",
+        "hint": "time"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Thank you.",
+        "hint": "Okay. Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Would you like...? / Still or sparkling? / When is...?",
+    "core_chunks": "still or sparkling / for now",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "机场",
+    "npc_name": "空姐/空少"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "airport",
+    "npc": "flight_attendant",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CX-AIRPORT-FLIGHT-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "We're about to land. Please put your seat upright.",
+        "hint": "announce"
+      },
+      {
+        "role": "B",
+        "content": "Like this?",
+        "hint": "Like this?"
+      },
+      {
+        "role": "A",
+        "content": "Yes, that's good. And fasten your seatbelt.",
+        "hint": "yes / remind"
+      },
+      {
+        "role": "B",
+        "content": "How long until we land?",
+        "hint": "How long until we land?"
+      },
+      {
+        "role": "A",
+        "content": "About fifteen minutes.",
+        "hint": "time"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome. Thanks for flying with us.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Put your seat upright / Fasten your seatbelt / How long until...?",
+    "core_chunks": "about to land / fasten your seatbelt",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "机场",
+    "npc_name": "空姐/空少"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "train_station",
+    "npc": "ticket_clerk",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CX-TRAIN-TICKET-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Next. Where to?",
+        "hint": "ask destination"
+      },
+      {
+        "role": "B",
+        "content": "Shanghai, please. One ticket for today.",
+        "hint": "Shanghai, please. One ticket for today."
+      },
+      {
+        "role": "A",
+        "content": "Morning or afternoon?",
+        "hint": "Morning or afternoon?"
+      },
+      {
+        "role": "B",
+        "content": "The next available one.",
+        "hint": "The next available one."
+      },
+      {
+        "role": "A",
+        "content": "That's the 10:15. High-speed. Two hundred yuan.",
+        "hint": "train / price"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Window seat if possible.",
+        "hint": "Okay. Window seat if possible."
+      },
+      {
+        "role": "A",
+        "content": "Here's your ticket. Platform 3. Board at 10:00.",
+        "hint": "ticket / platform"
+      },
+      {
+        "role": "B",
+        "content": "Thank you.",
+        "hint": "Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Where to? / Morning or afternoon? / Window seat if possible",
+    "core_chunks": "next available / high-speed / platform",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "火车站 / 高铁站",
+    "npc_name": "售票员"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "train_station",
+    "npc": "ticket_clerk",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CX-TRAIN-TICKET-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Can I help you?",
+        "hint": "offer"
+      },
+      {
+        "role": "B",
+        "content": "I need two tickets to Beijing for tomorrow.",
+        "hint": "I need two tickets to Beijing for tomorrow."
+      },
+      {
+        "role": "A",
+        "content": "We have 8 a.m. and 2 p.m. Which do you prefer?",
+        "hint": "options"
+      },
+      {
+        "role": "B",
+        "content": "The morning one.",
+        "hint": "The morning one."
+      },
+      {
+        "role": "A",
+        "content": "Four hundred and sixty yuan total.",
+        "hint": "total price"
+      },
+      {
+        "role": "B",
+        "content": "Do you take WeChat Pay?",
+        "hint": "Do you take WeChat Pay?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Scan here.",
+        "hint": "yes / pay"
+      },
+      {
+        "role": "B",
+        "content": "Done. Thanks.",
+        "hint": "Done. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "No problem. Have a good trip.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I need...tickets / Which do you prefer? / Do you take...?",
+    "core_chunks": "WeChat Pay / have a good trip",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "火车站 / 高铁站",
+    "npc_name": "售票员"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "train_station",
+    "npc": "ticket_clerk",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CX-TRAIN-TICKET-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Next in line. Where are you heading?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Hangzhou. One way.",
+        "hint": "Hangzhou. One way."
+      },
+      {
+        "role": "A",
+        "content": "Today? We have trains every hour.",
+        "hint": "confirm / frequency"
+      },
+      {
+        "role": "B",
+        "content": "The one around noon.",
+        "hint": "The one around noon."
+      },
+      {
+        "role": "A",
+        "content": "11:42. Seventy-eight yuan.",
+        "hint": "time / price"
+      },
+      {
+        "role": "B",
+        "content": "That's fine. Here's eighty.",
+        "hint": "That's fine. Here's eighty."
+      },
+      {
+        "role": "A",
+        "content": "Two yuan change. Platform 1.",
+        "hint": "change / platform"
+      },
+      {
+        "role": "B",
+        "content": "Thank you.",
+        "hint": "Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Where are you heading? / One way / The one around noon",
+    "core_chunks": "one way / change",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "火车站 / 高铁站",
+    "npc_name": "售票员"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "train_station",
+    "npc": "ticket_checker",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CX-TRAIN-CHECKER-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Ticket, please.",
+        "hint": "ask ticket"
+      },
+      {
+        "role": "B",
+        "content": "Here.",
+        "hint": "Here."
+      },
+      {
+        "role": "A",
+        "content": "Platform 2. Train leaves in five minutes.",
+        "hint": "platform / time"
+      },
+      {
+        "role": "B",
+        "content": "Which way is platform 2?",
+        "hint": "Which way is platform 2?"
+      },
+      {
+        "role": "A",
+        "content": "Down the stairs, turn right.",
+        "hint": "direction"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "Hurry. Don't miss it.",
+        "hint": "remind"
+      }
+    ],
+    "core_sentences": "Ticket, please / Which way is...? / Don't miss it",
+    "core_chunks": "platform / down the stairs",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "火车站 / 高铁站",
+    "npc_name": "检票员"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "train_station",
+    "npc": "ticket_checker",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CX-TRAIN-CHECKER-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Boarding pass and ID.",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Here you go.",
+        "hint": "Here you go."
+      },
+      {
+        "role": "A",
+        "content": "Car 5, Seat 12A. Go to the front of the platform.",
+        "hint": "seat / direction"
+      },
+      {
+        "role": "B",
+        "content": "Is this the right train for Nanjing?",
+        "hint": "Is this the right train for Nanjing?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Board now.",
+        "hint": "confirm"
+      },
+      {
+        "role": "B",
+        "content": "Thank you.",
+        "hint": "Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Boarding pass and ID / Is this the right train for...?",
+    "core_chunks": "car / seat / board",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "火车站 / 高铁站",
+    "npc_name": "检票员"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "train_station",
+    "npc": "ticket_checker",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CX-TRAIN-CHECKER-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Tickets, please. Line up.",
+        "hint": "instruction"
+      },
+      {
+        "role": "B",
+        "content": "Two tickets. We're together.",
+        "hint": "Two tickets. We're together."
+      },
+      {
+        "role": "A",
+        "content": "Car 8. Seats 3A and 3B. That way.",
+        "hint": "car / seats / direction"
+      },
+      {
+        "role": "B",
+        "content": "Can we bring this bag on?",
+        "hint": "Can we bring this bag on?"
+      },
+      {
+        "role": "A",
+        "content": "Yes, if it fits under the seat.",
+        "hint": "yes / condition"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "Have a good journey.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Tickets, please / Can we bring...on?",
+    "core_chunks": "line up / fits under the seat",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "火车站 / 高铁站",
+    "npc_name": "检票员"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "bus_metro",
+    "npc": "driver",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CX-BUS-DRIVER-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Step back. Doors closing.",
+        "hint": "announce"
+      },
+      {
+        "role": "B",
+        "content": "Does this bus go to the railway station?",
+        "hint": "Does this bus go to the railway station?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. It's about ten stops.",
+        "hint": "yes / how many stops"
+      },
+      {
+        "role": "B",
+        "content": "How much is the fare?",
+        "hint": "How much is the fare?"
+      },
+      {
+        "role": "A",
+        "content": "Two yuan. Drop it in the box or use the card reader.",
+        "hint": "fare / how to pay"
+      },
+      {
+        "role": "B",
+        "content": "I'll use my card. Thanks.",
+        "hint": "I'll use my card. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Does this bus go to...? / How much is the fare?",
+    "core_chunks": "doors closing / card reader",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "地铁 / 公交",
+    "npc_name": "司机"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "bus_metro",
+    "npc": "driver",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CX-BUS-DRIVER-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Move to the rear, please. More people getting on.",
+        "hint": "instruction"
+      },
+      {
+        "role": "B",
+        "content": "Is the next stop the museum?",
+        "hint": "Is the next stop the museum?"
+      },
+      {
+        "role": "A",
+        "content": "No, one more after this.",
+        "hint": "no / one more"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. I'll get off there.",
+        "hint": "Thanks. I'll get off there."
+      },
+      {
+        "role": "A",
+        "content": "Okay. Press the bell when we're close.",
+        "hint": "remind"
+      },
+      {
+        "role": "B",
+        "content": "Got it. Thank you.",
+        "hint": "Got it. Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Is the next stop...? / One more after this",
+    "core_chunks": "move to the rear / press the bell",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "地铁 / 公交",
+    "npc_name": "司机"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "bus_metro",
+    "npc": "driver",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CX-BUS-DRIVER-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hold on. Sharp turn.",
+        "hint": "warning"
+      },
+      {
+        "role": "B",
+        "content": "Excuse me, do you stop near the airport?",
+        "hint": "Excuse me, do you stop near the airport?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Terminal 2 is the last stop.",
+        "hint": "yes / last stop"
+      },
+      {
+        "role": "B",
+        "content": "Perfect. That's where I'm going.",
+        "hint": "Perfect. That's where I'm going."
+      },
+      {
+        "role": "A",
+        "content": "We'll be there in about twenty minutes.",
+        "hint": "time"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Do you stop near...? / That's where I'm going",
+    "core_chunks": "sharp turn / terminal",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "地铁 / 公交",
+    "npc_name": "司机"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "bus_metro",
+    "npc": "conductor",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CX-BUS-CONDUCTOR-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Where to?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Three tickets to Xizhimen, please.",
+        "hint": "Three tickets to Xizhimen, please."
+      },
+      {
+        "role": "A",
+        "content": "That's six yuan each. Eighteen total.",
+        "hint": "price"
+      },
+      {
+        "role": "B",
+        "content": "Here's twenty.",
+        "hint": "Here's twenty."
+      },
+      {
+        "role": "A",
+        "content": "Two yuan change. Here are your tickets.",
+        "hint": "change / tickets"
+      },
+      {
+        "role": "B",
+        "content": "Which line do we take?",
+        "hint": "Which line do we take?"
+      },
+      {
+        "role": "A",
+        "content": "Line 2. Down the stairs, follow the signs.",
+        "hint": "line / direction"
+      },
+      {
+        "role": "B",
+        "content": "Thank you.",
+        "hint": "Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Where to? / Which line do we take?",
+    "core_chunks": "down the stairs / follow the signs",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "地铁 / 公交",
+    "npc_name": "售票员"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "bus_metro",
+    "npc": "conductor",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CX-BUS-CONDUCTOR-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Need a recharge? Your card balance is low.",
+        "hint": "remind"
+      },
+      {
+        "role": "B",
+        "content": "Yes. Add fifty yuan, please.",
+        "hint": "Yes. Add fifty yuan, please."
+      },
+      {
+        "role": "A",
+        "content": "Done. Your new balance is sixty-two.",
+        "hint": "done / balance"
+      },
+      {
+        "role": "B",
+        "content": "Can I use this for the bus too?",
+        "hint": "Can I use this for the bus too?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Same card for metro and bus.",
+        "hint": "yes"
+      },
+      {
+        "role": "B",
+        "content": "Great. Thanks.",
+        "hint": "Great. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Add fifty yuan / Can I use this for...too?",
+    "core_chunks": "recharge / balance",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "地铁 / 公交",
+    "npc_name": "售票员"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "bus_metro",
+    "npc": "conductor",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CX-BUS-CONDUCTOR-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Single trip or day pass?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Day pass. How much?",
+        "hint": "Day pass. How much?"
+      },
+      {
+        "role": "A",
+        "content": "Twenty yuan. Unlimited rides today.",
+        "hint": "price / unlimited"
+      },
+      {
+        "role": "B",
+        "content": "I'll take one. Here's twenty.",
+        "hint": "I'll take one. Here's twenty."
+      },
+      {
+        "role": "A",
+        "content": "Here's your pass. Tap at the gate.",
+        "hint": "pass / instruction"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Single trip or day pass? / How much?",
+    "core_chunks": "day pass / unlimited rides / tap at the gate",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "地铁 / 公交",
+    "npc_name": "售票员"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "taxi",
+    "npc": "taxi_driver",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CX-TAXI-DRIVER-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Where to?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "The airport, please. Terminal 2.",
+        "hint": "The airport, please. Terminal 2."
+      },
+      {
+        "role": "A",
+        "content": "Got it. About forty minutes in this traffic.",
+        "hint": "confirm / time"
+      },
+      {
+        "role": "B",
+        "content": "That's fine. How much will it be?",
+        "hint": "That's fine. How much will it be?"
+      },
+      {
+        "role": "A",
+        "content": "Around eighty yuan by meter.",
+        "hint": "around / meter"
+      },
+      {
+        "role": "B",
+        "content": "Can I pay by phone?",
+        "hint": "Can I pay by phone?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. WeChat or Alipay both work.",
+        "hint": "yes"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Where to? / How much will it be? / Can I pay by phone?",
+    "core_chunks": "by meter / WeChat or Alipay",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "出租车 / 网约车",
+    "npc_name": "司机"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "taxi",
+    "npc": "taxi_driver",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CX-TAXI-DRIVER-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. You ordered a car to 123 Main Street?",
+        "hint": "confirm"
+      },
+      {
+        "role": "B",
+        "content": "Yes, that's me.",
+        "hint": "Yes, that's me."
+      },
+      {
+        "role": "A",
+        "content": "Hop in. I'll put the AC on.",
+        "hint": "invite / service"
+      },
+      {
+        "role": "B",
+        "content": "Could you take the highway? I'm in a hurry.",
+        "hint": "Could you take the highway? I'm in a hurry."
+      },
+      {
+        "role": "A",
+        "content": "Sure. There might be a toll. About ten yuan.",
+        "hint": "sure / toll"
+      },
+      {
+        "role": "B",
+        "content": "That's okay. Thanks.",
+        "hint": "That's okay. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "You ordered a car to...? / Could you take the highway?",
+    "core_chunks": "hop in / in a hurry / toll",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "出租车 / 网约车",
+    "npc_name": "司机"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "taxi",
+    "npc": "taxi_driver",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CX-TAXI-DRIVER-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hello. Going to the train station?",
+        "hint": "confirm"
+      },
+      {
+        "role": "B",
+        "content": "Yes. My train is at 3. Is that enough time?",
+        "hint": "Yes. My train is at 3. Is that enough time?"
+      },
+      {
+        "role": "A",
+        "content": "Yeah, we'll be there in twenty minutes.",
+        "hint": "yes / time"
+      },
+      {
+        "role": "B",
+        "content": "Great. Please drop me at the south entrance.",
+        "hint": "Great. Please drop me at the south entrance."
+      },
+      {
+        "role": "A",
+        "content": "South entrance. No problem.",
+        "hint": "repeat"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome. Have a good trip.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Is that enough time? / Please drop me at...",
+    "core_chunks": "south entrance / have a good trip",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "出租车 / 网约车",
+    "npc_name": "司机"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "hotel",
+    "npc": "hotel_reception",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CX-HOTEL-RECEPTION-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Good evening. Do you have a reservation?",
+        "hint": "greeting"
+      },
+      {
+        "role": "B",
+        "content": "Yes. The name is Wang.",
+        "hint": "Yes. The name is Wang."
+      },
+      {
+        "role": "A",
+        "content": "Let me check. Yes, a double room for two nights.",
+        "hint": "confirm"
+      },
+      {
+        "role": "B",
+        "content": "That's right. Is breakfast included?",
+        "hint": "That's right. Is breakfast included?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. It's from 7 to 10 in the lobby.",
+        "hint": "yes / time and place"
+      },
+      {
+        "role": "B",
+        "content": "What time is check-out?",
+        "hint": "What time is check-out?"
+      },
+      {
+        "role": "A",
+        "content": "12 noon. Here's your key. Room 508. Elevator on your left.",
+        "hint": "time / key / direction"
+      },
+      {
+        "role": "B",
+        "content": "Thank you.",
+        "hint": "Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome. Enjoy your stay.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Do you have a reservation? / Is breakfast included? / What time is check-out?",
+    "core_chunks": "double room / check-out / elevator",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "酒店",
+    "npc_name": "前台"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "hotel",
+    "npc": "hotel_reception",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CX-HOTEL-RECEPTION-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. How can I help you?",
+        "hint": "offer"
+      },
+      {
+        "role": "B",
+        "content": "I'd like to book a room for tonight.",
+        "hint": "I'd like to book a room for tonight."
+      },
+      {
+        "role": "A",
+        "content": "We have standard and deluxe. Deluxe has a city view.",
+        "hint": "options"
+      },
+      {
+        "role": "B",
+        "content": "Standard is fine. How much?",
+        "hint": "Standard is fine. How much?"
+      },
+      {
+        "role": "A",
+        "content": "Three hundred and fifty yuan per night.",
+        "hint": "price"
+      },
+      {
+        "role": "B",
+        "content": "Okay. I'll take it.",
+        "hint": "Okay. I'll take it."
+      },
+      {
+        "role": "A",
+        "content": "ID, please. I'll need a deposit of two hundred.",
+        "hint": "ID / deposit"
+      },
+      {
+        "role": "B",
+        "content": "Here. Can I pay by card?",
+        "hint": "Here. Can I pay by card?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Here's your receipt. Room 312.",
+        "hint": "yes / receipt"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I'd like to book.../ How much? / Can I pay by card?",
+    "core_chunks": "standard and deluxe / deposit / receipt",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "酒店",
+    "npc_name": "前台"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "hotel",
+    "npc": "hotel_reception",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CX-HOTEL-RECEPTION-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Checking out? Room number?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "508. Here's my key.",
+        "hint": "508. Here's my key."
+      },
+      {
+        "role": "A",
+        "content": "One moment. Your total is seven hundred yuan.",
+        "hint": "total"
+      },
+      {
+        "role": "B",
+        "content": "Can I get an invoice?",
+        "hint": "Can I get an invoice?"
+      },
+      {
+        "role": "A",
+        "content": "Sure. Company name?",
+        "hint": "sure / ask"
+      },
+      {
+        "role": "B",
+        "content": "ABC Company. Tax ID on file.",
+        "hint": "ABC Company. Tax ID on file."
+      },
+      {
+        "role": "A",
+        "content": "Here you go. Thank you for staying with us.",
+        "hint": "hand / thank"
+      },
+      {
+        "role": "B",
+        "content": "Thank you. Goodbye.",
+        "hint": "Thank you. Goodbye."
+      },
+      {
+        "role": "A",
+        "content": "Goodbye. Safe travels.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Checking out? / Can I get an invoice?",
+    "core_chunks": "invoice / tax ID / on file",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "酒店",
+    "npc_name": "前台"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "hotel",
+    "npc": "housekeeping",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CX-HOTEL-HOUSE-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Housekeeping. May I come in?",
+        "hint": "announce"
+      },
+      {
+        "role": "B",
+        "content": "Yes, come in. Could I get some extra towels?",
+        "hint": "Yes, come in. Could I get some extra towels?"
+      },
+      {
+        "role": "A",
+        "content": "Of course. How many would you like?",
+        "hint": "of course / ask"
+      },
+      {
+        "role": "B",
+        "content": "Two, please.",
+        "hint": "Two, please."
+      },
+      {
+        "role": "A",
+        "content": "I'll bring them right up. Anything else?",
+        "hint": "confirm / offer"
+      },
+      {
+        "role": "B",
+        "content": "No, that's all. Thank you.",
+        "hint": "No, that's all. Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "May I come in? / Could I get...? / Anything else?",
+    "core_chunks": "housekeeping / extra towels",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "酒店",
+    "npc_name": "客房服务"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "hotel",
+    "npc": "housekeeping",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CX-HOTEL-HOUSE-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Room service. Your order is here.",
+        "hint": "deliver"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Just put it on the table.",
+        "hint": "Thanks. Just put it on the table."
+      },
+      {
+        "role": "A",
+        "content": "Sure. Would you like me to open the curtains?",
+        "hint": "sure / offer"
+      },
+      {
+        "role": "B",
+        "content": "Yes, please. And can I have a late check-out?",
+        "hint": "Yes, please. And can I have a late check-out?"
+      },
+      {
+        "role": "A",
+        "content": "I'll check with the front desk. Usually until 2 p.m.",
+        "hint": "check / usually"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Thanks.",
+        "hint": "Okay. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Just put it on.../ Can I have a late check-out?",
+    "core_chunks": "room service / late check-out",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "酒店",
+    "npc_name": "客房服务"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "hotel",
+    "npc": "housekeeping",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CX-HOTEL-HOUSE-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. You called for an extra pillow?",
+        "hint": "confirm"
+      },
+      {
+        "role": "B",
+        "content": "Yes. And do you have an iron?",
+        "hint": "Yes. And do you have an iron?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. I'll bring both. One moment.",
+        "hint": "yes / both"
+      },
+      {
+        "role": "B",
+        "content": "Thank you. What's the WiFi password?",
+        "hint": "Thank you. What's the WiFi password?"
+      },
+      {
+        "role": "A",
+        "content": "It's on the desk. Room number and 'guest'.",
+        "hint": "location / hint"
+      },
+      {
+        "role": "B",
+        "content": "Got it. Thanks.",
+        "hint": "Got it. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Do you have an iron? / What's the WiFi password?",
+    "core_chunks": "extra pillow / WiFi password",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "酒店",
+    "npc_name": "客房服务"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "hotel",
+    "npc": "cleaning",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "CX-HOTEL-CLEAN-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Good morning. Cleaning. Is now a good time?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Could you come back in half an hour?",
+        "hint": "Could you come back in half an hour?"
+      },
+      {
+        "role": "A",
+        "content": "Sure. I'll come back at 10.",
+        "hint": "sure / time"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. I'm in a meeting.",
+        "hint": "Thanks. I'm in a meeting."
+      },
+      {
+        "role": "A",
+        "content": "No problem. See you then.",
+        "hint": "no problem"
+      }
+    ],
+    "core_sentences": "Is now a good time? / Could you come back in...?",
+    "core_chunks": "cleaning / come back",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "酒店",
+    "npc_name": "保洁"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "hotel",
+    "npc": "cleaning",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "CX-HOTEL-CLEAN-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Housekeeping. May I clean your room?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Yes. The bathroom needs more soap.",
+        "hint": "Yes. The bathroom needs more soap."
+      },
+      {
+        "role": "A",
+        "content": "I'll leave some. Do you need new sheets?",
+        "hint": "confirm / offer"
+      },
+      {
+        "role": "B",
+        "content": "No, the bed is fine. Thanks.",
+        "hint": "No, the bed is fine. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome. Have a good day.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "May I clean your room? / The bathroom needs...",
+    "core_chunks": "new sheets",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "酒店",
+    "npc_name": "保洁"
+  },
+  {
+    "big_scene": "transport",
+    "small_scene": "hotel",
+    "npc": "cleaning",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "CX-HOTEL-CLEAN-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. I'm here to change the towels.",
+        "hint": "purpose"
+      },
+      {
+        "role": "B",
+        "content": "Come in. I'm leaving in a few minutes.",
+        "hint": "Come in. I'm leaving in a few minutes."
+      },
+      {
+        "role": "A",
+        "content": "I'll be quick. Trash too?",
+        "hint": "quick / offer"
+      },
+      {
+        "role": "B",
+        "content": "Yes, please. Thank you.",
+        "hint": "Yes, please. Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I'm here to.../ I'll be quick",
+    "core_chunks": "change the towels",
+    "big_scene_name": "出行交通",
+    "small_scene_name": "酒店",
+    "npc_name": "保洁"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "supermarket",
+    "npc": "cashier",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GW-SUPER-CASHIER-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Next, please. Did you find everything?",
+        "hint": "greeting"
+      },
+      {
+        "role": "B",
+        "content": "Yes. How much is it?",
+        "hint": "Yes. How much is it?"
+      },
+      {
+        "role": "A",
+        "content": "Eighty-five yuan. Card or cash?",
+        "hint": "total / pay method"
+      },
+      {
+        "role": "B",
+        "content": "Card, please.",
+        "hint": "Card, please."
+      },
+      {
+        "role": "A",
+        "content": "Tap or insert. Thank you. Receipt?",
+        "hint": "instruction / receipt"
+      },
+      {
+        "role": "B",
+        "content": "No, thanks. Have a good day.",
+        "hint": "No, thanks. Have a good day."
+      },
+      {
+        "role": "A",
+        "content": "You too. Bye.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Did you find everything? / How much is it? / Card or cash?",
+    "core_chunks": "tap or insert / receipt",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "超市 / 便利店",
+    "npc_name": "收银员"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "supermarket",
+    "npc": "cashier",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GW-SUPER-CASHIER-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "That'll be forty-two fifty.",
+        "hint": "total"
+      },
+      {
+        "role": "B",
+        "content": "Do you have a bag?",
+        "hint": "Do you have a bag?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Small or large? Five jiao for large.",
+        "hint": "options / price"
+      },
+      {
+        "role": "B",
+        "content": "One large, please.",
+        "hint": "One large, please."
+      },
+      {
+        "role": "A",
+        "content": "Forty-three yuan total. Pay here.",
+        "hint": "total / pay"
+      },
+      {
+        "role": "B",
+        "content": "Here you go.",
+        "hint": "Here you go."
+      },
+      {
+        "role": "A",
+        "content": "Thanks. Next!",
+        "hint": "thanks"
+      }
+    ],
+    "core_sentences": "Do you have a bag? / Small or large?",
+    "core_chunks": "five jiao / pay here",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "超市 / 便利店",
+    "npc_name": "收银员"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "supermarket",
+    "npc": "cashier",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GW-SUPER-CASHIER-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. Cash or mobile?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "WeChat. Is there a discount today?",
+        "hint": "WeChat. Is there a discount today?"
+      },
+      {
+        "role": "A",
+        "content": "Members get 10% off. Do you have a membership card?",
+        "hint": "discount / member"
+      },
+      {
+        "role": "B",
+        "content": "No. Just today's total.",
+        "hint": "No. Just today's total."
+      },
+      {
+        "role": "A",
+        "content": "Seventy-six yuan. Scan here.",
+        "hint": "total / scan"
+      },
+      {
+        "role": "B",
+        "content": "Done. Thanks.",
+        "hint": "Done. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "Thank you. Bye.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Is there a discount today? / Do you have a membership card?",
+    "core_chunks": "members get 10% off / scan here",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "超市 / 便利店",
+    "npc_name": "收银员"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "supermarket",
+    "npc": "guide",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GW-SUPER-GUIDE-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. Looking for something?",
+        "hint": "offer"
+      },
+      {
+        "role": "B",
+        "content": "Where is the milk?",
+        "hint": "Where is the milk?"
+      },
+      {
+        "role": "A",
+        "content": "Dairy is in the back, on the left.",
+        "hint": "location"
+      },
+      {
+        "role": "B",
+        "content": "Do you have oat milk?",
+        "hint": "Do you have oat milk?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Same aisle, top shelf.",
+        "hint": "yes / where"
+      },
+      {
+        "role": "B",
+        "content": "Thanks a lot.",
+        "hint": "Thanks a lot."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Where is...? / Do you have...?",
+    "core_chunks": "dairy / aisle / top shelf",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "超市 / 便利店",
+    "npc_name": "导购员"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "supermarket",
+    "npc": "guide",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GW-SUPER-GUIDE-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Can I help you find anything?",
+        "hint": "offer"
+      },
+      {
+        "role": "B",
+        "content": "I'm looking for soy sauce.",
+        "hint": "I'm looking for soy sauce."
+      },
+      {
+        "role": "A",
+        "content": "That's in Aisle 7. Seasonings.",
+        "hint": "aisle / section"
+      },
+      {
+        "role": "B",
+        "content": "Which brand do you recommend?",
+        "hint": "Which brand do you recommend?"
+      },
+      {
+        "role": "A",
+        "content": "The one on sale is good. Yellow label.",
+        "hint": "recommend"
+      },
+      {
+        "role": "B",
+        "content": "Okay. I'll try it. Thanks.",
+        "hint": "Okay. I'll try it. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I'm looking for.../ Which brand do you recommend?",
+    "core_chunks": "on sale / yellow label",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "超市 / 便利店",
+    "npc_name": "导购员"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "supermarket",
+    "npc": "guide",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GW-SUPER-GUIDE-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Need any help?",
+        "hint": "offer"
+      },
+      {
+        "role": "B",
+        "content": "Where are the frozen dumplings?",
+        "hint": "Where are the frozen dumplings?"
+      },
+      {
+        "role": "A",
+        "content": "Freezer section. Straight ahead, then right.",
+        "hint": "direction"
+      },
+      {
+        "role": "B",
+        "content": "Are they on special today?",
+        "hint": "Are they on special today?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Buy two get one free.",
+        "hint": "yes / promotion"
+      },
+      {
+        "role": "B",
+        "content": "Great. Thank you.",
+        "hint": "Great. Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Where are...? / Are they on special today?",
+    "core_chunks": "freezer section / buy two get one free",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "超市 / 便利店",
+    "npc_name": "导购员"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "mall",
+    "npc": "shop_staff",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GW-MALL-STAFF-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. Can I help you?",
+        "hint": "greeting"
+      },
+      {
+        "role": "B",
+        "content": "I'm just looking. Do you have this in blue?",
+        "hint": "I'm just looking. Do you have this in blue?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. What size?",
+        "hint": "yes / size"
+      },
+      {
+        "role": "B",
+        "content": "Medium.",
+        "hint": "Medium."
+      },
+      {
+        "role": "A",
+        "content": "Here you go. The fitting room is over there.",
+        "hint": "hand / fitting room"
+      },
+      {
+        "role": "B",
+        "content": "Can I try it on?",
+        "hint": "Can I try it on?"
+      },
+      {
+        "role": "A",
+        "content": "Sure. Let me know if you need another size.",
+        "hint": "sure / offer"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Do you have this in blue? / Can I try it on?",
+    "core_chunks": "just looking / fitting room",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "商场 / 服装店",
+    "npc_name": "店员"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "mall",
+    "npc": "shop_staff",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GW-MALL-STAFF-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Welcome. Looking for something special?",
+        "hint": "welcome"
+      },
+      {
+        "role": "B",
+        "content": "A gift for my mom. She likes scarves.",
+        "hint": "A gift for my mom. She likes scarves."
+      },
+      {
+        "role": "A",
+        "content": "We have some new ones. This silk one is popular.",
+        "hint": "suggest"
+      },
+      {
+        "role": "B",
+        "content": "How much is it?",
+        "hint": "How much is it?"
+      },
+      {
+        "role": "A",
+        "content": "Two hundred and ninety yuan. We can gift-wrap for free.",
+        "hint": "price / service"
+      },
+      {
+        "role": "B",
+        "content": "I'll take it. Can I get a receipt?",
+        "hint": "I'll take it. Can I get a receipt?"
+      },
+      {
+        "role": "A",
+        "content": "Sure. Pay at the counter. Thank you.",
+        "hint": "sure / thank"
+      },
+      {
+        "role": "B",
+        "content": "Thank you.",
+        "hint": "Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "A gift for.../ How much is it? / Can I get a receipt?",
+    "core_chunks": "gift-wrap / pay at the counter",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "商场 / 服装店",
+    "npc_name": "店员"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "mall",
+    "npc": "shop_staff",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GW-MALL-STAFF-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. Need a size?",
+        "hint": "offer"
+      },
+      {
+        "role": "B",
+        "content": "Yes. This jacket in large?",
+        "hint": "Yes. This jacket in large?"
+      },
+      {
+        "role": "A",
+        "content": "Let me check. Yes, we have one left.",
+        "hint": "check / stock"
+      },
+      {
+        "role": "B",
+        "content": "Is it on sale?",
+        "hint": "Is it on sale?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. 20% off. Four hundred yuan now.",
+        "hint": "yes / discount"
+      },
+      {
+        "role": "B",
+        "content": "I'll try it. Where's the fitting room?",
+        "hint": "I'll try it. Where's the fitting room?"
+      },
+      {
+        "role": "A",
+        "content": "Behind you. I'll hold it at the counter.",
+        "hint": "direction / hold"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "This jacket in large? / Is it on sale?",
+    "core_chunks": "20% off / hold it at the counter",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "商场 / 服装店",
+    "npc_name": "店员"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "mall",
+    "npc": "mall_guide",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GW-MALL-GUIDE-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. What style are you looking for?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Something casual for work.",
+        "hint": "Something casual for work."
+      },
+      {
+        "role": "A",
+        "content": "These shirts are popular. Cotton and easy to wash.",
+        "hint": "recommend"
+      },
+      {
+        "role": "B",
+        "content": "Do you have them in light blue?",
+        "hint": "Do you have them in light blue?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Here. Size M or L?",
+        "hint": "yes / size"
+      },
+      {
+        "role": "B",
+        "content": "M. How much?",
+        "hint": "M. How much?"
+      },
+      {
+        "role": "A",
+        "content": "One ninety-nine. Want to try?",
+        "hint": "price / try"
+      },
+      {
+        "role": "B",
+        "content": "Yes, please. Thanks.",
+        "hint": "Yes, please. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "Fitting room this way.",
+        "hint": "direction"
+      }
+    ],
+    "core_sentences": "What style are you looking for? / Do you have them in...?",
+    "core_chunks": "casual / easy to wash",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "商场 / 服装店",
+    "npc_name": "导购"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "mall",
+    "npc": "mall_guide",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GW-MALL-GUIDE-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "That looks good on you.",
+        "hint": "compliment"
+      },
+      {
+        "role": "B",
+        "content": "Really? Is it too tight?",
+        "hint": "Really? Is it too tight?"
+      },
+      {
+        "role": "A",
+        "content": "No. The fit is right. We have it in black too.",
+        "hint": "no / suggest"
+      },
+      {
+        "role": "B",
+        "content": "I'll stick with this color. I'll take it.",
+        "hint": "I'll stick with this color. I'll take it."
+      },
+      {
+        "role": "A",
+        "content": "Great. I'll ring it up at the counter.",
+        "hint": "confirm"
+      },
+      {
+        "role": "B",
+        "content": "Thanks for your help.",
+        "hint": "Thanks for your help."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome. Come again.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Is it too tight? / I'll take it",
+    "core_chunks": "the fit is right / ring it up",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "商场 / 服装店",
+    "npc_name": "导购"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "mall",
+    "npc": "mall_guide",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GW-MALL-GUIDE-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Looking for shoes? We have a new range.",
+        "hint": "offer"
+      },
+      {
+        "role": "B",
+        "content": "I need something comfortable for walking.",
+        "hint": "I need something comfortable for walking."
+      },
+      {
+        "role": "A",
+        "content": "These have good support. Try this pair.",
+        "hint": "recommend"
+      },
+      {
+        "role": "B",
+        "content": "What size is this?",
+        "hint": "What size is this?"
+      },
+      {
+        "role": "A",
+        "content": "Forty-two. Let me get you the other foot.",
+        "hint": "size / service"
+      },
+      {
+        "role": "B",
+        "content": "They feel good. I'll take them.",
+        "hint": "They feel good. I'll take them."
+      },
+      {
+        "role": "A",
+        "content": "Good choice. Pay over there.",
+        "hint": "confirm / pay"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I need something comfortable / What size is this?",
+    "core_chunks": "good support / the other foot",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "商场 / 服装店",
+    "npc_name": "导购"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "barber",
+    "npc": "barber_staff",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GW-BARBER-STAFF-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. How would you like it today?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Just a trim. Keep the length.",
+        "hint": "Just a trim. Keep the length."
+      },
+      {
+        "role": "A",
+        "content": "Same style? Any thinning on the sides?",
+        "hint": "confirm / suggest"
+      },
+      {
+        "role": "B",
+        "content": "A little shorter on the sides, please.",
+        "hint": "A little shorter on the sides, please."
+      },
+      {
+        "role": "A",
+        "content": "Got it. Shampoo first?",
+        "hint": "got it / shampoo"
+      },
+      {
+        "role": "B",
+        "content": "Yes, please.",
+        "hint": "Yes, please."
+      },
+      {
+        "role": "A",
+        "content": "Lean back. Comfortable?",
+        "hint": "instruction / comfortable"
+      },
+      {
+        "role": "B",
+        "content": "Yes. Thanks.",
+        "hint": "Yes. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "How would you like it today? / Just a trim / A little shorter on the sides",
+    "core_chunks": "keep the length / shampoo first",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "理发店",
+    "npc_name": "理发师"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "barber",
+    "npc": "barber_staff",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GW-BARBER-STAFF-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Next. What can I do for you?",
+        "hint": "offer"
+      },
+      {
+        "role": "B",
+        "content": "I want a new look. Maybe layers?",
+        "hint": "I want a new look. Maybe layers?"
+      },
+      {
+        "role": "A",
+        "content": "Layers would suit you. Shoulder length or shorter?",
+        "hint": "agree / option"
+      },
+      {
+        "role": "B",
+        "content": "Shoulder length. And some bangs?",
+        "hint": "Shoulder length. And some bangs?"
+      },
+      {
+        "role": "A",
+        "content": "Sure. We can do that. Sit here.",
+        "hint": "sure / sit"
+      },
+      {
+        "role": "B",
+        "content": "How long will it take?",
+        "hint": "How long will it take?"
+      },
+      {
+        "role": "A",
+        "content": "About forty minutes. Relax.",
+        "hint": "time / relax"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Thanks.",
+        "hint": "Okay. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I want a new look / Maybe layers? / How long will it take?",
+    "core_chunks": "layers / shoulder length / bangs",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "理发店",
+    "npc_name": "理发师"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "barber",
+    "npc": "barber_staff",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GW-BARBER-STAFF-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. Trim or full cut?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Full cut. And a wash.",
+        "hint": "Full cut. And a wash."
+      },
+      {
+        "role": "A",
+        "content": "Any product? Gel or wax?",
+        "hint": "product"
+      },
+      {
+        "role": "B",
+        "content": "Just a little wax. Nothing too heavy.",
+        "hint": "Just a little wax. Nothing too heavy."
+      },
+      {
+        "role": "A",
+        "content": "Got it. Thirty yuan for the cut, fifteen for the wash.",
+        "hint": "price"
+      },
+      {
+        "role": "B",
+        "content": "That's fine. Go ahead.",
+        "hint": "That's fine. Go ahead."
+      },
+      {
+        "role": "A",
+        "content": "Thanks. I'll start.",
+        "hint": "thanks"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Trim or full cut? / Just a little wax",
+    "core_chunks": "gel or wax / nothing too heavy",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "理发店",
+    "npc_name": "理发师"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "barber",
+    "npc": "barber_front",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GW-BARBER-FRONT-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. Do you have an appointment?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "No. Is there a free slot now?",
+        "hint": "No. Is there a free slot now?"
+      },
+      {
+        "role": "A",
+        "content": "We have one in twenty minutes. Or you can wait.",
+        "hint": "option"
+      },
+      {
+        "role": "B",
+        "content": "I'll wait. How much for a cut?",
+        "hint": "I'll wait. How much for a cut?"
+      },
+      {
+        "role": "A",
+        "content": "Forty for men, fifty for women. Wash is extra.",
+        "hint": "price"
+      },
+      {
+        "role": "B",
+        "content": "Men's cut, please. No wash.",
+        "hint": "Men's cut, please. No wash."
+      },
+      {
+        "role": "A",
+        "content": "Okay. Take a seat. We'll call you.",
+        "hint": "okay / wait"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Do you have an appointment? / Is there a free slot now?",
+    "core_chunks": "free slot / wash is extra",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "理发店",
+    "npc_name": "前台"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "barber",
+    "npc": "barber_front",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GW-BARBER-FRONT-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Next, please. Name?",
+        "hint": "call / ask"
+      },
+      {
+        "role": "B",
+        "content": "Wang. I had a 3 o'clock.",
+        "hint": "Wang. I had a 3 o'clock."
+      },
+      {
+        "role": "A",
+        "content": "Yes. Mr. Wang. Please go to Chair 2. Tony will help you.",
+        "hint": "confirm / assign"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Do you take cards?",
+        "hint": "Thanks. Do you take cards?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. You pay when you're done.",
+        "hint": "yes / when"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Thank you.",
+        "hint": "Okay. Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I had a 3 o'clock / Do you take cards?",
+    "core_chunks": "chair 2 / pay when you're done",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "理发店",
+    "npc_name": "前台"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "barber",
+    "npc": "barber_front",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GW-BARBER-FRONT-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. Would you like to book for next time?",
+        "hint": "offer"
+      },
+      {
+        "role": "B",
+        "content": "Yes. Same time next week?",
+        "hint": "Yes. Same time next week?"
+      },
+      {
+        "role": "A",
+        "content": "Let me check. Tuesday at 3? We have that.",
+        "hint": "check / confirm"
+      },
+      {
+        "role": "B",
+        "content": "Perfect. Under Wang.",
+        "hint": "Perfect. Under Wang."
+      },
+      {
+        "role": "A",
+        "content": "Done. We'll send a reminder.",
+        "hint": "done / reminder"
+      },
+      {
+        "role": "B",
+        "content": "Great. Thanks.",
+        "hint": "Great. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome. See you next week.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Would you like to book for next time? / Same time next week?",
+    "core_chunks": "under Wang / send a reminder",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "理发店",
+    "npc_name": "前台"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "cinema",
+    "npc": "cinema_clerk",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GW-CINEMA-CLERK-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. Which movie?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "The new action one. Two tickets for the 7 o'clock show.",
+        "hint": "The new action one. Two tickets for the 7 o'clock show."
+      },
+      {
+        "role": "A",
+        "content": "We have front, middle, or back. Middle?",
+        "hint": "seats"
+      },
+      {
+        "role": "B",
+        "content": "Middle, please. How much?",
+        "hint": "Middle, please. How much?"
+      },
+      {
+        "role": "A",
+        "content": "Sixty each. One hundred twenty total.",
+        "hint": "price"
+      },
+      {
+        "role": "B",
+        "content": "Do you have student discount?",
+        "hint": "Do you have student discount?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Student ID? Fifty each.",
+        "hint": "yes / student"
+      },
+      {
+        "role": "B",
+        "content": "Here. So one hundred.",
+        "hint": "Here. So one hundred."
+      },
+      {
+        "role": "A",
+        "content": "Right. Here are your tickets. Screen 3.",
+        "hint": "confirm / screen"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome. Enjoy the movie.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Which movie? / Do you have student discount?",
+    "core_chunks": "front middle back / screen",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "电影院",
+    "npc_name": "售票员"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "cinema",
+    "npc": "cinema_clerk",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GW-CINEMA-CLERK-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Next. What can I get you?",
+        "hint": "offer"
+      },
+      {
+        "role": "B",
+        "content": "One for the 9 p.m. show. Comedy.",
+        "hint": "One for the 9 p.m. show. Comedy."
+      },
+      {
+        "role": "A",
+        "content": "We have seats left in the back row.",
+        "hint": "seats"
+      },
+      {
+        "role": "B",
+        "content": "That's fine. And a large popcorn and two drinks.",
+        "hint": "That's fine. And a large popcorn and two drinks."
+      },
+      {
+        "role": "A",
+        "content": "Eighty for the ticket, forty for the combo. One twenty.",
+        "hint": "price"
+      },
+      {
+        "role": "B",
+        "content": "Here's one fifty.",
+        "hint": "Here's one fifty."
+      },
+      {
+        "role": "A",
+        "content": "Thirty change. Screen 1. Enjoy.",
+        "hint": "change / enjoy"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "One for the 9 p.m. show / And a large popcorn",
+    "core_chunks": "back row / combo",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "电影院",
+    "npc_name": "售票员"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "cinema",
+    "npc": "cinema_clerk",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GW-CINEMA-CLERK-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. Booking or walk-in?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Walk-in. What's showing soon?",
+        "hint": "Walk-in. What's showing soon?"
+      },
+      {
+        "role": "A",
+        "content": "Next one is in 15 minutes. Romance. Screen 2.",
+        "hint": "next / screen"
+      },
+      {
+        "role": "B",
+        "content": "One ticket. Center seat if possible.",
+        "hint": "One ticket. Center seat if possible."
+      },
+      {
+        "role": "A",
+        "content": "We have Row 8, Seat 10. Good view.",
+        "hint": "seat / view"
+      },
+      {
+        "role": "B",
+        "content": "Perfect. How much?",
+        "hint": "Perfect. How much?"
+      },
+      {
+        "role": "A",
+        "content": "Fifty-five. Pay here.",
+        "hint": "price"
+      },
+      {
+        "role": "B",
+        "content": "Done. Thanks.",
+        "hint": "Done. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "Thank you. Enjoy.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "What's showing soon? / Center seat if possible",
+    "core_chunks": "walk-in / good view",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "电影院",
+    "npc_name": "售票员"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "cinema",
+    "npc": "cinema_checker",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GW-CINEMA-CHECKER-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Ticket, please. Screen 3 is to your left.",
+        "hint": "ask / direction"
+      },
+      {
+        "role": "B",
+        "content": "Here. Is it okay to bring this in?",
+        "hint": "Here. Is it okay to bring this in?"
+      },
+      {
+        "role": "A",
+        "content": "No outside food. We have snacks inside.",
+        "hint": "rule"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Thanks.",
+        "hint": "Okay. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "Enjoy the movie.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Is it okay to bring this in?",
+    "core_chunks": "no outside food / snacks inside",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "电影院",
+    "npc_name": "检票员"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "cinema",
+    "npc": "cinema_checker",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GW-CINEMA-CHECKER-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Tickets. The show starts in five minutes.",
+        "hint": "ask / time"
+      },
+      {
+        "role": "B",
+        "content": "Two tickets. Row 5.",
+        "hint": "Two tickets. Row 5."
+      },
+      {
+        "role": "A",
+        "content": "Go straight. Row 5 is in the middle.",
+        "hint": "direction"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Where are the restrooms?",
+        "hint": "Thanks. Where are the restrooms?"
+      },
+      {
+        "role": "A",
+        "content": "Down the hall, on the right. Hurry back.",
+        "hint": "location"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Where are the restrooms?",
+    "core_chunks": "go straight / down the hall",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "电影院",
+    "npc_name": "检票员"
+  },
+  {
+    "big_scene": "shopping",
+    "small_scene": "cinema",
+    "npc": "cinema_checker",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GW-CINEMA-CHECKER-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Ticket? Screen 1, straight ahead.",
+        "hint": "ask / direction"
+      },
+      {
+        "role": "B",
+        "content": "Can we go in now? The ads are on.",
+        "hint": "Can we go in now? The ads are on."
+      },
+      {
+        "role": "A",
+        "content": "Yes. Find your seat. Movie starts in ten.",
+        "hint": "yes / remind"
+      },
+      {
+        "role": "B",
+        "content": "Thanks.",
+        "hint": "Thanks."
+      },
+      {
+        "role": "A",
+        "content": "Enjoy.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Can we go in now?",
+    "core_chunks": "ads are on",
+    "big_scene_name": "购物消费",
+    "small_scene_name": "电影院",
+    "npc_name": "检票员"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "office",
+    "npc": "boss",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GZ-OFFICE-BOSS-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Do you have a minute? I need to talk about the project.",
+        "hint": "request"
+      },
+      {
+        "role": "B",
+        "content": "Sure. What's up?",
+        "hint": "Sure. What's up?"
+      },
+      {
+        "role": "A",
+        "content": "The deadline is tight. Can you finish the report by Friday?",
+        "hint": "situation / ask"
+      },
+      {
+        "role": "B",
+        "content": "I'll try. I might need help with the data.",
+        "hint": "I'll try. I might need help with the data."
+      },
+      {
+        "role": "A",
+        "content": "Talk to Li. She can share the numbers. Any other issues?",
+        "hint": "suggest / ask"
+      },
+      {
+        "role": "B",
+        "content": "No. I'll get it done. Thanks.",
+        "hint": "No. I'll get it done. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "Good. Let me know if you need anything.",
+        "hint": "close"
+      }
+    ],
+    "core_sentences": "Do you have a minute? / Can you finish...by Friday?",
+    "core_chunks": "deadline is tight / let me know",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "办公室",
+    "npc_name": "领导"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "office",
+    "npc": "boss",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GZ-OFFICE-BOSS-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Good job on the presentation. The client liked it.",
+        "hint": "praise"
+      },
+      {
+        "role": "B",
+        "content": "Thank you. The team helped a lot.",
+        "hint": "Thank you. The team helped a lot."
+      },
+      {
+        "role": "A",
+        "content": "We have a follow-up meeting next week. Can you prepare the slides?",
+        "hint": "next step / ask"
+      },
+      {
+        "role": "B",
+        "content": "Yes. When is it?",
+        "hint": "Yes. When is it?"
+      },
+      {
+        "role": "A",
+        "content": "Wednesday at 2. Send me a draft by Monday.",
+        "hint": "time / deadline"
+      },
+      {
+        "role": "B",
+        "content": "Okay. I'll do that. Thanks.",
+        "hint": "Okay. I'll do that. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "Thanks. Keep it up.",
+        "hint": "close"
+      }
+    ],
+    "core_sentences": "Good job on.../ Can you prepare...?",
+    "core_chunks": "follow-up meeting / send me a draft",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "办公室",
+    "npc_name": "领导"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "office",
+    "npc": "boss",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GZ-OFFICE-BOSS-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "I need the sales figures by end of day. Is that possible?",
+        "hint": "request"
+      },
+      {
+        "role": "B",
+        "content": "I'm on it. I'll email them by 5.",
+        "hint": "I'm on it. I'll email them by 5."
+      },
+      {
+        "role": "A",
+        "content": "Great. And please copy the director.",
+        "hint": "great / add"
+      },
+      {
+        "role": "B",
+        "content": "Will do. Anything else?",
+        "hint": "Will do. Anything else?"
+      },
+      {
+        "role": "A",
+        "content": "No, that's all. Thanks.",
+        "hint": "no / thanks"
+      },
+      {
+        "role": "B",
+        "content": "You're welcome.",
+        "hint": "You're welcome."
+      },
+      {
+        "role": "A",
+        "content": "Okay.",
+        "hint": "close"
+      }
+    ],
+    "core_sentences": "I need...by end of day / Is that possible?",
+    "core_chunks": "I'm on it / copy the director",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "办公室",
+    "npc_name": "领导"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "office",
+    "npc": "colleague",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GZ-OFFICE-COLLEAGUE-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hey. Are you free for lunch? A few of us are going out.",
+        "hint": "invite"
+      },
+      {
+        "role": "B",
+        "content": "Sure. What time?",
+        "hint": "Sure. What time?"
+      },
+      {
+        "role": "A",
+        "content": "Around 12. The usual place.",
+        "hint": "time / place"
+      },
+      {
+        "role": "B",
+        "content": "Sounds good. I'll finish this email first.",
+        "hint": "Sounds good. I'll finish this email first."
+      },
+      {
+        "role": "A",
+        "content": "No rush. See you then.",
+        "hint": "no rush"
+      },
+      {
+        "role": "B",
+        "content": "See you.",
+        "hint": "See you."
+      },
+      {
+        "role": "A",
+        "content": "Bye.",
+        "hint": "bye"
+      }
+    ],
+    "core_sentences": "Are you free for lunch? / What time?",
+    "core_chunks": "the usual place / no rush",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "办公室",
+    "npc_name": "同事"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "office",
+    "npc": "colleague",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GZ-OFFICE-COLLEAGUE-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. Do you have the file from the meeting?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Which one? Yesterday's or this morning's?",
+        "hint": "Which one? Yesterday's or this morning's?"
+      },
+      {
+        "role": "A",
+        "content": "This morning. The budget sheet.",
+        "hint": "specify"
+      },
+      {
+        "role": "B",
+        "content": "I'll send it to you. One sec.",
+        "hint": "I'll send it to you. One sec."
+      },
+      {
+        "role": "A",
+        "content": "Thanks. I need it for the report.",
+        "hint": "thanks / reason"
+      },
+      {
+        "role": "B",
+        "content": "Done. Check your inbox.",
+        "hint": "Done. Check your inbox."
+      },
+      {
+        "role": "A",
+        "content": "Got it. Thanks again.",
+        "hint": "got it"
+      }
+    ],
+    "core_sentences": "Do you have the file...? / Which one?",
+    "core_chunks": "budget sheet / check your inbox",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "办公室",
+    "npc_name": "同事"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "office",
+    "npc": "colleague",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GZ-OFFICE-COLLEAGUE-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Coffee run? I'm going to the café.",
+        "hint": "offer"
+      },
+      {
+        "role": "B",
+        "content": "Yes, please. Latte, medium. Here's the money.",
+        "hint": "Yes, please. Latte, medium. Here's the money."
+      },
+      {
+        "role": "A",
+        "content": "Keep it. My treat today.",
+        "hint": "refuse / treat"
+      },
+      {
+        "role": "B",
+        "content": "Really? Thanks! Next time it's on me.",
+        "hint": "Really? Thanks! Next time it's on me."
+      },
+      {
+        "role": "A",
+        "content": "Deal. Back in ten.",
+        "hint": "deal / time"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Thanks.",
+        "hint": "Okay. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "No problem.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Coffee run? / Next time it's on me",
+    "core_chunks": "my treat / back in ten",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "办公室",
+    "npc_name": "同事"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "office",
+    "npc": "subordinate",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GZ-OFFICE-SUB-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. I've finished the draft. Can you take a look?",
+        "hint": "submit / ask"
+      },
+      {
+        "role": "B",
+        "content": "Sure. Send it over. When do you need feedback?",
+        "hint": "Sure. Send it over. When do you need feedback?"
+      },
+      {
+        "role": "A",
+        "content": "By tomorrow morning if possible. The meeting is at 10.",
+        "hint": "deadline / reason"
+      },
+      {
+        "role": "B",
+        "content": "I'll read it tonight. Any specific part to focus on?",
+        "hint": "I'll read it tonight. Any specific part to focus on?"
+      },
+      {
+        "role": "A",
+        "content": "The conclusion. I'm not sure if it's strong enough.",
+        "hint": "focus / worry"
+      },
+      {
+        "role": "B",
+        "content": "Okay. I'll give you notes by 9. Sound good?",
+        "hint": "okay / confirm"
+      },
+      {
+        "role": "A",
+        "content": "Perfect. Thank you.",
+        "hint": "Perfect. Thank you."
+      },
+      {
+        "role": "B",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I've finished...Can you take a look? / When do you need feedback?",
+    "core_chunks": "send it over / sound good",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "办公室",
+    "npc_name": "下属"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "office",
+    "npc": "subordinate",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GZ-OFFICE-SUB-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "I'm stuck on this part. Can you help?",
+        "hint": "ask help"
+      },
+      {
+        "role": "B",
+        "content": "Of course. What's the problem?",
+        "hint": "Of course. What's the problem?"
+      },
+      {
+        "role": "A",
+        "content": "The numbers don't match. I've checked twice.",
+        "hint": "explain"
+      },
+      {
+        "role": "B",
+        "content": "Let me see. Maybe the source file was updated.",
+        "hint": "suggest"
+      },
+      {
+        "role": "A",
+        "content": "I'll check. Thanks for the tip.",
+        "hint": "I'll check. Thanks for the tip."
+      },
+      {
+        "role": "B",
+        "content": "No problem. Come back if you're still stuck.",
+        "hint": "no problem / offer"
+      },
+      {
+        "role": "A",
+        "content": "I will. Thanks.",
+        "hint": "I will. Thanks."
+      },
+      {
+        "role": "B",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I'm stuck on...Can you help? / What's the problem?",
+    "core_chunks": "the numbers don't match / come back if",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "办公室",
+    "npc_name": "下属"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "office",
+    "npc": "subordinate",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GZ-OFFICE-SUB-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "I need to leave early today. Is that okay?",
+        "hint": "request"
+      },
+      {
+        "role": "B",
+        "content": "What time? We have the call at 4.",
+        "hint": "What time? We have the call at 4."
+      },
+      {
+        "role": "A",
+        "content": "I can stay for the call. I'll leave right after.",
+        "hint": "I can stay for the call. I'll leave right after."
+      },
+      {
+        "role": "B",
+        "content": "That's fine. Just send me the minutes.",
+        "hint": "approve / ask"
+      },
+      {
+        "role": "A",
+        "content": "I will. Thanks for understanding.",
+        "hint": "I will. Thanks for understanding."
+      },
+      {
+        "role": "B",
+        "content": "No problem. See you tomorrow.",
+        "hint": "no problem"
+      },
+      {
+        "role": "A",
+        "content": "See you.",
+        "hint": "see you"
+      }
+    ],
+    "core_sentences": "I need to leave early / Is that okay?",
+    "core_chunks": "stay for the call / send me the minutes",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "办公室",
+    "npc_name": "下属"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "interview",
+    "npc": "interviewer",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GZ-INTERVIEW-INTER-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Good morning. Please have a seat. Tell me about yourself.",
+        "hint": "greeting / ask"
+      },
+      {
+        "role": "B",
+        "content": "I'm a recent graduate. I studied marketing. I've done two internships.",
+        "hint": "I'm a recent graduate. I studied marketing. I've done two internships."
+      },
+      {
+        "role": "A",
+        "content": "Why do you want to work here?",
+        "hint": "why"
+      },
+      {
+        "role": "B",
+        "content": "I like your products and company culture. I want to grow with the team.",
+        "hint": "I like your products and company culture. I want to grow with the team."
+      },
+      {
+        "role": "A",
+        "content": "What's your biggest strength?",
+        "hint": "What's your biggest strength?"
+      },
+      {
+        "role": "B",
+        "content": "I'm a quick learner and I work well with others.",
+        "hint": "I'm a quick learner and I work well with others."
+      },
+      {
+        "role": "A",
+        "content": "When can you start?",
+        "hint": "When can you start?"
+      },
+      {
+        "role": "B",
+        "content": "I can start next month. I need to give two weeks' notice.",
+        "hint": "I can start next month. I need to give two weeks' notice."
+      },
+      {
+        "role": "A",
+        "content": "We'll be in touch. Thank you for coming.",
+        "hint": "close"
+      },
+      {
+        "role": "B",
+        "content": "Thank you for your time.",
+        "hint": "Thank you for your time."
+      }
+    ],
+    "core_sentences": "Tell me about yourself / Why do you want to work here? / When can you start?",
+    "core_chunks": "company culture / quick learner / give notice",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "面试",
+    "npc_name": "面试官"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "interview",
+    "npc": "interviewer",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GZ-INTERVIEW-INTER-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. Thanks for coming. How did you hear about us?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Through your website. I've been following your company for a while.",
+        "hint": "Through your website. I've been following your company for a while."
+      },
+      {
+        "role": "A",
+        "content": "Describe a challenge you faced at work.",
+        "hint": "Describe a challenge you faced at work."
+      },
+      {
+        "role": "B",
+        "content": "We had a tight deadline. I organized the team and we delivered on time.",
+        "hint": "We had a tight deadline. I organized the team and we delivered on time."
+      },
+      {
+        "role": "A",
+        "content": "Where do you see yourself in five years?",
+        "hint": "Where do you see yourself in five years?"
+      },
+      {
+        "role": "B",
+        "content": "I hope to be a team lead and contribute to bigger projects.",
+        "hint": "I hope to be a team lead and contribute to bigger projects."
+      },
+      {
+        "role": "A",
+        "content": "Do you have any questions for us?",
+        "hint": "Do you have any questions for us?"
+      },
+      {
+        "role": "B",
+        "content": "Yes. What does a typical day look like in this role?",
+        "hint": "Yes. What does a typical day look like in this role?"
+      },
+      {
+        "role": "A",
+        "content": "Good question. I'll explain. We'll call you next week.",
+        "hint": "answer / close"
+      },
+      {
+        "role": "B",
+        "content": "Thank you. I look forward to hearing from you.",
+        "hint": "Thank you. I look forward to hearing from you."
+      }
+    ],
+    "core_sentences": "Describe a challenge.../ Where do you see yourself...? / Do you have any questions?",
+    "core_chunks": "tight deadline / typical day",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "面试",
+    "npc_name": "面试官"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "interview",
+    "npc": "interviewer",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GZ-INTERVIEW-INTER-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Sit down, please. Your résumé says you speak English. How fluent?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "I can handle meetings and emails. I've used it in my last job.",
+        "hint": "I can handle meetings and emails. I've used it in my last job."
+      },
+      {
+        "role": "A",
+        "content": "What salary are you expecting?",
+        "hint": "What salary are you expecting?"
+      },
+      {
+        "role": "B",
+        "content": "I'm open. Based on the role and the market.",
+        "hint": "I'm open. Based on the role and the market."
+      },
+      {
+        "role": "A",
+        "content": "We offer benefits and annual leave. Anything else to add?",
+        "hint": "we offer / ask"
+      },
+      {
+        "role": "B",
+        "content": "No. I'm excited about this opportunity. Thank you.",
+        "hint": "No. I'm excited about this opportunity. Thank you."
+      },
+      {
+        "role": "A",
+        "content": "Thanks for your time. We'll get back to you soon.",
+        "hint": "close"
+      },
+      {
+        "role": "B",
+        "content": "Thank you. Goodbye.",
+        "hint": "Thank you. Goodbye."
+      }
+    ],
+    "core_sentences": "How fluent? / What salary are you expecting?",
+    "core_chunks": "I'm open / get back to you",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "面试",
+    "npc_name": "面试官"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "meeting",
+    "npc": "client",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GZ-MEETING-CLIENT-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Welcome. Thanks for coming. Can I get you some water or tea?",
+        "hint": "welcome / offer"
+      },
+      {
+        "role": "B",
+        "content": "Tea, please. Green tea if you have it.",
+        "hint": "Tea, please. Green tea if you have it."
+      },
+      {
+        "role": "A",
+        "content": "Sure. Let's start. You've seen the proposal?",
+        "hint": "sure / start"
+      },
+      {
+        "role": "B",
+        "content": "Yes. We have a few questions about the timeline.",
+        "hint": "Yes. We have a few questions about the timeline."
+      },
+      {
+        "role": "A",
+        "content": "Go ahead. We're flexible on the first phase.",
+        "hint": "go ahead / flexible"
+      },
+      {
+        "role": "B",
+        "content": "Good. And what about the budget?",
+        "hint": "Good. And what about the budget?"
+      },
+      {
+        "role": "A",
+        "content": "We can send a detailed breakdown by Friday.",
+        "hint": "offer"
+      },
+      {
+        "role": "B",
+        "content": "That would be great. Thank you.",
+        "hint": "That would be great. Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome. Let's keep in touch.",
+        "hint": "close"
+      }
+    ],
+    "core_sentences": "Can I get you...? / We have a few questions about...",
+    "core_chunks": "proposal / timeline / breakdown",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "会议 / 接待",
+    "npc_name": "客户"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "meeting",
+    "npc": "client",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GZ-MEETING-CLIENT-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. Good to see you again. How was the trip?",
+        "hint": "greeting"
+      },
+      {
+        "role": "B",
+        "content": "Smooth. Thanks for asking. Shall we get started?",
+        "hint": "Smooth. Thanks for asking. Shall we get started?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Here's the agenda. We'll go through the points.",
+        "hint": "yes / agenda"
+      },
+      {
+        "role": "B",
+        "content": "We'd like to discuss the contract terms first.",
+        "hint": "We'd like to discuss the contract terms first."
+      },
+      {
+        "role": "A",
+        "content": "Of course. Page 3. What would you like to change?",
+        "hint": "of course / ask"
+      },
+      {
+        "role": "B",
+        "content": "The payment schedule. We prefer 30 days instead of 14.",
+        "hint": "prefer / change"
+      },
+      {
+        "role": "A",
+        "content": "I'll check with our team and get back to you.",
+        "hint": "check / get back"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. We can sign once that's agreed.",
+        "hint": "Thanks. We can sign once that's agreed."
+      },
+      {
+        "role": "A",
+        "content": "Perfect. We'll email you by tomorrow.",
+        "hint": "perfect / when"
+      }
+    ],
+    "core_sentences": "Shall we get started? / We'd like to discuss...",
+    "core_chunks": "contract terms / payment schedule",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "会议 / 接待",
+    "npc_name": "客户"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "meeting",
+    "npc": "client",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GZ-MEETING-CLIENT-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Thank you for the presentation. We're interested.",
+        "hint": "thank / interest"
+      },
+      {
+        "role": "B",
+        "content": "Great. What's the next step?",
+        "hint": "Great. What's the next step?"
+      },
+      {
+        "role": "A",
+        "content": "We need to talk to our boss. We'll have an answer by next week.",
+        "hint": "need / timeline"
+      },
+      {
+        "role": "B",
+        "content": "Can we send a follow-up proposal with more details?",
+        "hint": "Can we send a follow-up proposal with more details?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Please do. The more info, the better.",
+        "hint": "yes / encourage"
+      },
+      {
+        "role": "B",
+        "content": "We'll send it today. Thank you for your time.",
+        "hint": "We'll send it today. Thank you for your time."
+      },
+      {
+        "role": "A",
+        "content": "Thank you. We'll be in touch.",
+        "hint": "thank / close"
+      },
+      {
+        "role": "B",
+        "content": "Looking forward to it. Goodbye.",
+        "hint": "Looking forward to it. Goodbye."
+      }
+    ],
+    "core_sentences": "What's the next step? / Can we send a follow-up...?",
+    "core_chunks": "the more info the better / be in touch",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "会议 / 接待",
+    "npc_name": "客户"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "meeting",
+    "npc": "partner",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GZ-MEETING-PARTNER-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Good to meet you. We've heard a lot about your company.",
+        "hint": "greeting"
+      },
+      {
+        "role": "B",
+        "content": "Likewise. We're excited about this partnership.",
+        "hint": "Likewise. We're excited about this partnership."
+      },
+      {
+        "role": "A",
+        "content": "So are we. Let's talk about how we can work together.",
+        "hint": "agree / propose"
+      },
+      {
+        "role": "B",
+        "content": "We have ideas for a joint project. Can we share the deck?",
+        "hint": "We have ideas for a joint project. Can we share the deck?"
+      },
+      {
+        "role": "A",
+        "content": "Please. We have the projector ready.",
+        "hint": "please / ready"
+      },
+      {
+        "role": "B",
+        "content": "Great. Here we go.",
+        "hint": "Great. Here we go."
+      },
+      {
+        "role": "A",
+        "content": "Interesting. We'll need to discuss internally.",
+        "hint": "interest / next"
+      },
+      {
+        "role": "B",
+        "content": "Sure. Take your time. We're here if you have questions.",
+        "hint": "Sure. Take your time. We're here if you have questions."
+      },
+      {
+        "role": "A",
+        "content": "Thanks. Let's schedule a follow-up.",
+        "hint": "thanks / schedule"
+      }
+    ],
+    "core_sentences": "We're excited about.../ Can we share...?",
+    "core_chunks": "joint project / discuss internally",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "会议 / 接待",
+    "npc_name": "合作伙伴"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "meeting",
+    "npc": "partner",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GZ-MEETING-PARTNER-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "The contract looks good. We have one concern.",
+        "hint": "opinion / concern"
+      },
+      {
+        "role": "B",
+        "content": "What's that? We can try to address it.",
+        "hint": "What's that? We can try to address it."
+      },
+      {
+        "role": "A",
+        "content": "The exclusivity clause. We'd like it limited to two years.",
+        "hint": "clause / request"
+      },
+      {
+        "role": "B",
+        "content": "We can do that. I'll have legal draft an addendum.",
+        "hint": "agree / action"
+      },
+      {
+        "role": "A",
+        "content": "Perfect. When can we sign?",
+        "hint": "Perfect. When can we sign?"
+      },
+      {
+        "role": "B",
+        "content": "How about next Monday? We'll send the final version by Friday.",
+        "hint": "suggest / when"
+      },
+      {
+        "role": "A",
+        "content": "That works. Thanks for being flexible.",
+        "hint": "That works. Thanks for being flexible."
+      },
+      {
+        "role": "B",
+        "content": "You're welcome. Looking forward to working with you.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "We have one concern / When can we sign?",
+    "core_chunks": "exclusivity clause / addendum",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "会议 / 接待",
+    "npc_name": "合作伙伴"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "meeting",
+    "npc": "partner",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GZ-MEETING-PARTNER-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Thanks for the collaboration so far. It's going well.",
+        "hint": "thank / progress"
+      },
+      {
+        "role": "B",
+        "content": "We think so too. The team gets along well.",
+        "hint": "We think so too. The team gets along well."
+      },
+      {
+        "role": "A",
+        "content": "We'd like to expand. Maybe another project next quarter.",
+        "hint": "expand / suggest"
+      },
+      {
+        "role": "B",
+        "content": "We're open to that. Let's set up a call to brainstorm.",
+        "hint": "We're open to that. Let's set up a call to brainstorm."
+      },
+      {
+        "role": "A",
+        "content": "Good idea. I'll send a calendar invite.",
+        "hint": "good idea / action"
+      },
+      {
+        "role": "B",
+        "content": "Great. Talk soon.",
+        "hint": "Great. Talk soon."
+      },
+      {
+        "role": "A",
+        "content": "Bye.",
+        "hint": "bye"
+      }
+    ],
+    "core_sentences": "It's going well / We'd like to expand",
+    "core_chunks": "next quarter / set up a call",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "会议 / 接待",
+    "npc_name": "合作伙伴"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "phone",
+    "npc": "customer_service",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GZ-PHONE-SERVICE-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hello. Thank you for calling. How can I help you?",
+        "hint": "greeting"
+      },
+      {
+        "role": "B",
+        "content": "Hi. I have a problem with my order. It hasn't arrived.",
+        "hint": "Hi. I have a problem with my order. It hasn't arrived."
+      },
+      {
+        "role": "A",
+        "content": "I'm sorry to hear that. Can I have your order number?",
+        "hint": "sorry / ask"
+      },
+      {
+        "role": "B",
+        "content": "Yes. It's 12345.",
+        "hint": "Yes. It's 12345."
+      },
+      {
+        "role": "A",
+        "content": "One moment. I see it. It was shipped yesterday. You should get it by Friday.",
+        "hint": "check / info"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Can you send me the tracking link?",
+        "hint": "Okay. Can you send me the tracking link?"
+      },
+      {
+        "role": "A",
+        "content": "Sure. I'll email it to you. Is there anything else?",
+        "hint": "sure / offer"
+      },
+      {
+        "role": "B",
+        "content": "No. Thank you.",
+        "hint": "No. Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome. Have a good day.",
+        "hint": "close"
+      }
+    ],
+    "core_sentences": "I have a problem with.../ Can I have your order number?",
+    "core_chunks": "I'm sorry to hear that / tracking link",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "电话沟通",
+    "npc_name": "客服"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "phone",
+    "npc": "customer_service",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GZ-PHONE-SERVICE-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Good afternoon. Customer service. How may I assist you?",
+        "hint": "greeting"
+      },
+      {
+        "role": "B",
+        "content": "I'd like to cancel my subscription.",
+        "hint": "I'd like to cancel my subscription."
+      },
+      {
+        "role": "A",
+        "content": "I can help with that. May I ask why?",
+        "hint": "help / ask why"
+      },
+      {
+        "role": "B",
+        "content": "I'm not using it anymore.",
+        "hint": "I'm not using it anymore."
+      },
+      {
+        "role": "A",
+        "content": "Understood. I'll process the cancellation. It will take effect at the end of the month.",
+        "hint": "process / when"
+      },
+      {
+        "role": "B",
+        "content": "That's fine. Will I get a refund?",
+        "hint": "That's fine. Will I get a refund?"
+      },
+      {
+        "role": "A",
+        "content": "Yes. Within 5 to 7 business days. Anything else?",
+        "hint": "yes / time / offer"
+      },
+      {
+        "role": "B",
+        "content": "No. Thanks.",
+        "hint": "No. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "Thank you for calling. Goodbye.",
+        "hint": "close"
+      }
+    ],
+    "core_sentences": "I'd like to cancel.../ May I ask why?",
+    "core_chunks": "take effect / business days",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "电话沟通",
+    "npc_name": "客服"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "phone",
+    "npc": "customer_service",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GZ-PHONE-SERVICE-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hello. You're through to support. What's the issue?",
+        "hint": "greeting"
+      },
+      {
+        "role": "B",
+        "content": "My password doesn't work. I need to reset it.",
+        "hint": "My password doesn't work. I need to reset it."
+      },
+      {
+        "role": "A",
+        "content": "I'll send you a reset link. What's your email?",
+        "hint": "action / ask"
+      },
+      {
+        "role": "B",
+        "content": "wang@email.com.",
+        "hint": "wang@email.com."
+      },
+      {
+        "role": "A",
+        "content": "Done. Check your inbox. The link is valid for one hour.",
+        "hint": "done / remind"
+      },
+      {
+        "role": "B",
+        "content": "Got it. Thank you.",
+        "hint": "Got it. Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome. Call back if you need more help.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I need to reset it / What's your email?",
+    "core_chunks": "reset link / valid for one hour",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "电话沟通",
+    "npc_name": "客服"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "phone",
+    "npc": "operator",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "GZ-PHONE-OPERATOR-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hello. ABC Company. How can I direct your call?",
+        "hint": "greeting"
+      },
+      {
+        "role": "B",
+        "content": "I'd like to speak to Mr. Zhang in Sales.",
+        "hint": "I'd like to speak to Mr. Zhang in Sales."
+      },
+      {
+        "role": "A",
+        "content": "One moment. I'll put you through.",
+        "hint": "one moment / put through"
+      },
+      {
+        "role": "B",
+        "content": "Thank you.",
+        "hint": "Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome. Please hold.",
+        "hint": "hold"
+      }
+    ],
+    "core_sentences": "How can I direct your call? / I'd like to speak to...",
+    "core_chunks": "put you through / please hold",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "电话沟通",
+    "npc_name": "接线员"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "phone",
+    "npc": "operator",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "GZ-PHONE-OPERATOR-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Good morning. Dr. Li's office. Can I help you?",
+        "hint": "greeting"
+      },
+      {
+        "role": "B",
+        "content": "I need to make an appointment for next week.",
+        "hint": "I need to make an appointment for next week."
+      },
+      {
+        "role": "A",
+        "content": "We have Tuesday at 10 or Thursday at 3. Which do you prefer?",
+        "hint": "options"
+      },
+      {
+        "role": "B",
+        "content": "Thursday at 3, please.",
+        "hint": "Thursday at 3, please."
+      },
+      {
+        "role": "A",
+        "content": "Done. Your name and phone number?",
+        "hint": "done / ask"
+      },
+      {
+        "role": "B",
+        "content": "Wang. 138-0000-0000.",
+        "hint": "Wang. 138-0000-0000."
+      },
+      {
+        "role": "A",
+        "content": "You're booked. We'll send a reminder. Goodbye.",
+        "hint": "confirm / goodbye"
+      },
+      {
+        "role": "B",
+        "content": "Thank you. Goodbye.",
+        "hint": "Thank you. Goodbye."
+      }
+    ],
+    "core_sentences": "I need to make an appointment / Which do you prefer?",
+    "core_chunks": "you're booked / send a reminder",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "电话沟通",
+    "npc_name": "接线员"
+  },
+  {
+    "big_scene": "work",
+    "small_scene": "phone",
+    "npc": "operator",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "GZ-PHONE-OPERATOR-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hello. He's in a meeting. Can I take a message?",
+        "hint": "busy / offer"
+      },
+      {
+        "role": "B",
+        "content": "Yes. Please tell him Wang called about the contract.",
+        "hint": "Yes. Please tell him Wang called about the contract."
+      },
+      {
+        "role": "A",
+        "content": "Wang, contract. Does he have your number?",
+        "hint": "repeat / ask"
+      },
+      {
+        "role": "B",
+        "content": "Yes. He has it. Thanks.",
+        "hint": "Yes. He has it. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "I'll pass it on. Goodbye.",
+        "hint": "confirm / goodbye"
+      },
+      {
+        "role": "B",
+        "content": "Goodbye.",
+        "hint": "Goodbye."
+      }
+    ],
+    "core_sentences": "Can I take a message? / Please tell him...called about...",
+    "core_chunks": "pass it on",
+    "big_scene_name": "工作职场",
+    "small_scene_name": "电话沟通",
+    "npc_name": "接线员"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "party",
+    "npc": "friend",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "SJ-PARTY-FRIEND-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hey! Long time no see. How have you been?",
+        "hint": "greeting"
+      },
+      {
+        "role": "B",
+        "content": "I've been good. Busy with work. How about you?",
+        "hint": "I've been good. Busy with work. How about you?"
+      },
+      {
+        "role": "A",
+        "content": "Same. We should hang out more. Are you free this weekend?",
+        "hint": "same / suggest"
+      },
+      {
+        "role": "B",
+        "content": "Yes. What do you have in mind?",
+        "hint": "Yes. What do you have in mind?"
+      },
+      {
+        "role": "A",
+        "content": "Maybe dinner? Or we could see a movie.",
+        "hint": "options"
+      },
+      {
+        "role": "B",
+        "content": "Dinner sounds great. Where?",
+        "hint": "Dinner sounds great. Where?"
+      },
+      {
+        "role": "A",
+        "content": "That new place on Main Street? I'll book a table.",
+        "hint": "suggest / action"
+      },
+      {
+        "role": "B",
+        "content": "Perfect. Text me the time.",
+        "hint": "Perfect. Text me the time."
+      },
+      {
+        "role": "A",
+        "content": "Will do. See you then.",
+        "hint": "will do"
+      }
+    ],
+    "core_sentences": "Long time no see / How have you been? / What do you have in mind?",
+    "core_chunks": "hang out / sounds great",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "朋友聚会",
+    "npc_name": "朋友"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "party",
+    "npc": "friend",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "SJ-PARTY-FRIEND-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Cheers! Happy birthday!",
+        "hint": "toast"
+      },
+      {
+        "role": "B",
+        "content": "Thank you! I'm so glad you could come.",
+        "hint": "Thank you! I'm so glad you could come."
+      },
+      {
+        "role": "A",
+        "content": "Wouldn't miss it. The cake looks amazing.",
+        "hint": "wouldn't miss / compliment"
+      },
+      {
+        "role": "B",
+        "content": "My mom made it. Do you want a piece?",
+        "hint": "My mom made it. Do you want a piece?"
+      },
+      {
+        "role": "A",
+        "content": "Yes, please. And another drink?",
+        "hint": "yes / offer"
+      },
+      {
+        "role": "B",
+        "content": "I'm good. Maybe later. Let's take a photo.",
+        "hint": "I'm good. Maybe later. Let's take a photo."
+      },
+      {
+        "role": "A",
+        "content": "Good idea. Everyone, gather round!",
+        "hint": "good idea / gather"
+      },
+      {
+        "role": "B",
+        "content": "Say cheese!",
+        "hint": "Say cheese!"
+      },
+      {
+        "role": "A",
+        "content": "Cheese! Nice one.",
+        "hint": "cheese / nice"
+      }
+    ],
+    "core_sentences": "I'm so glad you could come / Do you want a piece?",
+    "core_chunks": "wouldn't miss it / gather round",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "朋友聚会",
+    "npc_name": "朋友"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "party",
+    "npc": "friend",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "SJ-PARTY-FRIEND-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "So what's new? Any plans for the holiday?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "I'm thinking of traveling. Maybe Japan.",
+        "hint": "I'm thinking of traveling. Maybe Japan."
+      },
+      {
+        "role": "A",
+        "content": "Nice! I went last year. You'll love it. Need any tips?",
+        "hint": "nice / offer"
+      },
+      {
+        "role": "B",
+        "content": "Yes! Where did you stay?",
+        "hint": "Yes! Where did you stay?"
+      },
+      {
+        "role": "A",
+        "content": "In Tokyo. I can send you the hotel link. It was cheap and clean.",
+        "hint": "answer / offer"
+      },
+      {
+        "role": "B",
+        "content": "That would be great. Thanks.",
+        "hint": "That would be great. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "No problem. Let me know when you book.",
+        "hint": "no problem"
+      },
+      {
+        "role": "B",
+        "content": "I will. Thanks again.",
+        "hint": "I will. Thanks again."
+      }
+    ],
+    "core_sentences": "What's new? / Any plans for...? / Need any tips?",
+    "core_chunks": "I'm thinking of / send you the link",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "朋友聚会",
+    "npc_name": "朋友"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "party",
+    "npc": "classmate",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "SJ-PARTY-CLASSMATE-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi! You're in my English class, right?",
+        "hint": "recognize"
+      },
+      {
+        "role": "B",
+        "content": "Yes. I sit in the back. Nice to meet you properly.",
+        "hint": "Yes. I sit in the back. Nice to meet you properly."
+      },
+      {
+        "role": "A",
+        "content": "Same. Did you do the homework? The essay was hard.",
+        "hint": "same / homework"
+      },
+      {
+        "role": "B",
+        "content": "I did. I'm not sure if it's good. Want to compare?",
+        "hint": "I did. I'm not sure if it's good. Want to compare?"
+      },
+      {
+        "role": "A",
+        "content": "Sure. Let's meet before class. In the library?",
+        "hint": "sure / suggest"
+      },
+      {
+        "role": "B",
+        "content": "Okay. 9 a.m.?",
+        "hint": "Okay. 9 a.m.?"
+      },
+      {
+        "role": "A",
+        "content": "Perfect. See you then.",
+        "hint": "perfect"
+      },
+      {
+        "role": "B",
+        "content": "See you.",
+        "hint": "See you."
+      }
+    ],
+    "core_sentences": "You're in my...class, right? / Want to compare?",
+    "core_chunks": "nice to meet you properly / before class",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "朋友聚会",
+    "npc_name": "同学"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "party",
+    "npc": "classmate",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "SJ-PARTY-CLASSMATE-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "The exam is next week. Are you nervous?",
+        "hint": "topic / ask"
+      },
+      {
+        "role": "B",
+        "content": "A bit. I've been reviewing. How about you?",
+        "hint": "A bit. I've been reviewing. How about you?"
+      },
+      {
+        "role": "A",
+        "content": "Same. We could study together. I have notes.",
+        "hint": "same / offer"
+      },
+      {
+        "role": "B",
+        "content": "That would help. When are you free?",
+        "hint": "That would help. When are you free?"
+      },
+      {
+        "role": "A",
+        "content": "Tomorrow afternoon? Coffee shop?",
+        "hint": "suggest"
+      },
+      {
+        "role": "B",
+        "content": "Sounds good. 2 p.m.?",
+        "hint": "Sounds good. 2 p.m.?"
+      },
+      {
+        "role": "A",
+        "content": "Done. I'll bring the notes.",
+        "hint": "done"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. See you.",
+        "hint": "Thanks. See you."
+      }
+    ],
+    "core_sentences": "Are you nervous? / We could study together",
+    "core_chunks": "I've been reviewing / coffee shop",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "朋友聚会",
+    "npc_name": "同学"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "party",
+    "npc": "classmate",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "SJ-PARTY-CLASSMATE-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Are you going to the graduation party?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Yes. Are you? I heard it's at the Riverside Hotel.",
+        "hint": "Yes. Are you? I heard it's at the Riverside Hotel."
+      },
+      {
+        "role": "A",
+        "content": "Yeah. This Saturday. I'm going with a few classmates.",
+        "hint": "yes / with whom"
+      },
+      {
+        "role": "B",
+        "content": "Maybe we can go together. Share a ride?",
+        "hint": "Maybe we can go together. Share a ride?"
+      },
+      {
+        "role": "A",
+        "content": "Good idea. I'll drive. Pick you up at 6?",
+        "hint": "good idea / offer"
+      },
+      {
+        "role": "B",
+        "content": "Perfect. Text me your address. Thanks!",
+        "hint": "Perfect. Text me your address. Thanks!"
+      },
+      {
+        "role": "A",
+        "content": "No problem. See you Saturday.",
+        "hint": "no problem"
+      },
+      {
+        "role": "B",
+        "content": "See you. Bye.",
+        "hint": "See you. Bye."
+      }
+    ],
+    "core_sentences": "Are you going to...? / Maybe we can go together",
+    "core_chunks": "share a ride / pick you up",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "朋友聚会",
+    "npc_name": "同学"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "chat",
+    "npc": "stranger",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "SJ-CHAT-STRANGER-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Nice weather today, isn't it?",
+        "hint": "small talk"
+      },
+      {
+        "role": "B",
+        "content": "Yes, it is. Finally stopped raining.",
+        "hint": "Yes, it is. Finally stopped raining."
+      },
+      {
+        "role": "A",
+        "content": "Are you from around here?",
+        "hint": "Are you from around here?"
+      },
+      {
+        "role": "B",
+        "content": "No. I'm just visiting. I'm here for work.",
+        "hint": "No. I'm just visiting. I'm here for work."
+      },
+      {
+        "role": "A",
+        "content": "How long are you staying?",
+        "hint": "How long are you staying?"
+      },
+      {
+        "role": "B",
+        "content": "A week. So far so good.",
+        "hint": "A week. So far so good."
+      },
+      {
+        "role": "A",
+        "content": "Well, enjoy your stay. Bye.",
+        "hint": "well / bye"
+      },
+      {
+        "role": "B",
+        "content": "Thanks. Bye.",
+        "hint": "Thanks. Bye."
+      }
+    ],
+    "core_sentences": "Nice weather today, isn't it? / Are you from around here?",
+    "core_chunks": "just visiting / so far so good",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "打招呼 / 闲聊",
+    "npc_name": "陌生人"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "chat",
+    "npc": "stranger",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "SJ-CHAT-STRANGER-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "Excuse me. Is this seat taken?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "No. Go ahead. Sit down.",
+        "hint": "No. Go ahead. Sit down."
+      },
+      {
+        "role": "A",
+        "content": "Thanks. Busy day?",
+        "hint": "thanks / small talk"
+      },
+      {
+        "role": "B",
+        "content": "Yeah. Lots of meetings. You?",
+        "hint": "Yeah. Lots of meetings. You?"
+      },
+      {
+        "role": "A",
+        "content": "Same. I'm waiting for my train. Another hour.",
+        "hint": "same / situation"
+      },
+      {
+        "role": "B",
+        "content": "Time to relax then. I like people-watching here.",
+        "hint": "relax / hobby"
+      },
+      {
+        "role": "A",
+        "content": "Me too. Well, have a good trip.",
+        "hint": "me too / wish"
+      },
+      {
+        "role": "B",
+        "content": "You too. Bye.",
+        "hint": "You too. Bye."
+      }
+    ],
+    "core_sentences": "Is this seat taken? / Busy day?",
+    "core_chunks": "go ahead / people-watching",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "打招呼 / 闲聊",
+    "npc_name": "陌生人"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "chat",
+    "npc": "stranger",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "SJ-CHAT-STRANGER-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Hi. Do you mind if I sit here?",
+        "hint": "ask"
+      },
+      {
+        "role": "B",
+        "content": "Not at all. Please.",
+        "hint": "Not at all. Please."
+      },
+      {
+        "role": "A",
+        "content": "Thanks. That's a nice bag. Where did you get it?",
+        "hint": "thanks / compliment / ask"
+      },
+      {
+        "role": "B",
+        "content": "Online. It was on sale.",
+        "hint": "Online. It was on sale."
+      },
+      {
+        "role": "A",
+        "content": "I might look for one. Anyway, have a good day.",
+        "hint": "might / close"
+      },
+      {
+        "role": "B",
+        "content": "You too. Bye.",
+        "hint": "You too. Bye."
+      }
+    ],
+    "core_sentences": "Do you mind if I sit here? / Where did you get it?",
+    "core_chunks": "not at all / on sale",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "打招呼 / 闲聊",
+    "npc_name": "陌生人"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "hobby",
+    "npc": "playmate",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "SJ-HOBBY-PLAYMATE-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "Do you play basketball? We need one more for a game.",
+        "hint": "ask / invite"
+      },
+      {
+        "role": "B",
+        "content": "I do. When and where?",
+        "hint": "I do. When and where?"
+      },
+      {
+        "role": "A",
+        "content": "Saturday morning. The court near the park. 9 o'clock.",
+        "hint": "when / where"
+      },
+      {
+        "role": "B",
+        "content": "I'll be there. Should I bring a ball?",
+        "hint": "I'll be there. Should I bring a ball?"
+      },
+      {
+        "role": "A",
+        "content": "We have one. Just bring yourself and some water.",
+        "hint": "we have / just bring"
+      },
+      {
+        "role": "B",
+        "content": "Perfect. See you Saturday.",
+        "hint": "Perfect. See you Saturday."
+      },
+      {
+        "role": "A",
+        "content": "See you. It'll be fun.",
+        "hint": "see you"
+      }
+    ],
+    "core_sentences": "Do you play...? / We need one more / When and where?",
+    "core_chunks": "I'll be there / bring yourself",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "兴趣爱好",
+    "npc_name": "玩伴"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "hobby",
+    "npc": "playmate",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "SJ-HOBBY-PLAYMATE-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "You like hiking too? We're going to the mountain this weekend.",
+        "hint": "share / invite"
+      },
+      {
+        "role": "B",
+        "content": "I love hiking. Is it a long trail?",
+        "hint": "I love hiking. Is it a long trail?"
+      },
+      {
+        "role": "A",
+        "content": "About four hours round trip. We start early to avoid the heat.",
+        "hint": "time / plan"
+      },
+      {
+        "role": "B",
+        "content": "What should I bring?",
+        "hint": "What should I bring?"
+      },
+      {
+        "role": "A",
+        "content": "Water, snacks, and good shoes. Sunscreen too.",
+        "hint": "list"
+      },
+      {
+        "role": "B",
+        "content": "Got it. Count me in. Thanks.",
+        "hint": "Got it. Count me in. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "Great. I'll send you the details.",
+        "hint": "great"
+      }
+    ],
+    "core_sentences": "You like...too? / What should I bring?",
+    "core_chunks": "round trip / count me in",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "兴趣爱好",
+    "npc_name": "玩伴"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "hobby",
+    "npc": "playmate",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "SJ-HOBBY-PLAYMATE-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "Want to join our board game night? We play every Friday.",
+        "hint": "invite"
+      },
+      {
+        "role": "B",
+        "content": "Sounds fun. I'm not very good though.",
+        "hint": "Sounds fun. I'm not very good though."
+      },
+      {
+        "role": "A",
+        "content": "No worries. We're all learning. It's casual.",
+        "hint": "no worries / casual"
+      },
+      {
+        "role": "B",
+        "content": "Okay. Where do you meet?",
+        "hint": "Okay. Where do you meet?"
+      },
+      {
+        "role": "A",
+        "content": "At my place. I'll send you the address.",
+        "hint": "place / send"
+      },
+      {
+        "role": "B",
+        "content": "Great. What time?",
+        "hint": "Great. What time?"
+      },
+      {
+        "role": "A",
+        "content": "7 p.m. Bring a snack if you want. See you.",
+        "hint": "time / bring / see you"
+      },
+      {
+        "role": "B",
+        "content": "See you. Thanks.",
+        "hint": "See you. Thanks."
+      }
+    ],
+    "core_sentences": "Want to join...? / Where do you meet?",
+    "core_chunks": "no worries / board game night",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "兴趣爱好",
+    "npc_name": "玩伴"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "hobby",
+    "npc": "hobbyist",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "SJ-HOBBY-HOBBYIST-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "That's a great camera. Do you do photography?",
+        "hint": "compliment / ask"
+      },
+      {
+        "role": "B",
+        "content": "Yes. Just as a hobby. Do you?",
+        "hint": "Yes. Just as a hobby. Do you?"
+      },
+      {
+        "role": "A",
+        "content": "Me too. I mostly do street photography. You?",
+        "hint": "me too / ask"
+      },
+      {
+        "role": "B",
+        "content": "Landscapes. I went to the mountains last month. Got some good shots.",
+        "hint": "Landscapes. I went to the mountains last month. Got some good shots."
+      },
+      {
+        "role": "A",
+        "content": "Nice. We have a photo group. We meet once a month. Want to join?",
+        "hint": "nice / invite"
+      },
+      {
+        "role": "B",
+        "content": "I'd love to. How do I join?",
+        "hint": "I'd love to. How do I join?"
+      },
+      {
+        "role": "A",
+        "content": "I'll add you on WeChat. We post the events there.",
+        "hint": "add / explain"
+      },
+      {
+        "role": "B",
+        "content": "Perfect. Thanks.",
+        "hint": "Perfect. Thanks."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome. See you at the next meetup.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "Do you do photography? / Want to join?",
+    "core_chunks": "just as a hobby / street photography",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "兴趣爱好",
+    "npc_name": "同好"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "hobby",
+    "npc": "hobbyist",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "SJ-HOBBY-HOBBYIST-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "You're reading the new bestseller? How is it?",
+        "hint": "notice / ask"
+      },
+      {
+        "role": "B",
+        "content": "Really good. I'm almost done. Have you read it?",
+        "hint": "Really good. I'm almost done. Have you read it?"
+      },
+      {
+        "role": "A",
+        "content": "Not yet. Is it worth buying?",
+        "hint": "Not yet. Is it worth buying?"
+      },
+      {
+        "role": "B",
+        "content": "Yes. Or borrow from the library. I got my copy there.",
+        "hint": "yes / suggest"
+      },
+      {
+        "role": "A",
+        "content": "I'll check. Thanks for the recommendation.",
+        "hint": "I'll check. Thanks for the recommendation."
+      },
+      {
+        "role": "B",
+        "content": "No problem. Let me know what you think when you're done.",
+        "hint": "no problem"
+      },
+      {
+        "role": "A",
+        "content": "I will. Bye.",
+        "hint": "I will. Bye."
+      }
+    ],
+    "core_sentences": "How is it? / Is it worth buying?",
+    "core_chunks": "bestseller / worth buying",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "兴趣爱好",
+    "npc_name": "同好"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "hobby",
+    "npc": "hobbyist",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "SJ-HOBBY-HOBBYIST-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "That concert was amazing. Are you a fan too?",
+        "hint": "share / ask"
+      },
+      {
+        "role": "B",
+        "content": "Yes! I've been following them for years.",
+        "hint": "Yes! I've been following them for years."
+      },
+      {
+        "role": "A",
+        "content": "Same. Did you get the new album?",
+        "hint": "Same. Did you get the new album?"
+      },
+      {
+        "role": "B",
+        "content": "Yes. I pre-ordered it. It's great.",
+        "hint": "Yes. I pre-ordered it. It's great."
+      },
+      {
+        "role": "A",
+        "content": "I'll get it this weekend. We should go to a show together sometime.",
+        "hint": "plan / suggest"
+      },
+      {
+        "role": "B",
+        "content": "Definitely. Let's stay in touch.",
+        "hint": "Definitely. Let's stay in touch."
+      },
+      {
+        "role": "A",
+        "content": "Sure. Here's my number. Text me.",
+        "hint": "sure / contact"
+      },
+      {
+        "role": "B",
+        "content": "Will do. Nice meeting you.",
+        "hint": "Will do. Nice meeting you."
+      }
+    ],
+    "core_sentences": "Are you a fan too? / Did you get the new album?",
+    "core_chunks": "pre-ordered / stay in touch",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "兴趣爱好",
+    "npc_name": "同好"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "praise",
+    "npc": "companion",
+    "dialogue_set": 1,
+    "usage": "learn",
+    "dialogue_id": "SJ-PRAISE-COMPANION-1",
+    "content": [
+      {
+        "role": "A",
+        "content": "You did a great job on the project. Really impressed.",
+        "hint": "praise"
+      },
+      {
+        "role": "B",
+        "content": "Thank you. That means a lot. The team helped too.",
+        "hint": "Thank you. That means a lot. The team helped too."
+      },
+      {
+        "role": "A",
+        "content": "You're too modest. Your presentation was clear and strong.",
+        "hint": "modest / praise again"
+      },
+      {
+        "role": "B",
+        "content": "I'm glad it went well. Thanks for the feedback.",
+        "hint": "I'm glad it went well. Thanks for the feedback."
+      },
+      {
+        "role": "A",
+        "content": "Keep it up. We need more people like you.",
+        "hint": "encourage"
+      },
+      {
+        "role": "B",
+        "content": "I'll try. Thank you again.",
+        "hint": "I'll try. Thank you again."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "You did a great job / That means a lot / Thanks for the feedback",
+    "core_chunks": "really impressed / keep it up",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "赞美 / 安慰 / 道歉",
+    "npc_name": "通用 NPC（朋友/同事/家人）"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "praise",
+    "npc": "companion",
+    "dialogue_set": 2,
+    "usage": "review",
+    "dialogue_id": "SJ-PRAISE-COMPANION-2",
+    "content": [
+      {
+        "role": "A",
+        "content": "I heard about your loss. I'm so sorry.",
+        "hint": "condolence"
+      },
+      {
+        "role": "B",
+        "content": "Thank you. It's been hard.",
+        "hint": "Thank you. It's been hard."
+      },
+      {
+        "role": "A",
+        "content": "I can't imagine. If you need anything, just say.",
+        "hint": "empathy / offer"
+      },
+      {
+        "role": "B",
+        "content": "That's kind. I'll be okay. Thanks for being here.",
+        "hint": "That's kind. I'll be okay. Thanks for being here."
+      },
+      {
+        "role": "A",
+        "content": "Anytime. Take care of yourself.",
+        "hint": "anytime / take care"
+      },
+      {
+        "role": "B",
+        "content": "I will. Thank you.",
+        "hint": "I will. Thank you."
+      },
+      {
+        "role": "A",
+        "content": "You're welcome.",
+        "hint": "response"
+      }
+    ],
+    "core_sentences": "I'm so sorry / If you need anything, just say",
+    "core_chunks": "I can't imagine / take care of yourself",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "赞美 / 安慰 / 道歉",
+    "npc_name": "通用 NPC（朋友/同事/家人）"
+  },
+  {
+    "big_scene": "social",
+    "small_scene": "praise",
+    "npc": "companion",
+    "dialogue_set": 3,
+    "usage": "immersive",
+    "dialogue_id": "SJ-PRAISE-COMPANION-3",
+    "content": [
+      {
+        "role": "A",
+        "content": "I'm really sorry about yesterday. I was wrong.",
+        "hint": "apologize"
+      },
+      {
+        "role": "B",
+        "content": "It's okay. I know you didn't mean it.",
+        "hint": "It's okay. I know you didn't mean it."
+      },
+      {
+        "role": "A",
+        "content": "Still. I shouldn't have said that. I'll be more careful.",
+        "hint": "still / promise"
+      },
+      {
+        "role": "B",
+        "content": "Thanks for saying that. Let's move on.",
+        "hint": "Thanks for saying that. Let's move on."
+      },
+      {
+        "role": "A",
+        "content": "Thanks for understanding. I appreciate it.",
+        "hint": "thanks"
+      },
+      {
+        "role": "B",
+        "content": "No problem. We're good.",
+        "hint": "No problem. We're good."
+      },
+      {
+        "role": "A",
+        "content": "Good. See you tomorrow.",
+        "hint": "good"
+      }
+    ],
+    "core_sentences": "I'm really sorry about.../ I shouldn't have said that",
+    "core_chunks": "didn't mean it / let's move on",
+    "big_scene_name": "社交人情",
+    "small_scene_name": "赞美 / 安慰 / 道歉",
+    "npc_name": "通用 NPC（朋友/同事/家人）"
   }
 ]

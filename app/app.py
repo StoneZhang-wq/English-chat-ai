@@ -18,7 +18,7 @@ import anthropic
 import re
 import io
 from pydub import AudioSegment
-from .shared import clients, get_current_character
+from .shared import clients, get_current_character, get_learning_stage
 
 # Spark-TTS / torch 按需导入（仅 TTS_PROVIDER=sparktts 时加载，豆包/OpenAI 路径不加载）
 SPARKTTS_AVAILABLE = False
@@ -118,6 +118,7 @@ except ImportError as e:
     print(f"{YELLOW}无法导入豆包客户端模块: {e}{RESET_COLOR}")
 OPENAI_TTS_URL = os.getenv('OPENAI_TTS_URL', 'https://api.openai.com/v1/audio/speech')
 OPENAI_TTS_VOICE = os.getenv('OPENAI_TTS_VOICE', 'alloy')
+OPENAI_TTS_VOICE_B = os.getenv('OPENAI_TTS_VOICE_B', OPENAI_TTS_VOICE)  # 角色 B（用户）人声，未配置则与 A 相同
 OPENAI_MODEL_TTS = os.getenv('OPENAI_MODEL_TTS', 'gpt-4o-mini-tts')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
@@ -395,6 +396,7 @@ elif API_PROVIDER == 'doubao':
 print(f"{NEON_GREEN}Character: {character_display_name}{RESET_COLOR}")
 print(f"To stop chatting say Quit or Exit. One moment please loading...")
 
+
 async def process_and_play(prompt, audio_file_pth):
     # 移除延迟，因为文字消息已经在 process_text 中发送完成
     # Always get the current character name to ensure we have the right audio file
@@ -442,7 +444,13 @@ async def process_and_play(prompt, audio_file_pth):
             }))
     elif API_PROVIDER == 'doubao':
         output_path = os.path.join(output_dir, 'output.wav')
-        success = await doubao_text_to_speech(prompt, output_path)
+        # 中文对话阶段必须用中文专用音色 TTS_VOICE_TYPE_ZH（仅说中文）；英文学习阶段用 TTS_VOICE_TYPE
+        stage = get_learning_stage()
+        if stage == "chinese_chat":
+            doubao_voice = os.getenv("TTS_VOICE_TYPE_ZH", "").strip() or "zh_female_cancan_mars_bigtts"
+        else:
+            doubao_voice = os.getenv("TTS_VOICE_TYPE") or "zh_female_cancan_mars_bigtts"
+        success = await doubao_text_to_speech(prompt, output_path, voice_type=doubao_voice)
         if success and os.path.exists(output_path):
             print("Playing generated audio...")
             await send_message_to_clients(json.dumps({"action": "ai_start_speaking"}))
@@ -500,21 +508,23 @@ def save_pcm_as_wav(pcm_data: bytes, file_path: str, sample_rate: int = 24000, c
         wav_file.setframerate(sample_rate)
         wav_file.writeframes(pcm_data)
 
-async def openai_text_to_speech(prompt, output_path):
+async def openai_text_to_speech(prompt, output_path, voice=None):
+    """voice: 可选，不传则用 OPENAI_TTS_VOICE。用于对话卡片 A/NPC 与 B/用户 不同人声。"""
+    voice = voice or OPENAI_TTS_VOICE
     file_extension = Path(output_path).suffix.lstrip('.').lower()
 
     voice_speed = float(os.getenv("VOICE_SPEED", "1.0"))
 
     async with aiohttp.ClientSession() as session:
         if file_extension == 'wav':
-            pcm_data = await fetch_pcm_audio(OPENAI_MODEL_TTS, OPENAI_TTS_VOICE, prompt, OPENAI_TTS_URL, session)
+            pcm_data = await fetch_pcm_audio(OPENAI_MODEL_TTS, voice, prompt, OPENAI_TTS_URL, session)
             save_pcm_as_wav(pcm_data, output_path)
         else:
             try:
                 async with session.post(
                     url=OPENAI_TTS_URL,
                     headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
-                    json={"model": OPENAI_MODEL_TTS, "voice": OPENAI_TTS_VOICE, "input": prompt, "response_format": file_extension, "speed": voice_speed},
+                    json={"model": OPENAI_MODEL_TTS, "voice": voice, "input": prompt, "response_format": file_extension, "speed": voice_speed},
                     timeout=30
                 ) as response:
                     response.raise_for_status()
@@ -1418,8 +1428,8 @@ async def kokoro_text_to_speech(text, output_path):
         }))
         return False
 
-async def doubao_text_to_speech(text, output_path):
-    """Convert text to speech using Doubao TTS API."""
+async def doubao_text_to_speech(text, output_path, voice_type=None):
+    """Convert text to speech using Doubao TTS API. voice_type: 可选，用于对话卡片 A/NPC 与 B/用户 不同人声。"""
     global doubao_tts_client
     
     if doubao_tts_client is None:
@@ -1431,10 +1441,11 @@ async def doubao_text_to_speech(text, output_path):
         return False
     
     try:
-        # 调用豆包TTS API
+        # 调用豆包TTS API（可传入 voice_type 区分 A/B 人声）
         audio_data = await asyncio.to_thread(
             doubao_tts_client.synthesize,
-            text
+            text,
+            voice_type
         )
         
         if audio_data:

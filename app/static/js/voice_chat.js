@@ -1132,7 +1132,10 @@ document.addEventListener("DOMContentLoaded", function() {
             ? recommendations.map(r => `
                 <div class="recommend-item" data-small="${r.small_scene_id}" data-npc="${r.npc_id}" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;margin-bottom:8px;background:var(--surface-2);border-radius:8px;border:1px solid var(--border);">
                     <span style="font-size:14px;color:var(--text);">${(r.title || '英文学习').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
-                    <button type="button" class="btn-start-recommend" style="padding:8px 16px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">开始学习</button>
+                    <span style="display:flex;align-items:center;gap:8px;">
+                        ${r.learned ? '<span style="font-size:12px;color:var(--text-muted);">已掌握</span>' : ''}
+                        <button type="button" class="btn-start-recommend" style="padding:8px 16px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">开始学习</button>
+                    </span>
                 </div>
             `).join('')
             : '<p style="margin:0 0 12px;font-size:13px;color:var(--text-muted);">暂无推荐，请自选场景。</p>';
@@ -1620,11 +1623,14 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             
             let originalHTML = null;
+            let closeOptionsCountdown = null;
             try {
                 startEnglishBtn.disabled = true;
                 originalHTML = startEnglishBtn.innerHTML;
                 startEnglishBtn.innerHTML = '<span style="font-size: 12px;">保存中...</span>';
-                
+                // 一开始就显示倒计时，覆盖「保存记忆」+「拉取场景」整段等待时间（最多 10 秒）
+                closeOptionsCountdown = showCountdownOverlay('正在保存记忆并准备学习选项', 10);
+
                 // 第一步：保存当前对话记忆（接口内会做 LLM 摘要+提取用户信息，可能较慢）
                 const response = await fetch('/api/conversation/end', {
                     method: 'POST',
@@ -1632,9 +1638,9 @@ document.addEventListener("DOMContentLoaded", function() {
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.status === 'success') {
                     if (result.summary) {
                         addAIMessage(`记忆已保存。\n\n摘要：${result.summary}`);
@@ -1642,9 +1648,6 @@ document.addEventListener("DOMContentLoaded", function() {
                         addAIMessage('记忆已保存');
                     }
 
-                    const closeOptionsCountdown = showCountdownOverlay('正在准备学习选项', 10);
-                    const optionsShownAt = Date.now();
-                    const MIN_OPTIONS_MS = 2000;
                     let bigScenes = [];
                     try {
                         const res = await fetch('/api/scene-npc/big-scenes');
@@ -1655,10 +1658,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     } catch (e) {
                         console.warn('获取大场景失败', e);
                     }
-                    const elapsedOpts = Date.now() - optionsShownAt;
-                    const delayCloseOpts = Math.max(0, MIN_OPTIONS_MS - elapsedOpts);
-                    await new Promise(r => setTimeout(r, delayCloseOpts));
-                    closeOptionsCountdown();
+                    // 场景数据就绪后再关倒计时并展示场景选择
+                    if (closeOptionsCountdown) closeOptionsCountdown();
+                    closeOptionsCountdown = null;
 
                     if (bigScenes.length === 0) {
                         showError('暂无可用场景，请确认 data/dialogues.json 已正确配置');
@@ -1698,7 +1700,8 @@ document.addEventListener("DOMContentLoaded", function() {
                                 englishResult.dialogue_id || '',
                                 selected.small_scene_id,
                                 selected.npc_id,
-                                englishResult.card_title || ''
+                                englishResult.card_title || '',
+                                englishResult.npc_name || ''
                             );
                             addAIMessage('已切换到英文学习模式！现在我会用英文和你交流。');
                             showSuccess('英文对话已生成，已切换到英文学习模式！');
@@ -1722,10 +1725,12 @@ document.addEventListener("DOMContentLoaded", function() {
                         showError('生成英文对话失败：' + error.message);
                     }
                 } else {
+                    if (closeOptionsCountdown) closeOptionsCountdown();
                     showError(result.message || '保存记忆失败');
                 }
             } catch (error) {
                 console.error('Error starting english learning:', error);
+                if (closeOptionsCountdown) closeOptionsCountdown();
                 showError('开始英语学习失败：' + error.message);
             } finally {
                 if (startEnglishBtn) {
@@ -1820,11 +1825,10 @@ document.addEventListener("DOMContentLoaded", function() {
         }).filter(line => line).join('. '); // 用句号连接，更自然
     }
     
-    // 格式化对话，标签和内容分开，支持逐句播放
-    function formatDialogue(dialogue, dialogueLines = []) {
+    // 格式化对话，标签和内容分开，支持逐句播放。npcDisplayName：A 方显示的角色名（如保安、服务员），空则显示 NPC
+    function formatDialogue(dialogue, dialogueLines = [], npcDisplayName = '') {
         const lines = dialogue.split('\n').filter(line => line.trim());
-        let lineIndex = 0;
-        
+        const aLabel = (npcDisplayName && String(npcDisplayName).trim()) ? String(npcDisplayName).trim().replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'NPC';
         return lines.map((line, idx) => {
             const trimmedLine = line.trim();
             if (trimmedLine.startsWith('A:')) {
@@ -1835,7 +1839,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 const lineId = `dialogue-line-${idx}`;
                 
                 return `<div class="dialogue-item speaker-a-item">
-                    <div class="speaker-label speaker-a-label">A</div>
+                    <div class="speaker-label speaker-a-label">${aLabel}</div>
                     <div class="dialogue-bubble speaker-a-bubble ${audioUrl ? 'dialogue-line-clickable' : ''}" 
                          data-audio-url="${audioUrl || ''}" 
                          data-line-id="${lineId}"
@@ -1853,7 +1857,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 const lineId = `dialogue-line-${idx}`;
                 
                 return `<div class="dialogue-item speaker-b-item">
-                    <div class="speaker-label speaker-b-label">B</div>
+                    <div class="speaker-label speaker-b-label">我</div>
                     <div class="dialogue-bubble speaker-b-bubble ${audioUrl ? 'dialogue-line-clickable' : ''}" 
                          data-audio-url="${audioUrl || ''}" 
                          data-line-id="${lineId}"
@@ -1870,8 +1874,8 @@ document.addEventListener("DOMContentLoaded", function() {
         }).join('');
     }
     
-    // 创建英文学习卡片（cardTitle 可选，如「在小区楼下跟快递员沟通」）
-    function displayEnglishDialogue(dialogue, dialogueLines = [], dialogueId = '', smallSceneId = '', npcId = '', cardTitle = '') {
+    // 创建英文学习卡片（cardTitle 可选；npcDisplayName 为 A 方显示名，如保安、服务员）
+    function displayEnglishDialogue(dialogue, dialogueLines = [], dialogueId = '', smallSceneId = '', npcId = '', cardTitle = '', npcDisplayName = '') {
         const card = document.createElement('div');
         card.className = 'english-dialogue-card modern-card';
         card.dataset.dialogueId = dialogueId;
@@ -1897,7 +1901,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 </button>
             </div>
             <div class="dialogue-content">
-                ${formatDialogue(dialogue, dialogueLines)}
+                ${formatDialogue(dialogue, dialogueLines, npcDisplayName)}
             </div>
             <div class="dialogue-actions">
                 <button class="action-btn copy-btn" title="复制对话">
@@ -2183,6 +2187,13 @@ document.addEventListener("DOMContentLoaded", function() {
         totalTurns: 0,
         userInputs: []  // 收集用户输入：[{turn, user_said, reference, timestamp}, ...]
     };
+
+    // 离开场景练习叠加层/关闭场景弹窗时调用，确保主界面输入走中文对话而非练习逻辑
+    window.clearPracticeStateWhenLeavingScene = function () {
+        if (typeof practiceState !== 'undefined' && practiceState) {
+            practiceState.isActive = false;
+        }
+    };
     
     // 开始练习模式（cardElement 可为 null，如从场景体验进入）
     async function startPracticeMode(dialogue, cardElement, opts = {}) {
@@ -2252,7 +2263,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     totalTurns: result.total_turns,
                     userInputs: [],  // 初始化用户输入列表
                     sessionData: null,  // 完整的会话数据
-                    fromScene: isFromScene  // 来自场景体验则不显示生成复习笔记
+                    fromScene: isFromScene,  // 来自场景体验则不显示生成复习笔记
+                    npcLabel: isFromScene ? (opts.npcLabel || '') : '',
+                    npcImage: isFromScene ? (opts.npcImage || '') : ''
                 };
                 if (opts.closePracticeLoadingTip) opts.closePracticeLoadingTip();
                 // 折叠并禁用英语卡片（仅当来自卡片时）
@@ -2269,7 +2282,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     if (practiceBtnEl) practiceBtnEl.style.display = 'none';
                 }
                 
-                // 创建练习模式UI（场景模式时插入到 targetContainer）
+                // 创建练习模式UI（场景模式时插入到 targetContainer，并展示 NPC 头像）
                 createPracticeUI(result.a_text, result.a_audio_url, result.b_hints, result.total_turns, opts.targetContainer || null);
                 
                 // 场景模式：练习 UI 就绪后启用输入区
@@ -2282,11 +2295,11 @@ document.addEventListener("DOMContentLoaded", function() {
                     if (result.a_audio_url) {
                         createAudioBubble(result.a_text || '', result.a_audio_url, 'ai');
                     } else {
-                        addAIMessage(`A: ${result.a_text || ''}`);
+                        addAIMessage(`NPC: ${result.a_text || ''}`);
                     }
                 }
                 
-                showSuccess('练习模式已开始！你是角色B，请回复A的话。');
+                showSuccess('练习模式已开始！你是「我」方，请回复 NPC 的话。');
             } else {
                 showError(result.message || '开始练习失败');
                 if (practiceBtn) {
@@ -2303,7 +2316,7 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // 从场景体验进入练习模式（供 scene_modal 调用）
     window.startScenePractice = async function(params) {
-        const { dialogue, dialogue_lines, dialogue_id, small_scene_id, npc_id, targetContainer, onReady } = params;
+        const { dialogue, dialogue_lines, dialogue_id, small_scene_id, npc_id, npc_label, npc_image, targetContainer, onReady } = params;
         if (!dialogue || !dialogue_lines || dialogue_lines.length === 0) {
             if (typeof showError === 'function') showError('对话内容无效');
             return;
@@ -2313,6 +2326,8 @@ document.addEventListener("DOMContentLoaded", function() {
             dialogueId: dialogue_id || '',
             smallSceneId: small_scene_id || '',
             npcId: npc_id || '',
+            npcLabel: npc_label || '',
+            npcImage: npc_image || '',
             targetContainer: targetContainer || null,
             onReady: onReady || null
         });
@@ -2329,9 +2344,17 @@ document.addEventListener("DOMContentLoaded", function() {
         const practiceUI = document.createElement('div');
         practiceUI.id = 'practice-mode-ui';
         practiceUI.className = 'practice-mode-container';
+        const sceneNpcBlock = (targetContainer && typeof practiceState !== 'undefined' && practiceState && practiceState.npcImage)
+            ? `<div class="practice-scene-npc" style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                <img src="${practiceState.npcImage}" alt="${(practiceState.npcLabel || '').replace(/"/g, '&quot;')}" class="practice-scene-npc-avatar" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.3);" />
+                <span class="practice-scene-npc-label" style="font-weight:600;color:var(--text,#e2e8f0);">与 ${(practiceState.npcLabel || 'NPC').replace(/</g, '&lt;')} 对话</span>
+               </div>`
+            : '';
+        const practiceTitle = targetContainer ? '🎯 沉浸模式' : '🎯 练习模式';
         practiceUI.innerHTML = `
             <div class="practice-header">
-                <h3>🎯 练习模式</h3>
+                <h3>${practiceTitle}</h3>
+                ${sceneNpcBlock}
                 <div class="practice-progress">
                     <span>进度：<span id="practice-current-turn">1</span>/<span id="practice-total-turns">${totalTurns}</span></span>
                 </div>
@@ -2478,18 +2501,27 @@ document.addEventListener("DOMContentLoaded", function() {
         scrollToBottom();
     }
     
-    // 填充提示内容（只显示重点词组）
+    // 填充提示内容：关键词与参考句（phrases 可含关键词/关键句，key_sentence 为完整参考句）
     function fillHintsContent(hints) {
         const hintsContent = document.getElementById('hints-content');
         if (!hintsContent) return;
+        if (!hints) hints = {};
         
-        let html = '';
+        let html = '<div class="hints-section-title">关键词与参考句</div>';
         
-        // 只显示重点词组
         if (hints.phrases && hints.phrases.length > 0) {
-            html += `<div class="hint-phrases-container">${hints.phrases.map(p => `<span class="hint-phrase-box">${p}</span>`).join('')}</div>`;
-        } else {
-            html = '<div class="hint-phrases-container"><span class="hint-phrase-box-empty">暂无提示</span></div>';
+            html += `<div class="hint-phrases-container">${hints.phrases.map(p => `<span class="hint-phrase-box">${p.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`).join('')}</div>`;
+        }
+        if (hints.key_sentence && hints.key_sentence.trim()) {
+            const sent = hints.key_sentence.trim();
+            if (!hints.phrases || !hints.phrases.includes(sent)) {
+                html += `<div class="hint-key-sentence">参考句：<span class="hint-phrase-box">${sent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span></div>`;
+            }
+        }
+        if (!hints.phrases || hints.phrases.length === 0) {
+            if (!hints.key_sentence || !hints.key_sentence.trim()) {
+                html += '<div class="hint-phrases-container"><span class="hint-phrase-box-empty">暂无提示</span></div>';
+            }
         }
         
         hintsContent.innerHTML = html;
@@ -2989,7 +3021,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         ${reviewNotes.review_dialogue.map((line, idx) => `
                             <div class="dialogue-line ${line.speaker === 'A' ? 'speaker-a' : 'speaker-b'}">
                                 ${line.audio_url ? `<button class="review-audio-btn" data-audio-url="${line.audio_url}" title="播放" style="margin-right:6px;cursor:pointer;border:none;background:transparent;font-size:14px;">▶</button>` : ''}
-                                <span class="speaker-label">${line.speaker}:</span>
+                                <span class="speaker-label">${line.speaker === 'A' ? 'NPC' : '我'}:</span>
                                 <span class="dialogue-text">${line.text}</span>
                                 ${line.hint ? `<span class="dialogue-hint">（${line.hint}）</span>` : ''}
                             </div>
@@ -3109,7 +3141,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             if (result.next_a_audio_url) {
                                 createAudioBubble(result.next_a_text, result.next_a_audio_url, 'ai');
                             } else {
-                                addAIMessage(`A: ${result.next_a_text}`);
+                                addAIMessage(`NPC: ${result.next_a_text}`);
                             }
                             
                             // 更新提示
@@ -3239,8 +3271,8 @@ function showSayHelloScreen() {
         sayHelloOverlay.style.display = 'flex';
         sayHelloOverlay.classList.remove('success-mode');
     }
-    if (instruction) instruction.style.display = 'none';
-    if (hint) hint.textContent = "Say 'Hello' to Start";
+    if (instruction) instruction.style.display = '';
+    if (hint) hint.textContent = "请开口说 「Hello World」 才能进入";
     if (dot) dot.classList.remove('active');
     if (loginOverlay) {
         loginOverlay.classList.add('hidden');
@@ -3395,8 +3427,8 @@ function initSayHello() {
             sayHelloDataArray = new Uint8Array(sayHelloAnalyser.frequencyBinCount);
             sayHelloCanvasRunning = true;
             if (dot) dot.classList.add('active');
-            if (hint) hint.textContent = "Say 'Hello' / 'Start'";
-            if (instruction) instruction.style.display = 'none';
+            if (hint) hint.textContent = "请开口说 「Hello World」";
+            if (instruction) instruction.style.display = '';
             renderFrame();
             sayHelloRecognition = new SpeechRecognitionAPI();
             sayHelloRecognition.lang = 'en-US';
@@ -3408,7 +3440,7 @@ function initSayHello() {
                     transcript += event.results[i][0].transcript;
                 }
                 transcript = transcript.toLowerCase().trim();
-                if (/hello|hi\b|hey\b|start/.test(transcript)) {
+                if (/hello\s*world/.test(transcript)) {
                     triggerSuccessAnimation();
                 }
             };
@@ -3417,7 +3449,7 @@ function initSayHello() {
                 sayHelloRecognition.start();
             } catch (err) {}
         }).catch(function() {
-            if (hint) hint.textContent = 'Microphone access denied. Tap button below.';
+            if (hint) hint.textContent = '无法使用麦克风时，请点击下方按钮进入';
         });
     }
 
@@ -3644,7 +3676,7 @@ async function handleLogin() {
                     
                     if (typeof window.addAIMessage === 'function') {
                         try {
-                            window.addAIMessage(`你好 ${username}！我是你的AI助手，可以输入文字或点击麦克风开始对话！`);
+                            window.addAIMessage(`请告诉我你想练习什么场景的英语，我来帮你推荐学习内容。`);
                             console.log('Welcome message added successfully');
                         } catch (error) {
                             console.error('Error adding welcome message:', error);
@@ -3655,7 +3687,7 @@ async function handleLogin() {
                         const messagesList = document.getElementById('messages-list');
                         if (messagesList && typeof window.createMessageElement === 'function') {
                             try {
-                                const message = window.createMessageElement('ai', `你好 ${username}！我是你的AI助手，可以输入文字或点击麦克风开始对话！`, 'text');
+                                const message = window.createMessageElement('ai', `请告诉我你想练习什么场景的英语，我来帮你推荐学习内容。`, 'text');
                                 messagesList.appendChild(message);
                                 if (typeof window.scrollToBottom === 'function') {
                                     window.scrollToBottom();

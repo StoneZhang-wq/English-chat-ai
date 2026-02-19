@@ -10,7 +10,7 @@ import NotFoundPage from './pages/404Page';
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <Router basename="/practice/live">
       <Routes>
 
       <Route path="/" element={<LandingPage />} />

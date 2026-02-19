@@ -7,6 +7,12 @@ from datetime import datetime
 from typing import Dict
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
+
+
+class StaticFilesNo304(StaticFiles):
+    """禁用 304 Not Modified，避免浏览器强缓存导致替换图片后仍显示旧图。"""
+    def is_not_modified(self, *args, **kwargs) -> bool:
+        return False
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, JSONResponse
@@ -16,6 +22,9 @@ from .app_logic import start_conversation, stop_conversation, set_env_variable, 
 from .enhanced_logic import start_enhanced_conversation, stop_enhanced_conversation
 from .app import send_message_to_clients
 import logging
+import subprocess
+import sys
+from pathlib import Path
 from threading import Thread
 import uuid
 import aiohttp
@@ -55,9 +64,9 @@ app = FastAPI()
 
 @app.on_event("startup")
 async def startup_validate_dialogues():
-    """启动时预加载 dialogues.json，便于及早发现路径问题"""
+    """启动时预加载 dialogues.json，并自动刷新场景索引与本地占位图"""
     try:
-        from .scene_npc_db import get_dialogues, _dialogues_path
+        from .scene_npc_db import get_dialogues, _dialogues_path, reload_dialogues
         path = _dialogues_path()
         data = get_dialogues()
         if data:
@@ -67,10 +76,49 @@ async def startup_validate_dialogues():
     except Exception as e:
         logger.warning("启动: 预加载 dialogues 失败: %s", e)
 
+    # 每次启动自动刷新场景索引与缺失场景的占位图（从 dialogues 生成索引并同步 app/static/images/scenes/）
+    try:
+        root = Path(__file__).resolve().parent.parent
+        script = root / "scripts" / "build_scene_npc_index.py"
+        if script.is_file():
+            r = subprocess.run(
+                [sys.executable, str(script)],
+                cwd=str(root),
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+            if r.returncode == 0:
+                logger.info("启动: 场景索引与本地图已刷新")
+                reload_dialogues()
+                from .scene_npc_db import _load_scene_index, clear_scene_image_url_cache
+                _load_scene_index()
+                clear_scene_image_url_cache()
+            else:
+                logger.warning("启动: 场景索引脚本执行异常 returncode=%s stderr=%s", r.returncode, (r.stderr or "").strip()[:200])
+        else:
+            logger.debug("启动: 未找到场景索引脚本 %s", script)
+    except subprocess.TimeoutExpired:
+        logger.warning("启动: 场景索引脚本超时")
+    except Exception as e:
+        logger.warning("启动: 执行场景索引脚本失败: %s", e)
 
-# Mount static files and templates
-app.mount("/app/static", StaticFiles(directory="app/static"), name="static")
-templates = Jinja2Templates(directory="app/templates")
+    # 预加载场景索引（若存在），首请求即可用内存数据；并清空场景图 URL 缓存、打日志
+    try:
+        from .scene_npc_db import _load_scene_index, clear_scene_image_url_cache, _scenes_images_dir
+        clear_scene_image_url_cache()
+        scenes_dir = _scenes_images_dir()
+        logger.info("启动: 场景图目录=%s, home.png存在=%s", scenes_dir, (scenes_dir / "home.png").is_file())
+        if _load_scene_index():
+            logger.info("启动: 场景索引已预加载")
+    except Exception as e:
+        logger.debug("启动: 预加载场景索引跳过: %s", e)
+
+
+# Mount static files and templates（用项目根绝对路径；禁用 304 便于更新场景图后立即生效）
+_project_root = Path(__file__).resolve().parent.parent
+app.mount("/app/static", StaticFilesNo304(directory=str(_project_root / "app" / "static")), name="static")
+templates = Jinja2Templates(directory=str(_project_root / "app" / "templates"))
 
 # 添加音频文件服务
 @app.get("/audio/{file_path:path}")
@@ -122,6 +170,44 @@ async def get_voice_chat(request: Request):
         "request": request,
         "character_name": character_name,
     })
+
+
+# 真人 1v1 练习（Varta 前端 SPA，同源部署）
+_PRACTICE_LIVE_DIR = Path(__file__).resolve().parent / "static" / "practice-live"
+
+
+@app.get("/practice/live", response_class=HTMLResponse)
+async def practice_live_index():
+    """真人 1v1 练习页入口，返回 SPA index.html"""
+    index_path = _PRACTICE_LIVE_DIR / "index.html"
+    if not index_path.is_file():
+        return HTMLResponse(
+            "<!DOCTYPE html><html><body style='font-family:sans-serif;padding:2rem;'><h1>真人练习未就绪</h1>"
+            "<p>请先构建并放入静态文件：在项目根目录执行 <code>cd varta/client && npm run build</code>，"
+            "再将 <code>build/</code> 目录下全部内容复制到 <code>app/static/practice-live/</code>。</p></body></html>",
+            status_code=503,
+        )
+    return FileResponse(index_path, media_type="text/html")
+
+
+@app.get("/practice/live/{full_path:path}", response_class=HTMLResponse)
+async def practice_live_spa(full_path: str):
+    """SPA 静态资源或子路径兜底：有文件则返回文件，否则返回 index.html"""
+    if not full_path or full_path == "index.html":
+        index_path = _PRACTICE_LIVE_DIR / "index.html"
+        if index_path.is_file():
+            return FileResponse(index_path, media_type="text/html")
+        return HTMLResponse("<p>真人练习未就绪，请先构建并复制到 app/static/practice-live/</p>", status_code=503)
+    file_path = (_PRACTICE_LIVE_DIR / full_path).resolve()
+    if not str(file_path).startswith(str(_PRACTICE_LIVE_DIR.resolve())):
+        return HTMLResponse("<p>Invalid path</p>", status_code=400)
+    if file_path.is_file():
+        return FileResponse(file_path)
+    index_path = _PRACTICE_LIVE_DIR / "index.html"
+    if index_path.is_file():
+        return FileResponse(index_path, media_type="text/html")
+    return HTMLResponse("<p>Not found</p>", status_code=404)
+
 
 @app.post("/api/account/login")
 async def login_account(request: Request):
@@ -350,6 +436,23 @@ async def api_scene_npc_check():
         "path": str(path),
         "path_exists": path.exists(),
     })
+
+
+@app.get("/api/scene-npc/debug-scene-images")
+async def api_debug_scene_images():
+    """排查场景图不更新：返回后端实际使用的图片目录及 home.png 等是否存在。"""
+    from .scene_npc_db import _scenes_images_dir, _scene_image_url
+    base = _scenes_images_dir()
+    sample_ids = ["home", "bank", "cafe"]
+    files = {sid: {ext: (base / f"{sid}{ext}").is_file() for ext in [".png", ".svg"]} for sid in sample_ids}
+    urls = {sid: _scene_image_url(sid) for sid in sample_ids}
+    return JSONResponse({
+        "images_dir": str(base),
+        "dir_exists": base.exists(),
+        "sample_files": files,
+        "sample_urls": urls,
+    })
+
 
 @app.get("/api/scene-npc/big-scenes")
 async def api_big_scenes():
@@ -1117,23 +1220,14 @@ async def end_conversation(request: Request):
         current_character = get_current_character()
         learning_stage = get_learning_stage()
         
-        # 从临时文件生成摘要
-        entry = await memory_system.generate_diary_summary_from_temp(current_character)
-        
-        today_summary = ""
-        if entry:
-            memory_system.add_diary_entry(entry)
-            today_summary = entry.get("summary", "")
-            
-            # 从会话中提取用户信息
-            session_data = memory_system.load_session_temp()
-            if session_data and session_data.get("messages"):
-                conversation_text = "\n".join([
-                    f"{msg['role']}: {msg['content']}" 
-                    for msg in session_data["messages"]
-                ])
-                extracted_info = await memory_system.extract_user_info(conversation_text)
-                # extract_user_info 内部已经调用了 update_user_profile
+        # 从会话中提取用户信息（不再生成或保存 diary）
+        session_data = memory_system.load_session_temp()
+        if session_data and session_data.get("messages"):
+            conversation_text = "\n".join([
+                f"{msg['role']}: {msg['content']}" 
+                for msg in session_data["messages"]
+            ])
+            extracted_info = await memory_system.extract_user_info(conversation_text)
         
         # 清空临时会话文件
         memory_system.clear_session_temp()
@@ -1146,8 +1240,8 @@ async def end_conversation(request: Request):
         response_data = {
             "status": "success",
             "message": "对话已结束，记忆已保存。请选择场景后生成英语卡片",
-            "summary": today_summary,
-            "timestamp": entry.get("timestamp", "") if entry else "",
+            "summary": "",
+            "timestamp": "",
             "should_generate_english": True,
             "big_scenes": big_scenes,
         }
@@ -1211,6 +1305,7 @@ async def generate_english_dialogue(request: Request):
             "dialogue_id": dialogue_id,
             "small_scene_id": small_scene_id,
             "npc_id": npc_id,
+            "npc_name": dialogue.get("npc_name", "").strip() or npc_id,
             "card_title": card_title,
         })
 
@@ -1313,7 +1408,7 @@ practice_sessions = {}  # {session_id: {user_inputs: [], dialogue_lines: [], dia
 @app.post("/api/practice/start")
 async def start_practice(request: Request):
     """开始练习阶段，解析对话卡片并初始化状态。
-    耗时主要来自：1) LLM 提取对话主题 2) 若无音频则整段 TTS 3) 可选 LLM 抽取提示。前端会显示「正在准备练习资料」提示。"""
+    耗时主要来自：若无音频则整段 TTS。前端会显示「正在准备练习资料」提示。"""
     try:
         from .shared import get_memory_system
         from .app import chatgpt_streamed_async
@@ -1361,6 +1456,22 @@ async def start_practice(request: Request):
                 "message": "无法解析对话内容"
             }, status_code=400)
         
+        # 若有场景与 NPC，从数据库补全每条行的 hint（前端可能漏传，导致提示变成原句）
+        if small_scene_id and npc_id:
+            try:
+                from .scene_npc_db import get_learn_dialogue, get_immersive_dialogue
+                db_dialogue = get_immersive_dialogue(small_scene_id, npc_id) or get_learn_dialogue(small_scene_id, npc_id)
+                if db_dialogue and db_dialogue.get("content"):
+                    content = db_dialogue["content"]
+                    for i, line in enumerate(dialogue_lines):
+                        if i < len(content):
+                            item = content[i]
+                            role = item.get("role", "B")
+                            if line.get("speaker") == role and line.get("text") == item.get("content", ""):
+                                line["hint"] = item.get("hint", "")
+            except Exception as e:
+                logger.warning("补全 dialogue_lines hint 失败: %s", e)
+        
         # 规则：A=NPC（对方），B=用户（学习者）。允许以A或B开始
         if dialogue_lines[0]["speaker"] not in ("A", "B"):
             return JSONResponse({
@@ -1374,30 +1485,8 @@ async def start_practice(request: Request):
         # 生成会话ID用于跟踪练习会话
         session_id = str(uuid.uuid4())
         
-        # 从对话内容中智能提取主题（使用AI分析）
-        all_dialogue_text = " ".join([line.get("text", "") for line in dialogue_lines])
-        dialogue_topic = "日常对话"  # 默认主题
-        
-        try:
-            topic_prompt = f"""分析以下英文对话，提取出主要讨论的主题（1-2个中文关键词，如：电影、篮球、学习、工作等）：
-
-{all_dialogue_text}
-
-只返回主题关键词，用中文，用逗号分隔，例如：电影,篮球 或 学习,工作。不要其他说明。"""
-            
-            topic_response = await chatgpt_streamed_async(
-                topic_prompt,
-                "你是一个专业的英语教学助手，能够准确分析对话主题。只返回主题关键词，不要其他说明。",
-                "neutral",
-                []
-            )
-            # 提取主题关键词
-            if topic_response:
-                topics = [t.strip() for t in topic_response.strip().split(",") if t.strip()]
-                dialogue_topic = ", ".join(topics[:2]) if topics else "日常对话"
-        except Exception as e:
-            logger.error(f"Error extracting dialogue topic: {e}")
-            dialogue_topic = "日常对话"  # 失败时使用默认值
+        # 对话主题固定为「日常对话」，供生成复习笔记时 prompt 使用（不再用 LLM 分析）
+        dialogue_topic = "日常对话"
         
         # 若对话行无音频（如来自场景沉浸式），则生成 TTS
         needs_tts = any(
@@ -1439,18 +1528,18 @@ async def start_practice(request: Request):
             first_b_text = dialogue_lines[0]["text"]
             first_b_line = dialogue_lines[0]
         
-        # 如果有B的台词，取提示：优先用口语库的 hint，否则 AI 抽取
+        # 如果有B的台词，取提示：优先用口语库的 hint（须含关键词/关键句），否则 AI 抽取
         hints = None
         if first_b_text:
             if first_b_line.get("hint"):
                 h = first_b_line["hint"]
-                hints = {"phrases": [x.strip() for x in h.split("/") if x.strip()], "pattern": "", "words": [], "grammar": ""}
+                phrases = [x.strip() for x in h.split("/") if x.strip()]
+                # 若 hint 像动作描述（如 ask address）无具体可说内容，用本句 content 作参考句
+                if len(phrases) == 1 and phrases[0].islower() and "?" not in phrases[0] and len(phrases[0]) < 30:
+                    phrases.append(first_b_text)
+                hints = {"phrases": phrases, "pattern": "", "words": [], "grammar": "", "key_sentence": first_b_text}
             else:
-                try:
-                    hints = await extract_hints(first_b_text)
-                except Exception as e:
-                    logger.error(f"Error extracting hints: {e}")
-                    hints = {"phrases": [], "pattern": "", "words": [], "grammar": ""}
+                hints = {"phrases": [first_b_text], "pattern": "", "words": [], "grammar": "", "key_sentence": first_b_text}
         
         return JSONResponse({
             "status": "success",
@@ -1564,9 +1653,14 @@ async def practice_respond(request: Request):
                                     next_b_line = dialogue_lines[j + 1]
                                     if next_b_line.get("hint"):
                                         h = next_b_line["hint"]
-                                        next_b_hints = {"phrases": [x.strip() for x in h.split("/") if x.strip()], "pattern": "", "words": [], "grammar": ""}
+                                        phrases = [x.strip() for x in h.split("/") if x.strip()]
+                                        ref_text = next_b_line.get("text", "")
+                                        if len(phrases) == 1 and phrases[0].islower() and "?" not in phrases[0] and len(phrases[0]) < 30 and ref_text:
+                                            phrases.append(ref_text)
+                                        next_b_hints = {"phrases": phrases, "pattern": "", "words": [], "grammar": "", "key_sentence": ref_text}
                                     else:
-                                        next_b_hints = await extract_hints(next_b_line["text"])
+                                        ref_text = next_b_line.get("text", "")
+                                        next_b_hints = {"phrases": [ref_text] if ref_text else [], "pattern": "", "words": [], "grammar": "", "key_sentence": ref_text}
                                     is_completed = False  # 还有下一轮，未完成
                                 else:
                                     is_completed = True
@@ -1637,37 +1731,6 @@ async def end_practice(request: Request):
         return JSONResponse({
             "status": "error",
             "message": f"结束练习时出错: {str(e)}"
-        }, status_code=500)
-
-@app.post("/api/practice/hints")
-async def get_practice_hints(request: Request):
-    """获取提示信息（按需）"""
-    try:
-        from .shared import get_memory_system
-        
-        data = await request.json()
-        reference_text = data.get("reference_text", "").strip()
-        
-        if not reference_text:
-            return JSONResponse({
-                "status": "error",
-                "message": "参考文本不能为空"
-            }, status_code=400)
-        
-        hints = await extract_hints(reference_text)
-        
-        return JSONResponse({
-            "status": "success",
-            "hints": hints
-        })
-        
-    except Exception as e:
-        logger.error(f"Error getting hints: {e}")
-        import traceback
-        logger.error(traceback.format_exc())
-        return JSONResponse({
-            "status": "error",
-            "message": f"获取提示时出错: {str(e)}"
         }, status_code=500)
 
 @app.post("/api/practice/generate-review")

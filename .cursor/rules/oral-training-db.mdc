@@ -50,8 +50,8 @@ alwaysApply: false
   - 轮与轮之间可有追问、补充、转折、换小话题，但**不跳题**；后句可引用前文（如 "Me too." / "What about Saturday?"）。
   - **禁止**：同一问一答简单重复多遍、无上下文关系的拼凑。生成时**先按轮数设计多轮内容，再写每句 content 和 hint**。
 - **Hint 生成规则**：
-  - **生成顺序**：每句的 hint 在该句 content 确定之后写，用于提示该句要用到的**结构或关键词**，不是整句翻译。
-  - **形式**：以「结构提示」为主（如 `I + verb + place`、`because + reason`），可带 1～2 个关键词（如 `ask about routine / after work`）。禁止完整句子、过长短语。
+  - **生成顺序**：每句的 hint 在该句 content 确定之后写，用于提示该句要用到的**关键词或关键句**，让用户知道该说什么。
+  - **形式**：必须包含**关键词或关键句**（如 `What's for dinner? / Where are the plates?`），用 `/` 分隔；可兼有结构提示（如 `I + verb + place`）。**禁止仅写动作描述**（如 `ask address`、`offer help`），否则用户无法得知具体该说什么。
   - **多轮一致**：同一 Unit 下 A/B/C，**同一轮次**的句型/功能一致，hint 的「结构部分」一致，仅随 A/B/C 用词差异微调关键词。
   - **与句型/语块对应**：hint 中的关键表达必须出现在该条记录的 `core_sentences` 或 `core_chunks` 中（生成完 content 与 hint 后从整段归纳句型/语块，再检查 hint 覆盖）。
 

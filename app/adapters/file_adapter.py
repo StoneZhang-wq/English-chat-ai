@@ -21,7 +21,6 @@ class FileAdapter(MemoryAdapter):
             project_dir = current_file_dir.parent
         self.base_dir = Path(project_dir) / "memory" / "accounts" / _safe_account(account_name)
         self.base_dir.mkdir(parents=True, exist_ok=True)
-        self._diary_file = self.base_dir / "diary.json"
         self._user_profile_file = self.base_dir / "user_profile.json"
         self._session_temp_file = self.base_dir / "session_temp.json"
         self._npc_learn_progress_file = self.base_dir / "npc_learn_progress.json"
@@ -42,13 +41,6 @@ class FileAdapter(MemoryAdapter):
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-
-    def load_diary_data(self) -> Dict[str, Any]:
-        default = {"version": "1.0", "last_updated": None, "entries": []}
-        return self._read_json(self._diary_file, default)
-
-    def save_diary_data(self, data: Dict[str, Any]) -> None:
-        self._write_json(self._diary_file, data)
 
     def load_user_profile(self) -> Dict[str, Any]:
         default = {

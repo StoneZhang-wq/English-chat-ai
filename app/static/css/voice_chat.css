@@ -228,6 +228,32 @@ body::before {
     backdrop-filter: blur(5px);
 }
 
+/* 主提示：必须说 Hello World 才能进入，非常醒目 */
+.say-hello-instruction-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 28px;
+    padding: 20px 28px;
+    font-size: 1rem;
+    border: 2px solid rgba(165, 243, 252, 0.5);
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 30px rgba(165, 243, 252, 0.15);
+}
+.say-hello-instruction-strong {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    letter-spacing: 0.5px;
+}
+.say-hello-instruction-reason {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    font-weight: 400;
+}
+
 .say-hello-tap-hint {
     position: absolute;
     bottom: 15%;
@@ -867,6 +893,7 @@ body::before {
     transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
     font-family: inherit;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+    color: #ffffff;
 }
 
 .text-input:focus {
@@ -1332,14 +1359,15 @@ body::before {
     background: var(--surface-2);
     color: var(--text);
     border: 1px solid var(--border);
-    width: 40px;
+    min-width: 40px;
     height: 40px;
-    border-radius: 50%;
+    padding: 0 10px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 18px;
+    font-size: 14px;
     flex-shrink: 0;
 }
 
@@ -1486,18 +1514,24 @@ body::before {
     opacity: 0.9;
 }
 
+/* 播放中：稍亮的高亮色，保证气泡内文字可见 */
 .dialogue-line-playing {
-    background: rgba(102, 126, 234, 0.3) !important;
-    border-color: rgba(102, 126, 234, 0.6) !important;
+    background: rgba(147, 165, 255, 0.55) !important;
+    border-color: rgba(129, 140, 248, 0.75) !important;
+    color: #1e293b !important;
     animation: pulse-playing 1.5s ease-in-out infinite;
+}
+
+.dialogue-line-playing .bubble-content {
+    color: #1e293b !important;
 }
 
 @keyframes pulse-playing {
     0%, 100% {
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 2px 12px rgba(129, 140, 248, 0.4);
     }
     50% {
-        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.5);
+        box-shadow: 0 4px 18px rgba(129, 140, 248, 0.55);
     }
 }
 
@@ -1718,6 +1752,24 @@ body::before {
     color: var(--text-muted);
     font-size: 14px;
     line-height: 1.6;
+}
+
+/* 提示区块标题与参考句 */
+.hints-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+.hint-key-sentence {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.hint-key-sentence .hint-phrase-box {
+    white-space: normal;
 }
 
 /* 重点词组容器 */

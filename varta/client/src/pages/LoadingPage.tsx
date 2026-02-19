@@ -54,7 +54,7 @@ const LandingPage: React.FC = () => {
             className="text-4xl font-bold text-center mb-10"
             style={{ fontFamily: "Cinzel, Quattrocento, Ultine Extended Demi" }}
           >
-            Why Choose Varta?
+            为什么选择真人练习？
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div className="flex flex-col items-center text-center">
@@ -101,7 +101,7 @@ const LandingPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 relative">
             {[
               {
-                text: "“Varta has been an amazing tool to practice Spanish. I’ve made so many friends!”",
+                text: "“在这里和同场景的伙伴练口语，效果很好！”",
                 author: "Sai",
                 color: "text-[#fa546b]",
               },
@@ -171,7 +171,7 @@ const LandingPage: React.FC = () => {
         {/* Footer */}
         <footer className="bg-gray-900 text-gray-400 py-8">
           <div className="container mx-auto text-center">
-            <p>&copy; {new Date().getFullYear()} Varta. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} 英语学习 · 真人练习. All rights reserved.</p>
             <p>
               Built with ❤️ to bring people closer through language and culture.
             </p>

@@ -3,12 +3,23 @@ import { RoomManager } from "./RoomManager.js";
 import { fetchIpDetails } from '../utils/IpService.js';
 import { User } from '../models/UserData.js';
 
-// Defining the user structure
+// Defining the user structure. 按 sceneId 分队列，同场景用户互相匹配。
 export class UserManager {
   constructor() {
     this.users = [];
-    this.queue = [];
+    /** @type {Record<string, Array<{ name, socket, country, languages, sceneId? }>>} 场景 ID -> 排队用户列表 */
+    this.queuesByScene = {};
     this.roomManager = new RoomManager(this);
+  }
+
+  _queueKey(sceneId) {
+    return sceneId && String(sceneId).trim() ? String(sceneId).trim() : "default";
+  }
+
+  _getQueue(sceneId) {
+    const key = this._queueKey(sceneId);
+    if (!this.queuesByScene[key]) this.queuesByScene[key] = [];
+    return this.queuesByScene[key];
   }
 
 
@@ -50,7 +61,9 @@ export class UserManager {
       this.roomManager.removeUserFromRooms(socketId);
     } else {
       this.users = this.users.filter((u) => u.socket.id !== socketId);
-      this.queue = this.queue.filter((u) => u.socket.id !== socketId);
+      const key = user.sceneId != null ? this._queueKey(user.sceneId) : "default";
+      const q = this.queuesByScene[key];
+      if (q) this.queuesByScene[key] = q.filter((u) => u.socket.id !== socketId);
       const remainingUser = await this.roomManager.getRemainingUser(socketId);
       if (remainingUser) {
         this.reQueueUser(remainingUser);
@@ -58,40 +71,43 @@ export class UserManager {
     }
   }
 
-  // requeue users to get a next match
+  // requeue users to get a next match（按场景队列）
   reQueueUser(user) {
-    if (!this.queue.some((u) => u.socket.id === user.socket.id)) {
-      this.queue.push(user);
-      console.log(`[Requeue] User ${user.socket.id}`);
-      this.tryToPairUsers();
+    const queue = this._getQueue(user.sceneId);
+    if (!queue.some((u) => u.socket.id === user.socket.id)) {
+      queue.push(user);
+      console.log(`[Requeue] User ${user.socket.id} scene=${user.sceneId || "default"}`);
+      this.tryToPairUsers(user.sceneId);
     }
   }
 
-  tryToPairUsers() {
-    // Attempt to pair users if at least two are available
-    while (this.queue.length >= 2) {
-      const user1 = this.queue.pop();
-      const user2 = this.queue.pop();
+  tryToPairUsers(sceneId) {
+    const queue = this._getQueue(sceneId);
+    while (queue.length >= 2) {
+      const user1 = queue.pop();
+      const user2 = queue.pop();
       if (!user1 || !user2 || user1 === user2) {
         console.log("Insufficient users to pair.");
         return;
       }
       this.roomManager.createRoom(user1, user2);
     }
-    console.log("Didn't get match as <2 user present in queue...");
+    if (queue.length === 1) {
+      console.log(`[Match] scene=${sceneId || "default"} waiting, 1 user in queue`);
+    }
   }
 
   initHandlers(socket) {
-    socket.on("user-info", ({ name, languages }) => {
+    socket.on("user-info", ({ name, languages, sceneId }) => {
       const user = this.users.find(u => u.socket.id === socket.id);
       if (user) {
         user.name = name;
         user.languages = languages;
-        // console.log(`Updated user ${socket.id} info:`, user.name);
-
-        if (!this.queue.some(u => u.socket.id === user.socket.id)) {
-          this.queue.push(user);
-          this.tryToPairUsers();
+        user.sceneId = sceneId != null ? String(sceneId).trim() || undefined : undefined;
+        const queue = this._getQueue(user.sceneId);
+        if (!queue.some(u => u.socket.id === user.socket.id)) {
+          queue.push(user);
+          this.tryToPairUsers(user.sceneId);
         }
       }
     });

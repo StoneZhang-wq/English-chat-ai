@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Room } from "../components/Room";
 import { Navbar } from "../components/Navbar";
 import UserPermission from "../components/media_permission/UserPermission";
@@ -10,6 +11,8 @@ import {
 } from "../components/media_permission/mediaPermissions";
 
 const ChatPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const sceneIdFromUrl = searchParams.get("scene") || undefined;
 
   const [chatInput, setChatInput] = useState("");
   const [isChatActive, setIsChatActive] = useState(false);
@@ -99,8 +102,9 @@ const ChatPage: React.FC = () => {
           (textOnlyMode || (localAudioTrack?.enabled && localVideoTrack?.enabled)) ? (
             <>
               <Room
-                name={userName || "Anonymous"} 
+                name={userName || "Anonymous"}
                 learningLanguages={learningLanguages}
+                sceneId={sceneIdFromUrl}
                 localAudioTrack={textOnlyMode ? null : localAudioTrack}
                 localVideoTrack={textOnlyMode ? null : localVideoTrack}
                 chatInput={chatInput}
@@ -116,13 +120,13 @@ const ChatPage: React.FC = () => {
                 <img
                   className="opacity-50 mt-24 mx-auto"
                   src="./apple-icon-180x180.png"
-                  alt="varta-logo"
+                  alt="真人练习"
                 />
                 <p className="text-gray-500 mt-8 mx-auto">
-                  Click on join button to start match.....
+                  点击 Join 开始匹配同场景的练习伙伴
                 </p>
-                <p className="text-gray-400 text-sm mt-2">验证匹配可点「仅文字」不启用摄像头/麦克风</p>
-                <p className="text-amber-600 text-xs mt-1">请先启动 varta/server（<code>cd varta/server && npm start</code>，端口 5001）</p>
+                <p className="text-green-700 text-sm mt-2 font-medium">使用视频+语音：点「Join（视频+语音）」并允许摄像头与麦克风</p>
+                <p className="text-gray-400 text-sm mt-1">仅文字聊天：点「仅文字（验证用）」</p>
               </div>
               {/* Chat Section */}
               <div className="lg:w-1/3 bg-white border-l border-gray-300 lg:pl-4">
@@ -136,7 +140,7 @@ const ChatPage: React.FC = () => {
                       className="text-white bg-[#FA546B] py-2 px-4 rounded-lg"
                       onClick={() => setIsChatActive((prev) => !prev)}
                     >
-                      {isChatActive ? "Exit" : "Join"}
+                      {isChatActive ? "Exit" : "Join（视频+语音）"}
                     </button>
                     <button
                       className="text-[#FA546B] border border-[#FA546B] bg-white py-2 px-4 rounded-lg"

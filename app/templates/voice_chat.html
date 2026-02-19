@@ -12,17 +12,20 @@
     <link rel="icon" href="/app/static/favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <!-- 开口即启：Say Hello 欢迎屏 (Cyber Mode - Canvas 波形) -->
+    <!-- 开口即启：说 Hello World 才能进入（口语必须开口说） -->
     <div class="say-hello-overlay" id="say-hello-overlay">
         <div class="say-hello-ambient-light"></div>
         <canvas id="say-hello-visualizer" class="say-hello-canvas"></canvas>
         <div class="say-hello-ui-layer">
-            <h1 class="say-hello-cyber-title">Hello.</h1>
+            <h1 class="say-hello-cyber-title">Hello World</h1>
             <p class="say-hello-subtitle"><span class="status-dot" id="say-hello-dot"></span>Listening System</p>
-            <div class="say-hello-instruction" id="say-hello-instruction" style="display: none;">Say &quot;Hello&quot; to start</div>
+            <div class="say-hello-instruction say-hello-instruction-main" id="say-hello-instruction">
+                <span class="say-hello-instruction-strong">请开口说 「Hello World」 才能进入</span>
+                <span class="say-hello-instruction-reason">口语必须开口说 —— 从这一句开始</span>
+            </div>
         </div>
         <div class="say-hello-tap-hint" id="say-hello-hint">Waiting for user interaction...</div>
-        <button type="button" class="manual-btn" id="say-hello-manual-btn">Tap to enter manually</button>
+        <button type="button" class="manual-btn" id="say-hello-manual-btn">无法开口时点击进入</button>
     </div>
 
     <!-- 账号登录界面 -->

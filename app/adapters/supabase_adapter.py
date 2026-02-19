@@ -1,4 +1,4 @@
-"""Supabase 记忆适配器：读写 users、user_diary、user_npc_learn_progress。session_temp 仅内存不落库。"""
+"""Supabase 记忆适配器：读写 users、user_profile、user_npc_learn_progress。session_temp 仅内存不落库。"""
 import os
 import logging
 from datetime import datetime, timezone
@@ -33,30 +33,6 @@ class SupabaseAdapter(MemoryAdapter):
         r = self._client.table("users").select("id").eq("id", self._user_id).execute()
         if not (r.data and len(r.data) > 0):
             self._client.table("users").insert({"id": self._user_id, "name": self.account_name or self._user_id, "profile": {}}).execute()
-
-    def load_diary_data(self) -> Dict[str, Any]:
-        default = {"version": "1.0", "last_updated": None, "entries": []}
-        try:
-            self._ensure_user()
-            r = self._client.table("user_diary").select("data").eq("user_id", self._user_id).execute()
-            if r.data and len(r.data) > 0 and r.data[0].get("data"):
-                return r.data[0]["data"]
-            return default
-        except Exception as e:
-            logger.warning("Supabase load_diary_data: %s", e)
-            return default
-
-    def save_diary_data(self, data: Dict[str, Any]) -> None:
-        try:
-            self._ensure_user()
-            now = datetime.now(timezone.utc).isoformat()
-            self._client.table("user_diary").upsert(
-                {"user_id": self._user_id, "data": data, "last_updated": now},
-                on_conflict="user_id",
-            ).execute()
-        except Exception as e:
-            logger.exception("Supabase save_diary_data: %s", e)
-            raise
 
     def load_user_profile(self) -> Dict[str, Any]:
         default = {

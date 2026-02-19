@@ -1,4 +1,4 @@
-"""记忆存储适配器抽象：diary、user_profile、session_temp 的读写"""
+"""记忆存储适配器抽象：user_profile、session_temp、npc_learn_progress 的读写（已移除 diary）"""
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
 
@@ -9,17 +9,6 @@ class MemoryAdapter(ABC):
     @abstractmethod
     def get_user_id(self) -> str:
         """当前账户对应的存储 ID（安全名称）。"""
-        pass
-
-    # ---------- diary ----------
-    @abstractmethod
-    def load_diary_data(self) -> Dict[str, Any]:
-        """返回与 diary.json 同结构：{ version, last_updated, entries: [...] }"""
-        pass
-
-    @abstractmethod
-    def save_diary_data(self, data: Dict[str, Any]) -> None:
-        """保存整份 diary 数据。"""
         pass
 
     # ---------- user_profile ----------

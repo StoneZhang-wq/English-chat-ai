@@ -1,0 +1,696 @@
+{
+  "has_immersive": [
+    "mall",
+    "fast_food",
+    "park",
+    "office",
+    "hospital",
+    "home",
+    "party",
+    "phone",
+    "cinema",
+    "supermarket",
+    "taxi",
+    "bank",
+    "snack_shop",
+    "restaurant",
+    "hotel",
+    "chat",
+    "cafe",
+    "train_station",
+    "airport",
+    "praise",
+    "interview",
+    "hobby",
+    "community",
+    "meeting",
+    "barber",
+    "bus_metro"
+  ],
+  "big_scenes": [
+    {
+      "id": "daily",
+      "name": "日常生活",
+      "order": 1
+    },
+    {
+      "id": "food",
+      "name": "餐饮美食",
+      "order": 2
+    },
+    {
+      "id": "shopping",
+      "name": "购物消费",
+      "order": 4
+    },
+    {
+      "id": "work",
+      "name": "工作职场",
+      "order": 5
+    },
+    {
+      "id": "social",
+      "name": "社交人情",
+      "order": 6
+    },
+    {
+      "id": "transport",
+      "name": "出行交通",
+      "order": 99
+    }
+  ],
+  "small_scenes_by_big": {
+    "daily": [
+      {
+        "id": "home",
+        "small_scene_id": "home",
+        "name": "家 / 居家",
+        "immersive_scene_id": "home",
+        "order": 1
+      },
+      {
+        "id": "community",
+        "small_scene_id": "community",
+        "name": "小区 / 楼下",
+        "immersive_scene_id": "community",
+        "order": 2
+      },
+      {
+        "id": "park",
+        "small_scene_id": "park",
+        "name": "公园 / 户外",
+        "immersive_scene_id": "park",
+        "order": 3
+      },
+      {
+        "id": "clinic",
+        "small_scene_id": "hospital",
+        "name": "医院 / 诊所",
+        "immersive_scene_id": "clinic",
+        "order": 4
+      },
+      {
+        "id": "bank",
+        "small_scene_id": "bank",
+        "name": "银行",
+        "immersive_scene_id": "bank",
+        "order": 5
+      }
+    ],
+    "food": [
+      {
+        "id": "cafe",
+        "small_scene_id": "cafe",
+        "name": "咖啡馆",
+        "immersive_scene_id": "cafe",
+        "order": 1
+      },
+      {
+        "id": "restaurant",
+        "small_scene_id": "restaurant",
+        "name": "餐厅 / 饭店",
+        "immersive_scene_id": "restaurant",
+        "order": 2
+      },
+      {
+        "id": "fast_food",
+        "small_scene_id": "fast_food",
+        "name": "快餐店",
+        "immersive_scene_id": "fast_food",
+        "order": 3
+      },
+      {
+        "id": "snack_shop",
+        "small_scene_id": "snack_shop",
+        "name": "小吃店 / 奶茶店",
+        "immersive_scene_id": "snack_shop",
+        "order": 4
+      }
+    ],
+    "transport": [
+      {
+        "id": "airport",
+        "small_scene_id": "airport",
+        "name": "机场",
+        "immersive_scene_id": "airport",
+        "order": 1
+      },
+      {
+        "id": "train_station",
+        "small_scene_id": "train_station",
+        "name": "火车站 / 高铁站",
+        "immersive_scene_id": "train_station",
+        "order": 2
+      },
+      {
+        "id": "bus_metro",
+        "small_scene_id": "bus_metro",
+        "name": "地铁 / 公交",
+        "immersive_scene_id": "bus_metro",
+        "order": 3
+      },
+      {
+        "id": "taxi",
+        "small_scene_id": "taxi",
+        "name": "出租车 / 网约车",
+        "immersive_scene_id": "taxi",
+        "order": 4
+      },
+      {
+        "id": "hotel",
+        "small_scene_id": "hotel",
+        "name": "酒店",
+        "immersive_scene_id": "hotel",
+        "order": 5
+      }
+    ],
+    "shopping": [
+      {
+        "id": "supermarket",
+        "small_scene_id": "supermarket",
+        "name": "超市 / 便利店",
+        "immersive_scene_id": "supermarket",
+        "order": 1
+      },
+      {
+        "id": "mall",
+        "small_scene_id": "mall",
+        "name": "商场 / 服装店",
+        "immersive_scene_id": "mall",
+        "order": 2
+      },
+      {
+        "id": "barber",
+        "small_scene_id": "barber",
+        "name": "理发店",
+        "immersive_scene_id": "barber",
+        "order": 3
+      },
+      {
+        "id": "cinema",
+        "small_scene_id": "cinema",
+        "name": "电影院",
+        "immersive_scene_id": "cinema",
+        "order": 4
+      }
+    ],
+    "work": [
+      {
+        "id": "office",
+        "small_scene_id": "office",
+        "name": "办公室",
+        "immersive_scene_id": "office",
+        "order": 1
+      },
+      {
+        "id": "interview",
+        "small_scene_id": "interview",
+        "name": "面试",
+        "immersive_scene_id": "interview",
+        "order": 2
+      },
+      {
+        "id": "meeting",
+        "small_scene_id": "meeting",
+        "name": "会议 / 接待",
+        "immersive_scene_id": "meeting",
+        "order": 3
+      },
+      {
+        "id": "phone",
+        "small_scene_id": "phone",
+        "name": "电话沟通",
+        "immersive_scene_id": "phone",
+        "order": 4
+      }
+    ],
+    "social": [
+      {
+        "id": "party",
+        "small_scene_id": "party",
+        "name": "朋友聚会",
+        "immersive_scene_id": "party",
+        "order": 1
+      },
+      {
+        "id": "chat",
+        "small_scene_id": "chat",
+        "name": "打招呼 / 闲聊",
+        "immersive_scene_id": "chat",
+        "order": 2
+      },
+      {
+        "id": "hobby",
+        "small_scene_id": "hobby",
+        "name": "兴趣爱好",
+        "immersive_scene_id": "hobby",
+        "order": 3
+      },
+      {
+        "id": "praise",
+        "small_scene_id": "praise",
+        "name": "赞美 / 安慰 / 道歉",
+        "immersive_scene_id": "praise",
+        "order": 4
+      }
+    ]
+  },
+  "scene_detail_by_immersive_id": {
+    "home": {
+      "title": "家 / 居家",
+      "small_scene_id": "home",
+      "npcs": [
+        {
+          "id": "family",
+          "label": "家人",
+          "character": "home_family"
+        },
+        {
+          "id": "roommate",
+          "label": "室友",
+          "character": "home_roommate"
+        }
+      ]
+    },
+    "community": {
+      "title": "小区 / 楼下",
+      "small_scene_id": "community",
+      "npcs": [
+        {
+          "id": "neighbor",
+          "label": "邻居",
+          "character": "community_neighbor"
+        },
+        {
+          "id": "security",
+          "label": "保安",
+          "character": "community_security"
+        },
+        {
+          "id": "courier",
+          "label": "快递员",
+          "character": "community_courier"
+        },
+        {
+          "id": "delivery",
+          "label": "外卖员",
+          "character": "community_delivery"
+        }
+      ]
+    },
+    "park": {
+      "title": "公园 / 户外",
+      "small_scene_id": "park",
+      "npcs": [
+        {
+          "id": "passerby",
+          "label": "路人",
+          "character": "park_passerby"
+        },
+        {
+          "id": "elder",
+          "label": "晨练老人",
+          "character": "park_elder"
+        }
+      ]
+    },
+    "clinic": {
+      "title": "医院 / 诊所",
+      "small_scene_id": "hospital",
+      "npcs": [
+        {
+          "id": "doctor",
+          "label": "医生",
+          "character": "hospital_doctor"
+        },
+        {
+          "id": "nurse",
+          "label": "护士",
+          "character": "hospital_nurse"
+        },
+        {
+          "id": "reception",
+          "label": "挂号收费员",
+          "character": "hospital_reception"
+        }
+      ]
+    },
+    "bank": {
+      "title": "银行",
+      "small_scene_id": "bank",
+      "npcs": [
+        {
+          "id": "teller",
+          "label": "柜员",
+          "character": "bank_teller"
+        },
+        {
+          "id": "manager",
+          "label": "大堂经理",
+          "character": "bank_manager"
+        }
+      ]
+    },
+    "cafe": {
+      "title": "咖啡馆",
+      "small_scene_id": "cafe",
+      "npcs": [
+        {
+          "id": "waiter",
+          "label": "服务员",
+          "character": "cafe_waiter"
+        },
+        {
+          "id": "barista",
+          "label": "咖啡师",
+          "character": "cafe_barista"
+        },
+        {
+          "id": "customer",
+          "label": "顾客",
+          "character": "cafe_customer"
+        }
+      ]
+    },
+    "restaurant": {
+      "title": "餐厅 / 饭店",
+      "small_scene_id": "restaurant",
+      "npcs": [
+        {
+          "id": "host",
+          "label": "迎宾",
+          "character": "restaurant_host"
+        },
+        {
+          "id": "waiter",
+          "label": "服务员",
+          "character": "restaurant_waiter"
+        },
+        {
+          "id": "cashier",
+          "label": "收银员",
+          "character": "restaurant_cashier"
+        }
+      ]
+    },
+    "fast_food": {
+      "title": "快餐店",
+      "small_scene_id": "fast_food",
+      "npcs": [
+        {
+          "id": "order_staff",
+          "label": "点餐员",
+          "character": "fast_food_order_staff"
+        },
+        {
+          "id": "prep_staff",
+          "label": "配餐员",
+          "character": "fast_food_prep_staff"
+        }
+      ]
+    },
+    "snack_shop": {
+      "title": "小吃店 / 奶茶店",
+      "small_scene_id": "snack_shop",
+      "npcs": [
+        {
+          "id": "shop_staff",
+          "label": "店员",
+          "character": "snack_shop_shop_staff"
+        },
+        {
+          "id": "owner",
+          "label": "老板",
+          "character": "snack_shop_owner"
+        }
+      ]
+    },
+    "airport": {
+      "title": "机场",
+      "small_scene_id": "airport",
+      "npcs": [
+        {
+          "id": "ground_staff",
+          "label": "地勤",
+          "character": "airport_ground_staff"
+        },
+        {
+          "id": "security_check",
+          "label": "安检员",
+          "character": "airport_security_check"
+        },
+        {
+          "id": "flight_attendant",
+          "label": "空姐/空少",
+          "character": "airport_flight_attendant"
+        }
+      ]
+    },
+    "train_station": {
+      "title": "火车站 / 高铁站",
+      "small_scene_id": "train_station",
+      "npcs": [
+        {
+          "id": "ticket_clerk",
+          "label": "售票员",
+          "character": "train_station_ticket_clerk"
+        },
+        {
+          "id": "ticket_checker",
+          "label": "检票员",
+          "character": "train_station_ticket_checker"
+        }
+      ]
+    },
+    "bus_metro": {
+      "title": "地铁 / 公交",
+      "small_scene_id": "bus_metro",
+      "npcs": [
+        {
+          "id": "driver",
+          "label": "司机",
+          "character": "bus_metro_driver"
+        },
+        {
+          "id": "conductor",
+          "label": "售票员",
+          "character": "bus_metro_conductor"
+        }
+      ]
+    },
+    "taxi": {
+      "title": "出租车 / 网约车",
+      "small_scene_id": "taxi",
+      "npcs": [
+        {
+          "id": "taxi_driver",
+          "label": "司机",
+          "character": "taxi_taxi_driver"
+        }
+      ]
+    },
+    "hotel": {
+      "title": "酒店",
+      "small_scene_id": "hotel",
+      "npcs": [
+        {
+          "id": "hotel_reception",
+          "label": "前台",
+          "character": "hotel_hotel_reception"
+        },
+        {
+          "id": "housekeeping",
+          "label": "客房服务",
+          "character": "hotel_housekeeping"
+        },
+        {
+          "id": "cleaning",
+          "label": "保洁",
+          "character": "hotel_cleaning"
+        }
+      ]
+    },
+    "supermarket": {
+      "title": "超市 / 便利店",
+      "small_scene_id": "supermarket",
+      "npcs": [
+        {
+          "id": "cashier",
+          "label": "收银员",
+          "character": "supermarket_cashier"
+        },
+        {
+          "id": "guide",
+          "label": "导购员",
+          "character": "supermarket_guide"
+        }
+      ]
+    },
+    "mall": {
+      "title": "商场 / 服装店",
+      "small_scene_id": "mall",
+      "npcs": [
+        {
+          "id": "shop_staff",
+          "label": "店员",
+          "character": "mall_shop_staff"
+        },
+        {
+          "id": "mall_guide",
+          "label": "导购",
+          "character": "mall_mall_guide"
+        }
+      ]
+    },
+    "barber": {
+      "title": "理发店",
+      "small_scene_id": "barber",
+      "npcs": [
+        {
+          "id": "barber_staff",
+          "label": "理发师",
+          "character": "barber_barber_staff"
+        },
+        {
+          "id": "barber_front",
+          "label": "前台",
+          "character": "barber_barber_front"
+        }
+      ]
+    },
+    "cinema": {
+      "title": "电影院",
+      "small_scene_id": "cinema",
+      "npcs": [
+        {
+          "id": "cinema_clerk",
+          "label": "售票员",
+          "character": "cinema_cinema_clerk"
+        },
+        {
+          "id": "cinema_checker",
+          "label": "检票员",
+          "character": "cinema_cinema_checker"
+        }
+      ]
+    },
+    "office": {
+      "title": "办公室",
+      "small_scene_id": "office",
+      "npcs": [
+        {
+          "id": "boss",
+          "label": "领导",
+          "character": "office_boss"
+        },
+        {
+          "id": "colleague",
+          "label": "同事",
+          "character": "office_colleague"
+        },
+        {
+          "id": "subordinate",
+          "label": "下属",
+          "character": "office_subordinate"
+        }
+      ]
+    },
+    "interview": {
+      "title": "面试",
+      "small_scene_id": "interview",
+      "npcs": [
+        {
+          "id": "interviewer",
+          "label": "面试官",
+          "character": "interview_interviewer"
+        }
+      ]
+    },
+    "meeting": {
+      "title": "会议 / 接待",
+      "small_scene_id": "meeting",
+      "npcs": [
+        {
+          "id": "client",
+          "label": "客户",
+          "character": "meeting_client"
+        },
+        {
+          "id": "partner",
+          "label": "合作伙伴",
+          "character": "meeting_partner"
+        }
+      ]
+    },
+    "phone": {
+      "title": "电话沟通",
+      "small_scene_id": "phone",
+      "npcs": [
+        {
+          "id": "customer_service",
+          "label": "客服",
+          "character": "phone_customer_service"
+        },
+        {
+          "id": "operator",
+          "label": "接线员",
+          "character": "phone_operator"
+        }
+      ]
+    },
+    "party": {
+      "title": "朋友聚会",
+      "small_scene_id": "party",
+      "npcs": [
+        {
+          "id": "friend",
+          "label": "朋友",
+          "character": "party_friend"
+        },
+        {
+          "id": "classmate",
+          "label": "同学",
+          "character": "party_classmate"
+        }
+      ]
+    },
+    "chat": {
+      "title": "打招呼 / 闲聊",
+      "small_scene_id": "chat",
+      "npcs": [
+        {
+          "id": "stranger",
+          "label": "陌生人",
+          "character": "chat_stranger"
+        }
+      ]
+    },
+    "hobby": {
+      "title": "兴趣爱好",
+      "small_scene_id": "hobby",
+      "npcs": [
+        {
+          "id": "playmate",
+          "label": "玩伴",
+          "character": "hobby_playmate"
+        },
+        {
+          "id": "hobbyist",
+          "label": "同好",
+          "character": "hobby_hobbyist"
+        }
+      ]
+    },
+    "praise": {
+      "title": "赞美 / 安慰 / 道歉",
+      "small_scene_id": "praise",
+      "npcs": [
+        {
+          "id": "companion",
+          "label": "通用 NPC（朋友/同事/家人）",
+          "character": "praise_companion"
+        }
+      ]
+    }
+  }
+}

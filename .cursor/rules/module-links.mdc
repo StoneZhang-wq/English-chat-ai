@@ -31,6 +31,7 @@ alwaysApply: true
 1. 更新 `docs/PROJECT_FLOW.md` 中对应板块的「实现」和「功能」描述（如有变化）
 2. 检查联动表中列出的相关板块是否需要改动
 3. 若发现联动表已过时，按「元规则」更新本规则
+4. **数据库/场景更新**：每次更新 `data/dialogues.json` 或大/小场景、NPC 结构时，须同步更新 `app/scene_npc_db.py` 中 `infer_theme_scene_from_conversation()` 的关键词与场景映射，以保持推荐主题与数据库一致（详见 `docs/SCENE_INDEX_AND_IMAGES.md` 第三节）
 
 ## 数据来源
 

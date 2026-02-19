@@ -29,6 +29,7 @@ interface Message {
 export const Room = ({
   name,
   learningLanguages = [],
+  sceneId,
   localAudioTrack,
   localVideoTrack,
   chatInput,
@@ -39,6 +40,8 @@ export const Room = ({
 }: {
   name: string;
   learningLanguages?: string[];
+  /** 场景 ID，同场景用户互相匹配 */
+  sceneId?: string;
   localAudioTrack: MediaStreamTrack | null;
   localVideoTrack: MediaStreamTrack | null;
   chatInput: string;
@@ -260,6 +263,7 @@ export const Room = ({
       socket.emit("user-info", {
         name,
         languages: learningLanguages,
+        sceneId: sceneId || undefined,
       });
     });
 

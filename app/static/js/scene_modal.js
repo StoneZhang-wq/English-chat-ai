@@ -27,6 +27,9 @@
   let cacheBigScenes = null;
   const cacheSmallByBig = {};
   const cacheSceneDetail = {};
+  /** 当前所在大场景（从大场景点进小场景后设置），回退时用于恢复小场景列表 */
+  let currentBigSceneId = null;
+  let currentBigSceneName = null;
 
   function showListLoading(msg) {
     const container = q('#scenesList');
@@ -41,6 +44,9 @@
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     document.body.classList.add('scenes-modal-open');
+    // 每次打开弹窗清空场景列表缓存，确保拿到最新图片 URL（避免后端换图后仍显示旧图）
+    cacheBigScenes = null;
+    Object.keys(cacheSmallByBig).forEach(function (k) { delete cacheSmallByBig[k]; });
   }
   function closeModal() {
     const modal = q('#scenesModal');
@@ -124,15 +130,17 @@
   }
 
   async function loadSmallScenes(bigSceneId, bigSceneName) {
+    currentBigSceneId = bigSceneId;
+    currentBigSceneName = bigSceneName || '小场景';
     const cached = cacheSmallByBig[bigSceneId];
     if (Array.isArray(cached)) {
-      renderSmallScenesList(cached, bigSceneName);
+      renderSmallScenesList(cached, currentBigSceneName);
       const backBtn = q('#scenesBackBtn');
       if (backBtn) {
         backBtn.style.display = 'inline-block';
         backBtn.dataset.level = 'big';
       }
-      q('#scenesModalTitle').textContent = bigSceneName || '小场景';
+      q('#scenesModalTitle').textContent = currentBigSceneName;
       return;
     }
     showListLoading('加载小场景…');
@@ -142,13 +150,13 @@
       const res = await fetchJSON(url);
       const scenes = res.scenes || [];
       cacheSmallByBig[bigSceneId] = scenes;
-      renderSmallScenesList(scenes, bigSceneName);
+      renderSmallScenesList(scenes, currentBigSceneName);
       const backBtn = q('#scenesBackBtn');
       if (backBtn) {
         backBtn.style.display = 'inline-block';
         backBtn.dataset.level = 'big';
       }
-      q('#scenesModalTitle').textContent = bigSceneName || '小场景';
+      q('#scenesModalTitle').textContent = currentBigSceneName;
     } catch (e) {
       console.error('无法加载小场景：', e);
       q('#scenesList').innerHTML = '<div style="padding:24px;text-align:center;color:#666;"><p>无法加载小场景，请稍后重试</p></div>';
@@ -170,38 +178,48 @@
     const smallSceneId = scene.small_scene_id || scene.id;
     scene.npcs.forEach(npc => {
       const learned = npc.learned === true;
+      const npcImg = npc.image || '';
       const el = document.createElement('div');
       el.className = 'npc' + (learned ? '' : ' npc-locked');
       el.dataset.character = npc.character;
       el.dataset.smallSceneId = smallSceneId;
       el.dataset.npcId = npc.id;
       el.dataset.learned = learned ? '1' : '0';
+      el.dataset.npcImage = npcImg;
+      el.dataset.npcLabel = npc.label || '';
       el.innerHTML = learned
         ? `
         <span class="npc-badge npc-badge-unlocked">可对话</span>
-        <div class="npc-avatar"></div>
+        <div class="npc-avatar"><img src="${npcImg}" alt="${npc.label}" /></div>
         <div class="npc-label">${npc.label}</div>
         <div class="npc-hint">${npc.hint}</div>
       `
         : `
         <span class="npc-badge npc-badge-locked">未解锁</span>
-        <div class="npc-avatar npc-avatar-locked"><span class="npc-lock-icon">${lockIconSVG}</span></div>
+        <div class="npc-avatar npc-avatar-locked"><img src="${npcImg}" alt="${npc.label}" /><span class="npc-lock-icon">${lockIconSVG}</span></div>
         <div class="npc-label">${npc.label}</div>
         <div class="npc-hint npc-hint-locked">完成学习页对话后解锁</div>
       `;
       el.addEventListener('click', () => {
         if (el.dataset.learned !== '1') return;
-        openScenePractice(npc.label, smallSceneId, npc.id);
+        openScenePractice(npc.label, smallSceneId, npc.id, npcImg);
       });
       npcLayer.appendChild(el);
     });
     container.appendChild(npcLayer);
+    // 真人 1v1 练习入口（同场景用户互相匹配）
+    const acc = getSceneAccount();
+    const liveUrl = '/practice/live/chat?scene=' + encodeURIComponent(smallSceneId) + (acc ? '&account=' + encodeURIComponent(acc) : '');
+    const liveBar = document.createElement('div');
+    liveBar.className = 'scene-1v1-bar';
+    liveBar.innerHTML = '<a href="' + liveUrl + '" class="scene-1v1-btn" target="_self">真人 1v1 练习</a>';
+    container.appendChild(liveBar);
     view.appendChild(container);
   }
 
   // 从场景 NPC 进入练习模式（与英语练习相同体验：TTS 播放 + 用户语音输入）
-  // 练习 UI 显示在场景内叠加层，保持沉浸式体验；进入前显示 10 秒倒计时
-  async function openScenePractice(label, smallSceneId, npcId) {
+  // 练习 UI 显示在场景内叠加层；对话未准备好前统一显示倒计时，准备好后关闭倒计时并展示练习界面
+  async function openScenePractice(label, smallSceneId, npcId, npcImage) {
     const sceneChatModal = q('#sceneChatModal');
     if (sceneChatModal) sceneChatModal.style.display = 'none';
     const overlay = q('#scene-practice-overlay');
@@ -213,8 +231,6 @@
     const closeCountdown = typeof window.showCountdownOverlay === 'function'
       ? window.showCountdownOverlay('正在准备场景对话', 10)
       : function noop() {};
-    const sceneStartAt = Date.now();
-    const MIN_SCENE_MS = 2000;
     try {
       const res = await fetch(`/api/scene-npc/dialogue/immersive?small_scene_id=${encodeURIComponent(smallSceneId)}&npc_id=${encodeURIComponent(npcId)}`);
       const data = await res.json().catch(() => ({}));
@@ -228,22 +244,18 @@
         alert('暂无对话内容');
         return;
       }
-      const elapsed = Date.now() - sceneStartAt;
-      const delayClose = Math.max(0, MIN_SCENE_MS - elapsed);
-      await new Promise(function (r) { setTimeout(r, delayClose); });
-      closeCountdown();
 
       const content = data.dialogue.content;
       const dialogueLines = content.map(item => ({
         speaker: item.role === 'A' ? 'A' : 'B',
         text: item.content || '',
-        hint: item.hint || undefined,
+        hint: item.hint != null ? item.hint : '',  // 始终带上 hint，避免后端收不到
         audio_url: null
       }));
       const dialogue = dialogueLines.map(l => `${l.speaker}: ${l.text}`).join('\n');
       const dialogueId = data.dialogue.dialogue_id || `scene-${smallSceneId}-${npcId}`;
       overlay.style.display = 'flex';
-      container.innerHTML = '<div class="scene-practice-loading">正在载入对话，请稍候...</div>';
+      container.innerHTML = '';
       if (typeof window.startScenePractice === 'function') {
         await window.startScenePractice({
           dialogue,
@@ -251,13 +263,17 @@
           dialogue_id: dialogueId,
           small_scene_id: smallSceneId,
           npc_id: npcId,
+          npc_label: label || '',
+          npc_image: npcImage || '',
           targetContainer: container,
           onReady: function () {}
         });
+        closeCountdown();
         if (!container.querySelector('#practice-mode-ui')) {
           hideScenePracticeOverlay();
         }
       } else {
+        closeCountdown();
         overlay.style.display = 'none';
         alert('练习功能未加载，请刷新页面');
       }
@@ -269,13 +285,16 @@
     }
   }
 
-  // 练习结束后隐藏叠加层，恢复场景视图
+  // 练习结束后隐藏叠加层，恢复场景视图；同时清除练习状态，避免主界面输入仍被当作练习回复
   function hideScenePracticeOverlay() {
     const overlay = q('#scene-practice-overlay');
     const container = q('#scene-practice-container');
     if (overlay) overlay.style.display = 'none';
     if (container) container.innerHTML = '';
     document.body.classList.remove('scene-practice-active');
+    if (typeof window.clearPracticeStateWhenLeavingScene === 'function') {
+      window.clearPracticeStateWhenLeavingScene();
+    }
   }
   window.hideScenePracticeOverlay = hideScenePracticeOverlay;
   function closeSceneChat() {
@@ -308,7 +327,14 @@
       if (backBtn) backBtn.dataset.level = 'scene';
       return;
     }
-    showListLoading('进入场景…');
+    // 进入详情时在场景视图区显示 loading，不覆盖 #scenesList，以便回退时能恢复小场景列表
+    q('#scenesListPane').style.display = 'none';
+    q('#sceneViewPane').style.display = 'block';
+    q('#scenesBackBtn').style.display = 'inline-block';
+    const backBtn = q('#scenesBackBtn');
+    if (backBtn) backBtn.dataset.level = 'scene';
+    const view = q('#sceneView');
+    view.innerHTML = '<div class="scene-list-loading"><span class="scene-list-spinner"></span><p>进入场景…</p></div>';
     try {
       let scene;
       try {
@@ -318,24 +344,24 @@
         scene = data.scene;
       } catch (e) {
         console.error('加载场景失败：', e);
-        q('#scenesList').innerHTML = '';
+        q('#scenesListPane').style.display = 'block';
+        q('#sceneViewPane').style.display = 'none';
         alert('无法加载场景（后端未返回该场景或网络错误）');
         return;
       }
       if (!scene) {
+        q('#scenesListPane').style.display = 'block';
+        q('#sceneViewPane').style.display = 'none';
         alert('未知场景：' + id);
         return;
       }
       cacheSceneDetail[id] = scene;
       renderSceneView(scene);
-      q('#scenesListPane').style.display = 'none';
-      q('#sceneViewPane').style.display = 'block';
-      q('#scenesBackBtn').style.display = 'inline-block';
       q('#scenesModalTitle').textContent = scene.title;
-      const backBtn = q('#scenesBackBtn');
-      if (backBtn) backBtn.dataset.level = 'scene';
     } catch (e) {
       console.error(e);
+      q('#scenesListPane').style.display = 'block';
+      q('#sceneViewPane').style.display = 'none';
       alert('加载场景失败：' + e.message);
     }
   }
@@ -352,6 +378,15 @@
       cacheBigScenes = scenes;
       if (scenes && scenes.length) {
         renderBigScenesList(scenes);
+        // 预取第一个大场景的小场景列表，用户点进时即可秒出
+        const firstId = scenes[0].id;
+        if (firstId && !cacheSmallByBig[firstId]) {
+          const acc = getSceneAccount();
+          const url = urlWithAccount('/api/scene-npc/immersive-small-scenes?big_scene_id=' + encodeURIComponent(firstId), acc);
+          fetch(url, { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (res) {
+            if (res.scenes && Array.isArray(res.scenes)) cacheSmallByBig[firstId] = res.scenes;
+          }).catch(function () {});
+        }
       } else {
         q('#scenesList').innerHTML = '<div style="padding:24px;text-align:center;color:#666;"><p>暂无可体验的大场景</p></div>';
       }
@@ -410,14 +445,17 @@
       hideScenePracticeOverlay();
       const lvl = backBtn.dataset.level || 'big';
       if (lvl === 'scene') {
-        // 从场景视图返回到小场景列表
+        // 从场景视图返回到小场景列表：用缓存重新渲染小场景列表，避免空白/loading
         q('#sceneViewPane').style.display = 'none';
         q('#scenesListPane').style.display = 'block';
         backBtn.dataset.level = 'big';
-        q('#scenesModalTitle').textContent = '场景体验';
-        backBtn.style.display = 'none';
+        if (currentBigSceneId && Array.isArray(cacheSmallByBig[currentBigSceneId])) {
+          renderSmallScenesList(cacheSmallByBig[currentBigSceneId], currentBigSceneName || '小场景');
+        }
+        q('#scenesModalTitle').textContent = currentBigSceneName || '场景体验';
+        backBtn.style.display = 'inline-block';
       } else {
-        // 从小场景列表返回到大场景列表：用缓存重新渲染大场景列表，避免再发请求
+        // 从小场景列表返回到大场景列表：用缓存重新渲染大场景列表
         q('#sceneViewPane').style.display = 'none';
         q('#scenesListPane').style.display = 'block';
         q('#scenesModalTitle').textContent = '场景体验';

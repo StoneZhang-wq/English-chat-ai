@@ -104,14 +104,14 @@
 
 ### 规则约定
 
-- **角色约定（重要）**：`role` 必须为 **A = NPC（对方角色）**，**B = 用户（学习者）**。对话可以 A 或 B 开头。
+- **角色约定（重要）**：`role` 必须为 **A = NPC（对方角色）**，**B = 用户（学习者）**。**建议每条对话由 A（NPC）先开口**，避免用户不知道谁在说话。
 - **每 NPC 配 3 套对话**：`dialogue_set` 为 1、2、3
 - **usage**：  
   - 学习页：`dialogue_set` 1 = `learn`（模板对话）  
   - 复习：`dialogue_set` 2 = `review`（复习资料）  
   - 沉浸式：`dialogue_set` 3 = `immersive`（仅第三套用于沉浸式）
-- **content 格式**：`role` A=NPC、B=用户，含 `hint` 提示（hint 对应 B 行，即用户应说的内容）
-- **content 长度**：建议统一 4～8 轮（8～16 条），可按小场景类型微调
+- **content 格式**：`role` A=NPC、B=用户，含 `hint` 提示（hint 对应 B 行，即用户应说的内容）。**hint 必须包含「关键词或关键句」**（如 `What's for dinner? / Where are the plates?`），禁止仅写动作描述（如 `ask address`、`offer help`），以便用户知道该说什么。
+- **content 长度**：建议 **8～16 轮（16～32 条）**，最少不少于 8 条；日常场景 10 句不足以掌握，需更完整对话
 
 ---
 

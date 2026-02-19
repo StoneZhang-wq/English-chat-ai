@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 async def generate_tts_for_dialogue_lines(dialogue_lines: List[Dict], dialogue_id: str) -> None:
-    """为 dialogue_lines 每行生成 TTS 音频，填充 audio_url。供英语卡片、复习资料等共用。"""
-    from .app import API_PROVIDER, doubao_text_to_speech, openai_text_to_speech
+    """为 dialogue_lines 每行生成 TTS 音频，填充 audio_url。A=NPC、B=用户 使用不同人声（若已配置）。"""
+    from .app import API_PROVIDER, doubao_text_to_speech, openai_text_to_speech, OPENAI_TTS_VOICE, OPENAI_TTS_VOICE_B
     current_file_dir = os.path.dirname(os.path.abspath(__file__))
     project_dir = os.path.dirname(current_file_dir)
     audio_dir = os.path.join(project_dir, "outputs", "english_dialogue", dialogue_id)
@@ -24,20 +24,29 @@ async def generate_tts_for_dialogue_lines(dialogue_lines: List[Dict], dialogue_i
     tts_encoding = os.getenv("TTS_ENCODING", "mp3")
     for i, line in enumerate(dialogue_lines):
         try:
+            speaker = line.get("speaker", "A")
             if API_PROVIDER == "doubao" and tts_encoding == "mp3":
-                audio_filename = f"{line.get('speaker', 'A')}_{i}.mp3"
+                audio_filename = f"{speaker}_{i}.mp3"
             else:
-                audio_filename = f"{line.get('speaker', 'A')}_{i}.wav"
+                audio_filename = f"{speaker}_{i}.wav"
             audio_path = os.path.join(audio_dir, audio_filename)
             success = False
             if API_PROVIDER == "doubao":
-                success = await doubao_text_to_speech(line["text"], audio_path)
+                voice_type_a = os.getenv("TTS_VOICE_TYPE")
+                voice_type_b = os.getenv("TTS_VOICE_TYPE_B")
+                voice_type = voice_type_b if speaker == "B" and voice_type_b else voice_type_a
+                success = await doubao_text_to_speech(line["text"], audio_path, voice_type=voice_type)
+                # 若 B 人声未开通（如 403 resource not granted），回退为 A 人声
+                if not success and speaker == "B" and voice_type_b and voice_type_b != voice_type_a:
+                    logger.info("角色 B 人声 %s 不可用，回退使用 A 人声", voice_type_b)
+                    success = await doubao_text_to_speech(line["text"], audio_path, voice_type=voice_type_a)
                 if not success:
                     line["audio_url"] = None
                     continue
             elif API_PROVIDER == "openai":
                 try:
-                    await openai_text_to_speech(line["text"], audio_path)
+                    voice = OPENAI_TTS_VOICE_B if speaker == "B" else OPENAI_TTS_VOICE
+                    await openai_text_to_speech(line["text"], audio_path, voice=voice)
                     success = True
                 except Exception as e:
                     logger.warning("OpenAI TTS line %d 失败: %s", i, e)
@@ -211,123 +220,48 @@ class DiaryMemorySystem:
         from .adapters import get_memory_adapter
         self._adapter = get_memory_adapter(account_name=account_name, project_dir=project_dir)
         _user_id = self._adapter.get_user_id()
-        # 逻辑路径（用于日志与兼容引用，如 app_logic 中的 session_temp_file）
-        self.diary_file = Path("memory") / "accounts" / _user_id / "diary.json"
+        # 逻辑路径（用于日志与兼容引用）
         self.session_temp_file = Path("memory") / "accounts" / _user_id / "session_temp.json"
         self.user_profile_file = Path("memory") / "accounts" / _user_id / "user_profile.json"
         
-        self.max_entries = max_entries or int(os.getenv("MEMORY_MAX_ENTRIES", "50"))
-        
-        # 文件后端时确保目录存在（SupabaseAdapter 无 base_dir）
+        # 文件后端时确保目录存在
         if hasattr(self._adapter, "base_dir"):
             self._adapter.base_dir.mkdir(parents=True, exist_ok=True)
         
-        self.diary_data = self.load_diary()
         self.user_profile = self.load_user_profile()
         
         # 打印调试信息
         backend = (os.getenv("MEMORY_BACKEND") or "file").strip().lower()
         print(f"Memory system initialized (backend={backend}):")
-        print(f"  Diary: {self.diary_file}")
         print(f"  Session temp: {self.session_temp_file}")
         print(f"  User profile: {self.user_profile_file}")
-        
-    def load_diary(self) -> Dict:
-        """加载日记（来自 adapter：文件或 Supabase）"""
-        return self._adapter.load_diary_data()
-    
-    def save_diary(self):
-        """保存日记（写入 adapter）"""
-        self.diary_data["last_updated"] = datetime.now().isoformat()
-        self._adapter.save_diary_data(self.diary_data)
     
     def get_memory_context(self) -> str:
-        """获取记忆上下文，基于日记摘要和用户档案"""
-        # 获取当前日期
+        """获取记忆上下文，基于用户档案与当前时间（已移除 diary 依赖）"""
         today = datetime.now()
         today_str = today.strftime("%Y年%m月%d日")
         today_iso = today.strftime("%Y-%m-%d")
         weekday = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"][today.weekday()]
         
-        # 获取用户档案
         user_profile = self.get_user_profile_context()
-        
-        # 获取最近的日记条目（最近10条）
-        recent_entries = self.diary_data.get("entries", [])[-10:]
-        
-        # 构建上下文
         context_parts = [f"[当前时间信息]\n今天是{today_str}（{weekday}），日期：{today_iso}"]
         
         if user_profile:
             context_parts.append(f"[用户档案信息]\n{user_profile}")
         
-        if recent_entries:
-            # 按日期分组条目
-            entries_by_date = {}
-            for entry in recent_entries:
-                date_str = entry.get("date", "")
-                if date_str:
-                    if date_str not in entries_by_date:
-                        entries_by_date[date_str] = []
-                    entries_by_date[date_str].append(entry)
-            
-            # 生成摘要列表（带相对时间标签）
-            summary_entries = []
-            for date_str in sorted(entries_by_date.keys())[-7:]:  # 最近7天的记录
-                time_label = self.get_relative_time_label(date_str)
-                date_entries = entries_by_date[date_str]
-                summaries = [e.get("summary", "") for e in date_entries if e.get("summary")]
-                if summaries:
-                    # 合并同一天的多个摘要
-                    combined_summary = " ".join(summaries)
-                    summary_entries.append(f"{time_label}（{date_str}）：{combined_summary}")
-            
-            if summary_entries:
-                context_parts.append(f"[最近的对话记录]\n" + "\n".join(summary_entries))
-        
-        if len(context_parts) == 1:  # 只有时间信息
+        if len(context_parts) == 1:
             return ""
         
         context = "\n\n".join(context_parts)
         context += f"""
 
-请根据以上记忆与用户对话：
+请根据以上信息与用户对话：
 1. 明确知道今天是{today_str}
 2. 如果用户提到"昨天"、"今天"、"明天"，要能准确理解
-3. 可以主动提及之前的对话内容，如"你昨天提到..."、"你之前说过..."
-4. 可以追问后续进展，如"你之前提到的...现在怎么样了？"
-5. 保持对话的连贯性和时间感
-6. 使用相对时间概念（昨天、前天、上周等）让对话更自然
-7. 如果知道用户的姓名、兴趣等信息，要自然地使用这些信息
-8. 重要：只能基于以上真实记录的对话内容进行对话，不要虚构或添加不存在的信息
-9. 重要：不要说"在日记中提到"，只说"提到"或"说过"即可
-10. 重要：回复要简洁自然，像正常朋友聊天一样。每次回复尽量控制在50-100字左右，除非用户明确要求详细解释。保持对话的轻松和自然，不要长篇大论。
+3. 如果知道用户的姓名、兴趣等信息，要自然地使用这些信息
+4. 回复要简洁自然，像正常朋友聊天一样。每次回复尽量控制在50-100字左右，除非用户明确要求详细解释。
 """
         return context
-    
-    def get_relative_time_label(self, date_str: str) -> str:
-        """获取相对时间标签（昨天、今天、明天等）"""
-        try:
-            target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-            today = datetime.now().date()
-            days_ago = (today - target_date).days
-            
-            if days_ago == 0:
-                return "今天"
-            elif days_ago == 1:
-                return "昨天"
-            elif days_ago == 2:
-                return "前天"
-            elif days_ago < 7:
-                return f"{days_ago}天前"
-            elif days_ago < 30:
-                weeks = days_ago // 7
-                return f"{weeks}周前"
-            else:
-                months = days_ago // 30
-                return f"{months}个月前"
-        except:
-            return date_str
     
     def save_to_session_temp(self, message: Dict, character: str = ""):
         """保存消息到临时会话（adapter）"""
@@ -365,96 +299,6 @@ class DiaryMemorySystem:
         ]
         response_lower = response.lower()
         return any(indicator.lower() in response_lower for indicator in error_indicators)
-    
-    async def generate_diary_summary(self, session_messages: List[Dict], character: str):
-        """从会话生成文本摘要（不设字数限制，实事求是）"""
-        import asyncio
-        from .app import chatgpt_streamed_async
-        
-        conversation_text = "\n".join([
-            f"{msg['role']}: {msg['content']}" 
-            for msg in session_messages
-        ])
-        
-        today = datetime.now()
-        date_str = today.strftime("%Y-%m-%d")
-        timestamp = today.isoformat()
-        session_id = f"{date_str}_{today.strftime('%H-%M-%S')}"
-        
-        # 简化的摘要生成提示词
-        summary_prompt = f"""请将以下对话整理成一段简单的文本摘要，描述用户在这次对话中做了什么、说了什么、表达了什么。
-
-要求：
-1. 实事求是，有多少信息就写多少，不设字数限制
-2. 如果用户只是简单打招呼，就写"用户简单打招呼"
-3. 如果用户说了很多信息，就详细记录
-4. 只记录对话中明确提到的内容，不要虚构或添加细节
-5. 用自然的中文描述，像在写日记一样
-
-对话内容：
-{conversation_text}
-
-只返回摘要文本，不要其他说明。"""
-        
-        # 将同步函数包装成异步调用
-        response = await chatgpt_streamed_async(
-            summary_prompt,
-            "你是一个专业的对话摘要助手，实事求是地总结对话内容，不添加任何细节。",
-            "neutral",
-            []
-        )
-        
-        # 检查是否为错误响应
-        if self.is_error_response(response):
-            print(f"Error in diary summary generation: {response}")
-            return None
-        
-        # 清理响应（去除可能的格式标记）
-        summary = response.strip()
-        if not summary:
-            return None
-        
-        return {
-            "date": date_str,
-            "timestamp": timestamp,
-            "session_id": session_id,
-            "character": character,
-            "summary": summary
-        }
-    
-    async def generate_diary_summary_from_temp(self, character: str = ""):
-        """从临时文件生成摘要"""
-        session_data = self.load_session_temp()
-        if not session_data or not session_data.get("messages"):
-            return None
-        
-        # 使用临时文件中的消息进行生成
-        messages = session_data.get("messages", [])
-        if not messages:
-            return None
-        
-        # 使用临时文件中的角色，如果没有则使用传入的角色
-        session_character = session_data.get("character") or character
-        
-        entry = await self.generate_diary_summary(messages, session_character)
-        return entry
-    
-    def add_diary_entry(self, entry: Dict):
-        """添加日记条目到日记文件"""
-        if not entry:
-            return
-        
-        if "entries" not in self.diary_data:
-            self.diary_data["entries"] = []
-        
-        self.diary_data["entries"].append(entry)
-        
-        # 限制条目数量（保留最近N条）
-        if len(self.diary_data["entries"]) > self.max_entries:
-            self.diary_data["entries"] = self.diary_data["entries"][-self.max_entries:]
-        
-        # 保存到文件
-        self.save_diary()
     
     def load_user_profile(self) -> Dict:
         """加载用户档案（adapter）"""

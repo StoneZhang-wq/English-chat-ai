@@ -38,7 +38,7 @@ Voice Chat AI 是一个**英语学习语音对话应用**，支持多账户、�
 **实现：**
 - `main.py`：`POST /api/account/login`、`GET /api/account/current`、`POST /api/account/logout`
 - `shared.py`：`current_account`、`memory_system`，`get_memory_system(account_name)` 单例
-- 数据目录：`memory/accounts/{用户名}/`（user_profile.json、diary.json、session_temp.json、learning_progress.csv、scene_preferences.csv）
+- 数据目录：`memory/accounts/{用户名}/`（user_profile.json、session_temp.json、npc_learn_progress.json 等；已移除 diary）
 
 **未来改进：** 密码/认证、数据导入导出、多设备同步
 
@@ -95,13 +95,12 @@ Voice Chat AI 是一个**英语学习语音对话应用**，支持多账户、�
 ### 板块 5：结束对话与摘要
 
 **功能：**
-- 生成当日会话摘要并写入日记
-- 从摘要抽取用户信息
-- 根据摘要推荐练习场景
+- 从当次会话抽取用户信息并更新 user_profile
+- 清空临时会话；返回场景列表供前端选择
 
 **实现：**
 - `main.py`：`POST /api/conversation/end`
-- `memory_system.generate_diary_summary_from_temp()`、`add_diary_entry()`、`extract_user_info()`、`clear_session_temp()`、`get_suggested_scenes_from_summary()`
+- `memory_system.extract_user_info()`、`clear_session_temp()`（已移除 diary 生成与存储）
 
 **未来改进：** 多轮摘要压缩、与知识图谱关联、敏感信息脱敏
 
@@ -133,19 +132,18 @@ Voice Chat AI 是一个**英语学习语音对话应用**，支持多账户、�
 **功能：**
 - 用户按卡片逐句跟读，AI 说 A 句，用户说 B 句
 - 校验用户表达与参考句意思一致性（check_meaning_consistency）
-- 提示（phrases、pattern、words、grammar）由 `extract_hints()` 从参考句抽取
+- 提示由对话行自带的 `hint` 解析，无 hint 时为空（不再用 LLM 抽取）
+- 练习主题固定为「日常对话」，供生成复习笔记用（不再用 LLM 分析对话主题）
 - 练习转写（不触发 AI 回复，节省 token）
 
 **API / 入口：**
 - `POST /api/practice/start`（解析卡片、初始化会话）
 - `POST /api/practice/respond`（校验用户输入、返回下一句）
 - `POST /api/practice/end`（返回完整会话数据）
-- `POST /api/practice/hints`（按需获取提示）
 - `POST /api/practice/transcribe`（练习模式专用转写）
 
 **实现：**
-- `main.py`：上述 API、`check_meaning_consistency()`、`extract_hints()` 调用 LLM
-- 会话：`practice_sessions` 内存字典，`session_id` 贯穿
+- `main.py`：上述 API、`check_meaning_consistency()` 调用 LLM；会话：`practice_sessions` 内存字典，`session_id` 贯穿
 
 **未来改进：** 发音评估、流利度分析、知识点掌握度回写
 
@@ -268,7 +266,7 @@ Voice Chat AI 是一个**英语学习语音对话应用**，支持多账户、�
 ```
 用户登录
     → 初始化 memory/accounts/{用户名}/
-    → 加载 user_profile、diary、session_temp
+    → 加载 user_profile、session_temp
 
 中文沟通
     → 用户输入（语音/文本）→ ASR/文本 → process_text()
@@ -276,7 +274,6 @@ Voice Chat AI 是一个**英语学习语音对话应用**，支持多账户、�
     → 保存到 session_temp → TTS 播放
 
 结束对话
-    → 生成摘要 → 写入 diary
     → 抽取用户信息 → 更新 user_profile
     → 推荐场景 → 返回 available_scenes、suggested_scenes
 
