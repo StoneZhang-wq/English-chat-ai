@@ -5,9 +5,10 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# 音频处理依赖（soundfile）
+# 音频处理依赖：soundfile + ffmpeg（pydub 用 ffmpeg 将 webm 转为 wav，豆包 ASR 必须）
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libsndfile1 \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /app/requirements.txt
