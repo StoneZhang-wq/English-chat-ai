@@ -17,7 +17,14 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, JSONResponse, Response
 from starlette.background import BackgroundTask
-from .shared import clients, set_current_character, conversation_history, add_client, remove_client, get_memory_system, set_current_account, get_current_account, get_last_memory_init_error
+from .shared import (
+    clients, add_client, remove_client,
+    get_memory_system, set_current_account, get_current_account, get_last_memory_init_error,
+    set_current_character, get_current_character, get_conversation_history, clear_conversation_history,
+    get_learning_stage, set_learning_stage,
+    set_websocket_account, get_websocket_account,
+    DEFAULT_ACCOUNT,
+)
 from .app_logic import start_conversation, stop_conversation, set_env_variable, characters_folder, set_transcription_model, fetch_ollama_models, load_character_prompt, load_character_specific_history
 from .enhanced_logic import start_enhanced_conversation, stop_enhanced_conversation
 from .app import send_message_to_clients
@@ -905,53 +912,43 @@ async def stop_enhanced_conversation_route():
     return {"status": "stopped"}
 
 @app.post("/clear_history")
-async def clear_history():
-    """Clear the conversation history."""
+async def clear_history(request: Request):
+    """Clear the conversation history。按用户分状态。"""
     try:
-        # Import with alias to avoid potential shadowing issues
-        from .shared import conversation_history, get_current_character as get_character
-        
-        current_character = get_character()
-        
-        # Check if this is a story or game character
+        acc = _request_account(request)
+        conversation_history = get_conversation_history(acc)
+        current_character = get_current_character(acc)
+
         is_story_character = current_character.startswith("story_") or current_character.startswith("game_")
-        print(f"Clearing history for {current_character} ({is_story_character=})")
-        
-        # Clear the in-memory history
-        conversation_history.clear()
-        
+        print(f"Clearing history for {current_character} ({is_story_character=}) (account={acc})")
+
+        clear_conversation_history(acc)
+
         if is_story_character:
-            # Clear character-specific history file
             character_dir = os.path.join(characters_folder, current_character)
             history_file = os.path.join(character_dir, "conversation_history.txt")
-            
             if os.path.exists(history_file):
                 os.remove(history_file)
                 print(f"Deleted character-specific history file for {current_character}")
-            
-            # Write empty history to character-specific file
             from .app_logic import save_character_specific_history
             save_character_specific_history(conversation_history, current_character)
-        # 不再处理全局历史文件（conversation_history.txt 已移除）
-        
+
         return {"status": "cleared"}
     except Exception as e:
         print(f"Error clearing history: {e}")
         return {"status": "error", "message": str(e)}
 
 @app.get("/download_history")
-async def download_history():
-    # Create a temporary file with a unique name different from the main history file
+async def download_history(request: Request):
+    """按用户分状态。"""
+    acc = _request_account(request)
+    conversation_history = get_conversation_history(acc)
     temp_file = f"temp_download_{uuid.uuid4().hex}.txt"
-    
-    # Format it the same way as the save_conversation_history function in app.py
     with open(temp_file, "w", encoding="utf-8") as file:
         for message in conversation_history:
             role = message["role"].capitalize()
             content = message["content"]
             file.write(f"{role}: {content}\n")
-    
-    # Return the file and ensure it will be cleaned up after sending
     return FileResponse(
         temp_file,
         media_type="text/plain",
@@ -960,13 +957,11 @@ async def download_history():
     )
 
 @app.get("/download_enhanced_history")
-async def download_enhanced_history():
-    """Download the conversation history."""
+async def download_enhanced_history(request: Request):
+    """Download the conversation history。按用户分状态。"""
     try:
-        # Import with alias to avoid potential shadowing issues
-        from .shared import get_current_character as get_character
-        
-        current_character = get_character()
+        acc = _request_account(request)
+        current_character = get_current_character(acc)
         
         # Check if this is a story or game character
         is_story_character = current_character.startswith("story_") or current_character.startswith("game_")
@@ -1115,15 +1110,22 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             data = await websocket.receive_text()
             message = json.loads(data)
-            if message["action"] == "stop":
-                await stop_conversation()
+            if message["action"] == "set_account":
+                # 绑定该 WebSocket 与账号，后续按用户分状态
+                set_websocket_account(websocket, message.get("account_name") or "")
+                await websocket.send_json({"action": "account_set", "account_name": get_websocket_account(websocket)})
+            elif message["action"] == "stop":
+                acc = get_websocket_account(websocket)
+                await stop_conversation(acc)
             elif message["action"] == "start":
+                acc = get_websocket_account(websocket)
                 selected_character = message["character"]
-                await stop_conversation()  # Ensure any running conversation stops
-                set_current_character(selected_character)
-                await start_conversation()
+                await stop_conversation(acc)
+                set_current_character(selected_character, acc)
+                await start_conversation(acc)
             elif message["action"] == "set_character":
-                set_current_character(message["character"])
+                acc = get_websocket_account(websocket)
+                set_current_character(message["character"], acc)
                 await websocket.send_json({"message": f"Character: {message['character']}"})
             elif message["action"] == "set_api_provider":
                 # 全局API供应商开关：统一设置LLM、TTS、ASR
@@ -1159,7 +1161,8 @@ async def websocket_endpoint(websocket: WebSocket):
             elif message["action"] == "set_kokoro_voice":
                 set_env_variable("KOKORO_TTS_VOICE", message["voice"])
             elif message["action"] == "clear":
-                conversation_history.clear()
+                acc = get_websocket_account(websocket)
+                clear_conversation_history(acc)
                 await websocket.send_json({"message": "Conversation history cleared."})
     except WebSocketDisconnect:
         remove_client(websocket)
@@ -1260,13 +1263,11 @@ async def get_character_prompt(character_name: str):
         return {"error": str(e)}
 
 @app.get("/get_character_history")
-async def get_character_history():
-    """Get conversation history for currently selected character."""
+async def get_character_history(request: Request):
+    """Get conversation history for currently selected character。按用户分状态。"""
     try:
-        # Import with alias to avoid potential shadowing issues
-        from .shared import get_current_character as get_character
-        
-        current_character = get_character()
+        acc = _request_account(request)
+        current_character = get_current_character(acc)
         
         # Check if this is a story or game character
         is_story_character = current_character.startswith("story_") or current_character.startswith("game_")
@@ -1290,10 +1291,22 @@ async def get_character_history():
         print(f"Error getting character history: {e}")
         return {"status": "error", "message": str(e)}
 
+def _request_account(request: Request = None, account_name: str = None) -> str:
+    """从请求解析当前账号：X-Account-Name 头 > 参数 account_name > get_current_account() > default。"""
+    if request:
+        h = (request.headers.get("X-Account-Name") or "").strip()
+        if h:
+            return h
+    if account_name:
+        return (account_name or "").strip() or DEFAULT_ACCOUNT
+    return (get_current_account() or "").strip() or DEFAULT_ACCOUNT
+
 @app.post("/api/voice/upload")
 async def upload_voice_audio(
+    request: Request,
     audio: UploadFile = File(...),
-    character: str = Form("english_tutor")
+    character: str = Form("english_tutor"),
+    account_name: str = Form(None),
 ):
     """处理上传的语音文件"""
     try:
@@ -1371,36 +1384,29 @@ async def upload_voice_audio(
         except:
             pass
         
-        # 设置角色
-        set_current_character(character)
-        
-        # 首次使用时加载记忆和历史
-        from .shared import conversation_history, get_memory_system
+        acc = _request_account(request, account_name)
+        set_current_character(character, acc)
+
+        conversation_history = get_conversation_history(acc)
         if len(conversation_history) == 0:
-            # 加载完整对话历史（最近50条）
             from .app_logic import load_character_specific_history
             is_story_character = character.startswith("story_") or character.startswith("game_")
             if is_story_character:
                 loaded_history = load_character_specific_history(character)
                 if loaded_history:
-                    # 只加载最近50条
                     conversation_history.extend(loaded_history[-50:])
-                    logger.info(f"Loaded {len(loaded_history[-50:])} messages from character-specific history")
-            # 不再加载全局历史文件（conversation_history.txt 已移除）
-        
-        # 发送用户消息到客户端（只发送一次）
+                    logger.info(f"Loaded {len(loaded_history[-50:])} messages from character-specific history (account={acc})")
+
         from .app import send_message_to_clients
         await send_message_to_clients(json.dumps({
             "action": "user_message",
             "text": transcription
         }))
-        
-        # 将用户输入添加到对话历史
+
         conversation_history.append({"role": "user", "content": transcription})
-        
-        # 处理用户输入并生成回复（在后台任务中执行，避免阻塞）
+
         from .app_logic import process_text
-        asyncio.create_task(process_text(transcription))
+        asyncio.create_task(process_text(transcription, account_name=acc))
         
         return JSONResponse({
             "status": "success",
@@ -1423,47 +1429,40 @@ async def send_text_message(request: Request):
         data = await request.json()
         text = data.get("text", "").strip()
         character = data.get("character", "english_tutor")
-        
+        acc = _request_account(request, data.get("account_name"))
+
         if not text:
             return JSONResponse({
                 "status": "error",
                 "message": "消息内容不能为空"
             }, status_code=400)
-        
-        # 场景 NPC 角色（cafe_waiter 等）若不存在则回退到 english_tutor
+
         characters_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "characters")
         char_path = os.path.join(characters_dir, character)
         if not os.path.isdir(char_path) or not os.path.exists(os.path.join(char_path, f"{character}.txt")):
             character = "english_tutor"
-        set_current_character(character)
-        
-        # 首次使用时加载记忆和历史
-        from .shared import conversation_history, get_memory_system
+        set_current_character(character, acc)
+
+        conversation_history = get_conversation_history(acc)
         if len(conversation_history) == 0:
-            # 加载完整对话历史（最近50条）
             from .app_logic import load_character_specific_history
             is_story_character = character.startswith("story_") or character.startswith("game_")
             if is_story_character:
                 loaded_history = load_character_specific_history(character)
                 if loaded_history:
-                    # 只加载最近50条
                     conversation_history.extend(loaded_history[-50:])
-                    logger.info(f"Loaded {len(loaded_history[-50:])} messages from character-specific history")
-            # 不再加载全局历史文件（conversation_history.txt 已移除）
-        
-        # 发送用户消息到客户端
+                    logger.info(f"Loaded {len(loaded_history[-50:])} messages from character-specific history (account={acc})")
+
         from .app import send_message_to_clients
         await send_message_to_clients(json.dumps({
             "action": "user_message",
             "text": text
         }))
-        
-        # 将用户输入添加到对话历史
+
         conversation_history.append({"role": "user", "content": text})
-        
-        # 处理用户输入并生成回复（在后台任务中执行，避免阻塞）
+
         from .app_logic import process_text
-        asyncio.create_task(process_text(text))
+        asyncio.create_task(process_text(text, account_name=acc))
         
         return JSONResponse({
             "status": "success",
@@ -1481,19 +1480,18 @@ async def send_text_message(request: Request):
 
 @app.post("/api/conversation/end")
 async def end_conversation(request: Request):
-    """结束对话并生成摘要，如果处于中文沟通阶段则提示可以生成英文对话"""
+    """结束对话并生成摘要。按用户分状态。"""
     try:
-        from .shared import get_memory_system, get_current_character, get_learning_stage, get_current_account
-        
-        memory_system = get_memory_system()
+        acc = _request_account(request)
+        memory_system = get_memory_system(acc)
         if not memory_system:
             return JSONResponse({
                 "status": "error",
                 "message": "记忆系统未初始化"
             }, status_code=500)
-        
-        current_character = get_current_character()
-        learning_stage = get_learning_stage()
+
+        current_character = get_current_character(acc)
+        learning_stage = get_learning_stage(acc)
         
         # 从会话中提取用户信息（不再生成或保存 diary）
         session_data = memory_system.load_session_temp()
@@ -1509,7 +1507,7 @@ async def end_conversation(request: Request):
         
         # 场景-NPC：大场景→小场景→NPC
         from .scene_npc_db import get_big_scenes
-        account_name = get_current_account() or ""
+        account_name = acc
         big_scenes = get_big_scenes()
         
         response_data = {
@@ -1533,12 +1531,12 @@ async def end_conversation(request: Request):
 
 @app.post("/api/english/generate")
 async def generate_english_dialogue(request: Request):
-    """生成英文教学对话（从 dialogues.json 取 learn 对话，含 TTS 音频）"""
+    """生成英文教学对话。按用户分状态。"""
     try:
-        from .shared import set_learning_stage
         from .scene_npc_db import get_learn_dialogue, build_card_title
 
         data = await request.json()
+        acc = _request_account(request, data.get("account_name"))
         small_scene_id = (data.get("small_scene_id") or data.get("scene") or "").strip()
         npc_id = (data.get("npc_id") or "").strip()
 
@@ -1571,7 +1569,7 @@ async def generate_english_dialogue(request: Request):
 
         dialogue_text = "\n".join(dialogue_parts)
         card_title = build_card_title(dialogue)
-        set_learning_stage("english_learning")
+        set_learning_stage("english_learning", acc)
         return JSONResponse({
             "status": "success",
             "message": "英文对话已生成",
@@ -1595,16 +1593,14 @@ async def generate_english_dialogue(request: Request):
 
 @app.post("/api/learning/recommend")
 async def api_learning_recommend(request: Request):
-    """获取学习推荐：优先从对话摘要推断 1 个主题+场景，否则从练习记忆；其余随机。返回带 title 的推荐列表。"""
+    """获取学习推荐。按用户分状态。"""
     try:
-        from .shared import get_current_account
         from .scene_npc_db import get_learning_recommendations
-
-        account_name = get_current_account() or ""
         try:
             body = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
         except Exception:
             body = {}
+        account_name = _request_account(request, (body or {}).get("account_name"))
         conversation_summary = (body.get("conversation_summary") or "").strip() or None
         count = max(1, min(10, int(body.get("count", 4))))
 
@@ -1619,18 +1615,16 @@ async def api_learning_recommend(request: Request):
 
 @app.post("/api/learning/start_english")
 async def start_english_learning(request: Request):
-    """手动切换到英文学习阶段"""
+    """手动切换到英文学习阶段。按用户分状态。"""
     try:
-        from .shared import set_learning_stage, get_learning_stage
-
-        current_stage = get_learning_stage()
+        acc = _request_account(request)
+        current_stage = get_learning_stage(acc)
         if current_stage == "english_learning":
             return JSONResponse({
                 "status": "info",
                 "message": "已经处于英文学习阶段"
             })
-        
-        set_learning_stage("english_learning")
+        set_learning_stage("english_learning", acc)
         
         return JSONResponse({
             "status": "success",
@@ -1647,15 +1641,14 @@ async def start_english_learning(request: Request):
 
 @app.post("/api/user/update_english_level")
 async def update_english_level(request: Request):
-    """更新用户英文水平"""
+    """更新用户英文水平。按用户分状态。"""
     try:
-        from .shared import get_memory_system
-        
         data = await request.json()
+        acc = _request_account(request, data.get("account_name"))
         level = data.get("level", "beginner")
         description = data.get("description", "")
-        
-        memory_system = get_memory_system()
+
+        memory_system = get_memory_system(acc)
         if not memory_system:
             return JSONResponse({
                 "status": "error",
@@ -1682,15 +1675,14 @@ practice_sessions = {}  # {session_id: {user_inputs: [], dialogue_lines: [], dia
 # 练习模式相关API
 @app.post("/api/practice/start")
 async def start_practice(request: Request):
-    """开始练习阶段，解析对话卡片并初始化状态。
-    耗时主要来自：若无音频则整段 TTS。前端会显示「正在准备练习资料」提示。"""
+    """开始练习阶段。按用户分状态。"""
     try:
-        from .shared import get_memory_system
         from .app import chatgpt_streamed_async
         import asyncio
         import uuid
-        
+
         data = await request.json()
+        acc = _request_account(request, data.get("account_name"))
         dialogue = data.get("dialogue", "").strip()
         dialogue_lines_from_card = data.get("dialogue_lines", [])  # 从英语卡片获取的对话行（包含音频URL）
         dialogue_id_from_card = data.get("dialogue_id", "")  # 从英语卡片获取的对话ID
@@ -2173,17 +2165,14 @@ async def generate_review_notes(request: Request):
 
 @app.post("/api/knowledge/select-scene")
 async def select_scene(request: Request):
-    """用户选择场景（与难度），记录到 scene_choices（口语训练库）"""
+    """用户选择场景。按用户分状态。"""
     try:
-        from .shared import get_current_account
         from . import oral_training_db as otd
-        
         data = await request.json()
+        account_name = _request_account(request, data.get("account_name"))
         scene = (data.get("scene") or data.get("scene_primary") or "").strip()
         difficulty = (data.get("difficulty") or data.get("difficulty_level") or "").strip()
-        
-        account_name = get_current_account()
-        if not account_name:
+        if not account_name or account_name == DEFAULT_ACCOUNT:
             return JSONResponse({
                 "status": "error",
                 "message": "用户未登录"
@@ -2213,12 +2202,11 @@ async def select_scene(request: Request):
         }, status_code=500)
 
 @app.get("/api/knowledge/available-scenes")
-async def get_available_scenes():
-    """获取可选场景（recommended + frequent + new）与难度列表，基于口语训练库"""
+async def get_available_scenes(request: Request):
+    """获取可选场景。按用户分状态。"""
     try:
-        from .shared import get_current_account
         from . import oral_training_db as otd
-        account_name = get_current_account() or ""
+        account_name = _request_account(request) or ""
         scene_options = otd.get_scene_options_for_user(account_name, None)
         return JSONResponse({
             "status": "success",
@@ -2239,20 +2227,16 @@ async def get_available_scenes():
 
 @app.get("/api/knowledge/recommended")
 async def get_recommended_knowledge(request: Request):
-    """获取推荐知识点"""
+    """获取推荐知识点。按用户分状态。"""
     try:
-        from .shared import get_memory_system, get_current_account
         from .knowledge_db import KnowledgeDatabase
-        
-        account_name = get_current_account()
-        if not account_name:
+        account_name = _request_account(request)
+        if not account_name or account_name == DEFAULT_ACCOUNT:
             return JSONResponse({
                 "status": "error",
                 "message": "用户未登录"
             }, status_code=401)
-        
-        # 获取用户水平
-        memory_system = get_memory_system()
+        memory_system = get_memory_system(account_name)
         user_level = "beginner"
         if memory_system:
             user_level = memory_system.user_profile.get("english_level", "beginner")
@@ -2293,21 +2277,17 @@ async def get_recommended_knowledge(request: Request):
 
 @app.post("/api/practice/save-memory")
 async def save_practice_memory(request: Request):
-    """保存练习记忆到文件"""
+    """保存练习记忆。按用户分状态。"""
     try:
-        from .shared import get_memory_system
         from .scene_npc_db import mark_npc_learned, check_and_unlock_scene
-        
         data = await request.json()
+        account_name = _request_account(request, data.get("account_name"))
         small_scene_id = (data.get("small_scene_id") or "").strip()
         npc_id = (data.get("npc_id") or "").strip()
-        if small_scene_id and npc_id:
-            account_name = get_current_account() or ""
-            if account_name:
-                mark_npc_learned(account_name, small_scene_id, npc_id)
-                check_and_unlock_scene(account_name, small_scene_id)
-        
-        memory_system = get_memory_system()
+        if small_scene_id and npc_id and account_name:
+            mark_npc_learned(account_name, small_scene_id, npc_id)
+            check_and_unlock_scene(account_name, small_scene_id)
+        memory_system = get_memory_system(account_name)
         
         if not memory_system:
             return JSONResponse({
@@ -2341,22 +2321,17 @@ async def save_practice_memory(request: Request):
 
 @app.post("/api/practice/mark-unit-mastered")
 async def mark_unit_mastered_api(request: Request):
-    """用户自评「掌握了」时调用。支持两种来源：
-    1) 口语训练库：dialogue_id → oral_training_db.mark_unit_mastered
-    2) 场景 NPC：small_scene_id + npc_id → scene_npc_db.mark_npc_learned（记录为已学会）
-    """
+    """用户自评「掌握了」时调用。按用户分状态。"""
     try:
-        from .shared import get_current_account
         from . import oral_training_db as otd
         from .scene_npc_db import mark_npc_learned, check_and_unlock_scene
-
-        account_name = get_current_account() or ""
-        if not account_name:
+        data = await request.json()
+        account_name = _request_account(request, data.get("account_name"))
+        if not account_name or account_name == DEFAULT_ACCOUNT:
             return JSONResponse({
                 "status": "error",
                 "message": "请先登录账户"
             }, status_code=401)
-        data = await request.json()
         dialogue_id = (data.get("dialogue_id") or "").strip()
         small_scene_id = (data.get("small_scene_id") or "").strip()
         npc_id = (data.get("npc_id") or "").strip()

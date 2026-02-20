@@ -214,10 +214,14 @@ document.addEventListener("DOMContentLoaded", function() {
             
             websocket = new WebSocket(wsUrl);
             
-            // ✅ 连接成功回调
+            // ✅ 连接成功回调：按用户分状态，绑定当前账号
             websocket.onopen = () => {
                 console.log('✅ WebSocket连接成功！');
                 console.log('✅ 当前连接状态:', websocket.readyState); // 1=已连接
+                const acc = (typeof currentAccountName !== 'undefined' ? currentAccountName : null) || (typeof localStorage !== 'undefined' ? localStorage.getItem('current_account') : null) || '';
+                if (acc && websocket.readyState === WebSocket.OPEN) {
+                    websocket.send(JSON.stringify({ action: 'set_account', account_name: acc }));
+                }
             };
             
             // ✅ 接收后端消息（使用现有的完整消息处理逻辑）
@@ -767,9 +771,12 @@ document.addEventListener("DOMContentLoaded", function() {
             const formData = new FormData();
             formData.append('audio', audioBlob, 'recording.webm');
             formData.append('character', currentCharacter);
-            
+            const acc = (typeof currentAccountName !== 'undefined' ? currentAccountName : null) || (typeof localStorage !== 'undefined' ? localStorage.getItem('current_account') : null) || '';
+            if (acc) formData.append('account_name', acc);
+
             const response = await fetch('/api/voice/upload', {
                 method: 'POST',
+                headers: acc ? { 'X-Account-Name': acc } : {},
                 body: formData
             });
             

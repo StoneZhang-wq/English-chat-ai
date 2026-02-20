@@ -37,7 +37,7 @@ Voice Chat AI 是一个**英语学习语音对话应用**，支持多账户、�
 
 **实现：**
 - `main.py`：`POST /api/account/login`、`GET /api/account/current`、`POST /api/account/logout`
-- `shared.py`：`current_account`、`memory_system`，`get_memory_system(account_name)` 单例
+- `shared.py`：`current_account`、`memory_system`，`get_memory_system(account_name)` 单例；**按用户分状态**：`_user_states[account_name]` 存每人的 `conversation_history`、`current_character`、`learning_stage` 等，与账号记忆对接；WebSocket 通过 `set_account` 绑定连接与账号，HTTP 通过 `X-Account-Name` 或 body 传 `account_name`
 - 数据目录：`memory/accounts/{用户名}/`（user_profile.json、session_temp.json、npc_learn_progress.json 等；已移除 diary）
 
 **未来改进：** 密码/认证、数据导入导出、多设备同步

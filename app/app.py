@@ -397,10 +397,11 @@ print(f"{NEON_GREEN}Character: {character_display_name}{RESET_COLOR}")
 print(f"To stop chatting say Quit or Exit. One moment please loading...")
 
 
-async def process_and_play(prompt, audio_file_pth):
-    # 移除延迟，因为文字消息已经在 process_text 中发送完成
-    # Always get the current character name to ensure we have the right audio file
-    current_character = get_current_character()
+async def process_and_play(prompt, audio_file_pth, account_name=None):
+    """按用户分状态：account_name 为空时使用默认用户。"""
+    from .shared import DEFAULT_ACCOUNT
+    acc = (account_name or "").strip() or DEFAULT_ACCOUNT
+    current_character = get_current_character(acc)
     
     # Update characters_folder path to point to the current character's folder
     current_characters_folder = os.path.join(project_dir, 'characters', current_character)
@@ -1176,20 +1177,17 @@ async def execute_once(question_prompt):
     os.remove(image_path)
     return text_response
 
-async def execute_screenshot_and_analyze():
-    # Import the necessary modules at the beginning of the function
-    from .shared import get_current_character, conversation_history
+async def execute_screenshot_and_analyze(account_name=None):
+    """按用户分状态。"""
+    from .shared import get_current_character, get_conversation_history, DEFAULT_ACCOUNT
     from .app_logic import save_character_specific_history as save_character_specific_history_app
-    
+    acc = (account_name or "").strip() or DEFAULT_ACCOUNT
+    conversation_history = get_conversation_history(acc)
     question_prompt = "What do you see in this image? Keep it short but detailed and answer any follow up questions about it"
     print("Taking screenshot and analyzing...")
     text_response = await execute_once(question_prompt)
-    
-    # Add the AI's response to the conversation history
     conversation_history.append({"role": "assistant", "content": text_response})
-    
-    # Save the updated conversation history (only for story/game characters)
-    current_character = get_current_character()
+    current_character = get_current_character(acc)
     is_story_character = current_character.startswith("story_") or current_character.startswith("game_")
     
     if is_story_character:
