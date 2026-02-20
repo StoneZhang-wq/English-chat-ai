@@ -2405,9 +2405,10 @@ async def mark_unit_mastered_api(request: Request):
 async def practice_transcribe_audio(
     audio: UploadFile = File(...)
 ):
-    """练习模式下只转录音频，不生成AI回复（避免token浪费）"""
+    """练习模式下只转录音频，不生成AI回复（避免token浪费）。与全局 API_PROVIDER 一致：豆包用豆包 ASR，OpenAI 用 OpenAI。"""
     try:
-        from .transcription import transcribe_with_openai_api
+        from .transcription import transcribe_with_openai_api, transcribe_with_doubao_asr
+        from .app import API_PROVIDER
         import tempfile
         import os
         
@@ -2417,7 +2418,7 @@ async def practice_transcribe_audio(
             tmp_file.write(content)
             tmp_file_path = tmp_file.name
         
-        # 转录音频 - 需要将webm转换为wav格式
+        # 转录音频 - 需要将webm转换为wav格式（豆包 ASR 要求 16kHz/16bit/单声道 WAV）
         audio_converted = False
         try:
             from pydub import AudioSegment
@@ -2431,10 +2432,13 @@ async def practice_transcribe_audio(
             logger.warning(f"Could not convert audio format: {e}")
             # 如果转换失败，尝试直接使用原文件
         
-        # 转录音频
+        # 转录音频：按全局 API_PROVIDER 选择豆包 ASR 或 OpenAI
         transcription = None
         try:
-            transcription = await transcribe_with_openai_api(tmp_file_path, "gpt-4o-mini-transcribe")
+            if API_PROVIDER == "doubao":
+                transcription = await transcribe_with_doubao_asr(tmp_file_path)
+            else:
+                transcription = await transcribe_with_openai_api(tmp_file_path, "gpt-4o-mini-transcribe")
             if not transcription or transcription.strip() == "":
                 raise ValueError("Transcription returned empty result")
             logger.info(f"Practice transcription successful: {transcription[:50]}...")
