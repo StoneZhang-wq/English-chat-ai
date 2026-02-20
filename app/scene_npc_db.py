@@ -347,6 +347,18 @@ def get_immersive_dialogue(small_scene_id: str, npc_id: str) -> Optional[Dict]:
     return get_dialogue(small_scene_id, npc_id, "immersive")
 
 
+def get_one_immersive_dialogue_for_scene(small_scene_id: str) -> Optional[Dict]:
+    """返回该小场景下任意一条 usage=immersive 的对话（用于真人 1v1 练习）。"""
+    import random
+    candidates = [
+        d for d in get_dialogues()
+        if d.get("small_scene") == small_scene_id and d.get("usage") == "immersive"
+    ]
+    if not candidates:
+        return None
+    return random.choice(candidates)
+
+
 def build_card_title(dialogue: Dict) -> str:
     """根据对话记录生成卡片标题：在{小场景名}跟{NPC名}沟通。对 small_scene_name 做简单清洗。"""
     if not dialogue:

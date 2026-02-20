@@ -1,0 +1,175 @@
+/**
+ * 真人 1v1 练习页 - 画风与主站（语音对话/场景）统一
+ * 覆盖原 SPA 的字体、主色与背景，无第三方品牌感
+ * 使用 body 前缀提高优先级，确保覆盖 Tailwind 内置样式
+ */
+
+:root {
+    --pl-primary: #6366f1;
+    --pl-primary-hover: #818cf8;
+    --pl-primary-dark: #4f46e5;
+    --pl-bg: #050511;
+    --pl-surface: rgba(15, 15, 35, 0.95);
+    --pl-surface-2: rgba(30, 30, 60, 0.9);
+    --pl-text: #e2e8f0;
+    --pl-text-muted: #94a3b8;
+    --pl-border: rgba(226, 232, 240, 0.15);
+    --pl-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* 全局：与语音对话页一致的深色宇宙风 */
+body {
+    font-family: var(--pl-font) !important;
+    background-color: var(--pl-bg) !important;
+    background-image:
+        radial-gradient(ellipse 80% 50% at 50% 40%, rgba(76, 29, 149, 0.35), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 85% 15%, rgba(6, 182, 212, 0.2), transparent 45%),
+        radial-gradient(ellipse 60% 40% at 15% 85%, rgba(99, 102, 241, 0.2), transparent 45%) !important;
+    background-attachment: fixed !important;
+    color: var(--pl-text) !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 导航栏：深色表面、主色标题 */
+body nav.fixed {
+    background: var(--pl-surface) !important;
+    border-bottom-color: var(--pl-border) !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3) !important;
+}
+body nav a span {
+    color: var(--pl-primary) !important;
+    font-family: var(--pl-font) !important;
+    text-shadow: none !important;
+}
+
+/* 原 SPA 粉/紫主色 → 主站主色（靛蓝） */
+body .bg-\[\#FA546B\],
+body .bg-\[\#fa546b\] {
+    background-color: var(--pl-primary) !important;
+}
+body .bg-\[\#d53b84\] {
+    background-color: var(--pl-primary) !important;
+}
+body .bg-\[\#f1633d\] {
+    background-color: var(--pl-primary-hover) !important;
+}
+body .text-\[\#FA546B\],
+body .text-\[\#fa546b\],
+body .text-\[\#FA4E5B\] {
+    color: var(--pl-primary) !important;
+}
+body .text-\[\#d53b84\] {
+    color: var(--pl-primary) !important;
+}
+body .text-\[\#f1633d\] {
+    color: var(--pl-primary-hover) !important;
+}
+body .border-\[\#FA546B\] {
+    border-color: var(--pl-primary) !important;
+}
+body .hover\:bg-\[\#e0445e\]:hover {
+    background-color: var(--pl-primary-hover) !important;
+}
+
+/* 渐变区块：紫/粉 → 主站风格渐变 */
+body .bg-gradient-to-l.from-\[\#610C9F\].to-\[\#940B92\] {
+    background-image: linear-gradient(to left, rgba(76, 29, 149, 0.9), rgba(79, 70, 229, 0.85)) !important;
+}
+body .from-\[\#610C9F\] {
+    --tw-gradient-from: rgba(76, 29, 149, 0.95) !important;
+    --tw-gradient-to: rgba(79, 70, 229, 0.9) !important;
+}
+body .to-\[\#940B92\] {
+    --tw-gradient-to: rgba(79, 70, 229, 0.9) !important;
+}
+body .to-\[\#fa546b\] {
+    --tw-gradient-to: var(--pl-primary) !important;
+}
+body .bg-\[\#940B92\] {
+    background-color: var(--pl-primary-dark) !important;
+}
+
+/* 内容区背景：灰 → 深色表面 */
+body .bg-gray-100 {
+    background-color: rgba(15, 15, 35, 0.6) !important;
+}
+body .bg-gray-200 {
+    background-color: var(--pl-surface-2) !important;
+}
+body .bg-gray-50 {
+    background-color: var(--pl-surface-2) !important;
+}
+body .bg-white {
+    background-color: var(--pl-surface) !important;
+    border-color: var(--pl-border) !important;
+}
+body .bg-gray-900 {
+    background-color: rgba(5, 5, 17, 0.98) !important;
+}
+
+/* 文字颜色 */
+body .text-gray-200 { color: var(--pl-text-muted) !important; }
+body .text-gray-400 { color: var(--pl-text-muted) !important; }
+body .text-gray-500 { color: var(--pl-text-muted) !important; }
+body .text-gray-600 { color: var(--pl-text) !important; }
+body .text-gray-700 { color: var(--pl-text) !important; }
+body .text-gray-800 { color: var(--pl-text) !important; }
+body .text-black { color: var(--pl-text) !important; }
+body .text-green-700 { color: #34d399 !important; }
+
+/* 边框 */
+body .border-gray-300 {
+    border-color: var(--pl-border) !important;
+}
+
+/* 按钮：与主站一致 */
+body button.bg-white.text-\[\#fa546b\],
+body button.bg-white.text-\[\#d53b84\] {
+    background-color: var(--pl-surface) !important;
+    color: var(--pl-primary) !important;
+    border: 1px solid var(--pl-border) !important;
+}
+body button.bg-white.text-\[\#fa546b\]:hover,
+body button.bg-white.text-\[\#d53b84\]:hover {
+    background-color: var(--pl-primary) !important;
+    color: #fff !important;
+    border-color: var(--pl-primary) !important;
+}
+
+/* 卡片/反馈区 */
+body .p-6.rounded-lg.shadow-xl {
+    background: var(--pl-surface) !important;
+    border: 1px solid var(--pl-border) !important;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 底部 CTA 区块 */
+body .bg-\[\#940B92\].border-none,
+body div.bg-\[\#940B92\] {
+    background-color: var(--pl-primary-dark) !important;
+}
+
+/* 标题字体与主站一致 */
+body h1, body h2, body h3 {
+    font-family: var(--pl-font) !important;
+}
+
+/* 404 与简单页 */
+body .min-h-screen.bg-gray-50 {
+    background-color: var(--pl-bg) !important;
+    color: var(--pl-text) !important;
+}
+body .bg-indigo-600 {
+    background-color: var(--pl-primary) !important;
+}
+body .bg-indigo-600:hover {
+    background-color: var(--pl-primary-hover) !important;
+}
+
+/* 视频/聊天主区域容器 */
+body .min-h-\[26rem\],
+body .md\:h-\[29rem\],
+body .lg\:h-\[31rem\] {
+    background-color: var(--pl-surface-2) !important;
+}

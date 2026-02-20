@@ -196,7 +196,6 @@
         <div class="npc-label">${npc.label}</div>
         <div class="npc-hint">${npc.hint}</div>
         <div class="npc-actions">
-          <button type="button" class="npc-btn npc-btn-practice">按剧本练习</button>
           <button type="button" class="npc-btn npc-btn-immersive">自由对话</button>
         </div>
       `
@@ -209,12 +208,10 @@
       el.addEventListener('click', (e) => {
         if (el.dataset.learned !== '1') return;
         if (e.target.closest('.npc-actions')) return;
-        openScenePractice(npc.label, smallSceneId, npc.id, npcImg);
+        openImmersiveChat(npc.label, smallSceneId, npc.id);
       });
       if (learned) {
-        const btnPractice = el.querySelector('.npc-btn-practice');
         const btnImmersive = el.querySelector('.npc-btn-immersive');
-        if (btnPractice) btnPractice.addEventListener('click', (e) => { e.stopPropagation(); openScenePractice(npc.label, smallSceneId, npc.id, npcImg); });
         if (btnImmersive) btnImmersive.addEventListener('click', (e) => { e.stopPropagation(); openImmersiveChat(npc.label, smallSceneId, npc.id); });
       }
       npcLayer.appendChild(el);
@@ -230,80 +227,8 @@
     view.appendChild(container);
   }
 
-  // 从场景 NPC 进入练习模式（与英语练习相同体验：TTS 播放 + 用户语音输入）
-  // 练习 UI 显示在场景内叠加层；对话未准备好前统一显示倒计时，准备好后关闭倒计时并展示练习界面
-  async function openScenePractice(label, smallSceneId, npcId, npcImage) {
-    const sceneChatModal = q('#sceneChatModal');
-    if (sceneChatModal) sceneChatModal.style.display = 'none';
-    const overlay = q('#scene-practice-overlay');
-    const container = q('#scene-practice-container');
-    if (!overlay || !container) {
-      alert('场景练习容器未就绪，请刷新页面');
-      return;
-    }
-    const closeCountdown = typeof window.showCountdownOverlay === 'function'
-      ? window.showCountdownOverlay('正在准备场景对话', 10)
-      : function noop() {};
-    try {
-      const res = await fetch(`/api/scene-npc/dialogue/immersive?small_scene_id=${encodeURIComponent(smallSceneId)}&npc_id=${encodeURIComponent(npcId)}`);
-      const data = await res.json().catch(() => ({}));
-      if (res.status === 403) {
-        closeCountdown();
-        showSceneToast(data.message || data.error || '该角色未解锁，请先在学习页完成该NPC的对话学习');
-        return;
-      }
-      if (!data.dialogue || !data.dialogue.content || !Array.isArray(data.dialogue.content)) {
-        closeCountdown();
-        alert('暂无对话内容');
-        return;
-      }
-
-      const content = data.dialogue.content;
-      const dialogueLines = content.map(item => ({
-        speaker: item.role === 'A' ? 'A' : 'B',
-        text: item.content || '',
-        hint: item.hint != null ? item.hint : '',  // 始终带上 hint，避免后端收不到
-        audio_url: null
-      }));
-      const dialogue = dialogueLines.map(l => `${l.speaker}: ${l.text}`).join('\n');
-      const dialogueId = data.dialogue.dialogue_id || `scene-${smallSceneId}-${npcId}`;
-      overlay.style.display = 'flex';
-      container.innerHTML = '';
-      if (typeof window.startScenePractice === 'function') {
-        await window.startScenePractice({
-          dialogue,
-          dialogue_lines: dialogueLines,
-          dialogue_id: dialogueId,
-          small_scene_id: smallSceneId,
-          npc_id: npcId,
-          npc_label: label || '',
-          npc_image: npcImage || '',
-          targetContainer: container,
-          onReady: function () {}
-        });
-        closeCountdown();
-        if (!container.querySelector('#practice-mode-ui')) {
-          hideScenePracticeOverlay();
-        }
-      } else {
-        closeCountdown();
-        overlay.style.display = 'none';
-        alert('练习功能未加载，请刷新页面');
-      }
-    } catch (e) {
-      console.error('启动场景练习失败:', e);
-      closeCountdown();
-      hideScenePracticeOverlay();
-      alert('加载失败：' + (e.message || '请稍后重试'));
-    }
-  }
-
-  // 练习结束后隐藏叠加层，恢复场景视图；同时清除练习状态，避免主界面输入仍被当作练习回复
+  // 剧本练习已移除，仅保留自由对话。此处保留 no-op 供其它处调用不报错。
   function hideScenePracticeOverlay() {
-    const overlay = q('#scene-practice-overlay');
-    const container = q('#scene-practice-container');
-    if (overlay) overlay.style.display = 'none';
-    if (container) container.innerHTML = '';
     document.body.classList.remove('scene-practice-active');
     if (typeof window.clearPracticeStateWhenLeavingScene === 'function') {
       window.clearPracticeStateWhenLeavingScene();

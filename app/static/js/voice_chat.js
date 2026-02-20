@@ -2314,24 +2314,8 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
     
-    // 从场景体验进入练习模式（供 scene_modal 调用）
-    window.startScenePractice = async function(params) {
-        const { dialogue, dialogue_lines, dialogue_id, small_scene_id, npc_id, npc_label, npc_image, targetContainer, onReady } = params;
-        if (!dialogue || !dialogue_lines || dialogue_lines.length === 0) {
-            if (typeof showError === 'function') showError('对话内容无效');
-            return;
-        }
-        await startPracticeMode(dialogue, null, {
-            dialogueLines: dialogue_lines,
-            dialogueId: dialogue_id || '',
-            smallSceneId: small_scene_id || '',
-            npcId: npc_id || '',
-            npcLabel: npc_label || '',
-            npcImage: npc_image || '',
-            targetContainer: targetContainer || null,
-            onReady: onReady || null
-        });
-    };
+    // 剧本练习入口已移除，仅保留自由对话。保留空实现避免未定义引用。
+    window.startScenePractice = async function() {};
     
     // 创建练习模式UI（targetContainer 可选：场景模式下将 UI 插入到指定容器）
     function createPracticeUI(aText, aAudioUrl, hints, totalTurns, targetContainer) {

@@ -15,7 +15,7 @@ class StaticFilesNo304(StaticFiles):
         return False
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, JSONResponse, Response
 from starlette.background import BackgroundTask
 from .shared import clients, set_current_character, conversation_history, add_client, remove_client, get_memory_system, set_current_account, get_current_account, get_last_memory_init_error
 from .app_logic import start_conversation, stop_conversation, set_env_variable, characters_folder, set_transcription_model, fetch_ollama_models, load_character_prompt, load_character_specific_history
@@ -28,6 +28,7 @@ from pathlib import Path
 from threading import Thread
 import uuid
 import aiohttp
+import re
 import shutil
 
 
@@ -172,41 +173,84 @@ async def get_voice_chat(request: Request):
     })
 
 
-# 真人 1v1 练习（Varta 前端 SPA，同源部署）
+# 真人 1v1 练习（同源 SPA）
 _PRACTICE_LIVE_DIR = Path(__file__).resolve().parent / "static" / "practice-live"
+
+# 画风与主站统一：注入的样式表与字体（theme 走专用路由，不缓存，改完即生效）
+_PRACTICE_LIVE_THEME_CSS_URL = "/practice/live/theme.css"
+_PRACTICE_LIVE_OVERRIDE_CSS_PATH = Path(__file__).resolve().parent / "static" / "css" / "practice-live-override.css"
+_INTER_FONT_URL = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+_503_HTML = (
+    "<!DOCTYPE html><html><body style='font-family:sans-serif;padding:2rem;'>"
+    "<h1>真人练习未就绪</h1>"
+    "<p>请先在项目根目录执行 <code>npm run build:practice-live</code>，"
+    "并将构建输出复制到 <code>app/static/practice-live/</code>。</p></body></html>"
+)
+
+
+def _practice_live_index_response() -> HTMLResponse:
+    """返回注入统一画风后的 1v1 练习页 HTML；未构建则返回 503。"""
+    index_path = _PRACTICE_LIVE_DIR / "index.html"
+    if not index_path.is_file():
+        return HTMLResponse(_503_HTML, status_code=503)
+    html = index_path.read_text(encoding="utf-8")
+    html = re.sub(
+        r'<link[^>]+href="https://fonts\.googleapis\.com/css2\?[^"]*Cinzel[^"]*"[^>]*/?>\s*',
+        "",
+        html,
+        flags=re.IGNORECASE,
+    )
+    # 覆盖样式走 theme.css 路由，服务端不缓存，修改 CSS 后刷新即可同步
+    inject = (
+        f'<link rel="stylesheet" href="{_INTER_FONT_URL}">'
+        f'<link rel="stylesheet" href="{_PRACTICE_LIVE_THEME_CSS_URL}">'
+    )
+    if inject not in html:
+        html = html.replace("</head>", inject + "\n</head>")
+    return HTMLResponse(
+        html,
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
+    )
+
+
+@app.get("/practice/live/theme.css", response_class=Response)
+async def practice_live_theme_css():
+    """1v1 练习页统一画风样式表，禁止缓存，修改后刷新即生效（含从 voice_chat 跳转进入）。"""
+    if not _PRACTICE_LIVE_OVERRIDE_CSS_PATH.is_file():
+        return Response(status_code=404)
+    body = _PRACTICE_LIVE_OVERRIDE_CSS_PATH.read_bytes()
+    return Response(
+        content=body,
+        media_type="text/css",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
+    )
 
 
 @app.get("/practice/live", response_class=HTMLResponse)
 async def practice_live_index():
-    """真人 1v1 练习页入口，返回 SPA index.html"""
-    index_path = _PRACTICE_LIVE_DIR / "index.html"
-    if not index_path.is_file():
-        return HTMLResponse(
-            "<!DOCTYPE html><html><body style='font-family:sans-serif;padding:2rem;'><h1>真人练习未就绪</h1>"
-            "<p>请先构建并放入静态文件：在项目根目录执行 <code>cd varta/client && npm run build</code>，"
-            "再将 <code>build/</code> 目录下全部内容复制到 <code>app/static/practice-live/</code>。</p></body></html>",
-            status_code=503,
-        )
-    return FileResponse(index_path, media_type="text/html")
+    """真人 1v1 练习页入口；从 voice_chat 跳转至 /practice/live/chat 时也返回本注入页。"""
+    return _practice_live_index_response()
 
 
 @app.get("/practice/live/{full_path:path}", response_class=HTMLResponse)
 async def practice_live_spa(full_path: str):
-    """SPA 静态资源或子路径兜底：有文件则返回文件，否则返回 index.html"""
+    """SPA：静态资源直接返回文件；其余路径（如 /chat）均返回注入统一画风后的 index.html。"""
     if not full_path or full_path == "index.html":
-        index_path = _PRACTICE_LIVE_DIR / "index.html"
-        if index_path.is_file():
-            return FileResponse(index_path, media_type="text/html")
-        return HTMLResponse("<p>真人练习未就绪，请先构建并复制到 app/static/practice-live/</p>", status_code=503)
+        return _practice_live_index_response()
     file_path = (_PRACTICE_LIVE_DIR / full_path).resolve()
     if not str(file_path).startswith(str(_PRACTICE_LIVE_DIR.resolve())):
         return HTMLResponse("<p>Invalid path</p>", status_code=400)
     if file_path.is_file():
         return FileResponse(file_path)
-    index_path = _PRACTICE_LIVE_DIR / "index.html"
-    if index_path.is_file():
-        return FileResponse(index_path, media_type="text/html")
-    return HTMLResponse("<p>Not found</p>", status_code=404)
+    return _practice_live_index_response()
 
 
 @app.post("/api/account/login")
@@ -420,6 +464,45 @@ async def api_get_scene(request: Request, scene_id: str, account_name: str = Non
     if not scene:
         return JSONResponse({"error": "scene not found or not unlocked"}, status_code=404)
     return JSONResponse({"scene": scene})
+
+
+# --- 真人 1v1 练习：解锁场景列表 + 按场景取一条对话（角色/任务/台词）---
+
+@app.get("/api/practice-live/unlocked-scenes")
+async def api_practice_live_unlocked_scenes(request: Request, account_name: str = None):
+    """返回当前账号已解锁的 small_scene_id 列表，供匹配时取交集/并集选主题。"""
+    acc = _scene_account(request, account_name)
+    from .scene_npc_db import get_unlocked_scenes
+    ids = get_unlocked_scenes(acc) if acc else []
+    return JSONResponse({"small_scene_ids": ids})
+
+
+@app.get("/api/practice-live/dialogue")
+async def api_practice_live_dialogue(request: Request, small_scene_id: str):
+    """返回该小场景下一条沉浸式对话，含角色名、任务、A/B 台词选项（用于 1v1 房间内展示）。"""
+    from .scene_npc_db import get_one_immersive_dialogue_for_scene
+    d = get_one_immersive_dialogue_for_scene(small_scene_id.strip())
+    if not d:
+        return JSONResponse({"error": "no dialogue for scene"}, status_code=404)
+    content = d.get("content") or []
+    npc_name = (d.get("npc_name") or "").strip() or "角色A"
+    # 约定：A = NPC 方，B = 学习者方
+    role_label_a = npc_name
+    role_label_b = "学习者"
+    lines_a = [x for x in content if x.get("role") == "A"]
+    lines_b = [x for x in content if x.get("role") == "B"]
+    return JSONResponse({
+        "small_scene_id": d.get("small_scene"),
+        "small_scene_name": d.get("small_scene_name"),
+        "npc_name": npc_name,
+        "role_label_a": role_label_a,
+        "role_label_b": role_label_b,
+        "task_a": d.get("user_goal_a") or d.get("core_sentences") or "",
+        "task_b": d.get("user_goal") or d.get("core_sentences") or "",
+        "core_sentences": d.get("core_sentences"),
+        "lines_a": [{"content": x.get("content"), "hint": x.get("hint")} for x in lines_a],
+        "lines_b": [{"content": x.get("content"), "hint": x.get("hint")} for x in lines_b],
+    })
 
 
 # --- 场景-NPC 学习 API ---

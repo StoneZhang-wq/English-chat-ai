@@ -460,53 +460,6 @@
 
 .scene-chat-input-row button:hover { background: #4f46e5; }
 
-/* 场景练习载入提示 */
-.scene-practice-loading {
-  padding: 32px;
-  text-align: center;
-  color: #fff;
-  font-size: 18px;
-  background: rgba(15, 23, 42, 0.85);
-  border-radius: 12px;
-  margin: auto;
-}
-
-/* 场景内练习叠加层 - 半透明背景，居中练习面板 */
-.scene-practice-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
-  z-index: 100;
-  padding: 20px;
-  overflow: auto;
-}
-
-.scene-practice-container {
-  width: 100%;
-  max-width: 520px;
-  max-height: 100%;
-  overflow-y: auto;
-}
-
-.scene-practice-container .practice-dialogue-area {
-  max-height: 200px;
-  overflow-y: auto;
-  margin-bottom: 12px;
-}
-
-.practice-scene-record-btn.recording {
-  background: #b71c1c !important;
-  animation: pulse-recording 1s ease-in-out infinite;
-}
-@keyframes pulse-recording {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
 /* 沉浸式自由对话叠加层 */
 .scene-immersive-overlay {
   position: absolute;
@@ -703,10 +656,4 @@
 
 /* Modal 打开时隐藏底部场景按钮 */
 body.scenes-modal-open .enter-scenes-btn { visibility: hidden; pointer-events: none; }
-
-/* 场景内练习时，输入/录音区域置于顶层，用户可继续录音 */
-body.scene-practice-active .input-area {
-  position: relative;
-  z-index: 2500;
-}
 

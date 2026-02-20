@@ -8,14 +8,14 @@ const LandingPage: React.FC = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-l from-[#610C9F] to-[#940B92] text-white flex flex-col">
+        <div className="min-h-screen bg-gradient-to-l from-[#4338ca] to-[#6366f1] text-white flex flex-col">
         {/* Hero Section */}
         <div className="relative flex-1 flex flex-col items-center justify-center text-center px-6 py-52 pt-60 bg-transparent">
           <div className="relative z-10">
             <h1
               className="text-5xl md:text-7xl font-bold leading-tight mb-6"
               style={{
-                fontFamily: "Cinzel, Quattrocento, Ultine Extended Demi",
+                fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
               }}
             >
               Connect & Learn Together
@@ -25,7 +25,7 @@ const LandingPage: React.FC = () => {
               effortlessly.
             </p>
             <button
-              className="bg-white text-[#fa546b] font-semibold py-3 px-10 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
+              className="bg-white text-[#6366f1] font-semibold py-3 px-10 rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
               onClick={() => navigate("/chat")}
             >
               Start Chatting
@@ -52,13 +52,13 @@ const LandingPage: React.FC = () => {
         <div className="bg-gray-50 py-24 px-6 md:px-12 lg:px-24 text-gray-800">
           <h2
             className="text-4xl font-bold text-center mb-10"
-            style={{ fontFamily: "Cinzel, Quattrocento, Ultine Extended Demi" }}
+            style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}
           >
             为什么选择真人练习？
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div className="flex flex-col items-center text-center">
-              <div className="bg-[#fa546b] text-white rounded-full p-5 mb-4">
+              <div className="bg-[#6366f1] text-white rounded-full p-5 mb-4">
                 <i className="fas fa-language text-3xl"></i>
               </div>
               <h3 className="text-2xl font-bold mb-2">Language Practice</h3>
@@ -68,7 +68,7 @@ const LandingPage: React.FC = () => {
               </p>
             </div>
             <div className="flex flex-col items-center text-center">
-              <div className="bg-[#d53b84] text-white rounded-full p-5 mb-4">
+              <div className="bg-[#6366f1] text-white rounded-full p-5 mb-4">
                 <i className="fas fa-video text-3xl"></i>
               </div>
               <h3 className="text-2xl font-bold mb-2">Video Chat</h3>
@@ -77,7 +77,7 @@ const LandingPage: React.FC = () => {
               </p>
             </div>
             <div className="flex flex-col items-center text-center">
-              <div className="bg-[#f1633d] text-white rounded-full p-5 mb-4">
+              <div className="bg-[#818cf8] text-white rounded-full p-5 mb-4">
                 <i className="fas fa-globe text-3xl"></i>
               </div>
               <h3 className="text-2xl font-bold mb-2">Global Community</h3>
@@ -93,7 +93,7 @@ const LandingPage: React.FC = () => {
         <div className="relative text-black bg-white pt-28 pb-12 px-6 md:px-12 lg:px-24">
           <h2
             className="text-4xl font-bold text-center mb-10"
-            style={{ fontFamily: "Cinzel, Quattrocento, Ultine Extended Demi" }}
+            style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}
           >
             What Our Users Say
           </h2>
@@ -103,24 +103,24 @@ const LandingPage: React.FC = () => {
               {
                 text: "“在这里和同场景的伙伴练口语，效果很好！”",
                 author: "Sai",
-                color: "text-[#fa546b]",
+                color: "text-[#6366f1]",
               },
               {
                 text: "“The video chat quality is excellent, and the platform is easy to use.”",
                 author: "Satyam T.",
-                color: "text-[#d53b84]",
+                color: "text-[#6366f1]",
               },
               {
                 text: "“A perfect way to meet people and improve language skills.”",
                 author: "Abhishek M.",
-                color: "text-[#f1633d]",
+                color: "text-[#818cf8]",
               },
             ].map((feedback, index) => (
               <div
                 key={index}
                 className="p-6 bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 relative"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-[#fa546b] opacity-5 rounded-lg"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-[#6366f1] opacity-5 rounded-lg"></div>
                 <p className="italic mb-4">{feedback.text}</p>
                 <h3 className={`text-lg font-semibold ${feedback.color}`}>
                   - {feedback.author}
@@ -142,15 +142,15 @@ const LandingPage: React.FC = () => {
           >
             <path
               d="M0,288L30,277.3C60,267,120,245,180,229.3C240,213,300,203,360,218.7C420,235,480,277,540,288C600,299,660,277,720,234.7C780,192,840,128,900,112C960,96,1020,128,1080,138.7C1140,149,1200,139,1260,138.7C1320,139,1380,149,1410,154.7L1440,160L1440,320L1410,320C1380,320,1320,320,1260,320C1200,320,1140,320,1080,320C1020,320,960,320,900,320C840,320,780,320,720,320C660,320,600,320,540,320C480,320,420,320,360,320C300,320,240,320,180,320C120,320,60,320,30,320L0,320Z"
-              fill="#940B92"
+              fill="#4f46e5"
             ></path>
           </svg>
 
-          <div className="bg-[#940B92] border-none text-white py-12 text-center">
+          <div className="bg-[#4f46e5] border-none text-white py-12 text-center">
             <h2
               className="text-3xl font-bold mb-4"
               style={{
-                fontFamily: "Cinzel, Quattrocento, Ultine Extended Demi",
+                fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
               }}
             >
               Ready to Connect?
@@ -160,7 +160,7 @@ const LandingPage: React.FC = () => {
               journey today.
             </p>
             <button
-              className="bg-white text-[#d53b84] font-semibold py-3 px-10 rounded-lg hover:scale-105 transition-all duration-300"
+              className="bg-white text-[#6366f1] font-semibold py-3 px-10 rounded-lg hover:scale-105 transition-all duration-300"
               onClick={() => navigate("/chat")}
             >
               Get Started

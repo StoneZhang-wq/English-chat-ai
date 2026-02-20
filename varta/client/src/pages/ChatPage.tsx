@@ -13,6 +13,7 @@ import {
 const ChatPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const sceneIdFromUrl = searchParams.get("scene") || undefined;
+  const accountFromUrl = searchParams.get("account") || undefined;
 
   const [chatInput, setChatInput] = useState("");
   const [isChatActive, setIsChatActive] = useState(false);
@@ -103,6 +104,7 @@ const ChatPage: React.FC = () => {
             <>
               <Room
                 name={userName || "Anonymous"}
+                account={accountFromUrl}
                 learningLanguages={learningLanguages}
                 sceneId={sceneIdFromUrl}
                 localAudioTrack={textOnlyMode ? null : localAudioTrack}
@@ -116,12 +118,7 @@ const ChatPage: React.FC = () => {
             </>
           ) : (
             <>
-              <div className="flex-1 relative bg-gray-200 p-4 flex flex-col items-center min-h-[26rem] md:h-[29rem] lg:h-[31rem] 2xl:h-[41rem]">
-                <img
-                  className="opacity-50 mt-24 mx-auto"
-                  src="./apple-icon-180x180.png"
-                  alt="真人练习"
-                />
+              <div className="flex-1 relative bg-gray-200 p-4 flex flex-col items-center justify-center min-h-[26rem] md:h-[29rem] lg:h-[31rem] 2xl:h-[41rem]">
                 <p className="text-gray-500 mt-8 mx-auto">
                   点击 Join 开始匹配同场景的练习伙伴
                 </p>
@@ -137,13 +134,13 @@ const ChatPage: React.FC = () => {
 
                   <div className="flex items-center border-t p-2 flex-wrap gap-2">
                     <button
-                      className="text-white bg-[#FA546B] py-2 px-4 rounded-lg"
+                      className="text-white bg-[#6366f1] py-2 px-4 rounded-lg"
                       onClick={() => setIsChatActive((prev) => !prev)}
                     >
                       {isChatActive ? "Exit" : "Join（视频+语音）"}
                     </button>
                     <button
-                      className="text-[#FA546B] border border-[#FA546B] bg-white py-2 px-4 rounded-lg"
+                      className="text-[#6366f1] border border-[#6366f1] bg-white py-2 px-4 rounded-lg"
                       onClick={joinTextOnlyHandler}
                     >
                       仅文字（验证用）

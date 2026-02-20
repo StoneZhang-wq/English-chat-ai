@@ -5,6 +5,10 @@
   "description": "英语学习与真人 1v1 练习",
   "scripts": {
     "build:practice-live": "node scripts/build-practice-live.js",
+    "watch:practice-live": "node scripts/watch-practice-live.js",
     "build:scene-index": "python scripts/build_scene_npc_index.py"
+  },
+  "devDependencies": {
+    "chokidar": "^3.6.0"
   }
 }

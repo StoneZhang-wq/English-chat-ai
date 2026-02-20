@@ -26,8 +26,21 @@ interface Message {
   content: string;
 }
 
+const getApiBase = () => (typeof window !== "undefined" ? window.location.origin : "");
+
+export interface DialoguePayload {
+  roleLabelA: string;
+  taskA: string;
+  linesA: { content?: string; hint?: string }[];
+  roleLabelB: string;
+  taskB: string;
+  linesB: { content?: string; hint?: string }[];
+  smallSceneName?: string;
+}
+
 export const Room = ({
   name,
+  account,
   learningLanguages = [],
   sceneId,
   localAudioTrack,
@@ -39,8 +52,8 @@ export const Room = ({
   textOnlyMode = false,
 }: {
   name: string;
+  account?: string;
   learningLanguages?: string[];
-  /** 场景 ID，同场景用户互相匹配 */
   sceneId?: string;
   localAudioTrack: MediaStreamTrack | null;
   localVideoTrack: MediaStreamTrack | null;
@@ -48,16 +61,19 @@ export const Room = ({
   setChatInput: (value: string) => void;
   joinExitHandler: () => void;
   joinExitLabel: string;
-  /** 仅文字验证模式：无音视频，只保留匹配与文字聊天 */
   textOnlyMode?: boolean;
 }) => {
   const [lobby, setLobby] = useState(true);
   const [isMatching, setIsMatching] = useState(false);
-
+  const [queueCount, setQueueCount] = useState(0);
   const [remoteName, setRemoteName] = useState<string | null>(null);
-
   const [remoteUserCountry, setRemoteUserCountry] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]); // Fixed
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [myRole, setMyRole] = useState<"A" | "B" | null>(null);
+  const [dialoguePayload, setDialoguePayload] = useState<DialoguePayload | null>(null);
+  const [round, setRound] = useState<1 | 2>(1);
+  const [wantSwapSelf, setWantSwapSelf] = useState(false);
+  const [remoteWantSwap, setRemoteWantSwap] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const sendingPcRef = useRef<RTCPeerConnection | null>(null);
   const receivingPcRef = useRef<RTCPeerConnection | null>(null);
@@ -110,10 +126,16 @@ export const Room = ({
     pc.ondatachannel = (event) => {
       const channel = event.channel;
       channel.onmessage = (e) => {
-        const message = e.data;
+        try {
+          const parsed = JSON.parse(e.data);
+          if (parsed?.type === "want-swap") {
+            setRemoteWantSwap(true);
+            return;
+          }
+        } catch (_) {}
         setMessages((prev: Message[]) => [
           ...prev,
-          { sender: "remote", content: message },
+          { sender: "remote", content: e.data },
         ]);
       };
     };
@@ -216,18 +238,52 @@ export const Room = ({
     }
   };
 
+  const handleWantSwap = () => {
+    setWantSwapSelf(true);
+    if (dataChannelRef.current) {
+      dataChannelRef.current.send(JSON.stringify({ type: "want-swap" }));
+    }
+  };
+
+  const currentRoleLabel =
+    dialoguePayload && myRole
+      ? myRole === "A"
+        ? dialoguePayload.roleLabelA
+        : dialoguePayload.roleLabelB
+      : "";
+  const currentTask =
+    dialoguePayload && myRole
+      ? myRole === "A"
+        ? dialoguePayload.taskA
+        : dialoguePayload.taskB
+      : "";
+  const currentLines =
+    dialoguePayload && myRole
+      ? myRole === "A"
+        ? dialoguePayload.linesA
+        : dialoguePayload.linesB
+      : [];
+
+  useEffect(() => {
+    if (!wantSwapSelf || !remoteWantSwap || !dialoguePayload) return;
+    setMyRole((r) => (r === "A" ? "B" : "A"));
+    setRound(2);
+    setWantSwapSelf(false);
+    setRemoteWantSwap(false);
+  }, [wantSwapSelf, remoteWantSwap, dialoguePayload]);
+
   const handleExit = () => {
     console.log("Exit button pressed. Cleaning up connections.");
-  
-    // Start matching delay
+    setDialoguePayload(null);
+    setMyRole(null);
+    setRound(1);
+    setWantSwapSelf(false);
+    setRemoteWantSwap(false);
     setIsMatching(true);
-
-    // Close peer connections
     sendingPcRef.current?.close();
     receivingPcRef.current?.close();
     sendingPcRef.current = null;
     receivingPcRef.current = null;
-  
     setMessages([]);
     setRemoteUserCountry(null);
     
@@ -258,29 +314,70 @@ export const Room = ({
     });
     socketRef.current = socket;
 
-    // 必须在连接成功后再发 user-info，否则服务端收不到，无法加入匹配队列
-    socket.on("connect", () => {
+    socket.on("connect", async () => {
+      let unlockedScenes: string[] = [];
+      if (account) {
+        try {
+          const r = await fetch(
+            `${getApiBase()}/api/practice-live/unlocked-scenes?account_name=${encodeURIComponent(account)}`
+          );
+          if (r.ok) {
+            const data = await r.json();
+            unlockedScenes = data.small_scene_ids || [];
+          }
+        } catch (e) {
+          console.warn("Failed to fetch unlocked scenes", e);
+        }
+      }
       socket.emit("user-info", {
         name,
         languages: learningLanguages,
         sceneId: sceneId || undefined,
+        unlockedScenes,
       });
     });
 
-    socket.on("send-offer", async ({ roomId, remoteCountry, name }) => {
-      console.log("Received offer request. Creating offer... RoomId:", roomId);
+    socket.on("queue-count", ({ count }: { count: number }) => {
+      setQueueCount(count);
+    });
+
+    socket.on("send-offer", async ({ roomId, remoteCountry, name: remoteNameVal, smallSceneId, myRole: role }) => {
+      console.log("Received offer. RoomId:", roomId, "smallSceneId:", smallSceneId, "myRole:", role);
       setLobby(false);
       setMessages([]);
-      console.log("Received send-offer payload:", { roomId, remoteCountry });
-      setRemoteUserCountry(remoteCountry);
+      setRemoteUserCountry(remoteCountry && remoteCountry !== "Unknown" ? remoteCountry : null);
+      setRemoteName(remoteNameVal || null);
+      setMyRole(role || null);
+      setRound(1);
+      setWantSwapSelf(false);
+      setRemoteWantSwap(false);
 
-      if (remoteCountry && remoteCountry !== "Unknown") {
-        setRemoteUserCountry(remoteCountry);
+      if (smallSceneId) {
+        try {
+          const r = await fetch(
+            `${getApiBase()}/api/practice-live/dialogue?small_scene_id=${encodeURIComponent(smallSceneId)}`
+          );
+          if (r.ok) {
+            const data = await r.json();
+            setDialoguePayload({
+              roleLabelA: data.role_label_a || "角色A",
+              taskA: data.task_a || "",
+              linesA: data.lines_a || [],
+              roleLabelB: data.role_label_b || "学习者",
+              taskB: data.task_b || "",
+              linesB: data.lines_b || [],
+              smallSceneName: data.small_scene_name,
+            });
+          } else {
+            setDialoguePayload(null);
+          }
+        } catch (e) {
+          console.warn("Failed to fetch dialogue", e);
+          setDialoguePayload(null);
+        }
       } else {
-        setRemoteUserCountry(null);
+        setDialoguePayload(null);
       }
-
-      setRemoteName(name);
 
       const sendingPc = initializePeerConnection("sender", roomId);
       sendingPcRef.current = sendingPc;
@@ -289,6 +386,13 @@ export const Room = ({
       dataChannelRef.current = dataChannel;
 
       dataChannel.onmessage = (e) => {
+        try {
+          const parsed = JSON.parse(e.data);
+          if (parsed?.type === "want-swap") {
+            setRemoteWantSwap(true);
+            return;
+          }
+        } catch (_) {}
         setMessages((prev) => [...prev, { sender: "remote", content: e.data }]);
       };
 
@@ -316,9 +420,12 @@ export const Room = ({
     socket.on("add-ice-candidate", handleAddIceCandidate);
     socket.on("room-removed", () => {
       console.log("Room removed. Resetting state...");
-
+      setDialoguePayload(null);
+      setMyRole(null);
+      setRound(1);
+      setWantSwapSelf(false);
+      setRemoteWantSwap(false);
       setIsMatching(true);
-      // Clean up WebRTC connections
       sendingPcRef.current?.close();
       receivingPcRef.current?.close();
       sendingPcRef.current = null;
@@ -357,7 +464,7 @@ export const Room = ({
       sendingPcRef.current?.close();
       receivingPcRef.current?.close();
     };
-  }, [localAudioTrack, localVideoTrack, handleOffer, name, learningLanguages]);
+  }, [localAudioTrack, localVideoTrack, handleOffer, name, learningLanguages, account, sceneId]);
 
   // Local video rendering effect
   useEffect(() => {
@@ -429,9 +536,12 @@ export const Room = ({
           {/* Loading Indicator */}
           {(lobby || isMatching) && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-50">
-              <HashLoader color="#fa4e65" />
-              <div className="mt-3 text-lg font-medium text-[#FA4E5B] ">
-                Finding new partner...
+              <HashLoader color="#6366f1" />
+              <div className="mt-3 text-lg font-medium text-gray-700">
+                正在匹配...
+              </div>
+              <div className="mt-1 text-sm text-gray-500">
+                当前正在匹配中：{queueCount} 人
               </div>
             </div>
           )}
@@ -455,16 +565,66 @@ export const Room = ({
         </div>
       </div>
 
-      {/* Chat Section */}
-      <div className="h-full lg:w-1/3">
-        <ChatSection
-          chatInput={chatInput}
-          setChatInput={setChatInput}
-          messages={messages}
-          sendMessage={handleSendMessage}
-          joinExitHandler={handleExit}
-          joinExitLabel={joinExitLabel}
-        />
+      {/* Chat Section + 角色/任务/台词 + 互换与结束 */}
+      <div className="h-full lg:w-1/3 flex flex-col border-l border-gray-300 bg-white">
+        {dialoguePayload && (
+          <div className="p-3 border-b border-gray-200 bg-gray-50 text-sm overflow-y-auto max-h-40">
+            <div className="font-semibold text-indigo-600">
+              第{round}轮 · 你扮演：{currentRoleLabel}
+            </div>
+            {currentTask && (
+              <div className="mt-1 text-gray-700">
+                <span className="font-medium">任务：</span>
+                {currentTask}
+              </div>
+            )}
+            {currentLines.length > 0 && (
+              <div className="mt-2">
+                <span className="font-medium text-gray-700">你可说的内容：</span>
+                <ul className="list-disc list-inside mt-0.5 text-gray-600">
+                  {currentLines.map((line, i) => (
+                    <li key={i}>
+                      {line.content || line.hint || ""}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+        <div className="flex-1 min-h-0">
+          <ChatSection
+            chatInput={chatInput}
+            setChatInput={setChatInput}
+            messages={messages}
+            sendMessage={handleSendMessage}
+            joinExitHandler={handleExit}
+            joinExitLabel={joinExitLabel}
+          />
+        </div>
+        {!lobby && !isMatching && (
+          <div className="p-2 border-t border-gray-200 flex flex-wrap gap-2">
+            {round === 1 && dialoguePayload && (
+              <button
+                type="button"
+                onClick={handleWantSwap}
+                disabled={wantSwapSelf && remoteWantSwap}
+                className="px-3 py-1.5 text-sm rounded-lg border border-indigo-500 text-indigo-600 hover:bg-indigo-50 disabled:opacity-70"
+              >
+                {wantSwapSelf && remoteWantSwap
+                  ? "正在互换…"
+                  : wantSwapSelf
+                  ? "已点击互换，等待对方"
+                  : remoteWantSwap
+                  ? "对方已同意，点击互换"
+                  : "互换角色"}
+              </button>
+            )}
+            {round === 2 && (
+              <span className="text-sm text-gray-500 py-1.5">第二轮对话结束可点击上方 Exit 结束练习</span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

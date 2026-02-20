@@ -6,21 +6,28 @@ export class RoomManager {
     this.userManager = userManager; // Store UserManager instance
   }
 
-  createRoom(user1, user2) {
+  createRoom(user1, user2, smallSceneId = null) {
     const roomId = this.generate().toString();
-    console.log("RoomId created:", roomId);
-
-    this.rooms.set(roomId, {
-      user1,
-      user2,
-    });
+    this.rooms.set(roomId, { user1, user2 });
 
     console.log(
-      `Room ${roomId} created for User1(${user1.name}, Country: ${user1.country}), User2(${user2.name}, Country: ${user2.country})`
+      `Room ${roomId} created for ${user1.name} / ${user2.name}, theme: ${smallSceneId || "none"}`
     );
-    
-    user1.socket.emit("send-offer", { roomId, remoteCountry: user2.country, name: user2.name });
-    user2.socket.emit("send-offer", { roomId, remoteCountry: user1.country, name: user1.name });
+
+    user1.socket.emit("send-offer", {
+      roomId,
+      remoteCountry: user2.country,
+      name: user2.name,
+      smallSceneId: smallSceneId || undefined,
+      myRole: "A",
+    });
+    user2.socket.emit("send-offer", {
+      roomId,
+      remoteCountry: user1.country,
+      name: user1.name,
+      smallSceneId: smallSceneId || undefined,
+      myRole: "B",
+    });
   }
 
   onOffer(roomId, sdp, senderSocketId) {
