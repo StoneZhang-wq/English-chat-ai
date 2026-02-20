@@ -451,7 +451,12 @@ async def process_and_play(prompt, audio_file_pth):
                 "message": error_msg
             }))
     elif API_PROVIDER == 'doubao':
-        output_path = os.path.join(output_dir, 'output.wav')
+        # 保存到独立文件，供前端播放
+        import uuid, time
+        filename = f"ai_{uuid.uuid4().hex[:8]}_{int(time.time() * 1000)}.wav"
+        tts_dir = os.path.join(output_dir, "tts")
+        os.makedirs(tts_dir, exist_ok=True)
+        output_path = os.path.join(tts_dir, filename)
         # 中文对话阶段必须用中文专用音色 TTS_VOICE_TYPE_ZH（仅说中文）；英文学习阶段用 TTS_VOICE_TYPE
         stage = get_learning_stage()
         if stage == "chinese_chat":
@@ -461,16 +466,6 @@ async def process_and_play(prompt, audio_file_pth):
         success = await doubao_text_to_speech(prompt, output_path, voice_type=doubao_voice)
         if success and os.path.exists(output_path):
             print("TTS generated audio (doubao), sending audio URL to clients")
-            import uuid, time
-            filename = f"ai_{uuid.uuid4().hex[:8]}_{int(time.time() * 1000)}.wav"
-            tts_dir = os.path.join(output_dir, "tts")
-            os.makedirs(tts_dir, exist_ok=True)
-            # move or copy to tts_dir
-            try:
-                shutil.copy2(output_path, os.path.join(tts_dir, filename))
-            except Exception:
-                # fallback to using output_path directly relative url if copy fails
-                filename = os.path.basename(output_path)
             audio_url = f"/audio/tts/{filename}"
             await send_message_to_clients(json.dumps({
                 "action": "ai_audio",
