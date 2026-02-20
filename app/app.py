@@ -426,8 +426,13 @@ async def process_and_play(prompt, audio_file_pth):
             if os.path.exists(output_path):
                 print("Playing generated audio...")
                 await send_message_to_clients(json.dumps({"action": "ai_start_speaking"}))
-                await play_audio(output_path)
-                await send_message_to_clients(json.dumps({"action": "ai_stop_speaking"}))
+                try:
+                    await play_audio(output_path)
+                except Exception as e:
+                    # 播放失败也要记录并继续，确保前端不会一直被锁定
+                    print(f"Error during audio playback: {e}")
+                finally:
+                    await send_message_to_clients(json.dumps({"action": "ai_stop_speaking"}))
             else:
                 error_msg = "Error: OpenAI TTS生成失败，音频文件未找到"
                 print(error_msg)
@@ -454,8 +459,12 @@ async def process_and_play(prompt, audio_file_pth):
         if success and os.path.exists(output_path):
             print("Playing generated audio...")
             await send_message_to_clients(json.dumps({"action": "ai_start_speaking"}))
-            await play_audio(output_path)
-            await send_message_to_clients(json.dumps({"action": "ai_stop_speaking"}))
+            try:
+                await play_audio(output_path)
+            except Exception as e:
+                print(f"Error during audio playback: {e}")
+            finally:
+                await send_message_to_clients(json.dumps({"action": "ai_stop_speaking"}))
         else:
             error_msg = "Error: 豆包TTS API调用失败，请检查环境变量配置"
             print(error_msg)
