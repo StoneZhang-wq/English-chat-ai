@@ -650,45 +650,26 @@ class DoubaoASRClient:
                                         error_desc = error_map.get(error_code, f"错误码: {error_code}")
                                         raise Exception(f"ASR API错误: {error_desc} - {error_msg}")
                                     
-                                    # 提取文本
+                                    # 只使用 is_last 的最终结果，避免流式中间结果重复拼接成「你好你好你好...」
                                     payload = response.get("payload")
-                                    if payload:
-                                        # 根据实际响应格式提取文本
-                                        if isinstance(payload, dict):
-                                            # 打印payload以便调试
-                                            print(f"ASR响应payload: {json.dumps(payload, ensure_ascii=False, indent=2)}")
-                                            
-                                            # 尝试多种可能的字段名提取文本
-                                            # 根据响应格式，文本可能在 result.text 中
-                                            text = None
-                                            
-                                            # 方式1: 直接获取text字段
-                                            if payload.get("text"):
-                                                text = payload.get("text")
-                                            # 方式2: 从result.text获取
-                                            elif isinstance(payload.get("result"), dict) and payload.get("result", {}).get("text"):
-                                                text = payload.get("result", {}).get("text")
-                                            # 方式3: 从utterances获取
-                                            elif payload.get("utterances") and len(payload.get("utterances", [])) > 0:
-                                                utterance = payload.get("utterances")[0]
-                                                if isinstance(utterance, dict) and utterance.get("text"):
-                                                    text = utterance.get("text")
-                                            
-                                            if text:
-                                                # 确保text是字符串
-                                                if not isinstance(text, str):
-                                                    text = str(text) if text else ""
-                                                if text and text.strip():  # 只添加非空文本
-                                                    transcript_text += text
-                                                    print(f"提取到文本: {text}")
-                                            else:
-                                                # 如果没有提取到文本，打印payload以便调试
-                                                result = payload.get("result", {})
-                                                if isinstance(result, dict) and result.get("text") == "":
-                                                    print(f"响应中text字段为空，payload: {json.dumps(payload, ensure_ascii=False)}")
+                                    is_last = response.get("is_last", False)
+                                    if payload and isinstance(payload, dict):
+                                        text = None
+                                        if payload.get("text"):
+                                            text = payload.get("text")
+                                        elif isinstance(payload.get("result"), dict) and payload.get("result", {}).get("text"):
+                                            text = payload.get("result", {}).get("text")
+                                        elif payload.get("utterances") and len(payload.get("utterances", [])) > 0:
+                                            utterance = payload.get("utterances")[0]
+                                            if isinstance(utterance, dict) and utterance.get("text"):
+                                                text = utterance.get("text")
+                                        if text and isinstance(text, str) and text.strip():
+                                            if is_last:
+                                                transcript_text = text.strip()
+                                                print(f"最终转录: {transcript_text}")
+                                            # 中间结果不拼接，避免重复
                                     
-                                    if response.get("is_last"):
-                                        print(f"收到最后一条消息，当前转录文本: {transcript_text}")
+                                    if is_last:
                                         return True  # 接收完成
                                 
                                 elif msg.type == aiohttp.WSMsgType.ERROR:

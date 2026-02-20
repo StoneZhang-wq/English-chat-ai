@@ -1297,7 +1297,8 @@ async def upload_voice_audio(
 ):
     """处理上传的语音文件"""
     try:
-        from .transcription import transcribe_with_openai_api
+        from .transcription import transcribe_with_openai_api, transcribe_with_doubao_asr
+        from .app import API_PROVIDER
         import tempfile
         import os
         
@@ -1307,53 +1308,54 @@ async def upload_voice_audio(
             tmp_file.write(content)
             tmp_file_path = tmp_file.name
         
-        # 转录音频 - 需要将webm转换为wav格式
+        # 转录音频：webm → wav，豆包 ASR 要求 16kHz/16bit/单声道，统一转换便于兼容
         audio_converted = False
         try:
             from pydub import AudioSegment
-            # 将webm转换为wav
             audio_seg = AudioSegment.from_file(tmp_file_path, format="webm")
+            audio_seg = audio_seg.set_frame_rate(16000).set_channels(1).set_sample_width(2)
             wav_path = tmp_file_path.replace('.webm', '.wav')
             audio_seg.export(wav_path, format="wav")
-            # 清理原始webm文件
             os.unlink(tmp_file_path)
             tmp_file_path = wav_path
             audio_converted = True
-            logger.info("Audio converted from webm to wav successfully")
+            logger.info("Audio converted from webm to wav (16kHz mono 16bit) successfully")
         except ImportError as e:
             logger.warning(f"pydub not available, trying to use original file: {e}")
-            # pydub未安装，尝试直接使用原文件
         except Exception as e:
             logger.error(f"Error converting audio format: {e}")
             import traceback
             logger.error(traceback.format_exc())
-            # 如果转换失败，尝试直接使用原文件
             if not tmp_file_path.endswith('.wav'):
                 logger.warning("Audio conversion failed, but will try to use original file format")
         
-        # 转录音频
+        # 转录音频：按全局 API_PROVIDER 选择豆包 ASR 或 OpenAI
+        async def _do_transcribe(path):
+            if API_PROVIDER == "doubao":
+                return await transcribe_with_doubao_asr(path)
+            return await transcribe_with_openai_api(path)
         transcription = None
         try:
-            transcription = await transcribe_with_openai_api(tmp_file_path)
+            transcription = await _do_transcribe(tmp_file_path)
             if not transcription or transcription.strip() == "":
-                raise ValueError("Transcription returned empty result")
+                raise ValueError("转写结果为空")
             logger.info(f"Transcription successful: {transcription[:50]}...")
         except Exception as e:
             logger.error(f"Error during transcription: {e}")
             import traceback
             logger.error(traceback.format_exc())
-            # 如果转换失败且文件不是wav格式，尝试重新转换
             if not audio_converted and not tmp_file_path.endswith('.wav'):
                 logger.info("Retrying with alternative conversion method...")
                 try:
-                    # 尝试使用ffmpeg直接转换（如果可用）
                     import subprocess
                     wav_path = tmp_file_path.replace('.webm', '.wav').replace('.mp3', '.wav')
-                    subprocess.run(['ffmpeg', '-i', tmp_file_path, '-y', wav_path], 
-                                 check=True, capture_output=True)
+                    subprocess.run(
+                        ['ffmpeg', '-i', tmp_file_path, '-ar', '16000', '-ac', '1', '-y', wav_path],
+                        check=True, capture_output=True
+                    )
                     os.unlink(tmp_file_path)
                     tmp_file_path = wav_path
-                    transcription = await transcribe_with_openai_api(tmp_file_path)
+                    transcription = await _do_transcribe(tmp_file_path)
                     if not transcription or transcription.strip() == "":
                         raise ValueError("Transcription returned empty result")
                     logger.info(f"Transcription successful after ffmpeg conversion: {transcription[:50]}...")
@@ -2405,7 +2407,7 @@ async def mark_unit_mastered_api(request: Request):
 async def practice_transcribe_audio(
     audio: UploadFile = File(...)
 ):
-    """练习模式下只转录音频，不生成AI回复（避免token浪费）。与全局 API_PROVIDER 一致：豆包用豆包 ASR，OpenAI 用 OpenAI。"""
+    """练习/自由对话模式下只转录音频，不生成AI回复。与全局 API_PROVIDER 一致：豆包用豆包 ASR，OpenAI 用 OpenAI。"""
     try:
         from .transcription import transcribe_with_openai_api, transcribe_with_doubao_asr
         from .app import API_PROVIDER
@@ -2418,21 +2420,20 @@ async def practice_transcribe_audio(
             tmp_file.write(content)
             tmp_file_path = tmp_file.name
         
-        # 转录音频 - 需要将webm转换为wav格式（豆包 ASR 要求 16kHz/16bit/单声道 WAV）
+        # 转录音频：webm → wav，豆包 ASR 要求 16kHz/16bit/单声道
         audio_converted = False
         try:
             from pydub import AudioSegment
-            # 将webm转换为wav
             audio_seg = AudioSegment.from_file(tmp_file_path, format="webm")
+            audio_seg = audio_seg.set_frame_rate(16000).set_channels(1).set_sample_width(2)
             wav_path = tmp_file_path.replace('.webm', '.wav')
             audio_seg.export(wav_path, format="wav")
             tmp_file_path = wav_path
             audio_converted = True
         except Exception as e:
             logger.warning(f"Could not convert audio format: {e}")
-            # 如果转换失败，尝试直接使用原文件
         
-        # 转录音频：按全局 API_PROVIDER 选择豆包 ASR 或 OpenAI
+        # 转录音频：按 API_PROVIDER 选择豆包 ASR 或 OpenAI
         transcription = None
         try:
             if API_PROVIDER == "doubao":

@@ -750,11 +750,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 body: formData
             });
             
+            const result = await response.json().catch(function () { return {}; });
             if (!response.ok) {
-                throw new Error('上传失败');
+                throw new Error(result.message || result.error || ('上传失败 ' + response.status));
             }
-            
-            const result = await response.json();
             
             // 不在这里显示消息，等待WebSocket消息来显示
             // 这样可以避免重复显示

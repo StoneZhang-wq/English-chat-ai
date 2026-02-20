@@ -1,4 +1,5 @@
 import os
+import asyncio
 # pyaudio 按需导入（服务端录音时使用）
 import wave
 import numpy as np
@@ -95,29 +96,28 @@ async def transcribe_with_doubao_asr(audio_file):
     global doubao_asr_client
     
     if doubao_asr_client is None:
-        print("Error: 豆包ASR客户端未初始化，请检查环境变量配置（VOLCENGINE_ASR_APP_ID, VOLCENGINE_ASR_ACCESS_TOKEN）")
-        return None
+        msg = "豆包ASR客户端未初始化，请检查环境变量 VOLCENGINE_ASR_APP_ID、VOLCENGINE_ASR_ACCESS_TOKEN"
+        print("Error:", msg)
+        raise ValueError(msg)
     
+    # 读取音频文件
+    with open(audio_file, "rb") as f:
+        audio_data = f.read()
+    
+    # 调用豆包ASR API（同步方法，在异步环境中用 to_thread 运行）
     try:
-        # 读取音频文件
-        with open(audio_file, "rb") as f:
-            audio_data = f.read()
-        
-        # 调用豆包ASR API（同步方法，需要在异步环境中运行）
         transcription = await asyncio.to_thread(
             doubao_asr_client.transcribe,
             audio_data
         )
-        
-        if transcription:
-            return transcription
-        else:
-            print("Error: 豆包ASR返回空结果")
-            return None
-            
     except Exception as e:
         print(f"Error: 豆包ASR API调用失败 - {str(e)}")
-        return None
+        raise ValueError(f"豆包ASR调用失败: {str(e)}") from e
+    
+    if transcription and transcription.strip():
+        return transcription
+    print("Error: 豆包ASR返回空结果")
+    raise ValueError("豆包ASR返回空结果（可能是未检测到语音、鉴权失败或余额不足）")
 
 async def transcribe_with_openai_api(audio_file, model="gpt-4o-mini-transcribe"):
     """Transcribe audio using OpenAI's API
