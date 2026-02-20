@@ -347,6 +347,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
                 if (!sceneChatOpen) {
                     addAIMessage(data.text);
+                    // 在收到 AI 文本回复时，解除发送锁定（允许用户继续输入/发送）
+                    isProcessing = false;
+                    setInputEnabled(true);
                 }
             } else {
                 console.log('⚠️ [handleWebSocketMessage] Practice mode: ignoring AI message from normal flow');
