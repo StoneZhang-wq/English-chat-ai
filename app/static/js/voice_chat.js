@@ -403,6 +403,26 @@ document.addEventListener("DOMContentLoaded", function() {
         } else {
             console.warn('Unknown WebSocket message format:', data);
         }
+        // 新的音频播放消息：服务器提供音频文件 URL，前端负责播放
+        if (data.action === 'ai_audio' && data.audio_url) {
+            try {
+                console.log('Received ai_audio, playing:', data.audio_url);
+                isProcessing = true;
+                setInputEnabled(false);
+                const audio = new Audio(data.audio_url);
+                audio.play().catch(e => {
+                    console.error('Audio play failed:', e);
+                });
+                audio.addEventListener('ended', () => {
+                    isProcessing = false;
+                    setInputEnabled(true);
+                });
+            } catch (e) {
+                console.error('Error handling ai_audio:', e);
+                isProcessing = false;
+                setInputEnabled(true);
+            }
+        }
     }
 
     // 处理文本消息

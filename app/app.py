@@ -420,19 +420,22 @@ async def process_and_play(prompt, audio_file_pth):
         
     # 只使用全局API_PROVIDER指定的TTS供应商
     if API_PROVIDER == 'openai':
-        output_path = os.path.join(output_dir, 'output.wav')
+        # 保存到独立文件，供前端播放
+        import uuid, time
+        filename = f"ai_{uuid.uuid4().hex[:8]}_{int(time.time() * 1000)}.wav"
+        tts_dir = os.path.join(output_dir, "tts")
+        os.makedirs(tts_dir, exist_ok=True)
+        output_path = os.path.join(tts_dir, filename)
         try:
             await openai_text_to_speech(prompt, output_path)
             if os.path.exists(output_path):
-                print("Playing generated audio...")
-                await send_message_to_clients(json.dumps({"action": "ai_start_speaking"}))
-                try:
-                    await play_audio(output_path)
-                except Exception as e:
-                    # 播放失败也要记录并继续，确保前端不会一直被锁定
-                    print(f"Error during audio playback: {e}")
-                finally:
-                    await send_message_to_clients(json.dumps({"action": "ai_stop_speaking"}))
+                print("TTS generated audio, sending audio URL to clients")
+                audio_url = f"/audio/tts/{filename}"
+                await send_message_to_clients(json.dumps({
+                    "action": "ai_audio",
+                    "audio_url": audio_url,
+                    "character": current_character
+                }))
             else:
                 error_msg = "Error: OpenAI TTS生成失败，音频文件未找到"
                 print(error_msg)
@@ -457,14 +460,23 @@ async def process_and_play(prompt, audio_file_pth):
             doubao_voice = os.getenv("TTS_VOICE_TYPE") or "zh_female_cancan_mars_bigtts"
         success = await doubao_text_to_speech(prompt, output_path, voice_type=doubao_voice)
         if success and os.path.exists(output_path):
-            print("Playing generated audio...")
-            await send_message_to_clients(json.dumps({"action": "ai_start_speaking"}))
+            print("TTS generated audio (doubao), sending audio URL to clients")
+            import uuid, time
+            filename = f"ai_{uuid.uuid4().hex[:8]}_{int(time.time() * 1000)}.wav"
+            tts_dir = os.path.join(output_dir, "tts")
+            os.makedirs(tts_dir, exist_ok=True)
+            # move or copy to tts_dir
             try:
-                await play_audio(output_path)
-            except Exception as e:
-                print(f"Error during audio playback: {e}")
-            finally:
-                await send_message_to_clients(json.dumps({"action": "ai_stop_speaking"}))
+                shutil.copy2(output_path, os.path.join(tts_dir, filename))
+            except Exception:
+                # fallback to using output_path directly relative url if copy fails
+                filename = os.path.basename(output_path)
+            audio_url = f"/audio/tts/{filename}"
+            await send_message_to_clients(json.dumps({
+                "action": "ai_audio",
+                "audio_url": audio_url,
+                "character": current_character
+            }))
         else:
             error_msg = "Error: 豆包TTS API调用失败，请检查环境变量配置"
             print(error_msg)
