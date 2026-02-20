@@ -887,23 +887,20 @@ async def stop_conversation_route():
 
 @app.post("/start_enhanced_conversation")
 async def start_enhanced_conversation_route(request: Request):
-    data = await request.json()
-    character = data.get("character")
-    speed = data.get("speed")
-    model = data.get("model")
-    voice = data.get("voice")
-    tts_model = data.get("ttsModel")
-    transcription_model = data.get("transcriptionModel")
-    
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    acc = _request_account(request, data.get("account_name"))
     asyncio.create_task(start_enhanced_conversation(
-        character=character,
-        speed=speed,
-        model=model,
-        voice=voice,
-        ttsModel=tts_model,
-        transcriptionModel=transcription_model
+        character=data.get("character"),
+        speed=data.get("speed"),
+        model=data.get("model"),
+        voice=data.get("voice"),
+        ttsModel=data.get("ttsModel"),
+        transcriptionModel=data.get("transcriptionModel"),
+        account_name=acc
     ))
-    
     return {"status": "started"}
 
 @app.post("/stop_enhanced_conversation")

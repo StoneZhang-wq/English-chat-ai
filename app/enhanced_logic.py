@@ -3,7 +3,7 @@ import asyncio
 import json
 from threading import Thread
 from fastapi import APIRouter
-from .shared import clients, conversation_history, is_client_active, set_client_inactive
+from .shared import clients, get_conversation_history, clear_conversation_history, get_current_character, set_current_character, is_client_active, set_client_inactive, DEFAULT_ACCOUNT
 from .app_logic import (
     open_file,
     analyze_mood,
@@ -113,23 +113,19 @@ async def record_enhanced_audio_and_transcribe():
         send_status_callback=send_message_to_enhanced_clients
     )
 
-async def enhanced_text_to_speech(text, detected_mood=None):
-    """Convert text to speech using the enhanced TTS model with emotional voice instructions."""
+async def enhanced_text_to_speech(text, detected_mood=None, account_name=None):
+    """Convert text to speech. 按用户分状态可传 account_name。"""
     try:
-        # Import required libraries
         import json
         import aiohttp
         import os
         import asyncio
         import wave
         import pyaudio
-        
-        # Import get_current_character at the top to avoid shadowing
-        from .shared import get_current_character as get_character
-        
-        # Use a persistent file in the outputs directory instead of a temporary file
+        acc = (account_name or "").strip() or DEFAULT_ACCOUNT
+
         outputs_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "outputs")
-        os.makedirs(outputs_dir, exist_ok=True)  # Ensure the outputs directory exists
+        os.makedirs(outputs_dir, exist_ok=True)
         
         # Create a persistent file path for enhanced audio
         enhanced_audio_filename = os.path.join(outputs_dir, "output_enhanced.wav")
@@ -189,7 +185,7 @@ async def enhanced_text_to_speech(text, detected_mood=None):
         model = enhanced_tts_model
         
         # Get current character and load its prompt
-        character_name = get_character()
+        character_name = get_current_character(acc)
         character_prompt_file = os.path.join(characters_folder, character_name, f"{character_name}.txt")
         
         # Extract voice instructions from the character prompt file
@@ -514,22 +510,17 @@ async def enhanced_text_to_speech(text, detected_mood=None):
         # Make sure to stop speaking in case of error
         await send_message_to_enhanced_clients({"action": "ai_stop_speaking"})
 
-async def enhanced_conversation_loop():
-    """Main conversation loop for the enhanced interface."""
-    global enhanced_conversation_active, conversation_history
-
-    # Import get_current_character at the top level to avoid shadowing
-    from .shared import get_current_character as get_character
+async def enhanced_conversation_loop(account_name=None):
+    """Main conversation loop for the enhanced interface. 按用户分状态。"""
+    global enhanced_conversation_active
+    acc = (account_name or "").strip() or DEFAULT_ACCOUNT
+    conversation_history = get_conversation_history(acc)
 
     try:
-        # Keep context of the conversation
         local_conversation_history = []
-        
-        # Check if there's any history to load - only load if there's actual content
         if conversation_history and len(conversation_history) > 0:
             local_conversation_history = conversation_history.copy()
-            
-            # Display the conversation history in the UI
+
             for msg in local_conversation_history:
                 if msg["role"] == "user":
                     await send_message_to_enhanced_clients({
@@ -539,8 +530,8 @@ async def enhanced_conversation_loop():
                     await send_message_to_enhanced_clients({
                         "message": msg['content']
                     })
-        
-        character_name = get_character()
+
+        character_name = get_current_character(acc)
         character_prompt_file = os.path.join(characters_folder, character_name, f"{character_name}.txt")
         # character_audio_file = os.path.join(characters_folder, character_name, f"{character_name}.wav")
         
@@ -643,15 +634,16 @@ async def enhanced_conversation_loop():
                 else:
                     if len(local_conversation_history) > 30:
                         local_conversation_history = local_conversation_history[-30:]
-                
-                # Update conversation history
-                conversation_history = local_conversation_history.copy()
-                
+
+                # Update shared state for this user (in-place)
+                conversation_history.clear()
+                conversation_history.extend(local_conversation_history)
+
                 # Save history based on character type
                 await save_history()
                 
                 # Convert text to speech and play audio
-                await enhanced_text_to_speech(ai_response, detected_mood)
+                await enhanced_text_to_speech(ai_response, detected_mood, account_name=acc)
                 
                 # Now that audio is finished, display the message in the UI
                 await send_message_to_enhanced_clients({
@@ -814,46 +806,29 @@ async def enhanced_chat_completion(prompt, system_message, mood_prompt, conversa
         print(f"Error in enhanced chat completion: {e}")
         return f"Error: {str(e)}"
 
-async def start_enhanced_conversation(character=None, speed=None, model=None, voice=None, ttsModel=None, transcriptionModel=None):
-    """Start a new enhanced conversation."""
-    global enhanced_conversation_active, enhanced_conversation_thread, enhanced_speed, enhanced_voice, enhanced_model, enhanced_tts_model, enhanced_transcription_model, conversation_history
-    
-    # Import get_current_character at the top level to avoid shadowing
-    from .shared import get_current_character as get_character
-    
-    # Track previous character for history management
-    previous_character = get_character()
-    
-    # Set character if provided
+async def start_enhanced_conversation(character=None, speed=None, model=None, voice=None, ttsModel=None, transcriptionModel=None, account_name=None):
+    """Start a new enhanced conversation. 按用户分状态。"""
+    global enhanced_conversation_active, enhanced_conversation_thread, enhanced_speed, enhanced_voice, enhanced_model, enhanced_tts_model, enhanced_transcription_model
+    acc = (account_name or "").strip() or DEFAULT_ACCOUNT
+    conversation_history = get_conversation_history(acc)
+
+    previous_character = get_current_character(acc)
     if character:
-        from .shared import set_current_character
-        set_current_character(character)
-    
-    # Get current character after setting
-    current_character = get_character()
-    
-    # Check if we're switching characters
+        set_current_character(character, acc)
+    current_character = get_current_character(acc)
+
     is_character_switch = previous_character != current_character
     if is_character_switch:
-        # Save previous character's history if it was a story/game character
         is_previous_story_character = previous_character.startswith("story_") or previous_character.startswith("game_")
         if is_previous_story_character and conversation_history:
-            # Save the previous character's history before we clear it
-            save_character_specific_history(conversation_history, previous_character)
-        
-        # Always clear history when switching characters to prevent mixing
-        conversation_history.clear()
-        
-        # Also delete the global history file
+            save_character_specific_history(conversation_history.copy(), previous_character)
+        clear_conversation_history(acc)
+
         history_file = "conversation_history.txt"
         if os.path.exists(history_file):
             os.remove(history_file)
-            
-        # Create empty history file
         with open(history_file, "w", encoding="utf-8") as f:
             pass
-        
-        # Send a message to clear the UI
         try:
             await send_message_to_enhanced_clients({
                 "action": "clear_character_switch",
@@ -887,76 +862,47 @@ async def start_enhanced_conversation(character=None, speed=None, model=None, vo
     if enhanced_conversation_active:
         return {"status": "already_running"}
     
-    # Check if this is a story or game character
     is_story_character = current_character.startswith("story_") or current_character.startswith("game_")
-    
-    # Handle history based on character type
     if is_story_character:
-        # For story/game characters: load from character-specific file
         loaded_history = load_character_specific_history(current_character)
-        # Clear existing history to ensure we only have the loaded history
         conversation_history.clear()
         if loaded_history:
             conversation_history.extend(loaded_history)
         else:
             print("No previous character-specific history found, starting fresh")
     else:
-        # For standard characters: ensure history is cleared
-        # Only reload from global file if it exists and has content
         history_file = "conversation_history.txt"
-        # Make sure in-memory history is clear
         conversation_history.clear()
-        
         if os.path.exists(history_file) and os.path.getsize(history_file) > 0:
-            # File exists and has content, load it
             try:
                 temp_history = []
                 with open(history_file, "r", encoding="utf-8") as file:
                     current_role = None
                     current_content = ""
-                    
                     for line in file:
                         line = line.strip()
-                        if not line:  # Skip empty lines
+                        if not line:
                             continue
-                            
                         if line.startswith("User:"):
-                            # Save previous message if exists
                             if current_role:
                                 temp_history.append({"role": current_role, "content": current_content.strip()})
-                            
-                            # Start new user message
                             current_role = "user"
                             current_content = line[5:].strip()
                         elif line.startswith("Assistant:"):
-                            # Save previous message if exists
                             if current_role:
                                 temp_history.append({"role": current_role, "content": current_content.strip()})
-                            
-                            # Start new assistant message
                             current_role = "assistant"
                             current_content = line[10:].strip()
                         else:
-                            # Continue previous message
                             current_content += "\n" + line
-                    
-                    # Add the last message
                     if current_role:
                         temp_history.append({"role": current_role, "content": current_content.strip()})
-                
-                # Add loaded messages to conversation history
                 conversation_history.extend(temp_history)
             except Exception as e:
                 print(f"Error loading global history: {e}")
-        else:
-            # File doesn't exist or is empty
-            conversation_history = []
-    
-    # Set active flag
+
     enhanced_conversation_active = True
-    
-    # Start the conversation in a separate thread
-    enhanced_conversation_thread = Thread(target=asyncio.run, args=(enhanced_conversation_loop(),))
+    enhanced_conversation_thread = Thread(target=asyncio.run, args=(enhanced_conversation_loop(acc),))
     enhanced_conversation_thread.start()
     
     return {"status": "started"}
