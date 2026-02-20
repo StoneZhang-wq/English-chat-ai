@@ -773,10 +773,9 @@ document.addEventListener("DOMContentLoaded", function() {
             formData.append('character', currentCharacter);
             const acc = (typeof currentAccountName !== 'undefined' ? currentAccountName : null) || (typeof localStorage !== 'undefined' ? localStorage.getItem('current_account') : null) || '';
             if (acc) formData.append('account_name', acc);
-
+            // 不使用自定义 header，避免部分环境下 FormData 的 Content-Type boundary 被破坏导致上传失败
             const response = await fetch('/api/voice/upload', {
                 method: 'POST',
-                headers: acc ? { 'X-Account-Name': acc } : {},
                 body: formData
             });
             
