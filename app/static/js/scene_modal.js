@@ -1,4 +1,5 @@
 (() => {
+  console.log('[scene_modal] 脚本已加载');
   function q(sel, root=document) { return root.querySelector(sel); }
   function qa(sel, root=document) { return Array.from(root.querySelectorAll(sel)); }
 
@@ -58,6 +59,7 @@
     q('#scenesListPane').style.display = 'block';
     q('#scenesBackBtn').style.display = 'none';
     hideScenePracticeOverlay();
+    if (typeof hideImmersiveOverlay === 'function') hideImmersiveOverlay();
   }
 
   function renderBigScenesList(scenes) {
@@ -193,6 +195,10 @@
         <div class="npc-avatar"><img src="${npcImg}" alt="${npc.label}" /></div>
         <div class="npc-label">${npc.label}</div>
         <div class="npc-hint">${npc.hint}</div>
+        <div class="npc-actions">
+          <button type="button" class="npc-btn npc-btn-practice">按剧本练习</button>
+          <button type="button" class="npc-btn npc-btn-immersive">自由对话</button>
+        </div>
       `
         : `
         <span class="npc-badge npc-badge-locked">未解锁</span>
@@ -200,10 +206,17 @@
         <div class="npc-label">${npc.label}</div>
         <div class="npc-hint npc-hint-locked">完成学习页对话后解锁</div>
       `;
-      el.addEventListener('click', () => {
+      el.addEventListener('click', (e) => {
         if (el.dataset.learned !== '1') return;
+        if (e.target.closest('.npc-actions')) return;
         openScenePractice(npc.label, smallSceneId, npc.id, npcImg);
       });
+      if (learned) {
+        const btnPractice = el.querySelector('.npc-btn-practice');
+        const btnImmersive = el.querySelector('.npc-btn-immersive');
+        if (btnPractice) btnPractice.addEventListener('click', (e) => { e.stopPropagation(); openScenePractice(npc.label, smallSceneId, npc.id, npcImg); });
+        if (btnImmersive) btnImmersive.addEventListener('click', (e) => { e.stopPropagation(); openImmersiveChat(npc.label, smallSceneId, npc.id); });
+      }
       npcLayer.appendChild(el);
     });
     container.appendChild(npcLayer);
@@ -297,6 +310,387 @@
     }
   }
   window.hideScenePracticeOverlay = hideScenePracticeOverlay;
+
+  // ---------- 沉浸式自由对话：按剧本流程与 AI 对话，可角色互换，结束后生成纠错报告 ----------
+  let immersiveState = { smallSceneId: '', npcId: '', label: '', npcName: '', sceneName: '', history: [], roleSwapped: false, userGoal: '', userGoalA: '', bLines: [], aLines: [] };
+
+  function updateImmersiveTaskText() {
+    var taskEl = document.getElementById('sceneImmersiveTask');
+    var hintEl = document.getElementById('sceneImmersiveHint');
+    if (!taskEl) return;
+    var s = immersiveState;
+    var swapped = s.roleSwapped;
+    var prefix = '你的任务：';
+    if (swapped) {
+      taskEl.textContent = s.userGoalA ? (prefix + s.userGoalA) : (prefix + '你扮演 ' + (s.npcName || s.label) + '，AI 扮演学习者。请按剧本流程完成对话。');
+    } else if (s.userGoal) {
+      taskEl.textContent = prefix + s.userGoal;
+    } else {
+      taskEl.textContent = prefix + '扮演 ' + (s.npcName || s.label) + '，在「' + (s.sceneName || s.smallSceneId) + '」中完成剧本中的对话流程。';
+    }
+    if (hintEl) {
+      var refLines = swapped ? (s.aLines || []) : (s.bLines || []);
+      if (refLines.length) {
+        hintEl.textContent = '参考（你可以这样说）：' + refLines.join(' → ');
+        hintEl.style.display = '';
+      } else {
+        hintEl.textContent = '';
+        hintEl.style.display = 'none';
+      }
+    }
+  }
+
+  function appendImmersiveMsg(role, text, audioUrl) {
+    const chat = q('#sceneImmersiveChat');
+    if (!chat) return;
+    const div = document.createElement('div');
+    div.className = 'msg ' + role;
+    if (audioUrl) {
+      var wrap = document.createElement('div');
+      wrap.className = 'msg-immersive-with-audio';
+      var textSpan = document.createElement('span');
+      textSpan.className = 'msg-text';
+      textSpan.textContent = text;
+      var playBtn = document.createElement('button');
+      playBtn.type = 'button';
+      playBtn.className = 'msg-play-btn';
+      playBtn.title = '播放';
+      playBtn.setAttribute('aria-label', '播放');
+      playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="8 5 8 19 19 12 8 5"></polygon></svg>';
+      var audio = new Audio(audioUrl);
+      playBtn.addEventListener('click', function () {
+        if (audio.paused) { audio.play(); playBtn.classList.add('playing'); } else { audio.pause(); audio.currentTime = 0; playBtn.classList.remove('playing'); }
+      });
+      audio.addEventListener('ended', function () { playBtn.classList.remove('playing'); });
+      wrap.appendChild(textSpan);
+      wrap.appendChild(playBtn);
+      div.appendChild(wrap);
+    } else {
+      div.textContent = text;
+    }
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  async function sendImmersiveMessage() {
+    const input = q('#sceneImmersiveInput');
+    const sendBtn = q('#sceneImmersiveSend');
+    const text = (input && input.value && input.value.trim()) || '';
+    if (!text || !immersiveState.smallSceneId || !immersiveState.npcId) return;
+    if (sendBtn) sendBtn.disabled = true;
+    input.value = '';
+    appendImmersiveMsg('user', text);
+    const history = immersiveState.history.slice(-20).map(h => ({ role: h.role, content: h.content }));
+    const acc = getSceneAccount();
+    try {
+      const res = await fetch('/api/scene-npc/immersive-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          small_scene_id: immersiveState.smallSceneId,
+          npc_id: immersiveState.npcId,
+          message: text,
+          history,
+          role_swapped: immersiveState.roleSwapped,
+          account_name: acc || undefined
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (sendBtn) sendBtn.disabled = false;
+      if (!res.ok) {
+        appendImmersiveMsg('assistant', 'Error: ' + (data.message || data.error || res.status), null);
+        return;
+      }
+      const reply = (data.reply || '').trim();
+      const taskCompleted = data.task_completed === true;
+      const audioUrl = data.audio_url || null;
+      immersiveState.history.push({ role: 'user', content: text });
+      immersiveState.history.push({ role: 'assistant', content: reply });
+      appendImmersiveMsg('assistant', reply, audioUrl);
+      if (taskCompleted) {
+        requestImmersiveReport();
+      }
+    } catch (e) {
+      if (sendBtn) sendBtn.disabled = false;
+      appendImmersiveMsg('assistant', 'Network error: ' + (e.message || '请稍后重试'), null);
+    }
+  }
+
+  async function sendImmersiveMessageWithText(text, userAudioUrl) {
+    if (!text || !text.trim() || !immersiveState.smallSceneId || !immersiveState.npcId) return;
+    var sendBtn = q('#sceneImmersiveSend');
+    var input = q('#sceneImmersiveInput');
+    if (input) input.value = '';
+    appendImmersiveMsg('user', text.trim(), userAudioUrl || null);
+    var history = immersiveState.history.slice(-20).map(function (h) { return { role: h.role, content: h.content }; });
+    var acc = getSceneAccount();
+    if (sendBtn) sendBtn.disabled = true;
+    try {
+      var res = await fetch('/api/scene-npc/immersive-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          small_scene_id: immersiveState.smallSceneId,
+          npc_id: immersiveState.npcId,
+          message: text.trim(),
+          history: history,
+          role_swapped: immersiveState.roleSwapped,
+          account_name: acc || undefined
+        })
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (sendBtn) sendBtn.disabled = false;
+      if (!res.ok) {
+        appendImmersiveMsg('assistant', 'Error: ' + (data.message || data.error || res.status), null);
+        return;
+      }
+      var reply = (data.reply || '').trim();
+      var taskCompleted = data.task_completed === true;
+      var audioUrl = data.audio_url || null;
+      immersiveState.history.push({ role: 'user', content: text.trim() });
+      immersiveState.history.push({ role: 'assistant', content: reply });
+      appendImmersiveMsg('assistant', reply, audioUrl);
+      if (taskCompleted) requestImmersiveReport();
+    } catch (e) {
+      if (sendBtn) sendBtn.disabled = false;
+      appendImmersiveMsg('assistant', 'Network error: ' + (e.message || '请稍后重试'), null);
+    }
+  }
+
+  function simpleMarkdownToHtml(text) {
+    if (!text || !String(text).trim()) return '';
+    var s = String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    s = s
+      .replace(/^纠错与改进\s*$/gm, '## 纠错与改进')
+      .replace(/^本场景参考\s*$/gm, '## 本场景参考')
+      .replace(/^##\s+(.+)$/gm, '<h2 class="report-heading">$1</h2>')
+      .replace(/^###\s+(.+)$/gm, '<h3 class="report-heading">$1</h3>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+    return s;
+  }
+
+  async function requestImmersiveReport() {
+    const reportEl = q('#sceneImmersiveReport');
+    const bodyEl = q('#sceneImmersiveReportBody');
+    if (!reportEl || !bodyEl) return;
+    bodyEl.innerHTML = '<span class="report-loading">正在生成报告…</span>';
+    reportEl.style.display = 'block';
+    const closeCountdown = typeof window.showCountdownOverlay === 'function'
+      ? window.showCountdownOverlay('正在生成复习资料', 10)
+      : function noop() {};
+    const overlayShownAt = Date.now();
+    const MIN_OVERLAY_MS = 2000;
+    const transcript = immersiveState.history.filter(h => h.role === 'user').map(h => ({ role: 'user', content: h.content }));
+    const acc = getSceneAccount();
+    try {
+      const res = await fetch('/api/scene-npc/immersive-chat/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          small_scene_id: immersiveState.smallSceneId,
+          npc_id: immersiveState.npcId,
+          transcript,
+          account_name: acc || undefined
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      var elapsed = Date.now() - overlayShownAt;
+      var delayClose = Math.max(0, MIN_OVERLAY_MS - elapsed);
+      function closeAndUpdate() {
+        closeCountdown();
+        if (res.ok && data.report_markdown) {
+          bodyEl.innerHTML = simpleMarkdownToHtml(data.report_markdown);
+          bodyEl.scrollTop = 0;
+          reportEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          bodyEl.textContent = data.message || data.error || '生成报告失败';
+        }
+      }
+      if (delayClose > 0) setTimeout(closeAndUpdate, delayClose);
+      else closeAndUpdate();
+    } catch (e) {
+      closeCountdown();
+      bodyEl.textContent = '请求失败：' + (e.message || '');
+    }
+  }
+
+  function hideImmersiveOverlay() {
+    const overlay = q('#scene-immersive-overlay');
+    const report = q('#sceneImmersiveReport');
+    const chat = q('#sceneImmersiveChat');
+    const input = q('#sceneImmersiveInput');
+    if (overlay) overlay.style.display = 'none';
+    if (report) report.style.display = 'none';
+    if (chat) chat.innerHTML = '';
+    if (input) input.value = '';
+    immersiveState = { smallSceneId: '', npcId: '', label: '', npcName: '', sceneName: '', history: [], roleSwapped: false, userGoal: '', userGoalA: '', bLines: [], aLines: [] };
+  }
+
+  async function openImmersiveChat(label, smallSceneId, npcId) {
+    const sceneChatModal = q('#sceneChatModal');
+    if (sceneChatModal) sceneChatModal.style.display = 'none';
+    const overlay = q('#scene-immersive-overlay');
+    if (!overlay) return;
+    const closeCountdown = typeof window.showCountdownOverlay === 'function'
+      ? window.showCountdownOverlay('正在准备自由对话', 10)
+      : function noop() {};
+    const acc = getSceneAccount();
+    const url = urlWithAccount(
+      '/api/scene-npc/dialogue/immersive?small_scene_id=' + encodeURIComponent(smallSceneId) + '&npc_id=' + encodeURIComponent(npcId),
+      acc
+    );
+    try {
+      const data = await fetchJSON(url);
+      closeCountdown();
+      if (!data.dialogue) {
+        showSceneToast(data.message || data.error || '未找到该场景对话');
+        return;
+      }
+      const d = data.dialogue;
+      const content = d.content || [];
+      const bLines = content.filter(function (item) { return item.role === 'B'; }).map(function (item) { return (item.content || item.hint || '').trim(); }).filter(Boolean);
+      const aLines = content.filter(function (item) { return item.role === 'A'; }).map(function (item) { return (item.content || item.hint || '').trim(); }).filter(Boolean);
+      var userGoal = (d.user_goal != null && d.user_goal !== '') ? String(d.user_goal) : (d.userGoal != null && d.userGoal !== '') ? String(d.userGoal) : '';
+      var userGoalA = (d.user_goal_a != null && d.user_goal_a !== '') ? String(d.user_goal_a) : (d.userGoalA != null && d.userGoalA !== '') ? String(d.userGoalA) : '';
+      immersiveState = {
+        smallSceneId,
+        npcId,
+        label: label || d.npc_name || npcId,
+        npcName: d.npc_name || label || npcId,
+        sceneName: d.small_scene_name || smallSceneId,
+        history: [],
+        roleSwapped: false,
+        userGoal: userGoal,
+        userGoalA: userGoalA,
+        bLines: bLines,
+        aLines: aLines
+      };
+      console.log('[自由对话] 加载完成 d.user_goal_a=', d.user_goal_a, 'state.userGoalA=', immersiveState.userGoalA);
+      q('#sceneImmersiveTitle').textContent = '自由对话 · ' + (immersiveState.npcName || immersiveState.label);
+      updateImmersiveTaskText();
+      q('#sceneImmersiveChat').innerHTML = '';
+      q('#sceneImmersiveInput').value = '';
+      q('#sceneImmersiveReport').style.display = 'none';
+      q('#sceneImmersiveReportBody').textContent = '';
+      overlay.style.display = 'flex';
+      q('#sceneImmersiveInput').focus();
+    } catch (e) {
+      closeCountdown();
+      console.error('打开沉浸式对话失败:', e);
+      if (e.message && e.message.indexOf('403') >= 0) {
+        showSceneToast('该角色未解锁，请先完成学习');
+      } else {
+        showSceneToast('加载失败，请稍后重试');
+      }
+    }
+  }
+
+  var immersiveRecorder = { stream: null, recorder: null, chunks: [] };
+
+  function stopImmersiveRecordAndSend() {
+    if (!immersiveRecorder.recorder || immersiveRecorder.recorder.state === 'inactive') return;
+    immersiveRecorder.recorder.stop();
+    immersiveRecorder.recorder.onstop = function () {
+      var blob = new Blob(immersiveRecorder.chunks, { type: 'audio/webm' });
+      immersiveRecorder.chunks = [];
+          if (immersiveRecorder.stream) {
+            immersiveRecorder.stream.getTracks().forEach(function (t) { t.stop(); });
+            immersiveRecorder.stream = null;
+          }
+          var btn = q('#sceneImmersiveRecord');
+          if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; }
+          var formData = new FormData();
+          formData.append('audio', blob, 'recording.webm');
+          fetch('/api/practice/transcribe', { method: 'POST', body: formData })
+            .then(function (r) { return r.json(); })
+            .then(function (result) {
+              if (result.status === 'success' && result.transcription && result.transcription.trim()) {
+                sendImmersiveMessageWithText(result.transcription.trim(), result.audio_url || null);
+              } else {
+                showSceneToast(result.message || '未识别到语音，请重试');
+              }
+            })
+            .catch(function (e) {
+              showSceneToast('录音上传失败：' + (e.message || ''));
+            });
+        };
+  }
+
+  function bindImmersiveOverlay() {
+    const closeBtn = q('#sceneImmersiveClose');
+    const sendBtn = q('#sceneImmersiveSend');
+    const input = q('#sceneImmersiveInput');
+    const recordBtn = q('#sceneImmersiveRecord');
+    const roleSwapBtn = q('#sceneImmersiveRoleSwap');
+    const endBtn = q('#sceneImmersiveEnd');
+    const reportCloseBtn = q('#sceneImmersiveReportClose');
+    if (closeBtn) closeBtn.addEventListener('click', hideImmersiveOverlay);
+    if (sendBtn) sendBtn.addEventListener('click', sendImmersiveMessage);
+    if (input) input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendImmersiveMessage(); });
+    if (recordBtn) {
+      recordBtn.addEventListener('pointerdown', function (e) {
+        e.preventDefault();
+        if (immersiveRecorder.recorder && immersiveRecorder.recorder.state === 'recording') return;
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+          immersiveRecorder.stream = stream;
+          immersiveRecorder.chunks = [];
+          var recorder = new MediaRecorder(stream);
+          immersiveRecorder.recorder = recorder;
+          recorder.ondataavailable = function (ev) { if (ev.data.size) immersiveRecorder.chunks.push(ev.data); };
+          recorder.start();
+          recordBtn.classList.add('recording');
+          recordBtn.textContent = '录音中';
+        }).catch(function () { showSceneToast('无法使用麦克风'); });
+      });
+      recordBtn.addEventListener('pointerup', stopImmersiveRecordAndSend);
+      recordBtn.addEventListener('pointerleave', stopImmersiveRecordAndSend);
+    }
+    if (roleSwapBtn) roleSwapBtn.addEventListener('click', function () {
+      immersiveState.roleSwapped = !immersiveState.roleSwapped;
+      immersiveState.history = [];
+      var chatEl = q('#sceneImmersiveChat');
+      if (chatEl) chatEl.innerHTML = '';
+      var reportEl = q('#sceneImmersiveReport');
+      var reportBody = q('#sceneImmersiveReportBody');
+      if (reportEl) reportEl.style.display = 'none';
+      if (reportBody) reportBody.textContent = '';
+      var s = immersiveState;
+      var taskEl = document.getElementById('sceneImmersiveTask');
+      var hintEl = document.getElementById('sceneImmersiveHint');
+      console.log('[角色互换] taskEl=', taskEl, 'roleSwapped=', s.roleSwapped, 'userGoalA=', s.userGoalA);
+      if (!taskEl) console.warn('[角色互换] sceneImmersiveTask 未找到');
+      if (taskEl) {
+        var prefix = '你的任务：';
+        if (s.roleSwapped) {
+          taskEl.textContent = s.userGoalA ? (prefix + s.userGoalA) : (prefix + '你扮演 ' + (s.npcName || s.label) + '，AI 扮演学习者。请按剧本流程完成对话。');
+        } else {
+          taskEl.textContent = s.userGoal ? (prefix + s.userGoal) : (prefix + '扮演 ' + (s.npcName || s.label) + '，在「' + (s.sceneName || s.smallSceneId) + '」中完成剧本中的对话流程。');
+        }
+        console.log('[角色互换] 已设置 textContent=', taskEl.textContent);
+      }
+      if (hintEl) {
+        var refLines = s.roleSwapped ? (s.aLines || []) : (s.bLines || []);
+        if (refLines.length) {
+          hintEl.textContent = '参考（你可以这样说）：' + refLines.join(' → ');
+          hintEl.style.display = '';
+        } else {
+          hintEl.textContent = '';
+          hintEl.style.display = 'none';
+        }
+      }
+      showSceneToast(s.roleSwapped ? '已切换：你演 NPC，AI 演学习者；对话已清空' : '已切换：你演学习者，AI 演 NPC；对话已清空');
+    });
+    if (endBtn) endBtn.addEventListener('click', requestImmersiveReport);
+    if (reportCloseBtn) reportCloseBtn.addEventListener('click', () => {
+      const report = q('#sceneImmersiveReport');
+      if (report) report.style.display = 'none';
+    });
+  }
+
   function closeSceneChat() {
     const chatModal = q('#sceneChatModal');
     chatModal.style.display = 'none';
@@ -426,8 +820,9 @@
     if (data.text) appendSceneChat('ai', data.text);
   });
 
-  // Init handlers
-  document.addEventListener('DOMContentLoaded', () => {
+  // Init handlers（若 DOM 已就绪则立即执行，避免 DOMContentLoaded 已触发导致未绑定）
+  function runSceneModalInit() {
+    console.log('[scene_modal] runSceneModalInit 执行');
     const openBtn = q('#enter-scenes-btn');
     if (openBtn) {
       openBtn.addEventListener('click', (e) => {
@@ -443,6 +838,7 @@
     const backBtn = q('#scenesBackBtn');
     if (backBtn) backBtn.addEventListener('click', () => {
       hideScenePracticeOverlay();
+      if (typeof hideImmersiveOverlay === 'function') hideImmersiveOverlay();
       const lvl = backBtn.dataset.level || 'big';
       if (lvl === 'scene') {
         // 从场景视图返回到小场景列表：用缓存重新渲染小场景列表，避免空白/loading
@@ -472,6 +868,13 @@
     if (sceneInput) sceneInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendSceneChatText(); });
     const sceneClose = q('#sceneChatClose');
     if (sceneClose) sceneClose.addEventListener('click', closeSceneChat);
-  });
+    console.log('[scene_modal] 即将 bindImmersiveOverlay, roleSwapBtn=', q('#sceneImmersiveRoleSwap'));
+    bindImmersiveOverlay();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runSceneModalInit);
+  } else {
+    runSceneModalInit();
+  }
 })();
 

@@ -342,6 +342,10 @@
 
 .npc-label { font-weight: 600; font-size: 15px; margin-bottom: 4px; color: var(--text, #e2e8f0); }
 .npc-hint { font-size: 12px; color: var(--text-muted, #94a3b8); }
+.npc-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.npc-actions .npc-btn { padding: 6px 10px; font-size: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.25); background: rgba(51, 65, 85, 0.6); color: #e2e8f0; cursor: pointer; }
+.npc-actions .npc-btn:hover { background: rgba(71, 85, 105, 0.8); }
+.npc-actions .npc-btn-immersive { background: rgba(59, 130, 246, 0.4); border-color: rgba(59, 130, 246, 0.6); }
 
 /* 未解锁 NPC：灰底 + 虚线边框 + 顶部「未解锁」角标 + 头像区大锁，点击无反应 */
 .npc-locked {
@@ -501,6 +505,200 @@
 @keyframes pulse-recording {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
+}
+
+/* 沉浸式自由对话叠加层 */
+.scene-immersive-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 101;
+  padding: 20px;
+  overflow: auto;
+}
+.scene-immersive-panel {
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  background: var(--scene-panel-bg, #1e293b);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.scene-immersive-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.scene-immersive-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #f1f5f9;
+}
+.scene-immersive-close {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 6px;
+  line-height: 1;
+}
+.scene-immersive-close:hover { color: #f1f5f9; }
+.scene-immersive-task {
+  margin: 0;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  background: rgba(0,0,0,0.2);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.scene-immersive-hint {
+  margin: 0;
+  padding: 6px 16px 10px;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  background: rgba(0,0,0,0.15);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.scene-immersive-hint:empty { display: none; }
+.scene-immersive-chat {
+  flex: 1;
+  min-height: 200px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.scene-immersive-chat .msg {
+  max-width: 85%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+.scene-immersive-chat .msg.user {
+  align-self: flex-end;
+  background: #3b82f6;
+  color: #fff;
+}
+.scene-immersive-chat .msg.assistant {
+  align-self: flex-start;
+  background: rgba(255,255,255,0.1);
+  color: #e2e8f0;
+}
+.msg-immersive-with-audio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.msg-immersive-with-audio .msg-text { flex: 1; min-width: 0; }
+.msg-immersive-with-audio .msg-play-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.msg-immersive-with-audio .msg-play-btn:hover { background: rgba(255,255,255,0.4); }
+.msg-immersive-with-audio .msg-play-btn.playing { background: #22c55e; }
+.scene-immersive-record-btn.recording { background: #b71c1c !important; color: #fff; }
+.scene-immersive-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+.scene-immersive-actions input {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.2);
+  color: #f1f5f9;
+  font-size: 0.95rem;
+}
+.scene-immersive-actions button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(51, 65, 85, 0.8);
+  color: #e2e8f0;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.scene-immersive-actions #sceneImmersiveSend {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
+}
+.scene-immersive-report {
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+  background: rgba(0,0,0,0.25);
+  flex-shrink: 0;
+}
+.scene-immersive-report h4 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  color: #f1f5f9;
+  flex-shrink: 0;
+}
+.scene-immersive-report-body {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  line-height: 1.6;
+  padding: 4px 0 20px;
+}
+.scene-immersive-report-body br { display: block; content: ''; margin-bottom: 0.35em; }
+.scene-immersive-report-body .report-heading {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin: 16px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+.scene-immersive-report-body .report-heading:first-child { margin-top: 0; }
+.scene-immersive-report-body strong { color: #e2e8f0; }
+.scene-immersive-report-body .report-loading { color: #94a3b8; }
+/* 复习资料分条更清晰 */
+.scene-immersive-report-body .report-item { margin-bottom: 10px; padding-left: 0; }
+.scene-immersive-report-body p { margin: 0 0 8px; }
+.scene-immersive-report #sceneImmersiveReportClose {
+  margin-top: 10px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(51, 65, 85, 0.8);
+  color: #e2e8f0;
+  cursor: pointer;
 }
 
 /* Modal 打开时隐藏底部场景按钮 */

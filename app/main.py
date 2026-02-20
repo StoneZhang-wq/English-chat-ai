@@ -543,7 +543,11 @@ async def api_dialogue_immersive(request: Request, small_scene_id: str, npc_id: 
     d = get_immersive_dialogue(small_scene_id, npc_id)
     if not d:
         return JSONResponse({"error": "dialogue not found"}, status_code=404)
-    return JSONResponse({"dialogue": d})
+    # 确保前端一定能拿到 user_goal / user_goal_a（键名与类型一致）
+    out = dict(d)
+    out.setdefault("user_goal", "")
+    out.setdefault("user_goal_a", "")
+    return JSONResponse({"dialogue": out})
 
 
 @app.post("/api/scene-npc/mark-learned")
@@ -558,6 +562,192 @@ async def api_mark_learned(request: Request):
     mark_npc_learned(account_name, small_scene_id, npc_id)
     newly_unlocked = check_and_unlock_scene(account_name, small_scene_id)
     return JSONResponse({"status": "success", "newly_unlocked": newly_unlocked})
+
+
+# ---------- 沉浸式自由对话：与 AI 按剧本流程对话，可适当扩展，任务完成即结束，跑偏则纠正 ----------
+@app.post("/api/scene-npc/immersive-chat")
+async def api_immersive_chat(request: Request):
+    """沉浸式自由对话：AI 按 immersive 剧本推进，可换表达，任务完成即结束，话题跑偏时纠正。"""
+    try:
+        from .scene_npc_db import get_immersive_dialogue, get_npc_progress, _safe_account
+        from .app import chatgpt_streamed_async
+
+        data = await request.json()
+        small_scene_id = (data.get("small_scene_id") or "").strip()
+        npc_id = (data.get("npc_id") or "").strip()
+        user_message = (data.get("message") or "").strip()
+        history = data.get("history") or []  # [{ "role": "user"|"assistant", "content": "..." }]
+        role_swapped = data.get("role_swapped") is True  # True=用户演A(NPC)，AI演B
+
+        if not small_scene_id or not npc_id:
+            return JSONResponse({"status": "error", "message": "missing small_scene_id or npc_id"}, status_code=400)
+
+        acc = _scene_account(request, data.get("account_name"))
+        progress = get_npc_progress(_safe_account(acc))
+        if npc_id not in (progress.get(small_scene_id) or []):
+            return JSONResponse({"error": "未解锁", "message": "请先完成该角色学习"}, status_code=403)
+
+        dialogue = get_immersive_dialogue(small_scene_id, npc_id)
+        if not dialogue or not dialogue.get("content"):
+            return JSONResponse({"status": "error", "message": "未找到该场景对话"}, status_code=404)
+
+        npc_name = dialogue.get("npc_name") or npc_id
+        small_scene_name = dialogue.get("small_scene_name") or small_scene_id
+        content = dialogue["content"]
+        script_lines = "\n".join([f"{item.get('role', 'A')}: {item.get('content', '')}" for item in content])
+        core_sentences = dialogue.get("core_sentences") or ""
+        core_chunks = dialogue.get("core_chunks") or ""
+
+        if role_swapped:
+            task_desc = f"用户扮演 NPC（{npc_name}），你扮演学习者（B）。请按剧本流程推进，直到学习者（你）完成剧本中 B 该做的所有事项，然后结束对话。"
+        else:
+            task_desc = f"你扮演 NPC（{npc_name}），用户扮演学习者（B）。请按剧本流程推进，直到用户完成剧本中 B 该做的所有事项，然后结束对话。"
+
+        system = f"""You are in an English immersive scene: {small_scene_name}, NPC: {npc_name}.
+
+【你的核心任务】
+{task_desc}
+
+【参考剧本（作为框架，可扩充）】
+{script_lines}
+
+【扩充轮数：自然、有逻辑地加内容，引导用户开口】
+- 在剧本主线之外，自然增加几轮符合场景、符合角色的小对话，让用户多开口。例如：外卖员送餐可自然问一句天气或「今天忙吗」再回到确认房间、付款；家人吃饭可先问「今天过得怎么样」或「工作/学校有什么事」再接到要不要帮忙、洗菜、砧板在哪等。目的是引导用户多说，而不是把原本一轮要说的内容拆成多条短句发出去。
+- 中途可以稍微偏离主线（加一点寒暄、关心），但背景和角色逻辑不变：外卖员最终仍完成送餐/签收/道别，家人场景最终仍落到帮忙洗菜、道谢等。整段对话的结果不脱离该场景、该角色。
+
+【每轮不要太长，避免 AI 持续输出】
+- 每一轮你的回复控制在 1～2 句以内，禁止写一大段。宁可一句短问或短接话，等用户说。否则会变成你在持续输出、用户没机会开口。
+- 你的每一句必须与用户当前/之前说过的话衔接，不能跳过前提。用户明显跑题时礼貌拉回；剧本中 B 方该做的全部事项都完成后，再结束。
+
+【规则】
+1. 回复用英文。按剧本顺序与关键节点推进，用自然增加的小话题扩充轮数，让用户多说话；每轮回复严禁超过 2 句。
+2. 当你判定用户已完成剧本中 B 方该做的全部事项且对话可收束时，在当条回复末尾单独一行输出 [IMMERSIVE_END]。
+3. 除结束标记外不要输出 [IMMERSIVE_END] 或其它元指令。
+"""
+        if core_sentences or core_chunks:
+            system += f"\n【本场景核心句/词块】\nSentences: {core_sentences}\nChunks: {core_chunks}\n"
+
+        conv = []
+        for h in history[-20:]:
+            r = h.get("role")
+            c = (h.get("content") or "").strip()
+            if r and c and r in ("user", "assistant"):
+                conv.append({"role": "user" if r == "user" else "assistant", "content": c})
+
+        response = await chatgpt_streamed_async(user_message, system, "", conv)
+        if not response:
+            return JSONResponse({"status": "error", "message": "AI 未返回"}, status_code=500)
+
+        task_completed = "[IMMERSIVE_END]" in response
+        reply = response.replace("[IMMERSIVE_END]", "").strip()
+
+        audio_url = None
+        if reply:
+            try:
+                import uuid
+                import os
+                current_file_dir = os.path.dirname(os.path.abspath(__file__))
+                project_dir = os.path.dirname(current_file_dir)
+                immersive_dir = os.path.join(project_dir, "outputs", "immersive")
+                os.makedirs(immersive_dir, exist_ok=True)
+                filename = f"reply_{uuid.uuid4().hex[:12]}.wav"
+                path = os.path.join(immersive_dir, filename)
+                text_for_tts = (reply or "")[:500]
+                if text_for_tts:
+                    from .app import generate_speech
+                    ok = await generate_speech(text_for_tts, path)
+                    if ok and os.path.exists(path):
+                        audio_url = f"/audio/immersive/{filename}"
+            except Exception as tts_err:
+                logger.warning(f"Immersive TTS failed: {tts_err}")
+
+        return JSONResponse({
+            "status": "success",
+            "reply": reply,
+            "task_completed": task_completed,
+            "audio_url": audio_url,
+        })
+    except Exception as e:
+        logger.error(f"Immersive chat error: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+@app.post("/api/scene-npc/immersive-chat/report")
+async def api_immersive_chat_report(request: Request):
+    """沉浸式对话结束后：根据用户 transcript 生成纠错报告 + 剧本 + 核心句/词块，纯文本无语音。"""
+    try:
+        from .scene_npc_db import get_immersive_dialogue
+        from .app import chatgpt_streamed_async
+
+        data = await request.json()
+        small_scene_id = (data.get("small_scene_id") or "").strip()
+        npc_id = (data.get("npc_id") or "").strip()
+        transcript = data.get("transcript") or []  # [{ "role": "user"|"assistant", "content": "..." }]
+
+        if not small_scene_id or not npc_id:
+            return JSONResponse({"status": "error", "message": "missing small_scene_id or npc_id"}, status_code=400)
+
+        dialogue = get_immersive_dialogue(small_scene_id, npc_id)
+        if not dialogue:
+            return JSONResponse({"status": "error", "message": "未找到该场景对话"}, status_code=404)
+
+        script_lines = []
+        for item in dialogue.get("content") or []:
+            script_lines.append(f"{item.get('role', 'A')}: {item.get('content', '')}")
+        script_text = "\n".join(script_lines)
+        core_sentences = dialogue.get("core_sentences") or ""
+        core_chunks = dialogue.get("core_chunks") or ""
+
+        user_lines = [t.get("content", "").strip() for t in transcript if (t.get("role") == "user" and t.get("content", "").strip())]
+        user_text = "\n".join(user_lines) if user_lines else "(无用户发言)"
+
+        scene_ctx = f"{dialogue.get('small_scene_name') or small_scene_id}，用户扮演学习者（B），NPC 为{dialogue.get('npc_name') or npc_id}。剧本大意：B 需按顺序完成打招呼、进入场景关键步骤（如送餐确认房间、报价收款）、道别等。"
+
+        prompt = f"""场景说明：{scene_ctx}
+
+用户在本场景中的整段发言：
+{user_text}
+
+请输出一份「复习纠错资料」报告，要求：
+
+一、纠错与改进（报告主体，对口语提升有帮助的内容）
+- 对用户发言做口语层面的纠错与改进建议：语法、用词、逻辑、表达自然度。忽略大小写和标点。
+- 每条简短一行，格式：「原句 → 建议说法」或「某句可改为：…」，并可选一句简要说明（如语法点、更自然的说法）。
+- 不要以「是否按场景/角色完成步骤」作为主要纠错内容。即使有句子与场景关系不大，也请从语法、用词、逻辑上给出改进建议；若确需提醒场景，可在一句内简短带过即可，不要整段只写「未按场景推进」之类、而不给语言层面的建议。
+- 若用户发言很少或难以逐句纠错，可给 1～2 条通用表达建议或本场景常用说法。
+
+二、本场景参考
+- 仅列出本场景常用句型和词块，便于复习。
+- 核心句：{core_sentences}
+- 核心词块：{core_chunks}
+
+格式要求：用「纠错与改进」和「本场景参考」两个小标题，下面用简短分条，排版清晰，不要长段落。不要 JSON 或代码块。
+"""
+
+        report = await chatgpt_streamed_async(
+            prompt,
+            "你是英语口语复习资料助手。报告主体应为语法、用词、逻辑、表达自然度等对口语提升有帮助的纠错与改进建议；不要以「是否按场景/角色完成步骤」为主要内容。分两段、分条简洁、排版清晰。",
+            "",
+            [],
+        )
+        if not report or not report.strip():
+            report = "纠错与改进\n暂无。\n\n本场景参考\n核心句：" + core_sentences + "\n核心词块：" + core_chunks
+
+        return JSONResponse({
+            "status": "success",
+            "report_markdown": report.strip(),
+            "reference_script": script_text,
+            "core_sentences": core_sentences,
+            "core_chunks": core_chunks,
+        })
+    except Exception as e:
+        logger.error(f"Immersive report error: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
 
 @app.get("/enhanced_defaults")
 async def get_enhanced_defaults():

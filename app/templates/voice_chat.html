@@ -197,6 +197,30 @@
             <div id="scene-practice-overlay" class="scene-practice-overlay" style="display:none;">
               <div id="scene-practice-container" class="scene-practice-container"></div>
             </div>
+            <!-- 沉浸式自由对话叠加层：任务说明 + 对话区 + 角色互换 + 结束并生成报告 -->
+            <div id="scene-immersive-overlay" class="scene-immersive-overlay" style="display:none;">
+              <div class="scene-immersive-panel">
+                <div class="scene-immersive-header">
+                  <h3 id="sceneImmersiveTitle">自由对话</h3>
+                  <button type="button" id="sceneImmersiveClose" class="scene-immersive-close" aria-label="关闭">×</button>
+                </div>
+                <p id="sceneImmersiveTask" class="scene-immersive-task"></p>
+                <p id="sceneImmersiveHint" class="scene-immersive-hint"></p>
+                <div id="sceneImmersiveChat" class="scene-immersive-chat"></div>
+                <div class="scene-immersive-actions">
+                  <input type="text" id="sceneImmersiveInput" placeholder="输入英文或点击麦克风录音..." />
+                  <button type="button" id="sceneImmersiveSend">发送</button>
+                  <button type="button" id="sceneImmersiveRecord" class="scene-immersive-record-btn" title="按住录音">🎤</button>
+                  <button type="button" id="sceneImmersiveRoleSwap">角色互换</button>
+                  <button type="button" id="sceneImmersiveEnd">结束并生成报告</button>
+                </div>
+                <div id="sceneImmersiveReport" class="scene-immersive-report" style="display:none;">
+                  <h4>复习纠错资料</h4>
+                  <div id="sceneImmersiveReportBody" class="scene-immersive-report-body"></div>
+                  <button type="button" id="sceneImmersiveReportClose">关闭</button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
