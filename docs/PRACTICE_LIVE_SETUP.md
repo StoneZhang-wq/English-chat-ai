@@ -78,3 +78,36 @@ REACT_APP_VARTA_BACKEND_URL=https://你的varta后端地址 npm run build:practi
 | 5 | 从场景页点「真人 1v1 练习」能跳转到 `/practice/live/chat?scene=xxx` 并参与同场景匹配 |
 
 完成以上步骤后，用户即可在**同一网址**下使用英语练习和真人 1v1 对话，且不会看到 Varta 品牌。
+
+---
+
+## 四、常见问题：两人都进了真人练习但匹配不到、Active User 一直为 0
+
+**原因说明**：  
+「Active User」来自 Varta 后端的 `/user-count` 接口；匹配由同一 Varta 后端的 Socket.io 完成。若一直为 0 且两人互相匹配不到，说明**前端没有成功连上你部署的 Varta 后端**（要么连错地址，要么被 CORS/网络拦截）。
+
+**按下面顺序排查：**
+
+1. **看 1v1 页面上显示的「后端」地址**  
+   - 真人练习页右上角会显示一行小字：`后端: xxx`（仅显示主机名）。  
+   - 确认这里的 `xxx` 就是你**实际部署的 Varta 后端域名**（例如 `varta-xxx.up.railway.app`）。  
+   - 若显示的是 `localhost:5001` 或别的错误地址，说明构建时没有正确设置 `REACT_APP_VARTA_BACKEND_URL`，需要重新设置该变量后再执行 `npm run build:practice-live`，并重新部署主站静态资源。
+
+2. **是否出现「连接失败」**  
+   - 若在「Active User」旁出现红色「连接失败」，说明对 `/user-count` 的请求失败（跨域、网络或后端未启动）。  
+   - 在浏览器中直接打开 `https://你的varta后端域名/user-count`，应看到 JSON：`{"userCount":0}`。若打不开或报错，说明 Varta 服务未部署/未运行或地址错误。  
+   - 若该 URL 能打开但页面里仍「连接失败」，多半是 **CORS**：Varta 的 `FRONTEND_URL` 必须设成**主站页面的来源**（例如 `https://你的主站.up.railway.app`），不能是 `http://localhost:3000`。
+
+3. **确认 Varta 后端已单独部署且运行**  
+   - 两个 Service 架构下，Varta 必须单独一个 Service（如单独一个 Railway Service 跑 `varta/server`），并生成公网 URL。  
+   - 该 URL 要在构建 1v1 前端时写入 `REACT_APP_VARTA_BACKEND_URL`，且 Varta 的 `FRONTEND_URL` 要设为主站域名。
+
+4. **浏览器开发者工具辅助排查**  
+   - 打开真人练习页 → F12 → Network：筛选 WS 或 XHR，看是否有对「后端: xxx」那个域名的请求（如 `wss://xxx/socket.io`、`https://xxx/user-count`）。  
+   - 若完全没有对 Varta 域名的请求，说明前端用的后端地址不对（见第 1 步）。  
+   - 若有请求但标红失败，看控制台是否有 CORS 或 mixed content 报错，并对照第 2、3 步检查 URL 与 `FRONTEND_URL`。
+
+**总结**：  
+- Active User 为 0 = 当前没有用户连上该 Varta 实例（或前端根本没连上它）。  
+- 两人都进真人练习但匹配不到 = 两人的 Socket 没有连到**同一个** Varta 后端，或后端 CORS 阻止了连接。  
+- 务必保证：构建时 `REACT_APP_VARTA_BACKEND_URL` = Varta 公网地址；Varta 的 `FRONTEND_URL` = 主站域名；两个用户访问的是同一个主站、同一套构建产物。
