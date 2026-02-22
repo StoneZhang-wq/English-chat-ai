@@ -21,8 +21,10 @@ load_dotenv()
 # Config from environment variables
 DOUBAO_API_KEY = os.getenv("DOUBAO_API_KEY")
 DOUBAO_API_BASE_URL = os.getenv("DOUBAO_API_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3")
-# 豆包 2.0 Mini：速度与成本更优；方舟控制台若使用接入点则填 ep-xxx
-LLM_MODEL = os.getenv("LLM_MODEL", "doubao-seed-2-mini")
+# 豆包 2.0 Mini（260215）：支持 reasoning_effort；方舟接入点可填 ep-xxx
+LLM_MODEL = os.getenv("LLM_MODEL", "doubao-seed-2-0-mini-260215")
+# 思考程度：minimal=不思考(最快)、low、medium、high；语音/场景对话建议 minimal
+DOUBAO_REASONING_EFFORT = os.getenv("DOUBAO_REASONING_EFFORT", "minimal")
 VOLCENGINE_APP_ID = os.getenv("VOLCENGINE_APP_ID")
 VOLCENGINE_ACCESS_TOKEN = os.getenv("VOLCENGINE_ACCESS_TOKEN")
 TTS_ENDPOINT = os.getenv("TTS_ENDPOINT", "wss://openspeech.bytedance.com/api/v1/tts/ws_binary")
@@ -70,6 +72,10 @@ class DoubaoLLMClient:
             "messages": messages,
             "temperature": temperature
         }
+        # 2.0 系列：思考程度 minimal=不思考(最快) / low / medium / high
+        effort = (DOUBAO_REASONING_EFFORT or "").strip().lower()
+        if effort in ("minimal", "low", "medium", "high"):
+            data["reasoning_effort"] = effort
         
         # 添加max_tokens参数（如果提供），与OpenAI保持一致
         if max_tokens is not None:
@@ -83,6 +89,8 @@ class DoubaoLLMClient:
         print(f"Debug: Doubao API Request Payload:")
         print(f"  - Model: {self.model}")
         print(f"  - Temperature: {temperature}")
+        if "reasoning_effort" in data:
+            print(f"  - Reasoning effort: {data['reasoning_effort']}")
         print(f"  - Max Tokens: {max_tokens}")
         print(f"  - Stream: {stream}")
         print(f"  - Messages count: {len(messages)}")
