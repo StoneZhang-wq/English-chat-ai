@@ -90,7 +90,7 @@ export const Room = ({
     roomId: string
   ): RTCPeerConnection => {
     const pc = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      iceServers: config.iceServers,
     });
 
     pc.onicecandidate = (e) => {
@@ -328,10 +328,15 @@ export const Room = ({
           if (r.ok) {
             const data = await r.json();
             unlockedScenes = data.small_scene_ids || [];
+            console.log("[1v1] 已按账号获取解锁场景数:", unlockedScenes.length, "account:", account);
+          } else {
+            console.warn("[1v1] unlocked-scenes 请求非 200:", r.status);
           }
         } catch (e) {
           console.warn("Failed to fetch unlocked scenes", e);
         }
+      } else {
+        console.warn("[1v1] 无 account，未请求解锁场景，匹配将使用随机主题");
       }
       socket.emit("user-info", {
         name,
@@ -348,6 +353,11 @@ export const Room = ({
 
     socket.on("send-offer", async ({ roomId, remoteCountry, name: remoteNameVal, smallSceneId, myRole: role }) => {
       console.log("Received offer. RoomId:", roomId, "smallSceneId:", smallSceneId, "myRole:", role);
+      if (smallSceneId) {
+        console.log("[1v1] 本局主题来源: 按账号交集/并集 ->", smallSceneId);
+      } else {
+        console.log("[1v1] 本局主题来源: 随机（双方均无解锁场景或未传账号）");
+      }
       setLobby(false);
       setMessages([]);
       setRemoteUserCountry(remoteCountry && remoteCountry !== "Unknown" ? remoteCountry : null);

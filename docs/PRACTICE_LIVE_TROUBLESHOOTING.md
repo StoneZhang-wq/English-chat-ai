@@ -91,5 +91,76 @@
 | 点 Join 后 Network 里没有对 Varta 的 WS | 1、3（地址或 CORS） |
 | Varta 日志没有 `User connected` | 1、3、6（地址、CORS、服务/网络） |
 | 有 `User connected` 但没有 `Match` | 7（需两人都连上并发 user-info） |
+| 手机与电脑匹配无画面/无声音 | 八（配置 TURN / REACT_APP_ICE_SERVERS） |
+| 第一局总是同一场景（如外卖员） | 九（已改为 UUID 房间 ID；确认账号与 unlockedScenes） |
+| 想确认主题是按账号还是随机 | 十（看控制台 + Varta 日志 + 可选 Network） |
 
 按上面顺序一项项确认，通常能在 一～四 里找到原因。
+
+---
+
+## 八、手机与电脑匹配：看不到对方视频 / 听不到声音
+
+- **原因**：WebRTC 默认只用 STUN（公网发现），手机和电脑若在不同网络/NAT 后，有时无法直连，需要 **TURN 中继** 才能互通。
+- **已做**：前端已支持双 STUN（Google）并支持通过 `REACT_APP_ICE_SERVERS` 自定义 ICE（可含 TURN）。构建时设置该变量为 JSON 数组，例如：
+  ```bash
+  # 仅 STUN（默认已有）
+  set REACT_APP_ICE_SERVERS=[{"urls":"stun:stun.l.google.com:19302"}]
+  # 若使用 TURN 服务（需自行申请，如 Twilio、xirsys、自建 coturn）：
+  set REACT_APP_ICE_SERVERS=[{"urls":"stun:stun.l.google.com:19302"},{"urls":"turn:your-turn.com:443","username":"xx","credential":"yy"}]
+  ```
+  然后重新执行 `npm run build:practice-live` 并部署。
+- **排查**：浏览器 F12 → Console 看是否有 ICE/WebRTC 相关报错；若两边都显示“已连接”但无画面无声音，多半是 NAT 穿透失败，需配置 TURN。
+
+---
+
+## 九、第一局总是同一场景（如外卖员）
+
+- **原因**：此前房间 ID 为自增数字（1、2、3…），服务重启后第一间房固定为 `room_id=1`。后端用 `room_id` 做随机种子取一条沉浸对话，种子相同则结果相同，故第一局总是同一条（若该条是外卖员则总是外卖员）。
+- **已做**：房间 ID 已改为 **UUID**，每局种子不同，随机到的场景/对话会分散，不再固定“第一局一定是外卖员”。
+- **主题是否按账号**：是。匹配时用两人 `unlockedScenes` 的交集（无则并集）选出 **small_scene_id**；只有双方都未传或都为空时才用“随机一条”。若你经常看到随机场景，可查：1）嵌入主站时是否传了 account；2）主站 `/api/practice-live/unlocked-scenes` 是否按账号返回了列表；3）Varta 日志里 `Match: ... -> theme xxx` 是否有 `theme` 或 `random`。
+
+---
+
+## 十、检验：主题到底是按账号（交集/并集）还是随机？
+
+按下面步骤可自己验证当前是否真的在用账号分配主题。
+
+### 1. 看浏览器控制台（1v1 页面 F12 → Console）
+
+- **连上并点 Join 后**应看到其一：
+  - `[1v1] 已按账号获取解锁场景数: N account: xxx` → 说明**有账号且主站返回了 N 个解锁场景**，匹配会用交集/并集。
+  - `[1v1] 无 account，未请求解锁场景，匹配将使用随机主题` → 说明**没有账号**，本局一定是随机主题。
+  - `[1v1] unlocked-scenes 请求非 200` → 主站接口失败，unlockedScenes 为空，会走随机。
+- **匹配成功、收到 send-offer 后**应看到其一：
+  - `[1v1] 本局主题来源: 按账号交集/并集 -> smallSceneId` → 本局主题**来自两人解锁场景的交集或并集**。
+  - `[1v1] 本局主题来源: 随机（双方均无解锁场景或未传账号）` → 本局主题是**随机**，说明双方都没传到有效解锁列表（或未传账号）。
+
+### 2. 看 Varta 服务端日志（Railway 上该 Service 的 Deploy Logs）
+
+每次匹配会打一行类似：
+
+```text
+Match: 用户名 (account或no-account) [N unlocks] + 用户名 (account或no-account) [M unlocks] -> theme smallSceneId或random (intersection|union|random)
+```
+
+- **theme 后面是具体 smallSceneId** 且 **括号里是 intersection 或 union**：说明用的是**两人账号的解锁场景**（先交集，无则并集）。
+- **theme 后面是 random** 且 **括号里是 random**：说明两人 **unlockedScenes 都为空**（没账号、接口失败或账号下确实无解锁），本局是随机一条对话。
+- **`[N unlocks]` / `[M unlocks]` 为 0**：该用户没有解锁场景，若两人都是 0 则必为 random。
+
+### 3. 看主站接口（可选）
+
+浏览器 F12 → Network，筛选 `unlocked-scenes`：
+
+- 若 1v1 页**有 account**（URL 带 `?account=xxx` 或 postMessage 拿到），应有一条请求：  
+  `GET /api/practice-live/unlocked-scenes?account_name=xxx`
+- 点开看 Response：`small_scene_ids` 应为字符串数组；**若为空数组 `[]`**，说明该账号在主站侧没有解锁任何场景（或接口按账号查出来是空），匹配时仍会走并集/随机。
+
+### 小结
+
+| 你看到的情况 | 含义 |
+|--------------|------|
+| 控制台有「已按账号获取解锁场景数: N」且 N≥1，且收到「本局主题来源: 按账号交集/并集」 | 主题**是**按账号的交集/并集选的。 |
+| 控制台有「无 account」或「本局主题来源: 随机」 | 本局主题**是**随机的，未用账号。 |
+| 服务端日志 `theme random (random)` 或 `[0 unlocks]` | 双方都没有解锁场景或没传账号，系统走了随机。 |
+| 服务端日志 `theme xxx (intersection)` 或 `(union)` | 主题**是**按两人解锁场景的交集或并集选的。 |

@@ -87,9 +87,13 @@ export class UserManager {
     const a = new Set(Array.isArray(user1.unlockedScenes) ? user1.unlockedScenes : []);
     const b = new Set(Array.isArray(user2.unlockedScenes) ? user2.unlockedScenes : []);
     let pool = [...a].filter(x => b.has(x));
-    if (pool.length === 0) pool = [...new Set([...a, ...b])];
-    if (pool.length === 0) return null;
-    return pool[Math.floor(Math.random() * pool.length)];
+    let source = 'intersection';
+    if (pool.length === 0) {
+      pool = [...new Set([...a, ...b])];
+      source = 'union';
+    }
+    if (pool.length === 0) return { smallSceneId: null, source: 'random' };
+    return { smallSceneId: pool[Math.floor(Math.random() * pool.length)], source };
   }
 
   tryToPairUsers() {
@@ -103,8 +107,10 @@ export class UserManager {
         this._emitQueueCount();
         return;
       }
-      const smallSceneId = this._pickTheme(user1, user2);
-      console.log(`Match: ${user1.name} (${user1.account || 'no-account'}) + ${user2.name} (${user2.account || 'no-account'}) -> theme ${smallSceneId || 'random'}`);
+      const { smallSceneId, source } = this._pickTheme(user1, user2);
+      const n1 = (user1.unlockedScenes || []).length;
+      const n2 = (user2.unlockedScenes || []).length;
+      console.log(`Match: ${user1.name} (${user1.account || 'no-account'}) [${n1} unlocks] + ${user2.name} (${user2.account || 'no-account'}) [${n2} unlocks] -> theme ${smallSceneId || 'random'} (${source})`);
       this.roomManager.createRoom(user1, user2, smallSceneId);
       this._emitQueueCount();
     }

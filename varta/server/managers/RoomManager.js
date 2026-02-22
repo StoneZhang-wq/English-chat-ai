@@ -1,4 +1,4 @@
-let GLOBAL_ROOM_ID = 1;
+import crypto from 'crypto';
 
 export class RoomManager {
   constructor(userManager) {
@@ -7,7 +7,7 @@ export class RoomManager {
   }
 
   createRoom(user1, user2, smallSceneId = null) {
-    const roomId = this.generate().toString();
+    const roomId = crypto.randomUUID();
     this.rooms.set(roomId, { user1, user2 });
 
     console.log(
@@ -137,7 +137,4 @@ export class RoomManager {
     return Promise.resolve(null);
   }
 
-  generate() {
-    return GLOBAL_ROOM_ID++;
-  }
 }
