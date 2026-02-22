@@ -3350,6 +3350,22 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // 初始化账号系统（会检查登录状态，然后初始化其他功能）
     initializeAccountSystem();
+
+    // 模式切换标签：在 DOMContentLoaded 即绑定，不依赖登录，确保点击有效
+    const modeTabsEls = document.querySelectorAll('.mode-tab');
+    modeTabsEls.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            const mode = tab.getAttribute('data-mode');
+            if (mode === 'chat') location.hash = '#/';
+            else if (mode === 'practice') location.hash = '#/practice';
+            else if (mode === 'live') location.hash = '#/live';
+        });
+    });
+    if (typeof window.applyPageFromHash === 'function') {
+        window.removeEventListener('hashchange', window.applyPageFromHash);
+        window.addEventListener('hashchange', window.applyPageFromHash);
+        window.applyPageFromHash();
+    }
 });
 
 // ========== 账号系统相关函数 ==========
@@ -3893,17 +3909,6 @@ function updateUserInfo(username) {
     if (userInfo) {
         userInfo.style.display = 'flex';
     }
-
-    // 模式切换标签：AI 对话 | 练习模式 | 真人对话
-    const modeTabs = document.querySelectorAll('.mode-tab');
-    modeTabs.forEach(function (tab) {
-        tab.addEventListener('click', function () {
-            const mode = tab.getAttribute('data-mode');
-            if (mode === 'chat') location.hash = '#/';
-            else if (mode === 'practice') location.hash = '#/practice';
-            else if (mode === 'live') location.hash = '#/live';
-        });
-    });
 
     // 子页面：返回按钮与 hash 路由
     const practicePageBackBtn = document.getElementById('practice-page-back-btn');
