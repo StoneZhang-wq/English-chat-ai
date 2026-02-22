@@ -60,6 +60,8 @@ REACT_APP_VARTA_BACKEND_URL=https://你的varta后端地址 npm run build:practi
 
 这样用户始终只用一个网址（主站），真人 1v1 的页面和接口请求会由前端自动连到你配置的 Socket.io 后端。
 
+**避免 CORS（推荐）**：前端已改为通过主站同源接口 `/api/practice-live/user-count` 获取在线人数，不再直连 Varta 的 `/user-count`。请在**主站**环境变量中配置 `VARTA_BACKEND_URL`（指向你的 Varta 公网地址，如 Railway 上的 Varta Service URL），主站会代理请求到该地址并返回人数，从而避免跨域报错与「连接失败」。
+
 ### 4. 可选：替换图标与文案
 
 - 若希望真人练习页使用你自己的图标，可替换 `varta/client/public/` 下的 `apple-icon-*.png`、`android-icon-192x192.png` 等，然后重新 `npm run build` 并再复制到 `app/static/practice-live/`。

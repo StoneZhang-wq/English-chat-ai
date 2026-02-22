@@ -7,7 +7,10 @@ export const UserCount: React.FC = () => {
 
   const fetchUserCount = async () => {
     try {
-      const url = `${config.backendUrl}/user-count`;
+      // 嵌入主站时请求同源代理，避免直连 Varta 的 CORS（主站需配置 VARTA_BACKEND_URL 并实现 /api/practice-live/user-count）
+      const url = typeof window !== "undefined" && window.location.origin
+        ? `${window.location.origin}/api/practice-live/user-count`
+        : `${config.backendUrl}/user-count`;
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();

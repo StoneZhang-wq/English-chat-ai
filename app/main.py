@@ -525,6 +525,24 @@ async def api_practice_live_dialogue(request: Request, small_scene_id: str):
     })
 
 
+@app.get("/api/practice-live/user-count")
+async def api_practice_live_user_count():
+    """代理 Varta 后端的 /user-count，避免前端直连 Varta 时的 CORS 问题。主站需配置 VARTA_BACKEND_URL。"""
+    base = (os.getenv("VARTA_BACKEND_URL") or "").strip().rstrip("/")
+    if not base:
+        return JSONResponse({"userCount": 0})
+    url = f"{base}/user-count"
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=5)) as resp:
+                if resp.status != 200:
+                    return JSONResponse({"userCount": 0})
+                data = await resp.json()
+                return JSONResponse(data)
+    except Exception:
+        return JSONResponse({"userCount": 0})
+
+
 # --- 场景-NPC 学习 API ---
 
 @app.get("/api/scene-npc/check")
