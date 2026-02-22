@@ -46,14 +46,11 @@ REACT_APP_VARTA_BACKEND_URL=https://你的varta后端地址 npm run build:practi
 
 ### 2. 配置真人练习的后端地址（Socket.io）
 
-真人通话与匹配由 **Varta 的 Node 服务** 提供（Socket.io），和 FastAPI 是分开的。前端在**构建时**会读环境变量并写死后端地址，所以：
+真人通话与匹配由 **Varta 的 Node 服务** 提供（Socket.io），和 FastAPI 是分开的。
 
-- **本地开发**：前端默认连 `http://localhost:5001`，只需在项目里启动 `varta/server`（`cd varta/server && npm install && npm start`）。直接执行 `npm run build:practice-live` 即可。
-- **生产/部署**：在执行 `npm run build:practice-live` **之前**，设置环境变量：
-  - 变量名：`REACT_APP_VARTA_BACKEND_URL`
-  - 值：你的 Varta 后端公网地址，例如 `https://你的varta后端.up.railway.app`（不要末尾斜杠）
-
-然后执行 `npm run build:practice-live`（脚本会完成构建并复制）。
+- **运行时配置（推荐）**：1v1 前端会在打开时请求主站 `GET /api/practice-live/config` 获取 Varta 地址。只需在**主站**环境变量中配置 **VARTA_BACKEND_URL**（指向你的 Varta 公网地址），部署主站后刷新 1v1 页即可生效，**无需重构建** 1v1 前端。
+- **本地开发**：前端默认连 `http://localhost:5001`，主站未配或接口未返回时使用该默认；在项目里启动 `varta/server` 后直接执行 `npm run build:practice-live` 即可。
+- **构建时兜底**：若希望构建产物自带默认地址，可在执行 `npm run build:practice-live` 前设置 `REACT_APP_VARTA_BACKEND_URL`；部署后仍以主站下发的为准。
 
 ### 3. 部署到 Railway（或其它平台）时的分工
 

@@ -548,6 +548,13 @@ async def api_practice_live_dialogue_random(request: Request, room_id: str = Non
     return JSONResponse(out)
 
 
+@app.get("/api/practice-live/config")
+async def api_practice_live_config():
+    """返回 1v1 前端运行时配置（如 Varta 后端地址），避免构建时写死。主站配置 VARTA_BACKEND_URL 后无需重构建 1v1 即可生效。"""
+    base = (os.getenv("VARTA_BACKEND_URL") or "").strip().rstrip("/")
+    return JSONResponse({"backendUrl": base})
+
+
 @app.get("/api/practice-live/user-count")
 async def api_practice_live_user_count():
     """代理 Varta 后端的 /user-count，避免前端直连 Varta 时的 CORS 问题。主站需配置 VARTA_BACKEND_URL。"""

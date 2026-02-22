@@ -14,11 +14,21 @@ function getIceServers(): RTCIceServer[] {
   ];
 }
 
+// 优先用主站运行时下发的地址（/api/practice-live/config），部署主站后改 VARTA_BACKEND_URL 即生效，无需重构建 1v1
+function getBackendUrl(): string {
+  if (typeof window !== "undefined" && window.__VARTA_BACKEND_URL__) {
+    return window.__VARTA_BACKEND_URL__;
+  }
+  if (process.env.NODE_ENV === "production") {
+    return process.env.REACT_APP_VARTA_BACKEND_URL || "https://varta-server.onrender.com";
+  }
+  return "http://localhost:5001";
+}
+
 const config = {
-  backendUrl:
-    process.env.NODE_ENV === "production"
-      ? process.env.REACT_APP_VARTA_BACKEND_URL || "https://varta-server.onrender.com"
-      : "http://localhost:5001",
+  get backendUrl() {
+    return getBackendUrl();
+  },
   iceServers: getIceServers(),
 };
 
