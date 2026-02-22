@@ -497,21 +497,17 @@ async def api_practice_live_unlocked_scenes(request: Request, account_name: str 
     return JSONResponse({"small_scene_ids": ids})
 
 
-@app.get("/api/practice-live/dialogue")
-async def api_practice_live_dialogue(request: Request, small_scene_id: str):
-    """返回该小场景下一条沉浸式对话，含角色名、任务、A/B 台词选项（用于 1v1 房间内展示）。"""
-    from .scene_npc_db import get_one_immersive_dialogue_for_scene
-    d = get_one_immersive_dialogue_for_scene(small_scene_id.strip())
+def _practice_live_dialogue_response(d):
+    """将一条 immersive 对话转为 1v1 前端需要的 JSON 结构。"""
     if not d:
-        return JSONResponse({"error": "no dialogue for scene"}, status_code=404)
+        return None
     content = d.get("content") or []
     npc_name = (d.get("npc_name") or "").strip() or "角色A"
-    # 约定：A = NPC 方，B = 学习者方
     role_label_a = npc_name
     role_label_b = "学习者"
     lines_a = [x for x in content if x.get("role") == "A"]
     lines_b = [x for x in content if x.get("role") == "B"]
-    return JSONResponse({
+    return {
         "small_scene_id": d.get("small_scene"),
         "small_scene_name": d.get("small_scene_name"),
         "npc_name": npc_name,
@@ -522,7 +518,32 @@ async def api_practice_live_dialogue(request: Request, small_scene_id: str):
         "core_sentences": d.get("core_sentences"),
         "lines_a": [{"content": x.get("content"), "hint": x.get("hint")} for x in lines_a],
         "lines_b": [{"content": x.get("content"), "hint": x.get("hint")} for x in lines_b],
-    })
+    }
+
+
+@app.get("/api/practice-live/dialogue")
+async def api_practice_live_dialogue(request: Request, small_scene_id: str = None):
+    """返回该小场景下一条沉浸式对话；未传 small_scene_id 时返回随机一条（用于 1v1 无共同解锁时仍展示主题/任务）。"""
+    from .scene_npc_db import get_one_immersive_dialogue_for_scene, get_one_random_immersive_dialogue
+    if small_scene_id and small_scene_id.strip():
+        d = get_one_immersive_dialogue_for_scene(small_scene_id.strip())
+    else:
+        d = get_one_random_immersive_dialogue()
+    if not d:
+        return JSONResponse({"error": "no dialogue for scene"}, status_code=404)
+    out = _practice_live_dialogue_response(d)
+    return JSONResponse(out)
+
+
+@app.get("/api/practice-live/dialogue/random")
+async def api_practice_live_dialogue_random(request: Request):
+    """返回任意一条 immersive 对话（1v1 无主题时用）。"""
+    from .scene_npc_db import get_one_random_immersive_dialogue
+    d = get_one_random_immersive_dialogue()
+    if not d:
+        return JSONResponse({"error": "no immersive dialogue"}, status_code=404)
+    out = _practice_live_dialogue_response(d)
+    return JSONResponse(out)
 
 
 @app.get("/api/practice-live/user-count")

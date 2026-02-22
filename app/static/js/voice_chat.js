@@ -204,6 +204,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     function getCurrentAccountForLive() {
         try {
+            if (typeof currentAccountName !== 'undefined' && currentAccountName) return currentAccountName;
             if (typeof localStorage !== 'undefined') {
                 const acc = localStorage.getItem('current_account');
                 if (acc) return acc;
@@ -239,6 +240,15 @@ document.addEventListener("DOMContentLoaded", function() {
         if (location.hash !== '#/live') location.hash = '#/live';
         setModeTabActive('live');
     }
+    window.addEventListener('message', function (e) {
+        if (e.data && e.data.type === 'practice-live-get-account') {
+            var iframe = document.getElementById('live-iframe');
+            if (iframe && e.source === iframe.contentWindow) {
+                var acc = getCurrentAccountForLive();
+                e.source.postMessage({ type: 'practice-live-account', account: acc || '' }, e.origin);
+            }
+        }
+    });
     function setModeTabActive(mode) {
         const tabs = document.querySelectorAll('.mode-tab');
         tabs.forEach(function (tab) {

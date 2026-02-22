@@ -14,6 +14,8 @@ const ChatPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const sceneIdFromUrl = searchParams.get("scene") || undefined;
   const accountFromUrl = searchParams.get("account") || undefined;
+  /** 账号：来自 URL，或从父窗口 postMessage 获取（嵌入主站时 URL 可能无 account） */
+  const [account, setAccount] = useState<string | null>(() => (accountFromUrl || null));
 
   const [chatInput, setChatInput] = useState("");
   const [isChatActive, setIsChatActive] = useState(false);
@@ -65,6 +67,31 @@ const ChatPage: React.FC = () => {
     }
   }, [isChatActive, browser]);
 
+  // 嵌入主站时若 URL 无 account，向父窗口请求（主站会 postMessage 回复）
+  useEffect(() => {
+    if (account !== null) return;
+    if (typeof window === "undefined" || window.parent === window) {
+      setAccount("");
+      return;
+    }
+    const onMessage = (e: MessageEvent) => {
+      if (e.data?.type === "practice-live-account") {
+        setAccount(e.data.account != null ? String(e.data.account) : "");
+        window.removeEventListener("message", onMessage);
+      }
+    };
+    window.addEventListener("message", onMessage);
+    window.parent.postMessage({ type: "practice-live-get-account" }, "*");
+    const t = setTimeout(() => {
+      window.removeEventListener("message", onMessage);
+      setAccount((prev) => (prev === null ? "" : prev));
+    }, 800);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("message", onMessage);
+    };
+  }, [account]);
+
   if (error.isError) {
     console.log(error.errorMsg);
   }
@@ -101,21 +128,27 @@ const ChatPage: React.FC = () => {
           {!isPopoverOpen &&
           isChatActive &&
           (textOnlyMode || (localAudioTrack?.enabled && localVideoTrack?.enabled)) ? (
-            <>
-              <Room
-                name={userName || "Anonymous"}
-                account={accountFromUrl}
-                learningLanguages={learningLanguages}
-                sceneId={sceneIdFromUrl}
-                localAudioTrack={textOnlyMode ? null : localAudioTrack}
-                localVideoTrack={textOnlyMode ? null : localVideoTrack}
-                chatInput={chatInput}
-                setChatInput={setChatInput}
-                joinExitHandler={joinExitHandler}
-                joinExitLabel="Exit"
-                textOnlyMode={textOnlyMode}
-              />
-            </>
+            account === null ? (
+              <div className="flex-1 flex items-center justify-center text-gray-500 p-4">
+                正在获取账号，请稍候…
+              </div>
+            ) : (
+              <>
+                <Room
+                  name={userName || "Anonymous"}
+                  account={account ?? undefined}
+                  learningLanguages={learningLanguages}
+                  sceneId={sceneIdFromUrl}
+                  localAudioTrack={textOnlyMode ? null : localAudioTrack}
+                  localVideoTrack={textOnlyMode ? null : localVideoTrack}
+                  chatInput={chatInput}
+                  setChatInput={setChatInput}
+                  joinExitHandler={joinExitHandler}
+                  joinExitLabel="Exit"
+                  textOnlyMode={textOnlyMode}
+                />
+              </>
+            )
           ) : (
             <>
               <div className="flex-1 relative bg-gray-200 p-4 flex flex-col items-center justify-center min-h-[26rem] md:h-[29rem] lg:h-[31rem] 2xl:h-[41rem]">
