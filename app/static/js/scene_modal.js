@@ -169,6 +169,25 @@
       const scenes = res.scenes || [];
       cacheSmallByBig[bigSceneId] = scenes;
       renderSmallScenesList(scenes, currentBigSceneName);
+      // 预取该小场景下 NPC 的详细对话数据，提升点击 NPC 时的加载速度
+      (function prefetchNPCDetails(scenesArray) {
+        try {
+          scenesArray.forEach(s => {
+            const npcs = s.npcs || [];
+            npcs.forEach(npc => {
+              const nid = npc && npc.id;
+              if (!nid) return;
+              if (cacheSceneDetail[nid]) return;
+              const acc = getSceneAccount();
+              const url = urlWithAccount('/api/scene-npc/dialogue/immersive?small_scene_id=' + encodeURIComponent(s.small_scene_id || s.id) + '&npc_id=' + encodeURIComponent(nid), acc);
+              // 后台预取，不阻塞 UI
+              fetch(url).then(r => r.json()).then(json => {
+                if (json && json.dialogue) cacheSceneDetail[nid] = json;
+              }).catch(() => {});
+            });
+          });
+        } catch (e) {}
+      })(scenes);
       const backBtn = q('#scenesBackBtn');
       if (backBtn) {
         backBtn.style.display = 'inline-block';
@@ -539,7 +558,15 @@
       acc
     );
     try {
-      const data = await fetchJSON(url);
+      // 优先使用已缓存的 NPC 详情（若有），避免重复网络请求
+      let data;
+      if (cacheSceneDetail[npcId]) {
+        data = cacheSceneDetail[npcId];
+      } else {
+        data = await fetchJSON(url);
+        // 缓存以便下次使用
+        try { if (data && data.dialogue) cacheSceneDetail[npcId] = data; } catch(e){}
+      }
       closeCountdown();
       if (!data.dialogue) {
         showSceneToast(data.message || data.error || '未找到该场景对话');
