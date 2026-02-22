@@ -85,8 +85,11 @@ REACT_APP_VARTA_BACKEND_URL=https://你的varta后端地址 npm run build:practi
 
 ## 四、常见问题：两人都进了真人练习但匹配不到、Active User 一直为 0
 
+**Active User 统计的是什么**：  
+统计的是**已点击 Join 并成功连上 Varta 后端的 Socket 用户数**（不是「打开 1v1 页面」的人数）。只有进入匹配/房间后才会建立 Socket 连接并被计入。页面通过主站同源接口 `/api/practice-live/user-count` 请求，主站再代理到 `VARTA_BACKEND_URL/user-count`，因此**主站必须配置环境变量 VARTA_BACKEND_URL**，否则代理会直接返回 0。
+
 **原因说明**：  
-「Active User」来自 Varta 后端的 `/user-count` 接口；匹配由同一 Varta 后端的 Socket.io 完成。若一直为 0 且两人互相匹配不到，说明**前端没有成功连上你部署的 Varta 后端**（要么连错地址，要么被 CORS/网络拦截）。
+若你已点击 Join 且页面无「连接失败」但人数仍为 0，或两人互相匹配不到，说明**前端没有成功连上你部署的 Varta 后端**（要么连错地址，要么被 CORS/网络拦截）。
 
 **按下面顺序排查：**
 

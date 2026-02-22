@@ -356,6 +356,16 @@ export const Room = ({
       setWantSwapSelf(false);
       setRemoteWantSwap(false);
 
+      const mapDialogueResponse = (data: Record<string, unknown>) => ({
+        roleLabelA: (data.role_label_a as string) || "角色A",
+        taskA: (data.task_a as string) || "",
+        linesA: (data.lines_a as { content?: string; hint?: string }[]) || [],
+        roleLabelB: (data.role_label_b as string) || "学习者",
+        taskB: (data.task_b as string) || "",
+        linesB: (data.lines_b as { content?: string; hint?: string }[]) || [],
+        smallSceneName: data.small_scene_name as string | undefined,
+      });
+
       if (smallSceneId) {
         try {
           const r = await fetch(
@@ -363,24 +373,47 @@ export const Room = ({
           );
           if (r.ok) {
             const data = await r.json();
-            setDialoguePayload({
-              roleLabelA: data.role_label_a || "角色A",
-              taskA: data.task_a || "",
-              linesA: data.lines_a || [],
-              roleLabelB: data.role_label_b || "学习者",
-              taskB: data.task_b || "",
-              linesB: data.lines_b || [],
-              smallSceneName: data.small_scene_name,
-            });
+            setDialoguePayload(mapDialogueResponse(data));
+          } else {
+            try {
+              const rnd = await fetch(`${getApiBase()}/api/practice-live/dialogue/random`);
+              if (rnd.ok) {
+                const data = await rnd.json();
+                setDialoguePayload(mapDialogueResponse(data));
+              } else {
+                setDialoguePayload(null);
+              }
+            } catch (_) {
+              setDialoguePayload(null);
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to fetch dialogue", e);
+          try {
+            const rnd = await fetch(`${getApiBase()}/api/practice-live/dialogue/random`);
+            if (rnd.ok) {
+              const data = await rnd.json();
+              setDialoguePayload(mapDialogueResponse(data));
+            } else {
+              setDialoguePayload(null);
+            }
+          } catch (_) {
+            setDialoguePayload(null);
+          }
+        }
+      } else {
+        try {
+          const rnd = await fetch(`${getApiBase()}/api/practice-live/dialogue/random`);
+          if (rnd.ok) {
+            const data = await rnd.json();
+            setDialoguePayload(mapDialogueResponse(data));
           } else {
             setDialoguePayload(null);
           }
         } catch (e) {
-          console.warn("Failed to fetch dialogue", e);
+          console.warn("Failed to fetch random dialogue", e);
           setDialoguePayload(null);
         }
-      } else {
-        setDialoguePayload(null);
       }
 
       const sendingPc = initializePeerConnection("sender", roomId);
