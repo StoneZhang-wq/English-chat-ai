@@ -10,14 +10,27 @@ dotenv.config({ path: './config.env' });
 connectDB();
 
 const port = process.env.PORT || 5001;
-const frontend_url = process.env.FRONTEND_URL || 'http://localhost:3000';
+const frontendUrlRaw = process.env.FRONTEND_URL || 'http://localhost:3000';
+// 支持多个来源（逗号分隔），便于主站自定义域名 + Railway 预览域名同时使用
+const allowedOrigins = frontendUrlRaw.split(',').map(s => s.trim()).filter(Boolean);
+const frontend_url = allowedOrigins[0] || 'http://localhost:3000';
+
+const corsOrigin = allowedOrigins.length <= 1
+  ? frontend_url
+  : (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    };
 
 const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: frontend_url,
+    origin: allowedOrigins.length <= 1 ? frontend_url : allowedOrigins,
     methods: ["GET", "POST", "PUT", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -25,7 +38,7 @@ const io = new Server(server, {
 });
 
 const corsOptions = {
-  origin: frontend_url,
+  origin: corsOrigin,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,

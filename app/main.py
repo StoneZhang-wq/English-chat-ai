@@ -522,13 +522,14 @@ def _practice_live_dialogue_response(d):
 
 
 @app.get("/api/practice-live/dialogue")
-async def api_practice_live_dialogue(request: Request, small_scene_id: str = None):
-    """返回该小场景下一条沉浸式对话；未传 small_scene_id 时返回随机一条（用于 1v1 无共同解锁时仍展示主题/任务）。"""
+async def api_practice_live_dialogue(request: Request, small_scene_id: str = None, room_id: str = None):
+    """返回该小场景下一条沉浸式对话；room_id 相同时返回同一条，保证同一房间两人同一主题。"""
     from .scene_npc_db import get_one_immersive_dialogue_for_scene, get_one_random_immersive_dialogue
+    seed = (room_id or "").strip() or None
     if small_scene_id and small_scene_id.strip():
-        d = get_one_immersive_dialogue_for_scene(small_scene_id.strip())
+        d = get_one_immersive_dialogue_for_scene(small_scene_id.strip(), seed=seed)
     else:
-        d = get_one_random_immersive_dialogue()
+        d = get_one_random_immersive_dialogue(seed=seed)
     if not d:
         return JSONResponse({"error": "no dialogue for scene"}, status_code=404)
     out = _practice_live_dialogue_response(d)
@@ -536,10 +537,11 @@ async def api_practice_live_dialogue(request: Request, small_scene_id: str = Non
 
 
 @app.get("/api/practice-live/dialogue/random")
-async def api_practice_live_dialogue_random(request: Request):
-    """返回任意一条 immersive 对话（1v1 无主题时用）。"""
+async def api_practice_live_dialogue_random(request: Request, room_id: str = None):
+    """返回任意一条 immersive 对话；room_id 相同时返回同一条，保证同一房间两人同一主题。"""
     from .scene_npc_db import get_one_random_immersive_dialogue
-    d = get_one_random_immersive_dialogue()
+    seed = (room_id or "").strip() or None
+    d = get_one_random_immersive_dialogue(seed=seed)
     if not d:
         return JSONResponse({"error": "no immersive dialogue"}, status_code=404)
     out = _practice_live_dialogue_response(d)
@@ -560,7 +562,9 @@ async def api_practice_live_user_count():
                     return JSONResponse({"userCount": 0})
                 data = await resp.json()
                 return JSONResponse(data)
-    except Exception:
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning("practice-live user-count proxy failed: %s", e)
         return JSONResponse({"userCount": 0})
 
 

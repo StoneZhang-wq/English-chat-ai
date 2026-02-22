@@ -45,7 +45,7 @@ export class UserManager {
       await user_data.save();
     }
 
-    const user = { name, socket, country, languages };
+    const user = { name, socket, country, languages, account: undefined };
     this.users.push(user);
 
     console.log(`User added: ${name}, ID: ${socket.id}, Country: ${country}`);
@@ -104,6 +104,7 @@ export class UserManager {
         return;
       }
       const smallSceneId = this._pickTheme(user1, user2);
+      console.log(`Match: ${user1.name} (${user1.account || 'no-account'}) + ${user2.name} (${user2.account || 'no-account'}) -> theme ${smallSceneId || 'random'}`);
       this.roomManager.createRoom(user1, user2, smallSceneId);
       this._emitQueueCount();
     }
@@ -111,10 +112,11 @@ export class UserManager {
   }
 
   initHandlers(socket) {
-    socket.on("user-info", ({ name, languages, sceneId, unlockedScenes }) => {
+    socket.on("user-info", ({ name, account, languages, sceneId, unlockedScenes }) => {
       const user = this.users.find(u => u.socket.id === socket.id);
       if (user) {
         user.name = name || user.name;
+        user.account = account != null ? String(account).trim() || undefined : undefined;
         user.languages = languages || user.languages;
         user.sceneId = sceneId != null ? String(sceneId).trim() || undefined : undefined;
         user.unlockedScenes = Array.isArray(unlockedScenes) ? unlockedScenes : [];

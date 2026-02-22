@@ -10,6 +10,8 @@
 - **同场景匹配**：只有选择同一小场景（如同一 `scene` 参数）的用户会互相匹配。
 - **同源访问**：真人练习页由主站 FastAPI 提供，地址为 `你的主站/practice/live` 或 `/practice/live/chat?scene=xxx`，用户只看到一个网址。
 - **去品牌化**：前端标题、导航、页脚等已改为「真人练习」等，无 Varta 字样。
+- **返回主界面**：真人练习页导航栏有「返回主界面」按钮，嵌入主站 iframe 时点击会切回英语学习主界面（主站需监听 `practice-live-go-back` 并切换 hash，已内置）。
+- **匹配与主题**：服务端根据房间内两人的**已解锁场景**选主题：先取**交集**随机一个，无交集则取**并集**随机一个；用户身份通过主站传入的 account 获取解锁列表并随 `user-info` 发送 `unlockedScenes`。
 
 ---
 
@@ -61,6 +63,8 @@ REACT_APP_VARTA_BACKEND_URL=https://你的varta后端地址 npm run build:practi
 这样用户始终只用一个网址（主站），真人 1v1 的页面和接口请求会由前端自动连到你配置的 Socket.io 后端。
 
 **避免 CORS（推荐）**：前端已改为通过主站同源接口 `/api/practice-live/user-count` 获取在线人数，不再直连 Varta 的 `/user-count`。请在**主站**环境变量中配置 `VARTA_BACKEND_URL`（指向你的 Varta 公网地址，如 Railway 上的 Varta Service URL），主站会代理请求到该地址并返回人数，从而避免跨域报错与「连接失败」。
+
+**Varta 服务 CORS**：Varta 的 `FRONTEND_URL` 可为**多个来源**（逗号分隔），例如 `https://englishchatcommunity.com,https://你的主站.up.railway.app`，便于主站自定义域名与 Railway 预览域名同时使用。
 
 ### 4. 可选：替换图标与文案
 

@@ -335,6 +335,7 @@ export const Room = ({
       }
       socket.emit("user-info", {
         name,
+        account: account || undefined,
         languages: learningLanguages,
         sceneId: sceneId || undefined,
         unlockedScenes,
@@ -366,17 +367,18 @@ export const Room = ({
         smallSceneName: data.small_scene_name as string | undefined,
       });
 
+      const seedParam = roomId ? `&room_id=${encodeURIComponent(roomId)}` : "";
       if (smallSceneId) {
         try {
           const r = await fetch(
-            `${getApiBase()}/api/practice-live/dialogue?small_scene_id=${encodeURIComponent(smallSceneId)}`
+            `${getApiBase()}/api/practice-live/dialogue?small_scene_id=${encodeURIComponent(smallSceneId)}${seedParam}`
           );
           if (r.ok) {
             const data = await r.json();
             setDialoguePayload(mapDialogueResponse(data));
           } else {
             try {
-              const rnd = await fetch(`${getApiBase()}/api/practice-live/dialogue/random`);
+              const rnd = await fetch(`${getApiBase()}/api/practice-live/dialogue/random?room_id=${encodeURIComponent(roomId)}`);
               if (rnd.ok) {
                 const data = await rnd.json();
                 setDialoguePayload(mapDialogueResponse(data));
@@ -390,7 +392,7 @@ export const Room = ({
         } catch (e) {
           console.warn("Failed to fetch dialogue", e);
           try {
-            const rnd = await fetch(`${getApiBase()}/api/practice-live/dialogue/random`);
+            const rnd = await fetch(`${getApiBase()}/api/practice-live/dialogue/random?room_id=${encodeURIComponent(roomId)}`);
             if (rnd.ok) {
               const data = await rnd.json();
               setDialoguePayload(mapDialogueResponse(data));
@@ -403,7 +405,7 @@ export const Room = ({
         }
       } else {
         try {
-          const rnd = await fetch(`${getApiBase()}/api/practice-live/dialogue/random`);
+          const rnd = await fetch(`${getApiBase()}/api/practice-live/dialogue/random?room_id=${encodeURIComponent(roomId)}`);
           if (rnd.ok) {
             const data = await rnd.json();
             setDialoguePayload(mapDialogueResponse(data));

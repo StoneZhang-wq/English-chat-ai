@@ -248,6 +248,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 e.source.postMessage({ type: 'practice-live-account', account: acc || '' }, e.origin);
             }
         }
+        if (e.data && e.data.type === 'practice-live-go-back') {
+            location.hash = '#/';
+            if (typeof showMainPage === 'function') showMainPage();
+        }
     });
     function setModeTabActive(mode) {
         const tabs = document.querySelectorAll('.mode-tab');

@@ -347,8 +347,8 @@ def get_immersive_dialogue(small_scene_id: str, npc_id: str) -> Optional[Dict]:
     return get_dialogue(small_scene_id, npc_id, "immersive")
 
 
-def get_one_immersive_dialogue_for_scene(small_scene_id: str) -> Optional[Dict]:
-    """返回该小场景下任意一条 usage=immersive 的对话（用于真人 1v1 练习）。"""
+def get_one_immersive_dialogue_for_scene(small_scene_id: str, seed: Optional[str] = None) -> Optional[Dict]:
+    """返回该小场景下一条 usage=immersive 的对话。seed 相同时返回同一条（同一房间两人拿同一主题）。"""
     import random
     candidates = [
         d for d in get_dialogues()
@@ -356,15 +356,19 @@ def get_one_immersive_dialogue_for_scene(small_scene_id: str) -> Optional[Dict]:
     ]
     if not candidates:
         return None
+    if seed is not None:
+        random.seed(seed)
     return random.choice(candidates)
 
 
-def get_one_random_immersive_dialogue() -> Optional[Dict]:
-    """返回任意一条 usage=immersive 的对话（用于真人 1v1 无共同解锁场景时仍展示主题/任务）。"""
+def get_one_random_immersive_dialogue(seed: Optional[str] = None) -> Optional[Dict]:
+    """返回任意一条 usage=immersive 的对话。seed 相同时返回同一条（同一房间两人拿同一主题）。"""
     import random
     candidates = [d for d in get_dialogues() if d.get("usage") == "immersive"]
     if not candidates:
         return None
+    if seed is not None:
+        random.seed(seed)
     return random.choice(candidates)
 
 
