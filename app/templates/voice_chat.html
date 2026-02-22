@@ -100,6 +100,13 @@
             </div>
         </header>
 
+        <!-- 模式切换：AI 对话 | 练习模式 | 真人对话 -->
+        <nav class="mode-tabs" id="mode-tabs" aria-label="对话模式">
+            <button type="button" class="mode-tab active" data-mode="chat" id="mode-tab-chat">AI 对话</button>
+            <button type="button" class="mode-tab" data-mode="practice" id="mode-tab-practice">练习模式</button>
+            <button type="button" class="mode-tab" data-mode="live" id="mode-tab-live">真人对话</button>
+        </nav>
+
         <!-- 主内容区：对话 + 学习卡片 + 复习笔记 同页顺序展示，不再分栏 -->
         <div class="main-content">
           <div class="messages-container" id="messages-container">
@@ -162,6 +169,11 @@
                 <h2 class="sub-page-title">📝 复习笔记</h2>
             </div>
             <div id="review-page-content" class="sub-page-body"></div>
+        </div>
+
+        <!-- 真人对话页（内嵌 1v1，不跳转） -->
+        <div id="live-page" class="sub-page live-page-iframe" style="display: none;" aria-hidden="true">
+            <iframe id="live-iframe" title="真人 1v1 对话" src="about:blank"></iframe>
         </div>
 
         <!-- 录音状态指示器 -->

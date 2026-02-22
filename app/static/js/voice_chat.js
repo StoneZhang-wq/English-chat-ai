@@ -125,25 +125,38 @@ document.addEventListener("DOMContentLoaded", function() {
         const main = document.querySelector('.main-content');
         const practicePage = document.getElementById('practice-page');
         const reviewPage = document.getElementById('review-page');
+        const livePage = document.getElementById('live-page');
         const inputArea = document.querySelector('.input-area');
         if (main) main.style.display = 'none';
         if (reviewPage) reviewPage.style.display = 'none';
+        if (livePage) {
+            livePage.style.display = 'none';
+            livePage.setAttribute('aria-hidden', 'true');
+            const iframe = document.getElementById('live-iframe');
+            if (iframe) iframe.src = 'about:blank';
+        }
         if (practicePage) {
             practicePage.style.display = 'flex';
             practicePage.setAttribute('aria-hidden', 'false');
         }
         if (inputArea) inputArea.style.display = 'none';
         if (location.hash !== '#/practice') location.hash = '#/practice';
+        setModeTabActive('practice');
     }
     function showReviewPage() {
         const main = document.querySelector('.main-content');
         const practicePage = document.getElementById('practice-page');
         const reviewPage = document.getElementById('review-page');
+        const livePage = document.getElementById('live-page');
         const inputArea = document.querySelector('.input-area');
         if (main) main.style.display = 'none';
         if (practicePage) {
             practicePage.style.display = 'none';
             practicePage.setAttribute('aria-hidden', 'true');
+        }
+        if (livePage) {
+            livePage.style.display = 'none';
+            livePage.setAttribute('aria-hidden', 'true');
         }
         if (reviewPage) {
             reviewPage.style.display = 'flex';
@@ -151,11 +164,13 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         if (inputArea) inputArea.style.display = 'none';
         if (location.hash !== '#/review') location.hash = '#/review';
+        setModeTabActive('chat');
     }
     function showMainPage() {
         const main = document.querySelector('.main-content');
         const practicePage = document.getElementById('practice-page');
         const reviewPage = document.getElementById('review-page');
+        const livePage = document.getElementById('live-page');
         const inputArea = document.querySelector('.input-area');
         if (practicePage) {
             practicePage.style.display = 'none';
@@ -170,22 +185,76 @@ document.addEventListener("DOMContentLoaded", function() {
             reviewPage.style.display = 'none';
             reviewPage.setAttribute('aria-hidden', 'true');
         }
+        if (livePage) {
+            livePage.style.display = 'none';
+            livePage.setAttribute('aria-hidden', 'true');
+            const iframe = document.getElementById('live-iframe');
+            if (iframe) iframe.src = 'about:blank';
+        }
         if (main) main.style.display = 'flex';
         if (inputArea) inputArea.style.display = '';
         if (location.hash !== '#/' && location.hash !== '') location.hash = '#/';
+        setModeTabActive('chat');
         // 确保回到主页面后 AI 消息和卡片都显示在对话区，不继续往练习页追加
         if (typeof practiceState !== 'undefined' && practiceState) practiceState.messageTarget = null;
+    }
+    function getCurrentAccountForLive() {
+        try {
+            if (typeof localStorage !== 'undefined') {
+                const acc = localStorage.getItem('current_account');
+                if (acc) return acc;
+            }
+            const span = document.getElementById('current-username');
+            if (span && span.textContent && span.textContent !== '未登录') return span.textContent.trim();
+        } catch (e) {}
+        return '';
+    }
+    function showLivePage() {
+        const main = document.querySelector('.main-content');
+        const practicePage = document.getElementById('practice-page');
+        const reviewPage = document.getElementById('review-page');
+        const livePage = document.getElementById('live-page');
+        const inputArea = document.querySelector('.input-area');
+        if (main) main.style.display = 'none';
+        if (practicePage) {
+            practicePage.style.display = 'none';
+            practicePage.setAttribute('aria-hidden', 'true');
+        }
+        if (reviewPage) reviewPage.style.display = 'none';
+        if (inputArea) inputArea.style.display = 'none';
+        if (livePage) {
+            livePage.style.display = 'flex';
+            livePage.setAttribute('aria-hidden', 'false');
+            const iframe = document.getElementById('live-iframe');
+            if (iframe) {
+                const account = getCurrentAccountForLive();
+                const base = '/practice/live/chat';
+                iframe.src = account ? base + '?account=' + encodeURIComponent(account) : base;
+            }
+        }
+        if (location.hash !== '#/live') location.hash = '#/live';
+        setModeTabActive('live');
+    }
+    function setModeTabActive(mode) {
+        const tabs = document.querySelectorAll('.mode-tab');
+        tabs.forEach(function (tab) {
+            const m = tab.getAttribute('data-mode');
+            if (m === mode) tab.classList.add('active');
+            else tab.classList.remove('active');
+        });
     }
     function applyPageFromHash() {
         const hash = location.hash || '#/';
         if (hash === '#/practice') showPracticePage();
         else if (hash === '#/review') showReviewPage();
+        else if (hash === '#/live') showLivePage();
         else showMainPage();
     }
     window.applyPageFromHash = applyPageFromHash;
     window.showMainPage = showMainPage;
     window.showPracticePage = showPracticePage;
     window.showReviewPage = showReviewPage;
+    window.showLivePage = showLivePage;
 
     // 初始化WebSocket连接
     function initWebSocket() {
@@ -3825,6 +3894,17 @@ function updateUserInfo(username) {
         userInfo.style.display = 'flex';
     }
 
+    // 模式切换标签：AI 对话 | 练习模式 | 真人对话
+    const modeTabs = document.querySelectorAll('.mode-tab');
+    modeTabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            const mode = tab.getAttribute('data-mode');
+            if (mode === 'chat') location.hash = '#/';
+            else if (mode === 'practice') location.hash = '#/practice';
+            else if (mode === 'live') location.hash = '#/live';
+        });
+    });
+
     // 子页面：返回按钮与 hash 路由
     const practicePageBackBtn = document.getElementById('practice-page-back-btn');
     const reviewPageBackBtn = document.getElementById('review-page-back-btn');
@@ -3845,8 +3925,8 @@ function updateUserInfo(username) {
         window.removeEventListener('hashchange', window.applyPageFromHash);
         window.addEventListener('hashchange', window.applyPageFromHash);
     }
-    // 登录后确保显示主页面（对话+卡片）
-    if (typeof window.showMainPage === 'function') window.showMainPage();
+    // 登录后根据 hash 显示对应页面（含模式标签高亮）
+    if (typeof window.applyPageFromHash === 'function') window.applyPageFromHash();
 }
 
 // 分栏（Tabs）已取消：对话、学习卡片、复习笔记在同一页顺序展示，无需切换逻辑

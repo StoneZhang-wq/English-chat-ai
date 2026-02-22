@@ -217,12 +217,18 @@
       npcLayer.appendChild(el);
     });
     container.appendChild(npcLayer);
-    // 真人 1v1 练习入口（同场景用户互相匹配）
-    const acc = getSceneAccount();
-    const liveUrl = '/practice/live/chat?scene=' + encodeURIComponent(smallSceneId) + (acc ? '&account=' + encodeURIComponent(acc) : '');
+    // 真人 1v1 练习入口：不跳转，在主页内切换到「真人对话」标签
     const liveBar = document.createElement('div');
     liveBar.className = 'scene-1v1-bar';
-    liveBar.innerHTML = '<a href="' + liveUrl + '" class="scene-1v1-btn" target="_self">真人 1v1 练习</a>';
+    const liveBtn = document.createElement('button');
+    liveBtn.type = 'button';
+    liveBtn.className = 'scene-1v1-btn';
+    liveBtn.textContent = '真人 1v1 练习';
+    liveBtn.addEventListener('click', function () {
+      closeModal();
+      location.hash = '#/live';
+    });
+    liveBar.appendChild(liveBtn);
     container.appendChild(liveBar);
     view.appendChild(container);
   }

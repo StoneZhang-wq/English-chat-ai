@@ -565,6 +565,49 @@ body::before {
     color: var(--primary);
 }
 
+/* 模式切换：AI 对话 | 练习模式 | 真人对话 */
+.mode-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px 20px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.mode-tab {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md, 8px);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.mode-tab:hover {
+    background: var(--primary-bg);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+.mode-tab.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* 真人对话页：内嵌 iframe 全屏 */
+.live-page-iframe {
+    padding: 0;
+}
+.live-page-iframe iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: none;
+    flex: 1;
+    min-height: 0;
+}
+
 /* 消息容器 */
 .messages-container {
     flex: 1;
