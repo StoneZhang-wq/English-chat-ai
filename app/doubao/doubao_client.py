@@ -21,7 +21,8 @@ load_dotenv()
 # Config from environment variables
 DOUBAO_API_KEY = os.getenv("DOUBAO_API_KEY")
 DOUBAO_API_BASE_URL = os.getenv("DOUBAO_API_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3")
-LLM_MODEL = os.getenv("LLM_MODEL")
+# 豆包 2.0 Mini：速度与成本更优；方舟控制台若使用接入点则填 ep-xxx
+LLM_MODEL = os.getenv("LLM_MODEL", "doubao-seed-2-mini")
 VOLCENGINE_APP_ID = os.getenv("VOLCENGINE_APP_ID")
 VOLCENGINE_ACCESS_TOKEN = os.getenv("VOLCENGINE_ACCESS_TOKEN")
 TTS_ENDPOINT = os.getenv("TTS_ENDPOINT", "wss://openspeech.bytedance.com/api/v1/tts/ws_binary")

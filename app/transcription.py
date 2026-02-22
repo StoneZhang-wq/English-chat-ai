@@ -91,7 +91,8 @@ async def transcribe_with_doubao_file_asr(audio_url: str) -> str:
     """豆包录音文件识别大模型：提交音频 URL，轮询查询结果。无分段延迟，响应更快。"""
     app_key = os.getenv("VOLCENGINE_ASR_APP_ID", "").strip()
     access_key = os.getenv("VOLCENGINE_ASR_ACCESS_TOKEN", "").strip()
-    resource_id = os.getenv("VOLCENGINE_FILE_ASR_RESOURCE_ID", "volc.seedasr.auc").strip()
+    # 1.0 常用 volc.bigasr.auc，2.0 为 volc.seedasr.auc；若报 45000030 未授权可改为 volc.bigasr.auc
+    resource_id = os.getenv("VOLCENGINE_FILE_ASR_RESOURCE_ID", "volc.bigasr.auc").strip()
     base_url = os.getenv("VOLCENGINE_FILE_ASR_BASE_URL", "https://openspeech.bytedance.com").rstrip("/")
     if not app_key or not access_key:
         raise ValueError("请设置 VOLCENGINE_ASR_APP_ID 和 VOLCENGINE_ASR_ACCESS_TOKEN")
