@@ -87,37 +87,64 @@ def transcribe_with_whisper(audio_file):
         transcription += segment.text + " "
     return transcription.strip()
 
+async def transcribe_with_doubao_file_asr(audio_url: str) -> str:
+    """豆包录音文件识别大模型：提交音频 URL，轮询查询结果。无分段延迟，响应更快。"""
+    app_key = os.getenv("VOLCENGINE_ASR_APP_ID", "").strip()
+    access_key = os.getenv("VOLCENGINE_ASR_ACCESS_TOKEN", "").strip()
+    resource_id = os.getenv("VOLCENGINE_FILE_ASR_RESOURCE_ID", "volc.seedasr.auc").strip()
+    base_url = os.getenv("VOLCENGINE_FILE_ASR_BASE_URL", "https://openspeech.bytedance.com").rstrip("/")
+    if not app_key or not access_key:
+        raise ValueError("请设置 VOLCENGINE_ASR_APP_ID 和 VOLCENGINE_ASR_ACCESS_TOKEN")
+    submit_url = f"{base_url}/api/v3/auc/bigmodel/submit"
+    query_url = f"{base_url}/api/v3/auc/bigmodel/query"
+    task_id = __import__("uuid").uuid4().hex
+    headers_submit = {
+        "Content-Type": "application/json",
+        "X-Api-App-Key": app_key,
+        "X-Api-Access-Key": access_key,
+        "X-Api-Resource-Id": resource_id,
+        "X-Api-Request-Id": task_id,
+        "X-Api-Sequence": "-1",
+    }
+    body = {
+        "user": {"uid": "voice_chat_user"},
+        "audio": {"url": audio_url, "format": "wav"},
+        "request": {"model_name": "bigmodel", "enable_itn": True},
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.post(submit_url, json=body, headers=headers_submit) as resp:
+            code = resp.headers.get("X-Api-Status-Code", "")
+            if code != "20000000":
+                msg = resp.headers.get("X-Api-Message", await resp.text())
+                raise ValueError(f"录音文件识别提交失败: {code} - {msg}")
+            x_tt_logid = resp.headers.get("X-Tt-Logid", "")
+        headers_query = {
+            "Content-Type": "application/json",
+            "X-Api-App-Key": app_key,
+            "X-Api-Access-Key": access_key,
+            "X-Api-Resource-Id": resource_id,
+            "X-Api-Request-Id": task_id,
+            "X-Tt-Logid": x_tt_logid,
+        }
+        for _ in range(60):
+            await asyncio.sleep(1)
+            async with session.post(query_url, json={}, headers=headers_query) as qresp:
+                code = qresp.headers.get("X-Api-Status-Code", "")
+                if code == "20000000":
+                    data = await qresp.json()
+                    result = (data or {}).get("result") or {}
+                    text = (result.get("text") or "").strip()
+                    if text:
+                        return text
+                    raise ValueError("录音文件识别返回空文本（可能为静音或识别失败）")
+                if code not in ("20000001", "20000002"):
+                    msg = qresp.headers.get("X-Api-Message", await qresp.text())
+                    raise ValueError(f"录音文件识别查询失败: {code} - {msg}")
+        raise ValueError("录音文件识别查询超时")
+
 async def transcribe_with_doubao_asr(audio_file):
-    """Transcribe audio using Doubao ASR API
-    
-    Returns:
-        str: 转录文本，如果失败则返回None
-    """
-    global doubao_asr_client
-    
-    if doubao_asr_client is None:
-        msg = "豆包ASR客户端未初始化，请检查环境变量 VOLCENGINE_ASR_APP_ID、VOLCENGINE_ASR_ACCESS_TOKEN"
-        print("Error:", msg)
-        raise ValueError(msg)
-    
-    # 读取音频文件
-    with open(audio_file, "rb") as f:
-        audio_data = f.read()
-    
-    # 调用豆包ASR API（同步方法，在异步环境中用 to_thread 运行）
-    try:
-        transcription = await asyncio.to_thread(
-            doubao_asr_client.transcribe,
-            audio_data
-        )
-    except Exception as e:
-        print(f"Error: 豆包ASR API调用失败 - {str(e)}")
-        raise ValueError(f"豆包ASR调用失败: {str(e)}") from e
-    
-    if transcription and transcription.strip():
-        return transcription
-    print("Error: 豆包ASR返回空结果")
-    raise ValueError("豆包ASR返回空结果（可能是未检测到语音、鉴权失败或余额不足）")
+    """已废弃：请使用 transcribe_with_doubao_file_asr(audio_url)。保留仅为兼容，实际应走录音文件识别。"""
+    raise ValueError("豆包流式 ASR 已停用，请使用录音文件识别；调用方应传入 audio_url 并调用 transcribe_with_doubao_file_asr")
 
 async def transcribe_with_openai_api(audio_file, model="gpt-4o-mini-transcribe"):
     """Transcribe audio using OpenAI's API
@@ -394,15 +421,16 @@ async def send_status_message(callback, message):
     if callback:
         await callback(message)
 
-async def transcribe_audio(transcription_model="gpt-4o-mini-transcribe", use_local=False, send_status_callback=None):
+async def transcribe_audio(transcription_model="gpt-4o-mini-transcribe", use_local=False, send_status_callback=None, base_url=None):
     """Main function to record audio and transcribe it
     
-    注意：use_local参数已废弃，现在只使用全局API_PROVIDER指定的供应商
+    注意：use_local参数已废弃，现在只使用全局API_PROVIDER指定的供应商。豆包使用录音文件识别，需可公网访问的 base_url（或设置 PUBLIC_APP_URL）。
     
     Args:
         transcription_model: Model to use for OpenAI transcription (仅用于OpenAI)
         use_local: 已废弃，不再支持本地Faster Whisper
         send_status_callback: Callback to send status messages
+        base_url: 可选，用于豆包录音文件识别的服务根 URL；未传时使用环境变量 PUBLIC_APP_URL
     
     Returns:
         Transcribed text or error message
@@ -424,10 +452,27 @@ async def transcribe_audio(transcription_model="gpt-4o-mini-transcribe", use_loc
         # 只使用全局API_PROVIDER指定的ASR供应商
         transcription = None
         if API_PROVIDER == 'doubao':
-            # Use Doubao ASR API
-            transcription = await transcribe_with_doubao_asr(temp_filename)
+            # 豆包录音文件识别：本地录音已是 16kHz wav，仅需注册临时 URL 供火山拉取
+            try:
+                from .audio_temp import register_audio_temp, unregister_audio_temp
+                base = (base_url or os.getenv("PUBLIC_APP_URL", "")).strip().rstrip("/")
+                if not base:
+                    raise ValueError("豆包录音文件识别需要可公网访问的 base_url，请在调用时传入 base_url 或设置环境变量 PUBLIC_APP_URL")
+                token = register_audio_temp(temp_filename)
+                try:
+                    audio_url = f"{base}/api/audio/temp/{token}"
+                    transcription = await transcribe_with_doubao_file_asr(audio_url)
+                finally:
+                    unregister_audio_temp(token)
+            except Exception as e:
+                if send_status_callback:
+                    await send_status_message(send_status_callback, {
+                        "action": "error",
+                        "message": str(e)
+                    })
+                return str(e)
             if transcription is None:
-                error_msg = "Error: 豆包ASR API调用失败，请检查环境变量配置"
+                error_msg = "Error: 豆包录音文件识别未返回结果，请检查环境变量与网络"
                 print(error_msg)
                 if send_status_callback:
                     await send_status_message(send_status_callback, {

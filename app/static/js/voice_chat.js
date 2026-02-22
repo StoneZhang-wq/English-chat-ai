@@ -707,42 +707,47 @@ document.addEventListener("DOMContentLoaded", function() {
             try {
                 isProcessingAudio = true;
                 setInputEnabled(false);
-                
+                // 立即显示「转写中…」，减少用户等待感
+                addUserMessage('转写中…');
                 const formData = new FormData();
                 formData.append('audio', audioBlob, 'recording.webm');
-                
                 const response = await fetch('/api/practice/transcribe', {
                     method: 'POST',
                     body: formData
                 });
-                
                 if (!response.ok) {
                     throw new Error('转录失败');
                 }
-                
                 const result = await response.json();
                 console.log('Practice transcribe result:', result);
-                
                 if (result.status === 'success' && result.transcription) {
                     console.log('Practice mode: transcription received, handling input');
-                    
-                    // 如果返回了音频URL，显示为音频气泡
+                    // 将占位更新为实际转录文本
+                    updateLastUserMessageContent(result.transcription);
                     if (result.audio_url) {
                         createAudioBubble(result.transcription, result.audio_url, 'user');
                     }
-                    
-                    // 使用练习API处理转录结果
-                    await handlePracticeInput(result.transcription);
+                    // 用户消息已显示，传入 true 避免重复
+                    await handlePracticeInput(result.transcription, true);
                 } else {
+                    const lastTarget = (practiceState && practiceState.messageTarget) || document.getElementById('messages-list');
+                    if (lastTarget && lastTarget.lastElementChild && lastTarget.lastElementChild.classList.contains('user')) {
+                        const txt = lastTarget.lastElementChild.querySelector('.text-message');
+                        if (txt && txt.textContent === '转写中…') lastTarget.lastElementChild.remove();
+                    }
                     const errorMsg = result.message || '转录失败：未知错误';
                     console.error('Transcription failed:', result);
                     showError(errorMsg);
                 }
-                
                 isProcessingAudio = false;
                 setInputEnabled(true);
-                return; // 已处理，不继续正常流程
+                return;
             } catch (error) {
+                const lastTarget = (practiceState && practiceState.messageTarget) || document.getElementById('messages-list');
+                if (lastTarget && lastTarget.lastElementChild && lastTarget.lastElementChild.classList.contains('user')) {
+                    const txt = lastTarget.lastElementChild.querySelector('.text-message');
+                    if (txt && txt.textContent === '转写中…') lastTarget.lastElementChild.remove();
+                }
                 console.error('Error in practice mode transcription:', error);
                 showError('转录音频失败：' + error.message);
                 isProcessingAudio = false;
@@ -837,6 +842,28 @@ document.addEventListener("DOMContentLoaded", function() {
             target.scrollTop = target.scrollHeight;
         } else {
             scrollToBottom();
+        }
+    }
+
+    /** 更新最后一条用户消息的文本（用于「转写中…」→ 实际转录） */
+    function updateLastUserMessageContent(text) {
+        const target = (typeof practiceState !== 'undefined' && practiceState && practiceState.messageTarget) || document.getElementById('messages-list');
+        if (!target || !text) return;
+        const last = target.lastElementChild;
+        if (!last || !last.classList.contains('user')) return;
+        const textEl = last.querySelector('.text-message');
+        if (textEl) {
+            textEl.textContent = text;
+        }
+    }
+
+    /** 移除最后一条 AI 消息（用于先显示「思考中…」再替换为真实回复） */
+    function removeLastAIMessage() {
+        const target = (typeof practiceState !== 'undefined' && practiceState && practiceState.messageTarget) || document.getElementById('messages-list');
+        if (!target) return;
+        const last = target.lastElementChild;
+        if (last && last.classList.contains('ai')) {
+            last.remove();
         }
     }
 
@@ -3070,8 +3097,8 @@ document.addEventListener("DOMContentLoaded", function() {
         practiceState.currentHints = null;
     }
     
-    // 处理练习模式的用户输入
-    async function handlePracticeInput(userInput) {
+    // 处理练习模式的用户输入（userMessageAlreadyShown=true 表示用户消息已通过占位更新显示，勿重复添加）
+    async function handlePracticeInput(userInput, userMessageAlreadyShown) {
         console.log('handlePracticeInput called, isActive:', practiceState.isActive);
         if (!practiceState.isActive) {
             console.log('Not in practice mode, returning false');
@@ -3081,8 +3108,11 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log('In practice mode, processing input...');
         
         try {
-            // 显示用户输入
-            addUserMessage(userInput);
+            if (!userMessageAlreadyShown) {
+                addUserMessage(userInput);
+            }
+            // 先显示「思考中…」，减少等待时的空白感
+            addAIMessage('思考中…');
             
             // 找到当前轮次对应的参考台词
             let referenceText = "";
@@ -3125,6 +3155,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             
             if (result.status === 'success') {
+                removeLastAIMessage(); // 去掉「思考中…」
                 if (result.is_consistent) {
                     // 意思一致，继续下一轮
                     practiceState.currentTurn = result.next_turn;
@@ -3169,7 +3200,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         }
                     }
                 } else {
-                    // 意思不一致，显示完整参考答案
+                    // 意思不一致，显示完整参考答案（已在上方 removeLastAIMessage）
                     const hint = referenceText
                         ? `意思不太一致，请再试试。参考答案：${referenceText}`
                         : '意思不太一致，请再试试。你可以点击"显示提示"查看提示。';
@@ -3177,11 +3208,13 @@ document.addEventListener("DOMContentLoaded", function() {
                     addAIMessage(hint);
                 }
             } else {
+                removeLastAIMessage();
                 showError(result.message || '验证失败');
             }
             
             return true; // 已处理，不继续正常流程
         } catch (error) {
+            removeLastAIMessage();
             console.error('Error handling practice input:', error);
             showError('处理失败：' + error.message);
             return true;

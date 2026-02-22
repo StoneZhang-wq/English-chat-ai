@@ -265,6 +265,7 @@
     }
   }
 
+  var immersiveCurrentAudio = null;
   function appendImmersiveMsg(role, text, audioUrl) {
     const chat = q('#sceneImmersiveChat');
     if (!chat) return;
@@ -282,11 +283,52 @@
       playBtn.title = '播放';
       playBtn.setAttribute('aria-label', '播放');
       playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="8 5 8 19 19 12 8 5"></polygon></svg>';
-      var audio = new Audio(audioUrl);
+      var audio = new Audio();
+      audio.preload = 'auto';
+      audio.src = audioUrl;
       playBtn.addEventListener('click', function () {
-        if (audio.paused) { audio.play(); playBtn.classList.add('playing'); } else { audio.pause(); audio.currentTime = 0; playBtn.classList.remove('playing'); }
+        if (audio.paused) {
+          if (immersiveCurrentAudio && immersiveCurrentAudio !== audio) {
+            immersiveCurrentAudio.pause();
+            immersiveCurrentAudio.currentTime = 0;
+            chat.querySelectorAll('.msg-play-btn.playing').forEach(function (b) { b.classList.remove('playing'); });
+          }
+          immersiveCurrentAudio = audio;
+          playBtn.classList.add('playing');
+          if (audio.readyState < 3) {
+            playBtn.disabled = true;
+            playBtn.title = '加载中…';
+            var onReady = function () {
+              playBtn.disabled = false;
+              playBtn.title = '播放';
+              audio.removeEventListener('canplaythrough', onReady);
+              audio.removeEventListener('error', onError);
+              audio.play().catch(function () { playBtn.classList.remove('playing'); });
+            };
+            var onError = function () {
+              playBtn.disabled = false;
+              playBtn.title = '播放';
+              audio.removeEventListener('canplaythrough', onReady);
+              audio.removeEventListener('error', onError);
+              playBtn.classList.remove('playing');
+            };
+            audio.addEventListener('canplaythrough', onReady);
+            audio.addEventListener('error', onError);
+            if (audio.readyState >= 3) onReady();
+          } else {
+            audio.play().catch(function () { playBtn.classList.remove('playing'); });
+          }
+        } else {
+          audio.pause();
+          audio.currentTime = 0;
+          playBtn.classList.remove('playing');
+          if (immersiveCurrentAudio === audio) immersiveCurrentAudio = null;
+        }
       });
-      audio.addEventListener('ended', function () { playBtn.classList.remove('playing'); });
+      audio.addEventListener('ended', function () {
+        playBtn.classList.remove('playing');
+        if (immersiveCurrentAudio === audio) immersiveCurrentAudio = null;
+      });
       wrap.appendChild(textSpan);
       wrap.appendChild(playBtn);
       div.appendChild(wrap);
@@ -305,6 +347,7 @@
     if (sendBtn) sendBtn.disabled = true;
     input.value = '';
     appendImmersiveMsg('user', text);
+    appendImmersiveMsg('assistant', '思考中…');
     const history = immersiveState.history.slice(-20).map(h => ({ role: h.role, content: h.content }));
     const acc = getSceneAccount();
     try {
@@ -322,6 +365,7 @@
       });
       const data = await res.json().catch(() => ({}));
       if (sendBtn) sendBtn.disabled = false;
+      removeLastImmersiveMsg('assistant');
       if (!res.ok) {
         appendImmersiveMsg('assistant', 'Error: ' + (data.message || data.error || res.status), null);
         return;
@@ -337,6 +381,7 @@
       }
     } catch (e) {
       if (sendBtn) sendBtn.disabled = false;
+      removeLastImmersiveMsg('assistant');
       appendImmersiveMsg('assistant', 'Network error: ' + (e.message || '请稍后重试'), null);
     }
   }
@@ -347,6 +392,7 @@
     var input = q('#sceneImmersiveInput');
     if (input) input.value = '';
     appendImmersiveMsg('user', text.trim(), userAudioUrl || null);
+    appendImmersiveMsg('assistant', '思考中…');
     var history = immersiveState.history.slice(-20).map(function (h) { return { role: h.role, content: h.content }; });
     var acc = getSceneAccount();
     if (sendBtn) sendBtn.disabled = true;
@@ -365,6 +411,7 @@
       });
       var data = await res.json().catch(function () { return {}; });
       if (sendBtn) sendBtn.disabled = false;
+      removeLastImmersiveMsg('assistant');
       if (!res.ok) {
         appendImmersiveMsg('assistant', 'Error: ' + (data.message || data.error || res.status), null);
         return;
@@ -378,6 +425,7 @@
       if (taskCompleted) requestImmersiveReport();
     } catch (e) {
       if (sendBtn) sendBtn.disabled = false;
+      removeLastImmersiveMsg('assistant');
       appendImmersiveMsg('assistant', 'Network error: ' + (e.message || '请稍后重试'), null);
     }
   }
@@ -516,6 +564,14 @@
 
   var immersiveRecorder = { stream: null, recorder: null, chunks: [] };
 
+  function removeLastImmersiveMsg(role) {
+    var chat = q('#sceneImmersiveChat');
+    if (!chat || !chat.lastElementChild) return;
+    var last = chat.lastElementChild;
+    if (role && !last.classList.contains(role)) return;
+    last.remove();
+  }
+
   function stopImmersiveRecordAndSend() {
     if (!immersiveRecorder.recorder || immersiveRecorder.recorder.state === 'inactive') return;
     immersiveRecorder.recorder.stop();
@@ -528,18 +584,22 @@
           }
           var btn = q('#sceneImmersiveRecord');
           if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; }
+          appendImmersiveMsg('user', '转写中…');
           var formData = new FormData();
           formData.append('audio', blob, 'recording.webm');
           fetch('/api/practice/transcribe', { method: 'POST', body: formData })
             .then(function (r) { return r.json(); })
             .then(function (result) {
               if (result.status === 'success' && result.transcription && result.transcription.trim()) {
+                removeLastImmersiveMsg('user');
                 sendImmersiveMessageWithText(result.transcription.trim(), result.audio_url || null);
               } else {
+                removeLastImmersiveMsg('user');
                 showSceneToast(result.message || '未识别到语音，请重试');
               }
             })
             .catch(function (e) {
+              removeLastImmersiveMsg('user');
               showSceneToast('录音上传失败：' + (e.message || ''));
             });
         };

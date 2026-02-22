@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import os
@@ -10,9 +11,58 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 
-async def generate_tts_for_dialogue_lines(dialogue_lines: List[Dict], dialogue_id: str) -> None:
-    """为 dialogue_lines 每行生成 TTS 音频，填充 audio_url。A=NPC、B=用户 使用不同人声（若已配置）。"""
+async def _generate_tts_one_line(
+    line: Dict,
+    i: int,
+    dialogue_id: str,
+    audio_dir: str,
+    tts_encoding: str,
+) -> None:
+    """为单行对话生成 TTS，并写入 line['audio_url']。"""
     from .app import API_PROVIDER, doubao_text_to_speech, openai_text_to_speech, OPENAI_TTS_VOICE, OPENAI_TTS_VOICE_B
+    try:
+        speaker = line.get("speaker", "A")
+        if API_PROVIDER == "doubao" and tts_encoding == "mp3":
+            audio_filename = f"{speaker}_{i}.mp3"
+        else:
+            audio_filename = f"{speaker}_{i}.wav"
+        audio_path = os.path.join(audio_dir, audio_filename)
+        success = False
+        if API_PROVIDER == "doubao":
+            voice_type_a = os.getenv("TTS_VOICE_TYPE")
+            voice_type_b = os.getenv("TTS_VOICE_TYPE_B")
+            voice_type = voice_type_b if speaker == "B" and voice_type_b else voice_type_a
+            success = await doubao_text_to_speech(line["text"], audio_path, voice_type=voice_type)
+            if not success and speaker == "B" and voice_type_b and voice_type_b != voice_type_a:
+                logger.info("角色 B 人声 %s 不可用，回退使用 A 人声", voice_type_b)
+                success = await doubao_text_to_speech(line["text"], audio_path, voice_type=voice_type_a)
+            if not success:
+                line["audio_url"] = None
+                return
+        elif API_PROVIDER == "openai":
+            try:
+                voice = OPENAI_TTS_VOICE_B if speaker == "B" else OPENAI_TTS_VOICE
+                await openai_text_to_speech(line["text"], audio_path, voice=voice)
+                success = True
+            except Exception as e:
+                logger.warning("OpenAI TTS line %d 失败: %s", i, e)
+                line["audio_url"] = None
+                return
+        else:
+            logger.warning("不支持的 TTS 供应商: %s", API_PROVIDER)
+            line["audio_url"] = None
+            return
+        if success and os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+            line["audio_url"] = f"/audio/english_dialogue/{dialogue_id}/{audio_filename}"
+        else:
+            line["audio_url"] = None
+    except Exception as e:
+        logger.warning("生成音频 line %d 失败: %s", i, e)
+        line["audio_url"] = None
+
+
+async def generate_tts_for_dialogue_lines(dialogue_lines: List[Dict], dialogue_id: str) -> None:
+    """为 dialogue_lines 每行生成 TTS 音频，填充 audio_url。并行请求以缩短复习资料生成时间。"""
     current_file_dir = os.path.dirname(os.path.abspath(__file__))
     project_dir = os.path.dirname(current_file_dir)
     audio_dir = os.path.join(project_dir, "outputs", "english_dialogue", dialogue_id)
@@ -22,47 +72,11 @@ async def generate_tts_for_dialogue_lines(dialogue_lines: List[Dict], dialogue_i
         logger.warning("创建音频目录失败: %s", e)
         return
     tts_encoding = os.getenv("TTS_ENCODING", "mp3")
-    for i, line in enumerate(dialogue_lines):
-        try:
-            speaker = line.get("speaker", "A")
-            if API_PROVIDER == "doubao" and tts_encoding == "mp3":
-                audio_filename = f"{speaker}_{i}.mp3"
-            else:
-                audio_filename = f"{speaker}_{i}.wav"
-            audio_path = os.path.join(audio_dir, audio_filename)
-            success = False
-            if API_PROVIDER == "doubao":
-                voice_type_a = os.getenv("TTS_VOICE_TYPE")
-                voice_type_b = os.getenv("TTS_VOICE_TYPE_B")
-                voice_type = voice_type_b if speaker == "B" and voice_type_b else voice_type_a
-                success = await doubao_text_to_speech(line["text"], audio_path, voice_type=voice_type)
-                # 若 B 人声未开通（如 403 resource not granted），回退为 A 人声
-                if not success and speaker == "B" and voice_type_b and voice_type_b != voice_type_a:
-                    logger.info("角色 B 人声 %s 不可用，回退使用 A 人声", voice_type_b)
-                    success = await doubao_text_to_speech(line["text"], audio_path, voice_type=voice_type_a)
-                if not success:
-                    line["audio_url"] = None
-                    continue
-            elif API_PROVIDER == "openai":
-                try:
-                    voice = OPENAI_TTS_VOICE_B if speaker == "B" else OPENAI_TTS_VOICE
-                    await openai_text_to_speech(line["text"], audio_path, voice=voice)
-                    success = True
-                except Exception as e:
-                    logger.warning("OpenAI TTS line %d 失败: %s", i, e)
-                    line["audio_url"] = None
-                    continue
-            else:
-                logger.warning("不支持的 TTS 供应商: %s", API_PROVIDER)
-                line["audio_url"] = None
-                continue
-            if success and os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
-                line["audio_url"] = f"/audio/english_dialogue/{dialogue_id}/{audio_filename}"
-            else:
-                line["audio_url"] = None
-        except Exception as e:
-            logger.warning("生成音频 line %d 失败: %s", i, e)
-            line["audio_url"] = None
+    tasks = [
+        _generate_tts_one_line(line, i, dialogue_id, audio_dir, tts_encoding)
+        for i, line in enumerate(dialogue_lines)
+    ]
+    await asyncio.gather(*tasks)
 
 
 # 英语水平配置

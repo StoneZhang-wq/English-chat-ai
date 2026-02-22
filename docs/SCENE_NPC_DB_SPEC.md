@@ -101,6 +101,14 @@
 | `content` | array | 对话内容，每项 `{"role":"A"|"B", "content":"...", "hint":"..."}` |
 | `core_sentences` | string | 核心句型，用 `/` 分隔 |
 | `core_chunks` | string | 核心语块，用 `/` 分隔 |
+| `user_goal` | string | **B（学习者）** 的任务描述，如「你作为学习者，要完成…」 |
+| `user_goal_a` | string | **A（NPC）** 的任务描述，如「你作为快递员，要完成…」 |
+
+### 任务字段约定（避免任务写反）
+
+- **`user_goal`**：必须描述 **B（学习者）** 在本对话中要完成的事（问路、点单、签收等）。
+- **`user_goal_a`**：必须描述 **A（NPC）** 在本对话中要完成的事（指路、接待、递单等）。
+- 若发现「任务不准确或反了」：检查是否把 NPC 该做的事写进了 `user_goal`，或把学习者该做的事写进了 `user_goal_a`；可运行 `python scripts/validate_dialogue_tasks.py` 做一致性检查。
 
 ### 规则约定
 
