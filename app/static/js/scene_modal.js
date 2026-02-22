@@ -146,7 +146,22 @@
       q('#scenesModalTitle').textContent = currentBigSceneName;
       return;
     }
-    showListLoading('加载小场景…');
+    // 先展示骨架占位，提升首屏感知速度
+    (function renderSmallScenesSkeleton(count = 6) {
+      const container = q('#scenesList');
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const s = document.createElement('div');
+        s.className = 'scene-card scene-card-skeleton';
+        s.innerHTML = `
+          <div class="scene-card-img-wrap skeleton-img"></div>
+          <h3 class="skeleton-text">　</h3>
+          <div style="height:36px;"></div>
+        `;
+        container.appendChild(s);
+      }
+    })();
+
     try {
       const acc = getSceneAccount();
       const url = urlWithAccount('/api/scene-npc/immersive-small-scenes?big_scene_id=' + encodeURIComponent(bigSceneId), acc);
@@ -764,14 +779,17 @@
       cacheBigScenes = scenes;
       if (scenes && scenes.length) {
         renderBigScenesList(scenes);
-        // 预取第一个大场景的小场景列表，用户点进时即可秒出
-        const firstId = scenes[0].id;
-        if (firstId && !cacheSmallByBig[firstId]) {
+        // 预取前 N 个大场景的小场景列表，提升首次体验的后续点击速度
+        const prefetchCount = Math.min(3, scenes.length);
+        for (let idx = 0; idx < prefetchCount; idx++) {
+          const bigId = scenes[idx] && scenes[idx].id;
+          if (!bigId) continue;
+          if (cacheSmallByBig[bigId]) continue;
           const acc = getSceneAccount();
-          const url = urlWithAccount('/api/scene-npc/immersive-small-scenes?big_scene_id=' + encodeURIComponent(firstId), acc);
-          fetch(url, { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (res) {
-            if (res.scenes && Array.isArray(res.scenes)) cacheSmallByBig[firstId] = res.scenes;
-          }).catch(function () {});
+          const url = urlWithAccount('/api/scene-npc/immersive-small-scenes?big_scene_id=' + encodeURIComponent(bigId), acc);
+          fetch(url).then(r => r.json()).then(res => {
+            if (res.scenes && Array.isArray(res.scenes)) cacheSmallByBig[bigId] = res.scenes;
+          }).catch(() => {});
         }
       } else {
         q('#scenesList').innerHTML = '<div style="padding:24px;text-align:center;color:#666;"><p>暂无可体验的大场景</p></div>';
