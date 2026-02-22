@@ -60,7 +60,10 @@
     q('#scenesBackBtn').style.display = 'none';
     hideScenePracticeOverlay();
     if (typeof hideImmersiveOverlay === 'function') hideImmersiveOverlay();
+    // 从 AI 对话(场景) 关闭弹窗时切回练习模式
+    if (typeof location !== 'undefined' && location.hash === '#/scene') location.hash = '#/';
   }
+  window.closeScenesModal = closeModal;
 
   function renderBigScenesList(scenes) {
     const container = q('#scenesList');

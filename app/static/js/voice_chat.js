@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         if (inputArea) inputArea.style.display = 'none';
         if (location.hash !== '#/practice') location.hash = '#/practice';
-        setModeTabActive('practice');
+        setModeTabActive('chat');
     }
     function showReviewPage() {
         const main = document.querySelector('.main-content');
@@ -195,6 +195,10 @@ document.addEventListener("DOMContentLoaded", function() {
         if (inputArea) inputArea.style.display = '';
         if (location.hash !== '#/' && location.hash !== '') location.hash = '#/';
         setModeTabActive('chat');
+        if (typeof window.closeScenesModal === 'function') window.closeScenesModal();
+        // 练习模式下隐藏「进入场景体验」按钮（场景体验由 AI 对话 tab 进入）
+        const enterScenesBtn = document.getElementById('enter-scenes-btn');
+        if (enterScenesBtn) enterScenesBtn.style.display = 'none';
         // 确保回到主页面后 AI 消息和卡片都显示在对话区，不继续往练习页追加
         if (typeof practiceState !== 'undefined' && practiceState) practiceState.messageTarget = null;
     }
@@ -243,11 +247,32 @@ document.addEventListener("DOMContentLoaded", function() {
             else tab.classList.remove('active');
         });
     }
+    function showScenePage() {
+        const main = document.querySelector('.main-content');
+        const practicePage = document.getElementById('practice-page');
+        const reviewPage = document.getElementById('review-page');
+        const livePage = document.getElementById('live-page');
+        const inputArea = document.querySelector('.input-area');
+        if (practicePage) { practicePage.style.display = 'none'; practicePage.setAttribute('aria-hidden', 'true'); }
+        if (reviewPage) { reviewPage.style.display = 'none'; reviewPage.setAttribute('aria-hidden', 'true'); }
+        if (livePage) {
+            livePage.style.display = 'none';
+            livePage.setAttribute('aria-hidden', 'true');
+            const iframe = document.getElementById('live-iframe');
+            if (iframe) iframe.src = 'about:blank';
+        }
+        if (main) main.style.display = 'flex';
+        if (inputArea) inputArea.style.display = '';
+        setModeTabActive('scene');
+        var enterScenesBtn = document.getElementById('enter-scenes-btn');
+        if (enterScenesBtn) enterScenesBtn.click();
+    }
     function applyPageFromHash() {
         const hash = location.hash || '#/';
         if (hash === '#/practice') showPracticePage();
         else if (hash === '#/review') showReviewPage();
         else if (hash === '#/live') showLivePage();
+        else if (hash === '#/scene') showScenePage();
         else showMainPage();
     }
     window.applyPageFromHash = applyPageFromHash;
@@ -3357,6 +3382,7 @@ document.addEventListener("DOMContentLoaded", function() {
         tab.addEventListener('click', function () {
             const mode = tab.getAttribute('data-mode');
             if (mode === 'chat') location.hash = '#/';
+            else if (mode === 'scene') location.hash = '#/scene';
             else if (mode === 'practice') location.hash = '#/practice';
             else if (mode === 'live') location.hash = '#/live';
         });
@@ -3747,7 +3773,8 @@ async function handleLogin() {
             
             // 先隐藏登录界面，显示对话界面
             showChatInterface();
-            
+            // 登录后默认进入练习模式
+            location.hash = '#/';
             // 更新用户信息
             updateUserInfo(username);
             
