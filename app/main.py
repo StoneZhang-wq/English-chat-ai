@@ -1917,6 +1917,9 @@ async def practice_respond(request: Request):
         next_turn = current_turn + 1
         is_completed = False  # 初始化 is_completed
         
+        # 总 B 轮数：只有用户说完所有 B 轮后才允许判定为完成，避免对话未讲完就误判
+        total_b_turns = len([l for l in dialogue_lines if l.get("speaker") == "B"])
+        
         if validation_result.get("result") in ["consistent", "consistent_with_errors"]:
             # 找到当前B之后的下一个A的台词
             b_count = 0
@@ -1954,6 +1957,10 @@ async def practice_respond(request: Request):
             # 如果找不到下一个A，说明对话已完成
             if next_a_text is None:
                 is_completed = True
+            
+            # 必须说完所有 B 轮才允许判定完成，避免对话未讲完就出现「生成复习资料」
+            if is_completed and total_b_turns > 0 and next_turn < total_b_turns:
+                is_completed = False
         else:
             is_completed = False
         

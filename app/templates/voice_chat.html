@@ -84,7 +84,7 @@
                         <line x1="23" y1="11" x2="17" y2="11"></line>
                     </svg>
                 </button>
-                <button id="start-english-btn" class="icon-btn" title="开始英语学习（将保存当前对话记忆）">
+                <button id="start-english-btn" class="icon-btn" title="开始英语学习（将保存当前对话记忆）" style="display: none;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 12h18M3 6h18M3 18h18"></path>
                         <path d="M12 3v18"></path>
@@ -283,7 +283,7 @@
                 <label for="character-select">角色:</label>
                 <select id="character-select"></select>
             </div>
-            <div class="setting-group" style="border: 2px solid #4CAF50; padding: 10px; border-radius: 8px; background: #f0f9f0;">
+            <div class="setting-group" id="api-provider-setting-group" style="border: 2px solid #4CAF50; padding: 10px; border-radius: 8px; background: #f0f9f0; display: none;">
                 <label for="api-provider-select" style="font-weight: bold; color: #2E7D32;">
                     🌐 全局API供应商 (LLM/TTS/ASR统一):
                 </label>

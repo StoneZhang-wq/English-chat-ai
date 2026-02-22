@@ -45,9 +45,7 @@
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     document.body.classList.add('scenes-modal-open');
-    // 每次打开弹窗清空场景列表缓存，确保拿到最新图片 URL（避免后端换图后仍显示旧图）
-    cacheBigScenes = null;
-    Object.keys(cacheSmallByBig).forEach(function (k) { delete cacheSmallByBig[k]; });
+    // 保留缓存：再次打开时直接用已加载的大/小场景，不再重新请求，提升「AI 对话」切回体验
   }
   function closeModal() {
     const modal = q('#scenesModal');
