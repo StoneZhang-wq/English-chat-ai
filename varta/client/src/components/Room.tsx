@@ -74,6 +74,8 @@ export const Room = ({
   const [round, setRound] = useState<1 | 2>(1);
   const [wantSwapSelf, setWantSwapSelf] = useState(false);
   const [remoteWantSwap, setRemoteWantSwap] = useState(false);
+  /** 用户选择关闭摄像头时为 true，仅隐藏本地画面并关闭 track，不影响语音 */
+  const [cameraOff, setCameraOff] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const sendingPcRef = useRef<RTCPeerConnection | null>(null);
   const receivingPcRef = useRef<RTCPeerConnection | null>(null);
@@ -276,6 +278,8 @@ export const Room = ({
     console.log("Exit button pressed. Cleaning up connections.");
     setDialoguePayload(null);
     setMyRole(null);
+    setCameraOff(false);
+    if (localVideoTrack) localVideoTrack.enabled = true;
     setRound(1);
     setWantSwapSelf(false);
     setRemoteWantSwap(false);
@@ -425,6 +429,8 @@ export const Room = ({
       setRound(1);
       setWantSwapSelf(false);
       setRemoteWantSwap(false);
+      setCameraOff(false);
+      if (localVideoTrack) localVideoTrack.enabled = true;
       setIsMatching(true);
       sendingPcRef.current?.close();
       receivingPcRef.current?.close();
@@ -466,26 +472,32 @@ export const Room = ({
     };
   }, [localAudioTrack, localVideoTrack, handleOffer, name, learningLanguages, account, sceneId]);
 
-  // Local video rendering effect
+  // Local video rendering effect（cameraOff 时不再绑定 stream，仅占位）
   useEffect(() => {
+    if (cameraOff || !localVideoTrack) return;
     const videoElement = localVideoRef.current;
-    if (videoElement && localVideoTrack) {
+    if (videoElement) {
       const stream = new MediaStream([localVideoTrack]);
       videoElement.srcObject = stream;
       videoElement.muted = true;
 
       const handleCanPlay = () => {
-        console.log("Local video is ready to play.");
         videoElement.play().catch((err) => console.error("Play error:", err));
       };
-
       videoElement.addEventListener("canplay", handleCanPlay);
-
       return () => {
         videoElement.removeEventListener("canplay", handleCanPlay);
       };
     }
-  }, [localVideoTrack]);
+  }, [localVideoTrack, cameraOff]);
+
+  const handleToggleCamera = () => {
+    if (localVideoTrack) {
+      const next = !cameraOff;
+      setCameraOff(next);
+      localVideoTrack.enabled = !next;
+    }
+  };
 
   // Add useMemo to prevent unnecessary re-renders of video elements
   const videoConstraints = useMemo(
@@ -546,15 +558,37 @@ export const Room = ({
             </div>
           )}
 
-          {/* Local Video（仅文字模式不显示） */}
-          {!textOnlyMode && (
-            <div className="absolute bottom-4 left-4 border border-gray-300 rounded-lg overflow-hidden shadow-lg">
-              <video
-                ref={localVideoRef}
-                autoPlay
-                muted
-                className="w-20 h-20 md:w-24 md:h-24 object-cover"
-              />
+          {/* Local Video 或关闭摄像头占位（仅文字模式不显示） */}
+          {!textOnlyMode && localVideoTrack && (
+            <div className="absolute bottom-4 left-4 flex flex-col items-center gap-1">
+              {cameraOff ? (
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg border border-gray-300 bg-gray-200 flex flex-col items-center justify-center shadow-lg">
+                  <span className="text-xs text-gray-500 px-1 text-center">摄像头已关闭</span>
+                  <button
+                    type="button"
+                    onClick={handleToggleCamera}
+                    className="mt-1 text-xs text-indigo-600 hover:underline"
+                  >
+                    开启摄像头
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <video
+                    ref={localVideoRef}
+                    autoPlay
+                    muted
+                    className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-lg border border-gray-300 shadow-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleToggleCamera}
+                    className="text-xs text-gray-500 hover:text-indigo-600"
+                  >
+                    关闭摄像头
+                  </button>
+                </>
+              )}
             </div>
           )}
           {textOnlyMode && !lobby && !isMatching && (
@@ -568,13 +602,16 @@ export const Room = ({
       {/* Chat Section + 角色/任务/台词 + 互换与结束 */}
       <div className="h-full lg:w-1/3 flex flex-col border-l border-gray-300 bg-white">
         {dialoguePayload && (
-          <div className="p-3 border-b border-gray-200 bg-gray-50 text-sm overflow-y-auto max-h-40">
+          <div className="p-3 border-b border-gray-200 bg-gray-50 text-sm overflow-y-auto max-h-48">
+            <div className="text-xs text-gray-500 mb-1.5">
+              本局主题：{dialoguePayload.smallSceneName || "—"}
+            </div>
             <div className="font-semibold text-indigo-600">
               第{round}轮 · 你扮演：{currentRoleLabel}
             </div>
             {currentTask && (
               <div className="mt-1 text-gray-700">
-                <span className="font-medium">任务：</span>
+                <span className="font-medium">你的任务：</span>
                 {currentTask}
               </div>
             )}
@@ -617,7 +654,7 @@ export const Room = ({
                   ? "已点击互换，等待对方"
                   : remoteWantSwap
                   ? "对方已同意，点击互换"
-                  : "互换角色"}
+                  : "互换角色（交换任务与可说的内容后再练一轮）"}
               </button>
             )}
             {round === 2 && (
