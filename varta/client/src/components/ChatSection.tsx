@@ -30,17 +30,16 @@ const ChatSection: React.FC<ChatSectionProps> = ({
         className="flex flex-col h-[11rem] md:h-[29rem] lg:h-[31rem] 2xl:h-[41rem]"
         style={{ maxHeight: "100%" }}
       >
-        <div className="flex-grow overflow-y-auto p-4 space-y-2">
+        <div className="chat-messages-list flex-grow overflow-y-auto p-4 space-y-2 min-w-0">
           {messages.map((message, idx) => (
             <div
               key={idx}
-              className={`flex ${
+              className={`chat-message flex min-w-0 ${
                 message.sender === "self" ? "justify-end" : "justify-start"
               }`}
             >
               <div
-
-                className={`px-4 py-2  max-w-[80%] shadow ${
+                className={`px-4 py-2 max-w-[80%] min-w-0 shadow break-all whitespace-normal ${
                   message.sender === "self"
                     ? "bg-indigo-300 text-black rounded-s-xl rounded-se-xl"
                     : "bg-pink-300 text-black rounded-e-xl rounded-es-xl"

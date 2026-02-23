@@ -563,10 +563,10 @@ export const Room = ({
   }, []);
 
   return (
-    <div className="relative w-full h-full flex flex-col min-h-[26rem] md:min-h-[29rem] md:grid md:grid-cols-[minmax(360px,1fr)_22rem] lg:grid-cols-[minmax(400px,2fr)_22rem] md:h-[29rem] lg:h-[31rem] 2xl:h-[41rem] overflow-hidden">
-      {/* 左侧视频区：min-w-0 + overflow-hidden 防止被右侧撑开挤压 */}
+    <div className="relative w-full h-full flex flex-col min-h-[26rem] md:min-h-[29rem] md:grid md:grid-cols-[minmax(0,1fr)_22rem] lg:grid-cols-[minmax(0,2fr)_22rem] md:h-[29rem] lg:h-[31rem] 2xl:h-[41rem] overflow-hidden">
+      {/* 左侧视频区：minmax(0,1fr) 避免 Grid 隐式最小尺寸挤压；内部也 min-w-0 */}
       <div className="relative flex-1 min-h-[24rem] min-w-0 overflow-hidden z-10 sticky top-0 md:relative bg-gray-50 md:bg-transparent flex flex-col">
-        <div className="relative m-4 flex-1 min-h-[22rem] h-[24rem] md:h-[27rem] lg:h-[29rem] 2xl:h-[39rem] flex items-center justify-center bg-white bg-opacity-50 rounded-lg overflow-hidden shadow-lg shrink-0">
+        <div className="relative m-4 flex-1 min-h-[22rem] min-w-0 h-[24rem] md:h-[27rem] lg:h-[29rem] 2xl:h-[39rem] flex items-center justify-center bg-white bg-opacity-50 rounded-lg overflow-hidden shadow-lg shrink-0">
           {/* Username Label */}
           {!lobby && (
             <div className="absolute top-2 left-4 flex items-center bg-white rounded shadow-lg p-1">
@@ -645,8 +645,8 @@ export const Room = ({
         </div>
       </div>
 
-      {/* 右侧任务/聊天区：三位一体锁定宽度 w/min/max-[22rem]，overflow-hidden 防止内容撑开 */}
-      <div className="h-full w-full md:w-[22rem] md:min-w-[22rem] md:max-w-[22rem] flex flex-col border-l border-gray-300 bg-white z-0 overflow-hidden shrink-0">
+      {/* 右侧任务/聊天区：绝对固定宽度 + 保底 class 供全局 CSS 防止动态内容撑开 */}
+      <div className="room-right-panel h-full w-full md:w-[22rem] md:min-w-[22rem] md:max-w-[22rem] flex flex-col border-l border-gray-300 bg-white z-0 overflow-hidden shrink-0">
         {dialoguePayload && (
           <div className="p-3 border-b border-gray-200 bg-gray-50 text-sm flex-shrink-0 overflow-y-auto max-h-[40%] min-h-0 min-w-0">
             <div className="text-sm space-y-2 break-all whitespace-normal">

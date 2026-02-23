@@ -17,3 +17,20 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* 1v1 真人练习：防止右侧任务/聊天区被动态内容撑开挤压视频（含 voice_chat.js 等注入的 DOM） */
+.room-right-panel,
+.room-right-panel .chat-messages-list,
+.room-right-panel .chat-message {
+  min-width: 0 !important;
+}
+.room-right-panel .chat-messages-list,
+.room-right-panel .chat-message * {
+  word-break: break-all !important;
+  overflow-wrap: anywhere !important;
+}
+.room-right-panel .list-disc li,
+.room-right-panel ul li {
+  white-space: normal !important;
+  word-break: break-all !important;
+}
