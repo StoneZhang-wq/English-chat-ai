@@ -119,12 +119,9 @@ const ChatPage: React.FC = () => {
         )}
 
         <div
-          className={`w-full max-w-6xl min-w-0 bg-gray-200 shadow-lg rounded-lg flex flex-col md:flex-row overflow-hidden ${
-            isPopoverOpen ? "blur-sm" : ""
-          }`}
+          className={`w-full max-w-6xl min-w-0 flex-1 flex flex-col md:flex-row overflow-hidden items-stretch bg-gray-200 shadow-lg rounded-lg ${isPopoverOpen ? "blur-sm" : ""}`}
         >
-          {/* 真人练习 Room：需占满宽度，内部左右分栏由 Room 自己 grid 控制 */}
-
+          {/* 真人练习 Room：父级 min-w-0 + overflow-hidden，子级占满且不撑开 */}
           {!isPopoverOpen &&
           isChatActive &&
           (textOnlyMode || (localAudioTrack?.enabled && localVideoTrack?.enabled)) ? (
@@ -133,7 +130,7 @@ const ChatPage: React.FC = () => {
                 正在获取账号，请稍候…
               </div>
             ) : (
-              <div className="w-full min-w-0 flex-1 flex flex-col md:flex-row">
+              <div className="flex-1 min-w-0 w-full h-full relative">
                 <Room
                   name={userName || "Anonymous"}
                   account={account ?? undefined}
