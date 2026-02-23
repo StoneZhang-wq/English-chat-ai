@@ -130,7 +130,7 @@ const ChatPage: React.FC = () => {
                 正在获取账号，请稍候…
               </div>
             ) : (
-              <div className="flex-1 min-w-0 w-full h-full relative">
+              <div className="flex-1 min-w-0 w-full h-full relative overflow-hidden">
                 <Room
                   name={userName || "Anonymous"}
                   account={account ?? undefined}

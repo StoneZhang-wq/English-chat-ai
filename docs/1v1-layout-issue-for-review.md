@@ -103,3 +103,22 @@
 - **若仍被挤压**：可能原因包括 Grid 列被内容撑开、某子元素有隐式 min-width、或 iframe/嵌入环境宽度较小等；希望得到更稳妥的 CSS（或 Tailwind）写法或排查步骤。
 
 如需完整文件，可提供：`varta/client/src/components/Room.tsx`、`varta/client/src/pages/ChatPage.tsx`。
+
+---
+
+## 七、为什么修改没在浏览器里生效（必读）
+
+**现象**：改动了 `varta/client/src/components/Room.tsx`（例如删掉 `lg:w-1/3`、加 `md:w-[350px]`），但浏览器里该元素仍显示 `lg:w-1/3`、宽度约 889px。
+
+**原因**：你访问的是**主站（Flask）**提供的 1v1 页面，主站加载的是 **`app/static/practice-live/`** 下的**已构建好的 JS/CSS**，不是 `varta/client` 的源码。  
+源码改完后若**没有重新构建并覆盖** `app/static/practice-live/`，浏览器会一直用旧 bundle（例如 `main.ca4c2ba1.js`），里面仍包含 `lg:w-1/3`。
+
+**正确流程**：
+
+1. **改源码**：只改 `varta/client/src/` 下的 `Room.tsx`、`ChatPage.tsx`、`index.css` 等。
+2. **重新构建并部署到主站静态目录**：在项目根目录执行  
+   `npm run build:practice-live`  
+   脚本会在 `varta/client` 里执行 `npm run build`，并把 `varta/client/build/` 的内容**整体复制**到 `app/static/practice-live/`（会清空该目录再复制），这样主站会加载新的 `main.xxxxx.js`。
+3. **浏览器硬刷新**：主站部署/重启后，在 1v1 页面按 **Ctrl+F5**（或 Cmd+Shift+R）强制刷新，避免用旧缓存。
+
+**如何确认生效**：用开发者工具选中右侧任务区 div，看其 class 是否包含 `room-right-panel`、`md:w-[350px]`、`shrink-0`，且**不再**出现 `lg:w-1/3`；宽度应为约 350px 而非约 889px。

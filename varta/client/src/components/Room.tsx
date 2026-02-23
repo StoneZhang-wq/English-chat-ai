@@ -645,8 +645,8 @@ export const Room = ({
         </div>
       </div>
 
-      {/* 右侧任务/聊天区：分配任务后不被内容撑开，用 flex 三连 0 0 350px 固定 */}
-      <div className="room-right-panel right-task-panel h-full w-full md:w-[350px] md:min-w-[350px] md:max-w-[350px] md:basis-[350px] md:grow-0 md:shrink-0 flex flex-col border-l border-gray-300 bg-white z-0 overflow-hidden shrink-0">
+      {/* 右侧容器：删掉 lg:w-1/3，换成固定的像素值 */}
+      <div className="room-right-panel right-task-panel flex flex-col h-full w-full md:w-[350px] md:min-w-[350px] md:max-w-[350px] shrink-0 border-l border-gray-300 bg-white z-0 overflow-hidden">
         {dialoguePayload && (
           <div className="p-3 border-b border-gray-200 bg-gray-50 text-sm shrink-0 overflow-y-auto overflow-x-hidden max-h-48 min-w-0">
             <div className="text-sm space-y-2 w-full min-w-0">
