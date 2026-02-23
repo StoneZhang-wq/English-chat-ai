@@ -563,9 +563,9 @@ export const Room = ({
   }, []);
 
   return (
-    <div className="relative w-full h-full flex flex-col min-h-[26rem] md:min-h-[29rem] md:grid md:grid-cols-[1fr_22rem] lg:grid-cols-[2fr_1fr] md:h-[29rem] lg:h-[31rem] 2xl:h-[41rem]">
-      {/* 左侧视频区：横排时占主栏，竖屏时粘性置顶 */}
-      <div className="relative flex-1 min-h-[24rem] z-10 sticky top-0 md:relative md:min-w-0 bg-gray-50 md:bg-transparent flex flex-col">
+    <div className="relative w-full h-full flex flex-col min-h-[26rem] md:min-h-[29rem] md:grid md:grid-cols-[minmax(360px,1fr)_minmax(20rem,22rem)] lg:grid-cols-[minmax(400px,2fr)_minmax(20rem,1fr)] md:h-[29rem] lg:h-[31rem] 2xl:h-[41rem]">
+      {/* 左侧视频区：横排时占主栏且保证最小宽度不被挤没，竖屏时粘性置顶 */}
+      <div className="relative flex-1 min-h-[24rem] z-10 sticky top-0 md:relative md:min-w-[360px] bg-gray-50 md:bg-transparent flex flex-col">
         <div className="relative m-4 flex-1 min-h-[22rem] h-[24rem] md:h-[27rem] lg:h-[29rem] 2xl:h-[39rem] flex items-center justify-center bg-white bg-opacity-50 rounded-lg overflow-hidden shadow-lg shrink-0">
           {/* Username Label */}
           {!lobby && (

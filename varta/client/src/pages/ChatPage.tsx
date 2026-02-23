@@ -119,11 +119,11 @@ const ChatPage: React.FC = () => {
         )}
 
         <div
-          className={`w-full max-w-6xl bg-gray-200 shadow-lg rounded-lg flex flex-col md:flex-row overflow-hidden  ${
+          className={`w-full max-w-6xl min-w-0 bg-gray-200 shadow-lg rounded-lg flex flex-col md:flex-row overflow-hidden ${
             isPopoverOpen ? "blur-sm" : ""
           }`}
         >
-          {/* Video Section */}
+          {/* 真人练习 Room：需占满宽度，内部左右分栏由 Room 自己 grid 控制 */}
 
           {!isPopoverOpen &&
           isChatActive &&
@@ -133,7 +133,7 @@ const ChatPage: React.FC = () => {
                 正在获取账号，请稍候…
               </div>
             ) : (
-              <>
+              <div className="w-full min-w-0 flex-1 flex flex-col md:flex-row">
                 <Room
                   name={userName || "Anonymous"}
                   account={account ?? undefined}
@@ -147,7 +147,7 @@ const ChatPage: React.FC = () => {
                   joinExitLabel="Exit"
                   textOnlyMode={textOnlyMode}
                 />
-              </>
+              </div>
             )
           ) : (
             <>
