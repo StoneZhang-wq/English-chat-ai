@@ -563,7 +563,7 @@ export const Room = ({
   }, []);
 
   return (
-    <div className="relative w-full h-full flex flex-col min-h-[26rem] md:min-h-[29rem] md:grid md:grid-cols-[minmax(360px,1fr)_minmax(20rem,22rem)] lg:grid-cols-[minmax(400px,2fr)_minmax(20rem,1fr)] md:h-[29rem] lg:h-[31rem] 2xl:h-[41rem]">
+    <div className="relative w-full h-full flex flex-col min-h-[26rem] md:min-h-[29rem] md:grid md:grid-cols-[minmax(360px,1fr)_22rem] lg:grid-cols-[minmax(400px,2fr)_22rem] md:h-[29rem] lg:h-[31rem] 2xl:h-[41rem]">
       {/* 左侧视频区：横排时占主栏且保证最小宽度不被挤没，竖屏时粘性置顶 */}
       <div className="relative flex-1 min-h-[24rem] z-10 sticky top-0 md:relative md:min-w-[360px] bg-gray-50 md:bg-transparent flex flex-col">
         <div className="relative m-4 flex-1 min-h-[22rem] h-[24rem] md:h-[27rem] lg:h-[29rem] 2xl:h-[39rem] flex items-center justify-center bg-white bg-opacity-50 rounded-lg overflow-hidden shadow-lg shrink-0">
@@ -645,28 +645,28 @@ export const Room = ({
         </div>
       </div>
 
-      {/* 右侧任务/聊天区：横排时固定宽度，与左侧同时可见 */}
-      <div className="h-full w-full md:w-auto flex flex-col border-l border-gray-300 bg-white z-0 min-w-0 overflow-auto">
+      {/* 右侧任务/聊天区：固定 22rem 宽，长内容向下滚动不横向撑开、不挤压视频 */}
+      <div className="h-full w-full flex flex-col border-l border-gray-300 bg-white z-0 min-w-0 max-w-full overflow-x-hidden overflow-y-auto">
         {dialoguePayload && (
-          <div className="p-3 border-b border-gray-200 bg-gray-50 text-sm overflow-y-auto max-h-48">
-            <div className="text-xs text-gray-500 mb-1.5">
+          <div className="p-3 border-b border-gray-200 bg-gray-50 text-sm overflow-y-auto max-h-48 min-w-0 shrink-0 break-words">
+            <div className="text-xs text-gray-500 mb-1.5 break-words">
               本局主题：{dialoguePayload.smallSceneName || "—"}
             </div>
-            <div className="font-semibold text-indigo-600">
+            <div className="font-semibold text-indigo-600 break-words">
               第{round}轮 · 你扮演：{currentRoleLabel}
             </div>
             {currentTask && (
-              <div className="mt-1 text-gray-700">
+              <div className="mt-1 text-gray-700 break-words">
                 <span className="font-medium">你的任务：</span>
                 {currentTask}
               </div>
             )}
             {currentLines.length > 0 && (
-              <div className="mt-2">
+              <div className="mt-2 min-w-0 break-words">
                 <span className="font-medium text-gray-700">你可说的内容：</span>
-                <ul className="list-disc list-inside mt-0.5 text-gray-600">
+                <ul className="list-disc list-inside mt-0.5 text-gray-600 break-words">
                   {currentLines.map((line, i) => (
-                    <li key={i}>
+                    <li key={i} className="break-words">
                       {line.content || line.hint || ""}
                     </li>
                   ))}
@@ -675,7 +675,7 @@ export const Room = ({
             )}
           </div>
         )}
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 min-w-0 overflow-hidden flex flex-col">
           <ChatSection
             chatInput={chatInput}
             setChatInput={setChatInput}
