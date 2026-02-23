@@ -563,8 +563,8 @@ export const Room = ({
   }, []);
 
   return (
-    <div className="relative w-full h-full flex flex-col min-h-[26rem] md:min-h-[29rem] md:grid md:grid-cols-[minmax(0,1fr)_22rem] lg:grid-cols-[minmax(0,2fr)_22rem] md:h-[29rem] lg:h-[31rem] 2xl:h-[41rem] overflow-hidden">
-      {/* 左侧视频区：minmax(0,1fr) 避免 Grid 隐式最小尺寸挤压；内部也 min-w-0 */}
+    <div className="relative w-full h-full flex flex-col min-h-[26rem] md:min-h-[29rem] md:flex-row md:h-[29rem] lg:h-[31rem] 2xl:h-[41rem] overflow-hidden">
+      {/* 左侧视频区：flex-1 min-w-0 占满剩余空间 */}
       <div className="relative flex-1 min-h-[24rem] min-w-0 overflow-hidden z-10 sticky top-0 md:relative bg-gray-50 md:bg-transparent flex flex-col">
         <div className="relative m-4 flex-1 min-h-[22rem] min-w-0 h-[24rem] md:h-[27rem] lg:h-[29rem] 2xl:h-[39rem] flex items-center justify-center bg-white bg-opacity-50 rounded-lg overflow-hidden shadow-lg shrink-0">
           {/* Username Label */}
@@ -645,23 +645,26 @@ export const Room = ({
         </div>
       </div>
 
-      {/* 右侧任务/聊天区：绝对固定宽度 + 保底 class 供全局 CSS 防止动态内容撑开 */}
-      <div className="room-right-panel h-full w-full md:w-[22rem] md:min-w-[22rem] md:max-w-[22rem] flex flex-col border-l border-gray-300 bg-white z-0 overflow-hidden shrink-0">
+      {/* 右侧任务/聊天区：锁死 352px，防止内容撑开 */}
+      <div className="room-right-panel right-task-panel h-full w-full md:w-[352px] md:min-w-[352px] md:max-w-[352px] flex flex-col border-l border-gray-300 bg-white z-0 overflow-hidden shrink-0">
         {dialoguePayload && (
-          <div className="p-3 border-b border-gray-200 bg-gray-50 text-sm flex-shrink-0 overflow-y-auto max-h-[40%] min-h-0 min-w-0">
-            <div className="text-sm space-y-2 break-all whitespace-normal">
-              <div className="text-xs text-gray-500">本局主题：{dialoguePayload.smallSceneName || "—"}</div>
+          <div
+            className="p-3 border-b border-gray-200 bg-gray-50 text-sm shrink-0 overflow-y-auto overflow-x-hidden max-h-48 min-h-0 min-w-0"
+            style={{ maxWidth: "100%", boxSizing: "border-box" }}
+          >
+            <div className="w-full min-w-0">
+              <div className="text-xs text-gray-500 mb-1.5 break-all">本局主题：{dialoguePayload.smallSceneName || "—"}</div>
               <div className="font-semibold text-indigo-600 break-all">第{round}轮 · 你扮演：{currentRoleLabel}</div>
               {currentTask && (
-                <div className="text-gray-700 break-all whitespace-normal">
+                <div className="mt-1 text-gray-700 break-all whitespace-normal">
                   <span className="font-medium">你的任务：</span>
                   {currentTask}
                 </div>
               )}
               {currentLines.length > 0 && (
-                <div className="min-w-0 break-all whitespace-normal">
+                <div className="mt-2 min-w-0 break-all whitespace-normal">
                   <span className="font-medium text-gray-700">你可说的内容：</span>
-                  <ul className="list-disc pl-4 list-outside mt-0.5 text-gray-600 break-all">
+                  <ul className="list-disc list-inside mt-0.5 text-gray-600 break-all whitespace-normal">
                     {currentLines.map((line, i) => (
                       <li key={i} className="break-all">{line.content || line.hint || ""}</li>
                     ))}
