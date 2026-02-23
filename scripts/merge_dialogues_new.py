@@ -108,14 +108,13 @@ def main():
         elif isinstance(arr, dict):
             new_list.append(arr)
 
-    # Dedupe new by dialogue_id (keep first), and filter valid only
+    # Dedupe new by dialogue_id (keep last so later-in-file / latest edit wins), filter valid only
     new_by_id = {}
     for r in new_list:
         if not is_valid_record(r):
             continue
         did = r.get("dialogue_id") or (f"{r.get('small_scene')}-{r.get('npc')}-{r.get('dialogue_set')}")
-        if did not in new_by_id:
-            new_by_id[did] = normalize_record(r)
+        new_by_id[did] = normalize_record(r)
 
     # Build result: for each original, replace if dialogue_id in new; then append new ids not in original
     orig_ids = set()

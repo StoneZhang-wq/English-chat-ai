@@ -100,7 +100,7 @@ def main(root: Path = None):
         print("错误: dialogues.json 应为数组", file=sys.stderr)
         sys.exit(1)
 
-    order_map = {"daily": 1, "food": 2, "travel": 3, "shopping": 4, "work": 5, "social": 6}
+    order_map = {"daily": 1, "food": 2, "travel": 3, "transport": 3, "shopping": 4, "work": 5, "social": 6}
 
     # 有 immersive 的 small_scene_id
     has_immersive = set()

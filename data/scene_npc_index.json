@@ -1,31 +1,31 @@
 {
   "has_immersive": [
-    "park",
-    "praise",
-    "home",
-    "fast_food",
-    "meeting",
-    "hospital",
-    "train_station",
-    "supermarket",
-    "chat",
     "bus_metro",
+    "mall",
     "phone",
-    "bank",
-    "party",
-    "cinema",
     "hobby",
-    "barber",
-    "airport",
     "interview",
+    "praise",
     "office",
+    "barber",
+    "park",
+    "fast_food",
+    "snack_shop",
+    "supermarket",
     "restaurant",
+    "cafe",
+    "cinema",
+    "bank",
+    "airport",
+    "meeting",
+    "chat",
+    "party",
+    "hotel",
+    "train_station",
+    "home",
     "community",
     "taxi",
-    "snack_shop",
-    "cafe",
-    "mall",
-    "hotel"
+    "hospital"
   ],
   "big_scenes": [
     {
@@ -37,6 +37,11 @@
       "id": "food",
       "name": "餐饮美食",
       "order": 2
+    },
+    {
+      "id": "transport",
+      "name": "出行交通",
+      "order": 3
     },
     {
       "id": "shopping",
@@ -52,11 +57,6 @@
       "id": "social",
       "name": "社交人情",
       "order": 6
-    },
-    {
-      "id": "transport",
-      "name": "出行交通",
-      "order": 99
     }
   ],
   "small_scenes_by_big": {
