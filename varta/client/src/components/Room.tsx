@@ -563,10 +563,10 @@ export const Room = ({
   }, []);
 
   return (
-    <div className="relative w-full h-full flex flex-col min-h-[26rem] md:h-[29rem] lg:h-[31rem] 2xl:h-[41rem] justify-center md:flex-row">
-      {/* 视频区：横排时至少占一半宽度且 z-10 在上层，竖屏时粘性置顶 */}
-      <div className="relative flex-1 min-w-0 z-10 sticky top-0 md:relative bg-gray-50 md:bg-transparent order-1">
-        <div className="relative m-4 flex-1 min-h-[24rem] h-[24rem] md:h-[27rem] lg:h-[29rem] 2xl:h-[39rem] flex items-center justify-center bg-white bg-opacity-50 rounded-lg overflow-hidden shadow-lg shrink-0">
+    <div className="relative w-full h-full flex flex-col min-h-[26rem] md:min-h-[29rem] md:grid md:grid-cols-[1fr_22rem] lg:grid-cols-[2fr_1fr] md:h-[29rem] lg:h-[31rem] 2xl:h-[41rem]">
+      {/* 左侧视频区：横排时占主栏，竖屏时粘性置顶 */}
+      <div className="relative flex-1 min-h-[24rem] z-10 sticky top-0 md:relative md:min-w-0 bg-gray-50 md:bg-transparent flex flex-col">
+        <div className="relative m-4 flex-1 min-h-[22rem] h-[24rem] md:h-[27rem] lg:h-[29rem] 2xl:h-[39rem] flex items-center justify-center bg-white bg-opacity-50 rounded-lg overflow-hidden shadow-lg shrink-0">
           {/* Username Label */}
           {!lobby && (
             <div className="absolute top-2 left-4 flex items-center bg-white rounded shadow-lg p-1">
@@ -645,8 +645,8 @@ export const Room = ({
         </div>
       </div>
 
-      {/* 任务/聊天区：横排时限制宽度，绝不占满整行，避免盖住视频 */}
-      <div className="h-full w-full md:max-w-[22rem] lg:max-w-none lg:w-1/3 flex flex-col border-l border-gray-300 bg-white z-0 flex-shrink-0 min-w-0 overflow-auto order-2">
+      {/* 右侧任务/聊天区：横排时固定宽度，与左侧同时可见 */}
+      <div className="h-full w-full md:w-auto flex flex-col border-l border-gray-300 bg-white z-0 min-w-0 overflow-auto">
         {dialoguePayload && (
           <div className="p-3 border-b border-gray-200 bg-gray-50 text-sm overflow-y-auto max-h-48">
             <div className="text-xs text-gray-500 mb-1.5">
