@@ -155,8 +155,8 @@ const ChatPage: React.FC = () => {
                 <p className="text-green-700 text-sm mt-2 font-medium">使用视频+语音：点「Join（视频+语音）」并允许摄像头与麦克风</p>
                 <p className="text-gray-400 text-sm mt-1">仅文字聊天：点「仅文字（验证用）」</p>
               </div>
-              {/* Chat Section */}
-              <div className="lg:w-1/3 bg-white border-l border-gray-300 lg:pl-4">
+              {/* Chat Section：固定宽度，避免大屏下 1/3 变成 889px */}
+              <div className="w-full md:w-[350px] md:min-w-[350px] md:max-w-[350px] md:shrink-0 bg-white border-l border-gray-300 md:pl-4">
                 <div className="flex flex-col h-full">
                   <div className="flex-grow overflow-y-auto p-4 min-h-[7rem]">
                     <p className="text-gray-700">Chat messages...</p>

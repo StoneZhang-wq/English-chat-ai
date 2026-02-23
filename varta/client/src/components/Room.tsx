@@ -645,26 +645,23 @@ export const Room = ({
         </div>
       </div>
 
-      {/* 右侧任务/聊天区：锁死 352px，防止内容撑开 */}
-      <div className="room-right-panel right-task-panel h-full w-full md:w-[352px] md:min-w-[352px] md:max-w-[352px] flex flex-col border-l border-gray-300 bg-white z-0 overflow-hidden shrink-0">
+      {/* 右侧任务/聊天区：摒弃比例单位，锁死 350px 三连 + shrink-0 */}
+      <div className="room-right-panel right-task-panel h-full w-full md:w-[350px] md:min-w-[350px] md:max-w-[350px] flex flex-col border-l border-gray-300 bg-white z-0 overflow-hidden shrink-0">
         {dialoguePayload && (
-          <div
-            className="p-3 border-b border-gray-200 bg-gray-50 text-sm shrink-0 overflow-y-auto overflow-x-hidden max-h-48 min-h-0 min-w-0"
-            style={{ maxWidth: "100%", boxSizing: "border-box" }}
-          >
-            <div className="w-full min-w-0">
-              <div className="text-xs text-gray-500 mb-1.5 break-all">本局主题：{dialoguePayload.smallSceneName || "—"}</div>
-              <div className="font-semibold text-indigo-600 break-all">第{round}轮 · 你扮演：{currentRoleLabel}</div>
+          <div className="p-3 border-b border-gray-200 bg-gray-50 text-sm shrink-0 overflow-y-auto overflow-x-hidden max-h-48 min-w-0">
+            <div className="text-sm space-y-2 w-full min-w-0">
+              <div className="text-xs text-gray-500 break-all whitespace-normal">本局主题：{dialoguePayload.smallSceneName || "—"}</div>
+              <div className="font-bold text-indigo-600 break-all">第{round}轮 · 你扮演：{currentRoleLabel}</div>
               {currentTask && (
-                <div className="mt-1 text-gray-700 break-all whitespace-normal">
+                <div className="text-gray-700 break-all">
                   <span className="font-medium">你的任务：</span>
                   {currentTask}
                 </div>
               )}
               {currentLines.length > 0 && (
-                <div className="mt-2 min-w-0 break-all whitespace-normal">
+                <div className="min-w-0 break-all">
                   <span className="font-medium text-gray-700">你可说的内容：</span>
-                  <ul className="list-disc list-inside mt-0.5 text-gray-600 break-all whitespace-normal">
+                  <ul className="list-disc list-inside text-gray-600 break-all">
                     {currentLines.map((line, i) => (
                       <li key={i} className="break-all">{line.content || line.hint || ""}</li>
                     ))}
