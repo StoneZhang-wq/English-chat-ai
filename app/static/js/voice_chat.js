@@ -3494,6 +3494,7 @@ function triggerAppEntry() {
         loginOverlay.classList.add('entry-ready');
         void loginOverlay.offsetWidth;
         loginOverlay.classList.add('active-mode');
+        showLoginPanel();
     }
     setTimeout(() => {
         if (sayHelloOverlay) {
