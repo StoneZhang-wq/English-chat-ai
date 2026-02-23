@@ -35,17 +35,19 @@ code {
   word-break: break-all !important;
 }
 
-/* 强制锁死右侧任务列 350px，禁止比例布局导致大屏 889px */
+/* 强制锁死右侧任务列 350px；分配任务后内容撑开时仍不扩大 */
 .right-task-panel {
   width: 350px !important;
   min-width: 350px !important;
   max-width: 350px !important;
+  flex: 0 0 350px !important;
 }
 @media (max-width: 767px) {
   .right-task-panel {
     width: 100% !important;
     min-width: 0 !important;
     max-width: 100% !important;
+    flex: 1 1 auto !important;
   }
 }
 
