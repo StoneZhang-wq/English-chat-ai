@@ -7,52 +7,20 @@
     "usage": "learn",
     "dialogue_id": "DL-HOME-FAMILY-1",
     "content": [
-      {
-        "role": "B",
-        "content": "What's for dinner tonight?",
-        "hint": "What's for...? / What's for dinner tonight?"
-      },
-      {
-        "role": "A",
-        "content": "We're having pasta.",
-        "hint": "We're having + food"
-      },
-      {
-        "role": "B",
-        "content": "Can I help?",
-        "hint": "Can I help?"
-      },
-      {
-        "role": "A",
-        "content": "Sure, set the table.",
-        "hint": "simple request"
-      },
-      {
-        "role": "B",
-        "content": "Where are the plates?",
-        "hint": "Where are...? / Where are the plates?"
-      },
-      {
-        "role": "A",
-        "content": "In the cabinet.",
-        "hint": "location reply"
-      },
-      {
-        "role": "B",
-        "content": "Got it. Thanks!",
-        "hint": "Got it. Thanks!"
-      },
-      {
-        "role": "A",
-        "content": "You're welcome.",
-        "hint": "response"
-      }
+      { "role": "B", "content": "Hey, any idea what's for dinner tonight? I'm absolutely starving!", "hint": "[询问计划] Any idea what's for...? / what are we having for...?" },
+      { "role": "A", "content": "I was thinking of whipping up some creamy pasta with mushrooms. Does that sound good?", "hint": "[提议/征求意见] I was thinking of... / Does that sound like a plan?" },
+      { "role": "B", "content": "Oh, that sounds fantastic! Is there anything I can do to help out?", "hint": "[赞同并主动分担] That sounds fantastic! / Is there anything I can do to help?" },
+      { "role": "A", "content": "Sure, if you're free, could you help me set the table? And maybe grab the wine glasses.", "hint": "[指派简单任务] If you're free, could you...? / Could you give me a hand with...?" },
+      { "role": "B", "content": "No problem. Whereabouts are the clean plates? I can't seem to find them.", "hint": "[确认位置] Whereabouts are...? / I can't seem to find..." },
+      { "role": "A", "content": "They're in the cabinet right above the dishwasher. I moved them yesterday.", "hint": "[说明方位与变动] They are in the... / I moved them to..." },
+      { "role": "B", "content": "Got it. Found them! Oh, wait, do we need the fancy napkins as well?", "hint": "[确认细节] Found them! / Do we also need...?" },
+      { "role": "A", "content": "Just the regular ones is fine for tonight. Dinner will be ready in ten.", "hint": "[否定细节并预告时间] Just the... is fine. / Dinner will be ready in..." },
+      { "role": "B", "content": "Perfect. Give me a shout if you need me to stir anything in the kitchen.", "hint": "[保持待命] Give me a shout if you need..." },
+      { "role": "A", "content": "Will do! You're a lifesaver. Everything is almost ready.", "hint": "[感激收尾] Will do! / You're a lifesaver." }
     ],
-    "core_sentences": "What's for...? / We're having + food / Can I help?",
-    "core_chunks": "for dinner / set the table / in the cabinet / you're welcome",
-    "big_scene_name": "日常生活",
-    "small_scene_name": "家 / 居家",
-    "npc_name": "家人"
+    "core_sentences": "Any idea what's for...? / Is there anything I can do to help out? / Give me a shout if...",
+    "core_chunks": "absolutely starving / whip up / set the table / in the cabinet / thanks a million",
+    "big_scene_name": "日常生活", "small_scene_name": "家 / 居家", "npc_name": "家人"
   },
   {
     "big_scene": "daily",
@@ -62,52 +30,20 @@
     "usage": "review",
     "dialogue_id": "DL-HOME-FAMILY-2",
     "content": [
-      {
-        "role": "B",
-        "content": "What's for breakfast?",
-        "hint": "What's for...? / What's for breakfast?"
-      },
-      {
-        "role": "A",
-        "content": "We're having eggs and toast.",
-        "hint": "We're having + food"
-      },
-      {
-        "role": "B",
-        "content": "Can I help?",
-        "hint": "Can I help?"
-      },
-      {
-        "role": "A",
-        "content": "Sure, make the coffee.",
-        "hint": "simple request"
-      },
-      {
-        "role": "B",
-        "content": "Where's the sugar?",
-        "hint": "Where is/Where's...? / Where's the sugar?"
-      },
-      {
-        "role": "A",
-        "content": "On the counter.",
-        "hint": "location reply"
-      },
-      {
-        "role": "B",
-        "content": "Got it. Thanks!",
-        "hint": "Got it. Thanks!"
-      },
-      {
-        "role": "A",
-        "content": "No problem.",
-        "hint": "response"
-      }
+      { "role": "B", "content": "Morning! What's for breakfast? Something smells really good.", "hint": "[询问早餐内容] What's for breakfast? / Something smells..." },
+      { "role": "A", "content": "I'm just making some eggs and avocado toast. Want some?", "hint": "[告知内容并询问意向] I'm just making... / Want some?" },
+      { "role": "B", "content": "Yes, please! That sounds way better than cereal. Can I help with the coffee?", "hint": "[接受并提议分工] That sounds way better than... / Can I help with...?" },
+      { "role": "A", "content": "That would be a huge help. Could you make a fresh pot?", "hint": "[接受帮助] That would be a huge help. / Could you make a...?" },
+      { "role": "B", "content": "Sure thing. Where's the premium coffee blend? I don't see it on the counter.", "hint": "[询问具体物品位置] Where's the... / I don't see it on..." },
+      { "role": "A", "content": "It's actually in the pantry, on the middle shelf behind the sugar.", "hint": "[详细说明方位] It's actually in... / on the middle shelf." },
+      { "role": "B", "content": "Found it! How many scoops of coffee should I put in?", "hint": "[确认找到并询问细节] Found it! / How many scoops of...?" },
+      { "role": "A", "content": "Four scoops should be enough for both of us.", "hint": "[给出具体指令] ...should be enough for..." },
+      { "role": "B", "content": "Got it. Coffee is brewing. Breakfast will be a feast today!", "hint": "[告知进度并表达期待] ...is brewing. / ...will be a feast!" },
+      { "role": "A", "content": "I hope so! Thanks for the help, honey.", "hint": "[致谢收尾] Thanks for the help." }
     ],
-    "core_sentences": "What's for...? / We're having + food / Can I help?",
-    "core_chunks": "for breakfast / make the coffee / on the counter / no problem",
-    "big_scene_name": "日常生活",
-    "small_scene_name": "家 / 居家",
-    "npc_name": "家人"
+    "core_sentences": "What's for breakfast? / Can I help with...? / How many scoops should I...?",
+    "core_chunks": "avocado toast / way better than / make a fresh pot / in the pantry",
+    "big_scene_name": "日常生活", "small_scene_name": "家 / 居家", "npc_name": "家人"
   },
   {
     "big_scene": "daily",
@@ -117,54 +53,22 @@
     "usage": "immersive",
     "dialogue_id": "DL-HOME-FAMILY-3",
     "content": [
-      {
-        "role": "B",
-        "content": "What's for lunch?",
-        "hint": "What's for...? / What's for lunch?"
-      },
-      {
-        "role": "A",
-        "content": "We're having sandwiches.",
-        "hint": "We're having + food"
-      },
-      {
-        "role": "B",
-        "content": "Can I help?",
-        "hint": "Can I help?"
-      },
-      {
-        "role": "A",
-        "content": "Sure, wash the vegetables.",
-        "hint": "simple request"
-      },
-      {
-        "role": "B",
-        "content": "Where's the cutting board?",
-        "hint": "Where is/Where's...? / Where's the cutting board?"
-      },
-      {
-        "role": "A",
-        "content": "In the drawer.",
-        "hint": "location reply"
-      },
-      {
-        "role": "B",
-        "content": "Got it. Thanks!",
-        "hint": "Got it. Thanks!"
-      },
-      {
-        "role": "A",
-        "content": "Anytime.",
-        "hint": "response"
-      }
+      { "role": "B", "content": "What are we having for lunch? I need to eat something quickly before my 1 PM meeting.", "hint": "[说明原因并询问] What are we having for...? / I need to... before..." },
+      { "role": "A", "content": "We're just having turkey sandwiches. It's quick and healthy. Can you lend a hand?", "hint": "[告知内容并请求协作] We're just having... / Can you lend a hand?" },
+      { "role": "B", "content": "I can do that. I'll wash the vegetables. By the way, where's the cutting board?", "hint": "[接受任务并询问工具] I'll wash the... / By the way, where's the...?" },
+      { "role": "A", "content": "It should be in the bottom drawer, but it might still be in the dishwasher.", "hint": "[模糊位置提示] It should be in... / It might be in..." },
+      { "role": "B", "content": "I've checked both, but I still can't find it. Did we leave it on the patio after the BBQ?", "hint": "[反馈障碍并提出猜想] I've checked both, but... / Did we leave it...?" },
+      { "role": "A", "content": "Oh, you're right! Silly me, I forgot to bring it back inside last night.", "hint": "[承认失误] You're right! / Silly me, I forgot to..." },
+      { "role": "B", "content": "No worries, I'll go grab it. Do we have any spicy mustard for the sandwiches?", "hint": "[解决困难并询问配料] No worries, I'll... / Do we have any...?" },
+      { "role": "A", "content": "Yes, it's in the fridge door. Lunch will be served in five minutes.", "hint": "[指引位置并预告时间] It's in the... / Lunch will be served in..." },
+      { "role": "B", "content": "Perfect. I'll have the veggies ready in a second. Thanks for making lunch.", "hint": "[承诺进度并致谢] I'll have the... ready in... / Thanks for making..." },
+      { "role": "A", "content": "Anytime! I know you're busy today. Enjoy!", "hint": "[礼貌回应并祝福] Anytime! / I know you're busy. / Enjoy!" }
     ],
-    "core_sentences": "What's for...? / We're having + food / Can I help?",
-    "core_chunks": "for lunch / wash the vegetables / in the drawer / anytime",
-    "big_scene_name": "日常生活",
-    "small_scene_name": "家 / 居家",
-    "npc_name": "家人",
-    "user_goal": "你作为学习者，要完成询问午饭吃什么、帮忙洗菜、找到砧板并道谢。",
-    "user_goal_a": "你作为家人，要完成告诉午饭吃什么、请对方洗菜、告诉砧板在抽屉、回应道谢。"
+    "core_sentences": "What are we having for...? / I've checked both, but... / Do we have any...?",
+    "core_chunks": "turkey sandwiches / lend a hand / cutting board / silly me / no worries",
+    "big_scene_name": "日常生活", "small_scene_name": "家 / 居家", "npc_name": "家人",
+    "user_goal": "你作为角色B，由于赶时间要确认午餐内容并提议帮忙，但在寻找工具时遇到困难，需要通过询问解决并确认细节，最后回应谢意。",
+    "user_goal_a": "你作为角色A，告知午餐内容并请求对方协助，对物品位置给出错误信息并在对方纠正后承认疏忽，最后告知午餐时间并致谢。"
   },
   {
     "big_scene": "daily",
@@ -174,52 +78,18 @@
     "usage": "learn",
     "dialogue_id": "DL-HOME-ROOMMATE-1",
     "content": [
-      {
-        "role": "B",
-        "content": "Are you using the bathroom?",
-        "hint": "Are you using...? / Are you using the bathroom?"
-      },
-      {
-        "role": "A",
-        "content": "I'll be out in five minutes.",
-        "hint": "I'll be out in + time"
-      },
-      {
-        "role": "B",
-        "content": "No rush. I can wait.",
-        "hint": "No rush. I can wait."
-      },
-      {
-        "role": "A",
-        "content": "Thanks for waiting.",
-        "hint": "thank"
-      },
-      {
-        "role": "B",
-        "content": "Did you see my keys?",
-        "hint": "Did you see...? / Did you see my keys?"
-      },
-      {
-        "role": "A",
-        "content": "They're on the table.",
-        "hint": "They're + location"
-      },
-      {
-        "role": "B",
-        "content": "Found them. Thanks!",
-        "hint": "Found them. Thanks!"
-      },
-      {
-        "role": "A",
-        "content": "No problem.",
-        "hint": "response"
-      }
+      { "role": "B", "content": "Hey, are you going to be using the bathroom for much longer? I'm running a bit late.", "hint": "[委婉催促] Are you going to be... for much longer? / I'm running late." },
+      { "role": "A", "content": "Sorry about that! I'll be out in about five minutes, I'm just finishing up my hair.", "hint": "[致歉并预告结束时间] I'll be out in... / I'm just finishing up..." },
+      { "role": "B", "content": "No rush, I just wanted to check. By the way, did you happen to see my keys anywhere?", "hint": "[缓解压力并询问物品] No rush. / By the way, did you happen to see...?" },
+      { "role": "A", "content": "I think I saw them on the coffee table earlier, tucked under some magazines.", "hint": "[回忆位置] I think I saw them... / tucked under..." },
+      { "role": "B", "content": "Let me see... Ah, yes! Found them. Thanks for the heads-up.", "hint": "[确认找到] Let me see... / Thanks for the heads-up." },
+      { "role": "A", "content": "No problem. I'm coming out now, so the bathroom is all yours.", "hint": "[交接空间] I'm coming out now. / It's all yours." },
+      { "role": "B", "content": "Awesome, thanks a million. I'll try to be as quick as possible.", "hint": "[致谢并承诺速度] Thanks a million. / as quick as possible." },
+      { "role": "A", "content": "Take your time. Have a productive day at work!", "hint": "[安抚并祝福] Take your time. / Have a productive day!" }
     ],
-    "core_sentences": "Are you using...? / I'll be out in + time / They're + location",
-    "core_chunks": "no rush / thanks for waiting / on the table",
-    "big_scene_name": "日常生活",
-    "small_scene_name": "家 / 居家",
-    "npc_name": "室友"
+    "core_sentences": "Are you going to be... for much longer? / By the way, did you happen to see...? / It's all yours.",
+    "core_chunks": "run a bit late / no rush / tucked under / thanks for the heads-up / productive day",
+    "big_scene_name": "日常生活", "small_scene_name": "家 / 居家", "npc_name": "室友"
   },
   {
     "big_scene": "daily",
@@ -229,52 +99,18 @@
     "usage": "review",
     "dialogue_id": "DL-HOME-ROOMMATE-2",
     "content": [
-      {
-        "role": "B",
-        "content": "Are you using the washing machine?",
-        "hint": "Are you using...? / Are you using the washing machine?"
-      },
-      {
-        "role": "A",
-        "content": "I'll be done in ten minutes.",
-        "hint": "I'll be done in + time"
-      },
-      {
-        "role": "B",
-        "content": "No rush. I can wait.",
-        "hint": "No rush. I can wait."
-      },
-      {
-        "role": "A",
-        "content": "Thanks for waiting.",
-        "hint": "thank"
-      },
-      {
-        "role": "B",
-        "content": "Did you see my charger?",
-        "hint": "Did you see...? / Did you see my charger?"
-      },
-      {
-        "role": "A",
-        "content": "It's on the sofa.",
-        "hint": "It's + location"
-      },
-      {
-        "role": "B",
-        "content": "Found it. Thanks!",
-        "hint": "Found it. Thanks!"
-      },
-      {
-        "role": "A",
-        "content": "No problem.",
-        "hint": "response"
-      }
+      { "role": "B", "content": "Hey, are you using the washing machine? I've got a huge load of laundry to do.", "hint": "[询问占用情况] Are you using...? / I've got a load of laundry to do." },
+      { "role": "A", "content": "It's almost finished. The cycle should be done in about ten minutes.", "hint": "[预告剩余时间] It's almost finished. / The cycle should be done in..." },
+      { "role": "B", "content": "That's perfect. Do you mind if I start mine right after yours?", "hint": "[征求后续使用权] Do you mind if I...? / right after yours." },
+      { "role": "A", "content": "Not at all. Actually, have you seen the laundry detergent? I think we're out.", "hint": "[同意并询问物资] Not at all. / Have you seen...? / I think we're out." },
+      { "role": "B", "content": "There should be an extra bottle in the storage closet on the top shelf.", "hint": "[指引储备位置] There should be an extra... / in the storage closet." },
+      { "role": "A", "content": "Oh, let me check. Ah, found it! Thanks for reminding me.", "hint": "[确认找到] Let me check. / Thanks for reminding me." },
+      { "role": "B", "content": "Sure thing. Just let me know when the machine is free, okay?", "hint": "[要求提醒] Just let me know when... / is free." },
+      { "role": "A", "content": "Will do. Thanks for waiting, I appreciate it.", "hint": "[致谢确认] Will do. / I appreciate it." }
     ],
-    "core_sentences": "Are you using...? / I'll be done in + time / It's + location",
-    "core_chunks": "no rush / thanks for waiting / on the sofa",
-    "big_scene_name": "日常生活",
-    "small_scene_name": "家 / 居家",
-    "npc_name": "室友"
+    "core_sentences": "Are you using...? / Do you mind if I...? / Just let me know when...",
+    "core_chunks": "load of laundry / washing machine / laundry detergent / storage closet / will do",
+    "big_scene_name": "日常生活", "small_scene_name": "家 / 居家", "npc_name": "室友"
   },
   {
     "big_scene": "daily",
@@ -284,54 +120,22 @@
     "usage": "immersive",
     "dialogue_id": "DL-HOME-ROOMMATE-3",
     "content": [
-      {
-        "role": "B",
-        "content": "Are you using the kitchen?",
-        "hint": "Are you using...? / Are you using the kitchen?"
-      },
-      {
-        "role": "A",
-        "content": "I'll be done in a minute.",
-        "hint": "I'll be done in + time"
-      },
-      {
-        "role": "B",
-        "content": "No rush. I can wait.",
-        "hint": "No rush. I can wait."
-      },
-      {
-        "role": "A",
-        "content": "Thanks for waiting.",
-        "hint": "thank"
-      },
-      {
-        "role": "B",
-        "content": "Did you see my phone?",
-        "hint": "Did you see...? / Did you see my phone?"
-      },
-      {
-        "role": "A",
-        "content": "It's by the window.",
-        "hint": "It's + location"
-      },
-      {
-        "role": "B",
-        "content": "Found it. Thanks!",
-        "hint": "Found it. Thanks!"
-      },
-      {
-        "role": "A",
-        "content": "No problem.",
-        "hint": "response"
-      }
+      { "role": "B", "content": "Are you planning to use the kitchen tonight? I'm hoping to cook a big dinner.", "hint": "[询问占用计划] Are you planning to...? / I'm hoping to..." },
+      { "role": "A", "content": "I'll be done in about fifteen minutes. I'm just heating up some leftovers.", "hint": "[告知进度及占用理由] I'll be done in... / I'm just heating up..." },
+      { "role": "B", "content": "That's fine. By any chance, did you see my phone? I can't find it anywhere.", "hint": "[转换话题询问物品] By any chance, did you see...? / I can't find it anywhere." },
+      { "role": "A", "content": "I think it's by the window in the living room. It was vibrating earlier.", "hint": "[提供线索] I think it's by the... / It was vibrating..." },
+      { "role": "B", "content": "Found it! Thanks. Oh, wait, the battery is almost dead. Do you have a charger?", "hint": "[反馈障碍并请求帮助] Found it! / The battery is dead. / Do you have a...?" },
+      { "role": "A", "content": "I have one in my room, but the cable is a bit short. Is that okay?", "hint": "[提供有条件帮助] I have one in... / The cable is short." },
+      { "role": "B", "content": "That's better than nothing. Can I borrow it for an hour?", "hint": "[寻求借用] That's better than nothing. / Can I borrow it for...?" },
+      { "role": "A", "content": "Sure, no problem. Just leave it on my desk when you're done.", "hint": "[同意并交代归还要求] Sure, no problem. / Just leave it on... when you're done." },
+      { "role": "B", "content": "Got it. Thanks a lot for the help. I'll get started on dinner now.", "hint": "[确认并开始下一步行动] Got it. / Thanks a lot for... / I'll get started on..." },
+      { "role": "A", "content": "You're welcome. Can't wait to see what you're cooking!", "hint": "[鼓励收尾] You're welcome. / Can't wait to see..." }
     ],
-    "core_sentences": "Are you using...? / I'll be done in + time / It's + location",
-    "core_chunks": "no rush / thanks for waiting / by the window",
-    "big_scene_name": "日常生活",
-    "small_scene_name": "家 / 居家",
-    "npc_name": "室友",
-    "user_goal": "你作为学习者，要完成询问对方是否在用洗手间或洗衣机、询问物品位置并道谢。",
-    "user_goal_a": "你作为室友，要完成告知很快用完、感谢等待、告诉对方物品位置、回应道谢。"
+    "core_sentences": "Are you planning to...? / By any chance, did you see...? / Can I borrow it for...?",
+    "core_chunks": "heat up leftovers / better than nothing / leave it on my desk / get started on",
+    "big_scene_name": "日常生活", "small_scene_name": "家 / 居家", "npc_name": "室友",
+    "user_goal": "你作为角色B，要询问厨房占用计划以便做饭，同时寻找手机并在找到后向室友借用充电器，说明借用时间并致谢。",
+    "user_goal_a": "你作为角色A，告知自己正在热剩菜并很快用完厨房，指引手机位置并提供充电器（提醒电线较短），告知归还位置并回应谢意。"
   },
   {
     "big_scene": "daily",
