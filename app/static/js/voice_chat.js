@@ -3644,29 +3644,28 @@ async function initializeAccountSystem() {
         }
     }, true);
 
-    // 绑定登录按钮事件
     const loginBtn = document.getElementById('login-btn');
     const usernameInput = document.getElementById('username-input');
+    const passwordInput = document.getElementById('password-input');
     const switchAccountBtn = document.getElementById('switch-account-btn');
+    const goRegisterLink = document.getElementById('go-register-link');
+    const goLoginLink = document.getElementById('go-login-link');
+    const registerBtn = document.getElementById('register-btn');
     
-    // 如果有保存的账号，可以在输入框中显示占位提示（但不自动填充）
-    if (usernameInput && savedAccount) {
-        // 可选：在占位符中提示上次使用的账号
-        usernameInput.placeholder = `上次使用：${savedAccount}（请输入您的名字）`;
-    }
-    
-    if (loginBtn) {
-        loginBtn.addEventListener('click', handleLogin);
-    }
-    
-    // 绑定回车键登录
+    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
     if (usernameInput) {
-        usernameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleLogin();
-            }
-        });
+        usernameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
     }
+    if (passwordInput) {
+        passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
+    }
+    if (goRegisterLink) goRegisterLink.addEventListener('click', showRegisterPanel);
+    if (goLoginLink) goLoginLink.addEventListener('click', showLoginPanel);
+    if (registerBtn) registerBtn.addEventListener('click', handleRegister);
+    
+    document.getElementById('register-username')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleRegister(); });
+    document.getElementById('register-password')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleRegister(); });
+    document.getElementById('register-password-confirm')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleRegister(); });
     
     // 绑定切换账号按钮
     if (switchAccountBtn) {
@@ -3700,13 +3699,16 @@ function showLoginInterface() {
         loginOverlay.style.pointerEvents = 'auto';
     }
     
-    // 聚焦输入框
+    showLoginPanel();
     const usernameInput = document.getElementById('username-input');
+    const passwordInput = document.getElementById('password-input');
     if (usernameInput) {
         usernameInput.disabled = false;
         usernameInput.readOnly = false;
+        usernameInput.value = '';
         setTimeout(() => usernameInput.focus(), 100);
     }
+    if (passwordInput) passwordInput.value = '';
 }
 
 function showChatInterface() {
@@ -3737,20 +3739,27 @@ function showChatInterface() {
 
 async function handleLogin() {
     const usernameInput = document.getElementById('username-input');
+    const passwordInput = document.getElementById('password-input');
     const loginBtn = document.getElementById('login-btn');
     const username = usernameInput ? usernameInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value : '';
     
     if (!username) {
-        showError('请输入您的名字');
+        showLoginToast('请输入用户名', true);
+        showError('请输入用户名');
         return;
     }
-    
+    if (!password) {
+        showLoginToast('请输入密码', true);
+        showError('请输入密码');
+        return;
+    }
     if (username.length > 20) {
-        showError('名字不能超过20个字符');
+        showLoginToast('用户名不能超过20个字符', true);
+        showError('用户名不能超过20个字符');
         return;
     }
     
-    // 禁用按钮
     if (loginBtn) {
         loginBtn.disabled = true;
         loginBtn.innerHTML = '<span>登录中...</span>';
@@ -3762,7 +3771,7 @@ async function handleLogin() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ account_name: username })
+            body: JSON.stringify({ username: username, password: password })
         });
         
         let result;
@@ -3770,12 +3779,13 @@ async function handleLogin() {
             result = await response.json();
         } catch (parseErr) {
             console.error('Login response not JSON:', parseErr);
+            showLoginToast('登录失败：服务器返回异常，请检查后端是否正常运行', true);
             if (typeof window.showError === 'function') {
                 window.showError('登录失败：服务器返回异常，请检查后端是否正常运行（' + (response.status || '') + '）');
             }
             if (loginBtn) {
                 loginBtn.disabled = false;
-                loginBtn.innerHTML = '<span>开始使用</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+                loginBtn.innerHTML = '<span>登录</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
             }
             return;
         }
@@ -3798,6 +3808,7 @@ async function handleLogin() {
                 const messagesList = document.getElementById('messages-list');
                 if (!messagesList) {
                     console.error('Messages list not found after login');
+                    showLoginToast('界面初始化失败，请刷新页面', true);
                     if (typeof window.showError === 'function') {
                         window.showError('界面初始化失败，请刷新页面');
                     }
@@ -3876,22 +3887,128 @@ async function handleLogin() {
                 window.showSuccess('登录成功！');
             }
         } else {
+            showLoginToast(result.message || '登录失败', true);
             if (typeof window.showError === 'function') {
                 window.showError(result.message || '登录失败');
             }
             if (loginBtn) {
                 loginBtn.disabled = false;
-                loginBtn.innerHTML = '<span>开始使用</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+                loginBtn.innerHTML = '<span>登录</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
             }
         }
     } catch (error) {
         console.error('Error logging in:', error);
+        showLoginToast('登录失败：' + error.message, true);
         if (typeof window.showError === 'function') {
             window.showError('登录失败：' + error.message);
         }
         if (loginBtn) {
             loginBtn.disabled = false;
-            loginBtn.innerHTML = '<span>开始使用</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+            loginBtn.innerHTML = '<span>登录</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+        }
+    }
+}
+
+function showLoginToast(message, isError) {
+    clearTimeout(showLoginToast._tid);
+    var wrap = document.createElement('div');
+    wrap.className = 'global-login-toast-container';
+    wrap.setAttribute('aria-live', 'polite');
+    wrap.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;display:flex;align-items:flex-start;justify-content:center;padding-top:28px;box-sizing:border-box;z-index:2147483647';
+    var el = document.createElement('div');
+    el.className = 'toast-msg ' + (isError ? 'error' : 'success');
+    el.textContent = message;
+    wrap.appendChild(el);
+    document.body.appendChild(wrap);
+    showLoginToast._tid = setTimeout(function () {
+        if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+    }, 3500);
+}
+
+function showLoginPanel() {
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const desc = document.getElementById('login-header-desc');
+    if (loginForm) loginForm.classList.remove('hidden');
+    if (registerForm) registerForm.classList.add('hidden');
+    if (desc) desc.textContent = '使用用户名和密码登录';
+}
+
+function showRegisterPanel() {
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const desc = document.getElementById('login-header-desc');
+    if (loginForm) loginForm.classList.add('hidden');
+    if (registerForm) registerForm.classList.remove('hidden');
+    if (desc) desc.textContent = '注册新账号';
+}
+
+async function handleRegister() {
+    const usernameEl = document.getElementById('register-username');
+    const passwordEl = document.getElementById('register-password');
+    const confirmEl = document.getElementById('register-password-confirm');
+    const registerBtn = document.getElementById('register-btn');
+    const username = usernameEl ? usernameEl.value.trim() : '';
+    const password = passwordEl ? passwordEl.value : '';
+    const passwordConfirm = confirmEl ? confirmEl.value : '';
+    
+    if (!username) {
+        showLoginToast('请输入用户名', true);
+        showError('请输入用户名');
+        return;
+    }
+    if (username.length > 20) {
+        showLoginToast('用户名不能超过20个字符', true);
+        showError('用户名不能超过20个字符');
+        return;
+    }
+    if (password.length < 8) {
+        showLoginToast('密码至少8个字符', true);
+        showError('密码至少8个字符');
+        return;
+    }
+    if (password !== passwordConfirm) {
+        showLoginToast('两次输入的密码不一致', true);
+        showError('两次输入的密码不一致');
+        return;
+    }
+    
+    if (registerBtn) {
+        registerBtn.disabled = true;
+        registerBtn.innerHTML = '<span>注册中...</span>';
+    }
+    
+    try {
+        const response = await fetch('/api/account/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: username,
+                password: password,
+                password_confirm: passwordConfirm
+            })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (result.status === 'success') {
+            showLoginToast('注册成功，请登录', false);
+            if (typeof window.showSuccess === 'function') window.showSuccess('注册成功，请登录');
+            showLoginPanel();
+            const loginUsername = document.getElementById('username-input');
+            if (loginUsername) loginUsername.value = username;
+            const loginPassword = document.getElementById('password-input');
+            if (loginPassword) loginPassword.value = '';
+            if (loginPassword) loginPassword.focus();
+        } else {
+            showLoginToast(result.message || '注册失败', true);
+            if (typeof window.showError === 'function') window.showError(result.message || '注册失败');
+        }
+    } catch (e) {
+        showLoginToast('注册失败：' + (e.message || '网络错误'), true);
+        if (typeof window.showError === 'function') window.showError('注册失败：' + (e.message || '网络错误'));
+    } finally {
+        if (registerBtn) {
+            registerBtn.disabled = false;
+            registerBtn.innerHTML = '<span>注册</span>';
         }
     }
 }

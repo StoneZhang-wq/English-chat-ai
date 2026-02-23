@@ -28,34 +28,57 @@
         <button type="button" class="manual-btn" id="say-hello-manual-btn">无法开口时点击进入</button>
     </div>
 
-    <!-- 账号登录界面 -->
+    <!-- 账号登录/注册界面 -->
     <div class="login-overlay hidden" id="login-overlay">
         <div class="login-container">
             <div class="login-header">
                 <h1>🎯 欢迎使用英语学习助手</h1>
-                <p>请输入您的名字开始使用</p>
+                <p id="login-header-desc">使用用户名和密码登录</p>
             </div>
-            <div class="login-form">
-                <div class="input-group">
-                    <label for="username-input">您的名字</label>
-                    <input 
-                        type="text" 
-                        id="username-input" 
-                        class="username-input" 
-                        placeholder="请输入您的名字（如：张三）"
-                        maxlength="20"
-                        autocomplete="off">
-                </div>
-                <button id="login-btn" class="login-btn">
-                    <span>开始使用</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                </button>
-                <div class="login-hint">
-                    <p>💡 提示：每个账号都有独立的记忆和学习记录</p>
-                </div>
+            <!-- 登录表单 -->
+            <div class="login-form" id="login-form">
+                <form id="login-form-submit" method="dialog" onsubmit="return false;">
+                    <div class="input-group">
+                        <label for="username-input">用户名</label>
+                        <input type="text" id="username-input" class="username-input" placeholder="请输入用户名" maxlength="20" autocomplete="username">
+                    </div>
+                    <div class="input-group">
+                        <label for="password-input">密码</label>
+                        <input type="password" id="password-input" class="username-input" placeholder="请输入密码" autocomplete="current-password">
+                    </div>
+                    <button type="submit" id="login-btn" class="login-btn">
+                        <span>登录</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </form>
+                <p class="login-switch-text">没有账号？<a href="javascript:void(0)" id="go-register-link">去注册</a></p>
+            </div>
+            <!-- 注册表单 -->
+            <div class="login-form hidden" id="register-form">
+                <form id="register-form-submit" method="dialog" onsubmit="return false;">
+                    <div class="input-group">
+                        <label for="register-username">用户名</label>
+                        <input type="text" id="register-username" class="username-input" placeholder="请输入用户名（字母、数字、中文等）" maxlength="20" autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <label for="register-password">密码</label>
+                        <input type="password" id="register-password" class="username-input" placeholder="至少8个字符" autocomplete="new-password">
+                    </div>
+                    <div class="input-group">
+                        <label for="register-password-confirm">确认密码</label>
+                        <input type="password" id="register-password-confirm" class="username-input" placeholder="再次输入密码" autocomplete="new-password">
+                    </div>
+                    <button type="submit" id="register-btn" class="login-btn">
+                        <span>注册</span>
+                    </button>
+                </form>
+                <p class="login-switch-text">已有账号？<a href="javascript:void(0)" id="go-login-link">去登录</a></p>
+            </div>
+            <div class="login-hint">
+                <p>💡 每个账号都有独立的记忆和学习记录</p>
             </div>
         </div>
     </div>

@@ -28,6 +28,7 @@ from .shared import (
 from .app_logic import start_conversation, stop_conversation, set_env_variable, characters_folder, set_transcription_model, fetch_ollama_models, load_character_prompt, load_character_specific_history
 from .enhanced_logic import start_enhanced_conversation, stop_enhanced_conversation
 from .app import send_message_to_clients
+from . import account_auth
 import logging
 import subprocess
 import sys
@@ -273,57 +274,69 @@ async def practice_live_spa(full_path: str):
     return _practice_live_index_response()
 
 
-@app.post("/api/account/login")
-async def login_account(request: Request):
-    """账号登录/创建"""
+@app.post("/api/account/register")
+async def register_account_api(request: Request):
+    """注册账号：用户名 + 密码（需确认密码），数据存入 Supabase app_accounts。"""
     try:
         data = await request.json()
-        account_name = data.get("account_name", "").strip()
-        
-        if not account_name:
+        username = (data.get("username") or data.get("account_name") or "").strip()
+        password = (data.get("password") or "")
+        password_confirm = (data.get("password_confirm") or "")
+        if password != password_confirm:
             return JSONResponse({
                 "status": "error",
-                "message": "账号名称不能为空"
+                "message": "两次输入的密码不一致"
             }, status_code=400)
-        
-        # 验证账号名称（只允许字母、数字、中文、下划线、连字符和空格）
-        import re
-        if not re.match(r'^[\w\s\u4e00-\u9fa5-]+$', account_name):
+        ok, msg = account_auth.register_account(username, password)
+        if ok:
+            return JSONResponse({"status": "success", "message": msg})
+        return JSONResponse({"status": "error", "message": msg}, status_code=400)
+    except ValueError as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+    except Exception as e:
+        logger.exception("register_account_api: %s", e)
+        return JSONResponse({
+            "status": "error",
+            "message": "注册失败，请稍后重试"
+        }, status_code=500)
+
+
+@app.post("/api/account/login")
+async def login_account(request: Request):
+    """账号登录：用户名 + 密码，校验 Supabase app_accounts 后设置当前账号。"""
+    try:
+        data = await request.json()
+        username = (data.get("username") or data.get("account_name") or "").strip()
+        password = (data.get("password") or "")
+        ok, msg = account_auth.verify_account(username, password)
+        if not ok:
             return JSONResponse({
                 "status": "error",
-                "message": "账号名称只能包含字母、数字、中文、下划线和连字符"
-            }, status_code=400)
-        
-        if len(account_name) > 20:
-            return JSONResponse({
-                "status": "error",
-                "message": "账号名称不能超过20个字符"
-            }, status_code=400)
-        
-        # 设置当前账号并初始化记忆系统
+                "message": msg
+            }, status_code=401)
+        account_name = username
         set_current_account(account_name)
         memory_system = get_memory_system(account_name)
-        
         if memory_system:
             return JSONResponse({
                 "status": "success",
                 "message": "登录成功",
                 "account_name": account_name
             })
-        else:
-            detail = get_last_memory_init_error() or "未知原因"
-            return JSONResponse({
-                "status": "error",
-                "message": f"初始化记忆系统失败：{detail}"
-            }, status_code=500)
-            
+        detail = get_last_memory_init_error() or "未知原因"
+        return JSONResponse({
+            "status": "error",
+            "message": f"初始化记忆系统失败：{detail}"
+        }, status_code=500)
+    except ValueError as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
     except Exception as e:
         logger.error(f"Error logging in account: {e}")
         import traceback
         logger.error(traceback.format_exc())
         return JSONResponse({
             "status": "error",
-            "message": f"登录失败: {str(e)}"
+            "message": "登录失败，请稍后重试"
         }, status_code=500)
 
 @app.get("/api/account/current")

@@ -26,6 +26,13 @@ create table if not exists user_npc_learn_progress (
   updated_at timestamptz default now()
 );
 
+-- 应用账号（用户名+密码注册/登录，username 与 users.id 可一致以便关联记忆）
+create table if not exists app_accounts (
+  username text primary key,
+  password_hash text not null,
+  created_at timestamptz default now()
+);
+
 -- ---------- 若你已有旧表，可执行以下升级（删除不再使用的表、确保新表存在）----------
 -- drop table if exists user_session_temp;
 -- 然后执行上面的 create table user_npc_learn_progress（若尚未创建）

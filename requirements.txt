@@ -1,6 +1,5 @@
-# Voice Chat AI - 瘦身依赖（豆包/OpenAI API，无本地 Whisper/Spark-TTS）
-# Python 3.11+，本地与 Railway 共用此文件
-# 环境变量: FASTER_WHISPER_LOCAL=false, API_PROVIDER=doubao 或 openai
+# Voice Chat AI - Python 3.11+, local and Railway
+# Env: FASTER_WHISPER_LOCAL=false, API_PROVIDER=doubao or openai
 
 # Web framework
 fastapi==0.115.11
@@ -20,10 +19,13 @@ requests==2.32.4
 pydantic==2.7.4
 python-dotenv==1.0.1
 
-# Supabase (用户记忆持久化，MEMORY_BACKEND=supabase 时使用)
+# Supabase (MEMORY_BACKEND=supabase)
 supabase>=2.0.0
 
-# Audio (处理上传/API 音频)
+# Auth: password hashing for register/login
+passlib[bcrypt]>=1.7.4
+
+# Audio
 numpy>=1.21.6,<1.28.0
 soundfile==0.12.1
 pydub==0.25.1
@@ -36,6 +38,6 @@ av>=14.0.0
 pillow==10.3.0
 textblob==0.18.0.post0
 
-# Excel (可选)
+# Excel (optional)
 pandas==2.2.2
 openpyxl==3.1.5
