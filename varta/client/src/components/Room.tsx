@@ -610,7 +610,7 @@ export const Room = ({
                 <>
                   <div className="text-red-600 font-medium px-4 text-center">{connectionError}</div>
                   <div className="mt-2 text-sm text-gray-500 text-center max-w-xs">
-                    请检查主站是否配置 VARTA_BACKEND_URL、Varta 服务是否运行，或查看控制台/文档 PRACTICE_LIVE_TROUBLESHOOTING.md
+                    连接失败时「当前正在匹配中」会显示 0 人。请在主站环境变量中配置 <strong>VARTA_BACKEND_URL</strong> 为你的 Varta 实际地址（如 Railway 上的 Varta 服务 URL），并确保 Varta 服务的 <strong>FRONTEND_URL</strong> 包含本页域名（{typeof window !== "undefined" ? window.location.origin : ""}）。
                   </div>
                 </>
               ) : (

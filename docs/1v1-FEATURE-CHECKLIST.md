@@ -36,6 +36,7 @@
 
 ## 四、常见问题速查
 
+- **点 Join 后一直显示「当前正在匹配中：0人」且控制台出现连接 varta-server.onrender.com 失败**：说明 1v1 没有连上你的 Varta 服务。请在**主站**（例如 englishchatcommunity.com 所在的后端）环境变量中配置 **VARTA_BACKEND_URL** = 你的 Varta 实际地址（如 `https://你的varta.up.railway.app`）。主站接口 `/api/practice-live/config` 会返回该地址，1v1 页面加载时会用该地址连接；未配置时前端会使用默认的 Render 地址并连接失败，导致无法入队、始终显示 0 人。同时确保 Varta 服务的 **FRONTEND_URL** 包含主站域名。
 - **Active User 一直为 0**：主站未配 `VARTA_BACKEND_URL` 或 Varta 未启动；或前端未连上 Varta（看「后端:」是否为正确域名）。
 - **匹配不到**：两人未连到同一 Varta 实例；或 CORS 阻止（检查 Varta 的 `FRONTEND_URL` 是否包含主站 origin）。
 - **任务/角色不显示**：主站 `/api/practice-live/dialogue` 或 `/dialogue/random` 返回 404 时会出现「本局无主题数据」；检查 `data/dialogues.json` 中是否有 `usage: "immersive"` 的对话。
