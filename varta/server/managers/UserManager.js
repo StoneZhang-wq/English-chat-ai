@@ -26,33 +26,36 @@ export class UserManager {
   }
 
 
-  async addUser(name, socket, languages = []) {
+  addUser(name, socket, languages = []) {
+    // 先立即把用户加入列表并注册 user-info 等处理器，否则客户端连接后马上发的 user-info 会因尚未注册而丢失，导致「当前正在匹配中：0人」
+    const user = { name, socket, country: 'Unknown', languages, account: undefined };
+    this.users.push(user);
+    this.initHandlers(socket);
 
-    // Fetching  IP details
+    console.log(`User added: ${name}, ID: ${socket.id} (country resolving in background)`);
+
+    socket.emit("lobby", { country: 'Unknown' });
+
+    // IP/国家在后台解析，解析完后更新 user.country，不影响入队与 queue-count
     const forwarded = socket.handshake.headers['x-forwarded-for'];
     const clientIp = forwarded ? forwarded.split(/, /)[0] : socket.handshake.address;
-    const ipDetails = await fetchIpDetails(clientIp);
-    // 使用 country_code（两字母）便于前端国旗显示；ipapi.co 返回 country_code / country_name
-    const country = ipDetails?.country_code || ipDetails?.country || 'Unknown';
-
-    // Saving to database (only when MongoDB is connected)
-    if (mongoose.connection.readyState === 1) {
-      const user_data = new User({
-        socketId: socket.id,
-        ip: clientIp,
-        country,
-        otherDetails: ipDetails,
-      });
-      await user_data.save();
-    }
-
-    const user = { name, socket, country, languages, account: undefined };
-    this.users.push(user);
-
-    console.log(`User added: ${name}, ID: ${socket.id}, Country: ${country}`);
-
-    socket.emit("lobby", { country });
-    this.initHandlers(socket);
+    fetchIpDetails(clientIp).then((ipDetails) => {
+      const country = ipDetails?.country_code || ipDetails?.country || 'Unknown';
+      user.country = country;
+      socket.emit("lobby", { country });
+      if (mongoose.connection.readyState === 1) {
+        const user_data = new User({
+          socketId: socket.id,
+          ip: clientIp,
+          country,
+          otherDetails: ipDetails,
+        });
+        user_data.save().catch((err) => console.error("User save error:", err.message));
+      }
+      console.log(`User ${socket.id} country resolved: ${country}`);
+    }).catch((err) => {
+      console.warn("fetchIpDetails failed:", err?.message || err);
+    });
   }
 
   // handels case when user disconnects/ pressed exit to get next match.
