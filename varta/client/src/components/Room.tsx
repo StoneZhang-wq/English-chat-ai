@@ -76,6 +76,8 @@ export const Room = ({
   const [remoteWantSwap, setRemoteWantSwap] = useState(false);
   /** 用户选择关闭摄像头时为 true，仅隐藏本地画面并关闭 track，不影响语音 */
   const [cameraOff, setCameraOff] = useState(false);
+  /** Socket 连接失败时显示提示，便于排查「无法匹配」 */
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const sendingPcRef = useRef<RTCPeerConnection | null>(null);
   const receivingPcRef = useRef<RTCPeerConnection | null>(null);
@@ -318,7 +320,17 @@ export const Room = ({
     });
     socketRef.current = socket;
 
+    socket.on("connect_error", (err) => {
+      console.warn("[1v1] Socket connect_error:", err.message);
+      setConnectionError(err.message || "连接匹配服务器失败");
+    });
+    socket.on("disconnect", (reason) => {
+      if (reason !== "io server disconnect") {
+        setConnectionError("连接已断开，请检查网络或主站 VARTA_BACKEND_URL");
+      }
+    });
     socket.on("connect", async () => {
+      setConnectionError(null);
       let unlockedScenes: string[] = [];
       if (account) {
         try {
@@ -594,13 +606,24 @@ export const Room = ({
           {/* Loading Indicator */}
           {(lobby || isMatching) && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-50">
-              <HashLoader color="#6366f1" />
-              <div className="mt-3 text-lg font-medium text-gray-700">
-                正在匹配...
-              </div>
-              <div className="mt-1 text-sm text-gray-500">
-                当前正在匹配中：{queueCount} 人
-              </div>
+              {connectionError ? (
+                <>
+                  <div className="text-red-600 font-medium px-4 text-center">{connectionError}</div>
+                  <div className="mt-2 text-sm text-gray-500 text-center max-w-xs">
+                    请检查主站是否配置 VARTA_BACKEND_URL、Varta 服务是否运行，或查看控制台/文档 PRACTICE_LIVE_TROUBLESHOOTING.md
+                  </div>
+                </>
+              ) : (
+                <>
+                  <HashLoader color="#6366f1" />
+                  <div className="mt-3 text-lg font-medium text-gray-700">
+                    正在匹配...
+                  </div>
+                  <div className="mt-1 text-sm text-gray-500">
+                    当前正在匹配中：{queueCount} 人
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -647,7 +670,7 @@ export const Room = ({
 
       {/* 右侧容器：删掉 lg:w-1/3，换成固定的像素值 */}
       <div className="room-right-panel right-task-panel flex flex-col h-full w-full md:w-[350px] md:min-w-[350px] md:max-w-[350px] shrink-0 border-l border-gray-300 bg-white z-0 overflow-hidden">
-        {dialoguePayload && (
+        {dialoguePayload ? (
           <div className="p-3 border-b border-gray-200 bg-gray-50 text-sm shrink-0 overflow-y-auto overflow-x-hidden max-h-48 min-w-0">
             <div className="text-sm space-y-2 w-full min-w-0">
               <div className="text-xs text-gray-500 break-all whitespace-normal">本局主题：{dialoguePayload.smallSceneName || "—"}</div>
@@ -670,7 +693,11 @@ export const Room = ({
               )}
             </div>
           </div>
-        )}
+        ) : !lobby && !isMatching ? (
+          <div className="p-3 border-b border-gray-200 bg-gray-50 text-sm shrink-0 min-w-0">
+            <div className="text-gray-500">本局无主题数据，可自由对话；完成后可点击 Exit 退出。</div>
+          </div>
+        ) : null}
         <div className="flex-1 min-h-0 min-w-0 overflow-hidden flex flex-col">
           <ChatSection
             chatInput={chatInput}

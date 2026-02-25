@@ -32,7 +32,8 @@ export class UserManager {
     const forwarded = socket.handshake.headers['x-forwarded-for'];
     const clientIp = forwarded ? forwarded.split(/, /)[0] : socket.handshake.address;
     const ipDetails = await fetchIpDetails(clientIp);
-    const country = ipDetails?.country || 'Unknown';
+    // 使用 country_code（两字母）便于前端国旗显示；ipapi.co 返回 country_code / country_name
+    const country = ipDetails?.country_code || ipDetails?.country || 'Unknown';
 
     // Saving to database (only when MongoDB is connected)
     if (mongoose.connection.readyState === 1) {

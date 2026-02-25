@@ -122,3 +122,17 @@
 3. **浏览器硬刷新**：主站部署/重启后，在 1v1 页面按 **Ctrl+F5**（或 Cmd+Shift+R）强制刷新，避免用旧缓存。
 
 **如何确认生效**：用开发者工具选中右侧任务区 div，看其 class 是否包含 `room-right-panel`、`md:w-[350px]`、`shrink-0`，且**不再**出现 `lg:w-1/3`；宽度应为约 350px 而非约 889px。
+
+---
+
+## 八、布局改完后「无法匹配」的说明
+
+**结论**：仅改右侧宽度/父级 `overflow-hidden` 的布局修改**不会**影响匹配逻辑（Socket 连接、user-info、队列、匹配均在 Room 内独立运行）。若出现「无法匹配」，通常是环境或配置问题，与本次布局改动无关。
+
+**前端已做**：在 Room 内增加了 Socket **连接失败**提示。若连不上匹配服务器，会显示红色错误文案（如「连接匹配服务器失败」），并提示检查主站 VARTA_BACKEND_URL、Varta 服务是否运行。
+
+**请按顺序排查**（详见 `docs/PRACTICE_LIVE_TROUBLESHOOTING.md`）：
+1. 看 1v1 页导航栏「后端: xxx」是否为你的 Varta 公网地址；若不对，需设 `REACT_APP_VARTA_BACKEND_URL` 后重新 `npm run build:practice-live` 并部署。
+2. 主站环境变量 **VARTA_BACKEND_URL** 是否与上述地址一致。
+3. 浏览器 Network：点 Join 后是否有到 Varta 的 WebSocket 请求；Console 是否有 CORS/连接报错。
+4. 匹配需**至少两人**同时在线并点击 Join；可用两个浏览器或隐身窗口各点 Join 测试。

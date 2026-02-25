@@ -84,3 +84,7 @@ docs/
 build/
 dist/
 *.egg-info/
+
+# varta/client 在 Dockerfile.railway 中于镜像内重新构建，不复制本地 node_modules/build
+varta/client/node_modules/
+varta/client/build/

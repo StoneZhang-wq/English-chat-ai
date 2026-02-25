@@ -1,0 +1,52 @@
+# 主站 Railway 部署：多阶段构建，每次部署自动从 varta/client 构建 1v1 前端并打入镜像
+# 用法：Railway 主站 Service 使用本 Dockerfile，Root Directory 为仓库根（不要设为 varta/client）
+# 这样 push 到 main 后只会触发主站重建，用户访问的即是最新前端+后端
+
+# ---------- Stage 1: 构建真人 1v1 前端 ----------
+FROM node:20-bookworm-slim AS practice-live-builder
+
+WORKDIR /repo/varta/client
+
+# 构建时可通过 ARG 传入后端地址（可选，运行时以主站 /api/practice-live/config 为准）
+ARG REACT_APP_VARTA_BACKEND_URL=
+ENV REACT_APP_VARTA_BACKEND_URL=$REACT_APP_VARTA_BACKEND_URL
+
+# 先只复制依赖清单，便于利用 Docker 层缓存（有 package-lock 时用 npm ci，否则 npm install）
+COPY varta/client/package*.json ./
+RUN npm ci --omit=dev 2>/dev/null || npm install
+
+COPY varta/client/ ./
+RUN npm run build
+
+# 输出在 /repo/varta/client/build，Stage 2 会复制到 app/static/practice-live
+
+# ---------- Stage 2: 主站 Python 应用 ----------
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libsndfile1 \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# 先复制 app（不含 practice-live，避免覆盖）
+COPY app /app/app
+
+# 用 Stage 1 的构建产物覆盖 app/static/practice-live
+COPY --from=practice-live-builder /repo/varta/client/build /app/app/static/practice-live
+
+COPY data /app/data
+COPY characters /app/characters
+COPY .env.sample /app/.env.sample
+
+RUN mkdir -p /app/outputs /app/memory
+
+EXPOSE 8000
+ENV PORT=8000
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
